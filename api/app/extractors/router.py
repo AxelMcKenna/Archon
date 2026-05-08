@@ -5,6 +5,7 @@ from __future__ import annotations
 from uuid import UUID
 
 from app.extractors.claude_vision import extract_via_vision
+from app.extractors.metrics import Metrics
 from app.extractors.pdf_native import extract_native_pdf, has_text_layer
 from app.models import CanonicalRfi
 
@@ -16,7 +17,7 @@ def extract_document(
     project_id: UUID,
     bca: str,
     rfi_id: UUID | None = None,
-) -> CanonicalRfi:
+) -> tuple[CanonicalRfi, Metrics]:
     """Route to the appropriate extractor based on document type."""
     if media_type == "application/pdf" and has_text_layer(file_bytes):
         return extract_native_pdf(file_bytes, project_id=project_id, bca=bca, rfi_id=rfi_id)

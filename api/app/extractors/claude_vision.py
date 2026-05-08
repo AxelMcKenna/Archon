@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import base64
 import io
+import time
 from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID, uuid4
@@ -19,6 +20,7 @@ import pdfplumber
 
 from app.config import get_settings
 from app.extractors.entities import extract_entities
+from app.extractors.metrics import Metrics
 from app.models import CanonicalRfi, ExtractionMeta, RfiItem, RfiLetter
 
 EXTRACTOR_VERSION = "1.0.0"
@@ -97,11 +99,12 @@ def extract_via_vision(
     project_id: UUID,
     bca: str,
     rfi_id: UUID | None = None,
-) -> CanonicalRfi:
+) -> tuple[CanonicalRfi, Metrics]:
     """Extract a scanned PDF or image upload via Claude vision."""
     rfi_id = rfi_id or uuid4()
     settings = get_settings()
     client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+    t0 = time.monotonic()
 
     if media_type == "application/pdf":
         images = _pdf_to_images(file_bytes)
@@ -144,7 +147,7 @@ def extract_via_vision(
             )
         )
 
-    return CanonicalRfi(
+    canonical = CanonicalRfi(
         rfi_letter=RfiLetter(
             rfi_id=rfi_id,
             project_id=project_id,
@@ -163,3 +166,9 @@ def extract_via_vision(
             items=items,
         )
     )
+    metrics = Metrics(
+        processing_ms=int((time.monotonic() - t0) * 1000),
+        input_tokens=int(getattr(response.usage, "input_tokens", 0) or 0),
+        output_tokens=int(getattr(response.usage, "output_tokens", 0) or 0),
+    )
+    return canonical, metrics
