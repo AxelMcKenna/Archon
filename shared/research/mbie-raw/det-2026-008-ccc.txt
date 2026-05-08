@@ -1,0 +1,272 @@
+Determination 2026/008
+The authority’s decision to issue a notice to fix for a
+sleepout building constructed without building consent
+22A Glendevere Terrace, Christchurch
+Summary
+This determination considers the authority’s decision to issue a notice to fix for a
+contravention of section 40 of the Building Act 2004, relating to building work carried
+out without building consent. The determination focuses on whether the building work
+required building consent, in particular whether the work was exempt under Schedule
+1, clause 3B, with specific consideration of the meaning of “not more than 1 storey”
+and the relationship between the floor level and the supporting ground.
+
+Reference 4036
+
+Determination 2026/008
+
+In this determination, unless otherwise stated, references to “sections” are to sections of
+the Building Act 2004 (“the Act”) and references to “clauses” are to clauses in Schedule 1
+(“Schedule 1”) of the Act ‘Building work for which building consent not required’.
+The Act and Schedule 1 are available at www.legislation.govt.nz. Information about the
+legislation, as well as past determinations, compliance documents (eg Acceptable
+Solutions) and guidance issued by the Ministry, is available at www.building.govt.nz.
+
+1. The matter to be determined
+1.1. This is a determination made under due authorisation by me, Andrew Eames,
+Principal Advisor Determinations, for and on behalf of the Chief Executive of the
+Ministry of Business, Innovation and Employment (“the Ministry”).1
+1.2. The parties to the determination are:
+1.2.1. B R and L H Mawson, the owners.
+1.2.2. Christchurch City Council (“the authority”), carrying out its duties as a
+territorial authority or building consent authority.
+1.3. The matter to be determined, under sections 177(1)(b) and (3)(e) of the Act, is the
+Council’s decision to issue notice to fix ENF1238496/004 dated 29 October 2025
+(“the notice to fix”) for contraventions of section 40 of the Act for building work
+undertaken without building consent.
+1.4. In determining the matter, I will consider whether the building work was carried out
+without building consent in contravention of section 40, specifically whether the
+building work is exempt from requiring a building consent under clause 3B of
+Schedule 1. This determination will also consider the form and content of the notice
+to fix.
+
+2. The background and building work
+2.1. The building is a timber-framed sleepout where the timber subfloor cantilevers out
+from a slope and the poles extend down and connect to an existing retaining wall
+further down the slope.
+2.2. In March, May and June, the authority issued three different notices to fix (not
+subject to this determination) for this building work.
+
+1
+
+The Building Act 2004, section 185(1)(a) provides the Chief Executive of the Ministry with the power to
+make determinations.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+2
+
+18 March 2026
+
+Reference 4036
+
+Determination 2026/008
+
+2.3. On 29 October 2025 the authority issued a notice to fix (ENF1238496) to the owner2
+(“the notice to fix”). The particulars of contravention or non-compliance identified
+in the notice to fix identified (under se164 and s165 of the Act):
+A breach against s40(1)…of the Act, namely building work in connection with a building
+(sleepout), where the floor level exceeds 1 metre above the supporting ground at 22A
+Glendevere Terrace, Redcliffs, Christchurch.
+Building Act 2004:
+The building work, namely a building (sleepout) which exceeds 1 metre above the
+supporting ground to the floor level of the building is not provided for under schedule 1
+exemptions of the Act.
+Exemption 3B of Schedule 1 of the Act provides from single-storey detached buildings
+exceeding 10, but not exceeding 30, square metres in floor area if work carried out or
+supervised by Licensed Building Practitioner provides the requirements for building work
+to be exempt from requiring a building consent.
+In particular part 1, subpart (b)(i) states, for such buildings to be exempt, the building:
+“Is not more than 1 storey (being a floor level of up to 1 metre above the supporting
+ground and a height of up to 3.5 metres above the floor level)”
+
+2.4. The notice included these two photos:
+
+Figure 1: Building connection to downslope retaining wall
+
+2
+
+I note that the notice to fix issued by the authority referenced the correct address when describing the
+building but elsewhere in the notice stated the work had been carried out at different erroneous address in
+the ‘Particulars of Contravention or Non-compliance’ section of the notice. When the owner raised the
+error with the authority (on 1 November 2024), the notice to fix was rectified by the authority to amend the
+address to the owner’s property in the notice to fix (on 6 November 2024).
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+3
+
+18 March 2026
+
+Reference 4036
+
+Determination 2026/008
+
+Figure 2: Building connection to downslope retaining wall
+
+2.5. The notice continued:
+The building, as indicated by the above photographs, is supported at the outer edge by
+posts that extend well beyond 1 metre above the supporting ground. The height directly
+under the building is not relevant in this situation, as that is not where it is supported
+from in full, therefore does not comply with any exemption under schedule 1 of the Act.
+
+2.6. The notice to fix stated the following remedies for the contravention or noncompliance:
+1. Apply for a certificate of acceptance under s96 of the Act, for all work that can be
+shown to comply with the Building Code,
+And,
+2. Apply for a building consent for any additional building work, if required, and carry
+out that work,
+Or,
+3. Remove all the unapproved building work that required building approval.
+
+2.7. The compliance date for this notice was 16 February 2026.
+
+3. Submissions
+The owner
+3.1. The owner submits (in summary):
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+4
+
+18 March 2026
+
+Reference 4036
+
+Determination 2026/008
+
+3.1.1. The exemption rules specify a floor height, roof area, roof height and that
+the structure meets the Building Code. They consider they have met all
+these criteria.
+3.1.2. “When standing on the site the existence of the retaining wall posts gives us
+a potential anchor that may be stronger than a standard pile.”
+3.1.3. “We have run bearers between the walls, extending the posts accordingly.
+Our building then sits between the walls and the floor is less than 1000[mm]
+from the ground.”
+3.1.4. They interpreted the supporting ground to mean “cleared ground under the
+building”.
+3.1.5. “The attachment to the retaining wall on the downhill side is to the top of
+the retaining wall. Why not measure from the top of the retaining wall. Why
+is the height of the retaining wall relevant?”
+
+The Authority
+3.2. The authority submits (in summary):
+3.2.1. They consider the building in question does not meet any exemption
+automatically covered by Schedule 1 of the Act.
+3.2.2. They consider the building does not meet the requirements of exemptions
+3B, specifically in regard the requirement that the building is not more than
+one storey (being a floor level of up to 1 metre above supporting ground…)
+and emphasising the “1 metre above the supporting ground” as the issue
+here.
+3.2.3. The building has been constructed on a hill site and on one side the floor
+level is well over 1 metre above the supporting ground.
+3.2.4. We consider the supporting ground to be the base/ground level of the
+retaining wall posts below bearers that extend beyond the external wall of
+the building.
+
+4. Discussion
+4.1. The matter for determination is the authority’s decision to issue the notice to fix,
+for a contravention of section 40, that is, carrying out building work without
+building consent when one was required, in relation to the construction of a
+sleepout building. I will consider whether there were grounds to issue the notice to
+fix for a contravention of section 40 and the form and content of the notice.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+5
+
+18 March 2026
+
+Reference 4036
+
+Determination 2026/008
+
+The grounds for issuing the notice to fix
+4.2. Section 40(1) provides that a person must not carry out any building work except in
+accordance with a building consent.
+4.3. Section 41(1)(b) states that a building consent is not required if the building work
+falls within the exemptions under Schedule 1 of the Act. Schedule 1 prescribes
+building work for which building consent is not required. Therefore, whether there
+has been a contravention of section 40 in this case turns on whether the building
+work to construct the sleepout and veranda was exempt under Schedule 1.
+4.4. The relevant exemption in Schedule 1 that the owners are relying on in this case is
+clause 3B. Clause 3B relates to ‘Single-storey detached buildings exceeding 10, but
+not exceeding 30, square metres in floor area if work carried out or supervised by
+licensed building practitioner. The clause contains a number of conditions which
+must be met in order for the work to be exempt from building consent.
+4.5. The contentious item in Clause 3B in this case is the requirement that the building
+“i) is not more than 1 storey (being a floor level of up to 1 metre above the
+supporting ground…”)
+4.6. This requires considering the relationship between the floor level and the
+supporting ground. For a building to be considered single storey under the
+exemption, the floor level must be no more than 1 metre above the supporting
+ground at any point.
+4.7. The Ministry’s guidance document on Schedule 1 contains a suggested definition of
+supporting ground, being “Ground which is bearing all or part of the loads from
+building work.”
+4.8. The sleepout floor in this case cantilevers out over an area of sloping ground and is
+supported in part by piles fixed to an existing retaining wall. The retaining wall is a
+separate structure. The retaining wall does not itself constitute “supporting ground”
+for the purposes of clause 3B.
+4.9. Previous determinations have set out the purpose of Schedule 1 exemptions to be
+for simple lower risk building work3, the choice of a more complex construction
+involving extending bearers out and then fixing piles down into an existing retaining
+wall does not align with this.
+4.10. The exemption does not contemplate a significant alteration to the supporting
+ground, such as this existing retaining wall. Accordingly, the building does not meet
+the “not more than 1 storey” requirement in clause 3B.
+
+3
+For example, Determination 2025/062 An Authority’s decision to issue a notice to fix for a timber deck
+constructed without building consent. Issued 11 December 2025.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+6
+
+18 March 2026
+
+Reference 4036
+
+Determination 2026/008
+
+Conclusion
+4.11. The sleepout does not meet the requirements of Clause 3B. Accordingly, building
+consent was required, one was not obtained, therefore there is a contravention of
+section 40 and grounds on which to issue a notice to fix.
+
+The form, content, particulars and remedies in the notice to fix
+4.12. Section 165 sets out the requirements and provisions for the form and content of a
+notice to fix. Previous determinations4 have discussed the requirements that a
+recipient of a notice to fix must be “fairly and fully informed” by the particulars in a
+notice to fix, so they can address and remedy the identified issues.
+4.13. The notice provided enough detail to identify the contravention (s40), the specific
+building work carried out without building consent and the building to which it
+related.
+4.14. The remedies provided for two options, both of which I consider were appropriate
+to the contravention of section 40 identified.
+4.15. The compliance date given for the notice was 16 February 2026. From the date of
+issue to 16 February 2026 provided a period of just under 4 months. Even taking
+into account, some expected delay over the summer holiday period this was more
+than enough time to choose and achieve one of the remedies outlined above or to
+suggest an alternative approach to the authority. I consider the timeframe on the
+notice was appropriate.
+
+5. Decision
+5.1. In accordance with section 188 of the Building Act 2004, I confirm the authority’s
+notice to fix (ENF12238496), issued 29 October 2025.
+Signed for and on behalf of the Chief Executive of the Ministry of Business, Innovation
+and Employment on 18 March 2026.
+
+Andrew Eames
+Principal Advisor Determinations
+
+4
+
+Determination 2024/029 (issued 24 September 2024) [at paragraphs 4.14]
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+7
+
+18 March 2026
+
+

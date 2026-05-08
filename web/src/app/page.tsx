@@ -19,10 +19,10 @@ export default function Home() {
           Get started
         </Link>
         <Link
-          href="/auth/sign-in"
+          href="/projects/new"
           className="inline-flex items-center rounded-lg border border-ink-700/20 px-5 py-2.5 text-sm font-medium hover:bg-ink-700/5"
         >
-          Sign in
+          New project
         </Link>
       </div>
       <dl className="mt-16 grid grid-cols-3 gap-6 text-sm">

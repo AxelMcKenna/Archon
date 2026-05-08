@@ -1,20 +1,13 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createClient } from "@supabase/supabase-js";
 
+/**
+ * Single-user mode: Supabase JS client used for server-side reads in pages.
+ * RLS is disabled on user tables; the anon key reads/writes freely.
+ */
 export async function getSupabaseServer() {
-  const cookieStore = await cookies();
-  return createServerClient(
+  return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-        setAll: (toSet) => {
-          for (const { name, value, options } of toSet) {
-            cookieStore.set(name, value, options);
-          }
-        },
-      },
-    },
+    { auth: { persistSession: false } },
   );
 }

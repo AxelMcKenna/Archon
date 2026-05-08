@@ -24,7 +24,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <nav className="flex gap-4">
               <a href="/legal/privacy" className="hover:text-ink-900">Privacy</a>
               <a href="/legal/terms" className="hover:text-ink-900">Terms</a>
-              <form action="/auth/sign-out" method="post"><button className="hover:text-ink-900">Sign out</button></form>
             </nav>
           </footer>
         </div>

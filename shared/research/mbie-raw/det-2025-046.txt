@@ -1,0 +1,1544 @@
+Determination 2025/046
+Regarding an authority’s decision to issue a dangerous
+building notice
+140 Belvedere Road, Carterton
+Summary
+This determination relates to the authority’s decision to issue a dangerous building
+notice under section 124 arising from the use of the building and its fire safety
+features. The determination considers the features of the building in relation to the
+dangerous building test under section 121(1)(b) and, as the historical decision to record
+a change of use is in dispute, the evidence the authority had in recording a change of
+use in 2011.
+
+Figure 1: Photo of the building dated December 2024, taken from Google maps.
+
+Reference 3805
+
+Determination 2025/046
+
+In this determination, unless otherwise stated, references to “sections” are to sections of
+the Building Act 2004 (“the Act”) and references to “clauses” are to clauses in Schedule 1
+(“the Building Code”) of the Building Regulations 1992.
+The Act and the Building Code are available at www.legislation.govt.nz. Information about
+the legislation, as well as past determinations, compliance documents (eg, Acceptable
+Solutions) and guidance issued by the Ministry, is available at www.building.govt.nz.
+
+1. The matter to be determined
+1.1. This is a determination made under due authorisation by me, Rebecca Mackie, for
+and on behalf of the Chief Executive of the Ministry of Business, Innovation and
+Employment (“the Ministry”).1
+1.2. The parties to the determination are:
+1.2.1. Belvedere House Ltd, the owner of the building and recipient of the
+dangerous building notice, who applied for the determination, represented
+by its directors, P and S Davy, who live in the building and are referred to as
+“the owners” hereafter.
+1.2.2. Carterton District Council, carrying out its duties as a territorial and building
+consent authority (“the authority”).
+1.3. This determination arises from the authority’s decision to issue a dangerous
+building notice under section 124 of the Act, in respect of the owners’ building. The
+authority issued the notice following an inspection of the building, which it carried
+out with Fire and Emergency New Zealand (FENZ) in October 2024. The authority
+decided to carry out the inspection after becoming aware that the building was
+being used for ‘transient accommodation’ or ‘fee paying tenants’ and raised
+concerns about the building’s ‘life safety features’ in relation to the use. In the
+authority’s view, this use constituted a change of use from the “approved use” of
+the building it had recorded on its property files from 2011, and was concerned that
+there was no compliance schedule for the building governing the functioning or
+maintenance of specified systems. The owners dispute that any change of use has
+occurred and that the building is dangerous.
+1.4. The matter to be determined, under section 177(1)(b) and (3)(f), is the authority’s
+decision to issue a dangerous building notice under section 124 on 10 October 2024
+(“the dangerous building notice”) in respect of the owners’ building. In determining
+this matter, I must consider:
+1.4.1. whether the building was dangerous in the event of a fire, as defined by
+section 121(1)(b), at the time the dangerous building notice was issued, and
+1
+
+The Building Act 2004, section 185(1)(a) provides the Chief Executive of the Ministry with the power to
+make determinations.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+2
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+1.4.2. as the use of the building relates to the decision to issue the dangerous
+building notice, the basis authority had for considering that a change of use
+of the building had occurred, in terms of section 114 and 115, at the time
+that it recorded a change of use on the building’s property file on 18 July
+2011.
+1.5. I have also consulted with FENZ on this matter, as required under section 170(a) of
+the Act.
+1.6. This determination is limited to the matters set out in 1.4 and will not consider any
+other matters.
+
+2. The background
+2.1. The owners’ property is a large (2,498sqm) flat section in an area of Carterton that
+is zoned commercial. The owners purchased the property in 2010.
+2.2. The property includes a large two-storey historic building, which was constructed in
+around 1899 for use as a hotel, with a public house (pub) and restaurant / dining
+room on the ground floor, and accommodation (including guest accommodation
+and an owner’s or manager’s private apartment) on the first floor.
+2.3. The building is constructed of timber framing, with timber weatherboard cladding
+and a metal sheet roof. The ground and first floors have timber joists with timber
+flooring laid on top of them. At present, only some of the ground-floor ceilings are
+lined, with a variety of ceiling materials used. In some areas, there are no ceiling
+linings so the underneath of the first-floor joists and flooring are exposed.
+2.4. A compliance schedule2 (detailing the building’s life safety systems, known as
+‘specified systems’, along with the inspection, maintenance and reporting
+requirements for those systems) was first issued in respect of the building in May
+20013.
+2.5. The public house stopped operating in February 2005, although the first floor of the
+building continued to be used for bed and breakfast accommodation, with 14
+bedrooms available for this purpose.
+2.6. In 2006, the authority assessed the building as being a potentially earthquake-prone
+building under the relevant (at the time) provisions of the Act, and as part of that
+process encouraged the then owner to obtain an independent assessment of the
+building in order to avoid the building being added to the earthquake-prone
+building register.
+
+2
+
+Compliance schedule requirements are set out in sections 100 to 107. In conjunction there are annual
+building warrant of fitness requirements (an annual renewal process confirming the building’s specified
+systems have been maintained and inspected), there are set out in sections 108 to 111.
+3
+I have not been provided details of what specified systems were included in the schedule.
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+3
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+2.7. In late 2008 the building was damaged in a fire. Shortly after, on 2 February 2009,
+the authority cancelled the building’s compliance schedule.
+2.8. On 1 July 2009, the previous owners of the building applied for a building consent
+for ‘Reinstatement of fire damaged building’, with the application giving the
+intended use of the building as ‘storage’. The authority issued the building consent
+(BC090177) on 15 July 2009. The project information memorandum attached to the
+consent also gave the intended use of the building as ‘storage’, as did the consented
+plans which carried an annotation that the first floor was to be used for “Controlled
+light storage only” and was “One complete fire cell”. The authority issued a code
+compliance certificate in respect of the works covered by building consent
+BC090177 on 2 March 2010.
+2.9. In 2010, the current owners purchased the property and initially lived in a selfcontained apartment on the first floor. I understand members of their extended
+family may also lived in the building at this point.
+2.10. On 1 June 2011, the owners applied for a building consent to install a freestanding
+wood burner on the first floor of the building. The authority issued a building
+consent (BC110116) for the work on 8 June 2011. The authority’s processing sheets
+associated with the consent describe the ‘building category’ as ‘residential’ category
+1 (‘RES 1’), but do not otherwise indicate the building’s use at the time. The
+authority issued a code compliance certificate in respect of the consent on 13 June
+2011.
+2.11. On 18 July 2011, the authority removed the building from the earthquake-prone
+building register, with its records stating: ‘Change of use to habitable dwelling only
+by new owners in 2010 means building can be removed from earthquake-prone
+building register. Any future work to convert to retail/commercial premises will
+require an engineer’s report for [earthquake-prone building].’
+2.12. The owners applied for a building consent on 4 June 2015 (BC150141) for ‘internal
+alterations & recladding of back exterior wall’. The application was withdrawn on 20
+October 2016. A hand-written note on the application form explained that the
+building would be used to house members of the owners’ family, as well as ‘possibly
+up to 5 boarders’.
+2.13. Between 2010 and 2022, the owners carried out various building work on the
+building, including rewiring it, reinstating bedrooms, bathrooms and kitchens,
+relining the walls and ceilings, and upgrading fittings. It is unknown the full extent of
+these works and whether they required building consent or came within the
+Schedule 1 exemptions.
+2.14. In November 2023, the owners contacted the authority querying the level of rates
+they were paying on the building. The authority’s records state that the building use
+changed to residential use in 2011, which should have triggered a corresponding
+change in the rates. This hadn’t occurred, and as a result the owners had been
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+4
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+paying commercial rates for the past 12 years. The owners were provided with a
+refund for the excess rates, with the file noting that the building was ‘still zoned
+commercial from a planning perspective’ and that if it was used for a commercial
+venture in the future, the owners would have to apply for a change of use.
+2.15. From February 2024, the owners used the ‘left wing’ of the upper floor as bed and
+breakfast accommodation for approximately two months. They then organised with
+WINZ (Work and Income New Zealand) and Ka Puta Ka Ora Emerge Aotearoa to rent
+out upper-floor rooms to tenants.
+2.16. In September 2024, the owners shifted from the first floor to an apartment on the
+ground floor, which they had gradually been creating over the preceding two years.
+The work to create this apartment is still underway.
+2.17. In late 2024, the authority became aware that the building was being used for
+accommodation. On 13 September 2024, it wrote to the owners requesting a site
+visit by itself and FENZ in order to assess the building’s life safety systems and for
+the purposes of establishing if the building is dangerous as defined by the Act. The
+authority was concerned that the building did not have a current compliance
+schedule and wished to verify that any specified systems were being maintained.
+2.18. On 9 October 2024, the authority and FENZ undertook a site inspection of the
+property. The authority noted in its report that at the time of the inspection, the
+building was being occupied by the owner and five tenants. The tenants occupied
+the first floor, and had individual tenancy agreements, typically for one year, and
+locks on their individual units or bedroom doors. Some of the tenancies were selfcontained units, while others were individual bedrooms with shared communal
+facilities, including a lounge, kitchen and bathrooms. The ground floor of the
+building was predominantly being used to store household items, and also
+contained the owners’ apartment. The report also noted that the approved use of
+the building was as a ‘house’, but the actual use was ‘SA (transient
+accommodation)’. Throughout the report also notes:
+…there are no effective features to stop the spread of smoke or fire around the
+building…
+… If a fire was to start it would grow very quickly and spread quickly…
+…meaning that the means of escape would be quickly overcome.
+The building does have smoke detectors which are interconnected however there
+is not full coverage
+… A smouldering fire would also be problematic as given the lack of smoke
+separations smoke would easily travel around the building.
+
+2.19. Following the inspection, FENZ sent the authority a letter of the same date stating
+that “the building in it’s [sic] current state is likely to result in the loss of life or
+serious injury should a fire occur”. This opinion was based on the following
+observations made during the site visit of 9 October 2024, which, in FENZ’s opinion,
+meant that, in the event of fire, injury or death to persons in the building or to
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+5
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+persons on other property is likely (in other words, the threshold for a dangerous
+building under section 121(1)(b) had been met):
+• A lack of a suitable warning system to alert the occupants to presence and
+danger from fire.
+• No discernable [sic] fire separations within the structure resulting in the ability
+for fire and smoke to rapidly spread throughout the building should a fire occur.
+• The removal of safety features such as external escape ladders thereby allowing
+only one exit path available to the upstairs occupants.
+• Insecure handrails on the internal stair.
+• A lack of any emergency lighting within the exit paths.
+• A large amount of combustible materials stored within some ground floor
+rooms which would give rise to the rapid spread of fire compromising the ability
+of upstairs occupants to safely exit the building.
+• Openings into the escape path which were not fire rated, thereby compromising
+the integrity of the escape path.
+
+2.20. On 10 October 2024, the authority issued the owner with a dangerous building
+notice under section 124(2)(c)(i). The notice stated that the authority “considers
+that the building has insufficient life safety features to protect residents, and in the
+event of fire, injury or death to any persons in the building or to persons on other
+property is likely”. In particular, the authority noted that:
+2.20.1. the building is one large firecell with no obvious fire separations,
+2.20.2. the smoke detection system installed is insufficient to raise an alarm should
+a fire occur in a space that does not have a smoke/heat detector installed,
+2.20.3. there is no emergency lighting associated with the stairs; should a fire occur
+that causes the power supply to fail, this may mean the tenants are unable
+to adequately see the escape route,
+2.20.4. there is a large fire load given the amount and type of materials stored on
+the site in particular on the ground floor.
+2.21. In addition to the above, the notice stated that during the site visit the authority
+also observed:
+2.21.1. the main stairs from the lower to first level are not protected from the
+effects of fire or smoke,
+2.21.2. that some final exits have been removed by cladding and lining being
+installed over original door spaces and parts of the external walkways for
+the fire escape being removed.
+2.22. The dangerous building notice cited a compliance date of 5 November 2024,
+requiring work to be carried out by that time, to ‘remove’ the danger in order that
+the authority could be satisfied that the building was no longer dangerous. The
+authority recommended the following work be undertaken:
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+6
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+2.22.1. Remove all material from the ground floor that is not specifically for the
+day-to-day use of residents, or for construction purposes.
+2.22.2. Extend the smoke detection system into all spaces within the building
+including those spaces that are vacant or under construction, heat detectors
+may be installed in the kitchens to avoid false alarms. This must include
+replacement of the upstairs detector that has been removed from one of
+the bedrooms.
+2.23. The owners applied for a determination on the 26 October 2024 and this was
+accepted by the Ministry on 3 December 2024.
+2.24. On 28 November 2024, the authority issued a notice to fix (NF2024/01) in respect of
+the owners’ building. The notice listed numerous particulars of contravention or
+non-compliance, including, among other things, matters covered by the dangerous
+building notice.
+
+3. Submissions
+The owner
+3.1. The owners made submissions in support of the application for determination and
+in response to the Ministry’s requests for information, which are summarised as
+follows:
+3.1.1. The owners have lived onsite since purchasing the property in 2010. The
+majority of this time was spent occupying a self-contained room on the first
+floor before moving to a ground floor apartment in September 2024.
+3.1.2. The owner’s intent for the property was always to have a small number of
+tenants to supplement their retirement income and progressively finish
+renovating the ground floor with the income generated.
+3.1.3. The building has always been used as accommodation and not as a private
+home. It previously had 14 bedrooms on the first floor but the owners have
+reduced these to 7. There will only ever be a maximum of seven (or eight)
+persons upstairs in a 320m² area. Tenants are permanent so are aware of
+escape routes.
+3.1.4. There are ‘multiple ways to escape’ from the first floor. The main stairway is
+the primary route leading to front and back ground-floor doors, but there
+are also walkways on three sides of the building with ladders leading to the
+ground. All walkways are now intact and all first floor windows open.
+3.1.5. The building has never been used as a storage facility. This was an intention
+of a previous owner which was not actioned.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+7
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+3.1.6. When the owners purchased the property, the authority issued a building
+consent for the building as residential and not commercial. There were no
+firecell blocks, no smoke alarm and all fire doors had been removed.
+3.1.7. The owners have never intended to change the use of the building, and
+there has been no consultation, correspondence or documentation with or
+from the authority about a change of use.
+3.1.8. The owners were also never advised of the change of use to a ‘habitable
+dwelling’, as recorded in the authority’s file note of 18 July 2011. The
+owners have always intended to use the building for accommodation and
+have continued renovating the entire building so it can be used for this
+purpose. They would not have done this if they knew the use had been
+changed.
+3.1.9. Twenty Wi-Fi linked smoke detectors have been installed throughout the
+two floors of the building which would sound simultaneously in the event of
+a fire.
+3.1.10. There has never been emergency lighting installed in the building. There is a
+large skylight above the stairs and all tenants have torches beside their beds
+and emergency evacuation instructions on their room doors. Windows and
+doors have exit signs and the stairs have handrails.
+3.1.11. The owners have a strict no flame policy in the building and all tenants have
+evacuation instructions on their doors.
+3.1.12. The large amount of household items stored onsite was temporary, as a
+relative had passed away and the owners had recently moved downstairs
+leaving numerous possessions in boxes. These have since been removed.
+3.1.13. The authority has issued the dangerous building notice because it considers
+a change of use has occurred, but the owners do not consider that any
+change of use has taken place. There was no consultation or
+correspondence from the authority that indicated that a change of use had
+been recorded or that such requirements under the Act had been
+implemented.
+
+The authority
+3.2. The authority made submissions in response to the application for determination
+and to the Ministry’s requests for information, which are summarised as follows:
+3.2.1. The authority’s view is that the building is being used as an accommodation
+building and that a change of use has occurred.
+3.2.2. The authority considers that the building’s use has now changed from
+sleeping single home (SH) to sleeping accommodation (SA), as defined by
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+8
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+Schedule 2 of the Building (Specified Systems, Change the Use, and
+Earthquake-prone Buildings) Regulations 2005 (“the change of use
+regulations”).
+3.2.3. The compliance schedule for the building was cancelled by the previous
+owner in 2009, following a significant fire in the building.
+3.2.4. The original use of the building was changed in 2011 which gave the building
+an approved use as a SH. The authority’s records show this is the current
+approved use.
+3.2.5. The application for building consent made by the owners in June 2015, and
+withdrawn in October 2016, stated that the property ‘will be used as a
+residential building’.
+3.2.6. The authority’s records show that the owners engaged with the rates team
+in late 2023 and a rates review was undertaken. The SH use was confirmed
+and as result a rates refund was applied as the owners had been paying
+commercial rate fees on the building. This change was at the owner’s
+request and in the authority’s view constituted a notification to it (in its
+capacity as a territorial authority) that the use of the building had changed.
+3.2.7. The authority’s view is that the building is currently being used as SA and
+that this use, at the time the dangerous building notice was issued, was not
+disputed by the owners. There are fee-paying tenants subject to ‘rental type
+agreement[s]’ who have paid bonds and have locks fitted on their room
+doors.
+3.2.8. The authority is concerned that there is no current compliance schedule for
+the building and so it cannot be assured that any specified systems relating
+to life safety are being maintained.
+
+4. Fire and Emergency New Zealand’s opinion
+4.1. As stated in paragraph 1.5 I consulted with FENZ under section 170(a) about the fire
+safety and fire engineering of the building.
+4.2. FENZ reviewed the site photographs provided in the parties’ submissions, and
+confirmed the opinion expressed in its letter of 9 October 2024, namely that the
+building in its current state is likely to result in the loss of life or serious injury,
+either to people in the building or people on other property, should a fire occur.
+
+5. Discussion
+5.1. The matter to be determined is the authority’s decision to issue a dangerous
+building notice in respect of the owners’ building under section 124. As the parties
+dispute the use of the building (which gave rise to the issuing of the notice), I will
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+9
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+consider the use of the building and the basis on which the authority recorded a
+change of use for the building (under section 115) in 2011.
+5.2. While I will consider each of these matters in turn, I note the building’s use is
+relevant to both.
+
+The dangerous building notice
+5.3. The authority issued the dangerous building notice in respect of the owners’
+building on 10 October 2024, requiring work to be carried out on the building to
+reduce or remove the danger in respect of section 124(2)(c)(i). The authority
+“considers that the building has insufficient life safety features to protect residents,
+and in the event of fire, injury or death to any persons in the building or to persons
+on other property is likely”, suggesting the authority considers the building is
+dangerous ‘in the event of fire’ as per section 121(1)(b).
+5.4. The authority’s decision was informed by the official use of the building recorded on
+its files, its site inspection carried out 9 October 2024, and the fire safety advice it
+received from FENZ following the site inspection.
+The legislation
+5.5. The provisions of the Act relating to dangerous building notices can be found in
+subpart 6, with the relevant sections in this case being sections 121, 124 and 125.
+5.6. Section 121 sets out the meaning of a ‘dangerous building’.
+121 Meaning of dangerous building
+(1) A building is dangerous for the purposes of this Act if,—
+(a) …
+(b) in the event of fire, injury or death to any persons in the building or to
+persons on other property is likely.
+(2) For the purpose of determining whether a building is dangerous in terms of
+subsection (1)(b), a territorial authority—
+(a) may seek advice from employees, volunteers, and contractors of Fire and
+Emergency New Zealand who have been notified to the territorial authority by
+the board of Fire and Emergency New Zealand as being competent to give
+advice; and
+(b) if the advice is sought, must have due regard to the advice.
+
+5.7. Under section 121(1)(b), a building is dangerous for the purposes of the Act if ‘in the
+event of fire, injury or death to any persons in the building or to persons on other
+property is likely’ (“the section 121(1)(b) test”).
+5.8. Section 121(2)(a) allows for an authority to seek advice from FENZ in determining if
+a building is dangerous, which the authority did when it carried out the site
+inspection with FENZ on 9 October 2024. FENZ subsequently issued a written
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+10
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+opinion, which the authority has relied on in issuing the dangerous building notice,
+as provided for in section 121(2)(b).
+5.9. Section 124 provides that if a territorial authority is satisfied that a building is
+dangerous (as set out in section 121) it may, among other things, issue a notice
+“that complies with section 125(1) requiring work to be carried out on the building
+to… reduce or remove the danger” as per section 124(2)(c)(i). A notice issued under
+section 124 is not a prescribed form under the Building (Forms) Regulations 2004.
+Instead, section 125 specifies the requirements for such a notice, in particular
+section 125(1) sets out the requirements of a notice issued under section
+124(2)(c)(i) that requires building work to be carried out.
+The section 121(1)(b) test
+5.10. Previous determinations have discussed4 a building can be dangerous in terms of
+section 121(1)(b) for any reason relating to fire, and this may include likely fire
+hazards and sources and the building’s occupancy, among other matters.
+5.11. There is always a risk that in the event of a fire a person may be injured or die.
+However, for the risk of this to be ‘likely’, as set out in section 121(1)(b), there must
+be particular features of the building that create or contribute to this likelihood.
+5.12. When analysing if a particular building is dangerous, I consider it is appropriate, as
+an evaluation tool, to first consider whether the building complies with the Building
+Code, as many of the performance requirements of the Code relate to life safety in
+the event of fire. If the answer is no, then the next consideration will be whether
+the non-compliant features of the building contribute to and satisfy the test of a
+building dangerous in terms of section 121(1)(b).
+5.13. It is important to note that although a building may not comply with particular
+aspects of the Building Code, this does not automatically mean that the building is
+dangerous. Additional analysis of the particular configuration and features of the
+building needs to be carried out to establish if the non-compliance amounts to
+‘dangerous’ so as to warrant the seriousness of issuing a dangerous building notice.
+5.14. The particular features of the building to analyse for Building Code compliance may
+include (but are not limited to) the:
+
+4
+
+•
+
+Outbreak and spread of fire (such as nature, number and location of any
+ignition sources)
+
+•
+
+means to escape the building
+
+•
+
+warning systems to alert occupants of fire and initiate evacuation
+
+•
+
+building’s use
+
+•
+
+occupancy.
+
+Determination 2015/014 Regarding the issue of a dangerous building notice for a house (issued 13 April
+2015) at paragraph 8.2.4.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+11
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+As these relate to Building Code Clause concerned with the prevention of
+fire occurring, the spread of fire and movement to a place of safety.
+5.15. There are two further points to note with respect to the test in section 121(1)(b).
+The first, is that the phrase ‘in the event of fire’ should be taken to refer to a
+credible fire scenario. This need not be the worst credible fire scenario (as might be
+used if testing for Building Code compliance), but nor should it be a trivial fire
+scenario. The analysis should be aligned to a fire scenario that might be considered
+usual or typical for the building’s type and occupancy.
+5.16. The second point to note is the meaning of the term ‘likely’. This meaning was
+considered in Determination 2006/1195 in the context of the dangerous building
+test under section 64 of the former Building Act 1991. The relevant paragraph of
+that determination states:
+The word “likely” in the context of section 64 of the Building Act 1991 (“the
+former Act”), now section 121, has been interpreted as follows:
+“likely” does not mean “probable”, as that puts the test too high. On the other
+hand, a mere possibility is not enough. What is required is “a reasonable
+consequence or [something which] could well happen”. Auckland CC v Weldon
+Properties Ltd 7/8/96, Judge Boshier, DC Auckland NP2627/95, [1996] DCR 635.
+
+5.17. I consider that this decision continues to represent good law in respect of the
+meaning of ‘likely’ in section 121, which should therefore be read as meaning
+something that could well happen.
+The ‘classified use’ of the building at the time the dangerous building notice was
+issued, to establish the Building Code requirements
+5.18. In order to carry out the first stage of the analysis for the section 121(1)(b) test –
+namely to assess whether the owners’ building complied with the Building Code – it
+is necessary to establish the ‘classified use’ of the building. This is because the “each
+building shall achieve the performance criteria specified in the building code for the
+classified use of that building”6.
+5.19. The various classified uses that buildings can have are set out in Clause A1 of the
+Building Code. A building with a given classified use may have one or more intended
+uses, as that term is defined by the Act.7 A building’s intended use includes any
+reasonably foreseeable occasional use that is not incompatible with the intended
+use.8 Clause 3(3) of the Building Regulations 1992 states how the intended use
+informs the classified use:
+
+5
+
+Determination 2006/119 Dangerous building notices for houses (issued 7 December 2006 by the
+Department of Building and Housing), at [5.2.1].
+6
+Refer to Building Regulations 1992, section 3(2).
+7
+Clause A1.0.2 of the Building Code.
+8
+Section 7 of the Act.
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+12
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+the classified use or uses of a building or part of a building shall be the ones that
+most closely correspond to the intended use or uses of that building or part of
+that building.
+
+5.20. Looking at the intended use of the owners’ building, at the time of the site
+inspection and the issue of the dangerous building notice, the building was occupied
+by the owners and five tenants. The owners occupied a flat on the ground floor,
+while the tenants occupied rooms with communal facilities or self-contained
+apartments on the first floor. The tenants all had individual residential tenancy
+agreements, typically for one-year, and locks on their room or apartment doors.
+Some of the tenants shared communal facilities such as kitchen and laundry areas.
+5.21. At the time the notice was issued, the building had three kitchens and two laundry
+areas on the ground floor and two kitchens and a laundry on the first floor. There
+were seven independent bedrooms/apartments on the first floor. The owners state
+that their intention is to have up to a maximum of seven or eight tenants living on
+the first floor, in order to generate retirement income and enable them to continue
+to renovate the building. They state this has always been their intention, although it
+appears that they did not begin to accept tenants until early 2024.
+5.22. Turning now to the classified uses in clause A1, there are two categories of classified
+use that residential uses may fall within – ‘housing’ and ‘communal residential’.
+5.23. Within the ‘housing’ category there are the following classified uses:
+2.0 Housing
+2.0.1 Applies to buildings or use where there is self care and service (internal
+management). There are three types:
+2.0.2 Detached dwellings
+Applies to a building or use where a group of people live as a single household or
+family. Examples: a holiday cottage, boarding house accommodating fewer than 6
+people, dwelling or hut.
+2.0.3 Multi-unit dwelling
+Applies to a building or use which contains more than one separate household or
+family. Examples: an attached dwelling, flat or multi-unit apartment.
+2.0.4 Group dwelling
+Applies to a building or use where groups of people live as one large extended
+family. Examples: within a commune or marae.
+
+5.24. Within the ‘communal residential’ category, there are two types of classified use,
+with the use that is potentially relevant to the owners’ building being community
+service.
+3.0.2 Community service
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+13
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+Applies to a residential building or use where limited assistance or care is
+extended to the principal users. Examples: a boarding house, hall of residence,
+holiday cabin, backcountry hut, hostel, hotel, motel, nurses’ home, retirement
+village, time-share accommodation, a work camp, or camping ground.
+
+5.25. In their correspondence, the parties have discussed the possible intended use of the
+owners’ building as a boarding house. However, I note that a boarding house is
+given in Clause A1 as an example of both the ‘detached dwelling’ and the
+‘communal residential community service’ classified uses, so this is not in itself a
+definitive indication of which use the owners’ building falls within.
+5.26. Instead, it is important to look at the features of the building and how the residents
+of the building live and their relationships with each other. Within the ‘housing’
+category of classified uses, the occupants will mainly look after themselves and each
+other.9 This idea is reinforced through the performance requirements that apply to
+housing uses, particularly those related to life safety, which are significantly less
+onerous than those that apply to ‘communal residential’ uses.
+5.27. For a building to fall within the ‘Detached dwellings’ use it must house people that
+live as a single household or family, with a boarding house accommodating fewer
+than 6 people given as a possible example.
+5.28. A ‘household’ is not defined in the Building Code. However, a ‘household unit’ is
+defined in section 7 of the Act, which can inform the interpretation of household.
+Household unit—
+(a) means a building or group of buildings, or part of a building or group of
+buildings, that is—
+(i) used, or intended to be used, only or mainly for residential purposes; and
+(ii) occupied, or intended to be occupied, exclusively as the home or residence
+of not more than 1 household; but
+(b) does not include a hostel, boarding house, or other specialised
+accommodation
+
+5.29. The definition of ‘household’ has also been considered by previous judgements and
+determinations that can provide guidance on the characteristics of a ‘single
+household’ and ‘family’.10 For example, in the High Court case of Queenstown-Lakes
+District Council v Wanaka Gym Ltd,11 the judge considered the following
+characteristics of a single household, noting it is not an exhaustive list:
+•
+
+degree of permanence in the residents
+
+•
+
+connection with other residents other than simple proximity
+
+9
+
+See clause A1.2.0.1.
+See for example, Hopper Nominees Ltd v Rodney District Council [1996] 1 NZLR 239; and Determination
+2007/111 Fire safety provisions for two relocated buildings to be used as staff accommodation (17
+September 2007).
+11
+Queenstown-Lakes District Council v Wanaka Gym Ltd. CIV-2003-002-265 (21 May 2014).
+10
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+14
+
+16 September 2025
+
+Reference 3805
+
+•
+
+Determination 2025/046
+
+an element of living together jointly.
+
+5.30. It is clear from the features of the building, for example several kitchens, that the
+building does not support the jointly living together as one exclusive household
+across the building.
+5.31. ‘Communal residential’ uses, on the other hand, are those where assistance or care
+is extended to the occupants.12 Unlike the uses within the ‘housing’ category, there
+is no emphasis placed upon the requirement for a family (or single household) and
+the occupants are less likely to know each other before occupying the building. The
+‘communal residential’ category covers residential activities where occupants
+generally receive more care and support than the housing category, and where the
+building contains a disparate group of occupants.
+5.32. In my view, based on the evidence provided, at the time the dangerous building
+notice was issued, the owners’ building was being used as a boarding house, with
+the owners living onsite as a separate household unit on the ground floor and
+permanent tenants occupying the first floor, with varying degrees of self-contained
+areas (‘apartment’)13 or in rooms with communal facilities. The fact that the tenants
+had separate residential tenancy agreements, and individual rooms / apartments
+with locks on their doors indicates they were not living as a single household unit.
+This is supported by the presence of several kitchens. There was no evidence that
+the tenants knew or had any type of relationship with each other, beyond the use of
+shared facilities. Instead, it appears the intention is they live independently of each
+other, with the owners providing limited assistance or care, in the form of
+maintaining the building and providing communal facilities on their behalf.
+5.33. Accordingly, I am of the opinion that the classified use of the owners’ building is
+‘communal residential’ (specifically ‘community service’) and my analysis of the
+Building Code compliance of the building, for the purpose of the section 121(1)(b)
+test, will be carried out on this basis.
+Building Code compliance
+5.34. As stated above, in respect of section 121(1)(b) test for whether a building is
+dangerous, it is appropriate to first consider whether the building complies with the
+Building Code.
+5.35. The dangerous building notice issued by the authority raised several matters
+relating to protection from fire, prevention of the spread of fire and means of
+escape. The relevant provisions can be found in the C—Protection from fire clauses
+of the Building Code (Clauses C1 to C6), which relate to different aspects of fire
+
+12
+
+See clause A1.3.0.1.
+I consider ‘2.0.3 Multi-unit dwelling’ is not a relevant classified use as the building does not have
+sufficient separation of discrete separate household units.
+13
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+15
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+safety, with the main clauses of relevance being clause C3—Fire affecting areas
+beyond the source and C4—Movement to a place of safety.
+5.36. The focus is on identifying particular deficiencies in the building – areas of noncompliance that could potentially make the building dangerous in the event of a
+fire. The most direct way to do this is to compare the as-built building, at the time
+the dangerous building notice was issued, with the relevant Acceptable Solution as
+a means of establishing compliance with the relevant Building Code Clauses.
+Although acceptable Solutions are not the only means of establishing compliance14,
+identifying areas where a building deviates from an Acceptable Solution highlights
+those areas so their compliance can be examined further.
+5.37. There are three Acceptable Solutions and two Verification Methods that relate to
+clauses C1-6 —Protection from fire. Which of these will apply to a particular
+building depends on which ‘risk group’ the building falls within, which is in turn
+based on how the building is used or intended to be used. The various fire safety
+risk groups are described in Table 1.1 in the Acceptable Solutions, and there are
+three that relate to places where people stay or reside.15
+5.38. The owners intend to use their building as a boarding house, and I have found that
+it has a classified use of ‘communal residential, community service’. At the time of
+the dangerous building notice, there were five tenants living in the building, but
+there are seven individual rooms / apartments on the first floor and the owners
+have indicated they are interested in potentially having more tenants in the future
+(up to seven or eight).
+5.39. Accordingly, I consider that the building falls within risk group SM—Sleeping noninstitutional. This risk group applies to buildings used as boarding houses where six
+or more people pay for accommodation (among other uses). Although risk group SH
+also applies to boarding houses (those where fewer than six people pay for
+accommodation), I consider the layout of the building, number of tenants and lack
+of ‘living as a single household unit’ means risk group SH is not appropriate, rather
+SM is the more appropriate risk group to apply.
+5.40. The Acceptable Solution for the SM risk group is C/AS2 (“the acceptable solution”).
+Looking at the matters raised by the authority in the dangerous building notice, it is
+clear that there are several areas where the owners’ building does not conform
+with the Acceptable Solution and hence potentially also does not comply with the
+Building Code.
+5.41. One of the first matters raised in the notice is that the building is one large firecell
+with no obvious fire separations. Paragraph 4.6 of C/AS2 contains specific
+requirements for firecells within sleeping areas in SM risk group buildings.
+14
+15
+
+Refer to section 19 of the Act for how compliance with the Building Code is established.
+I note that the risk groups for the purpose of the C clauses and their Acceptable Solutions, are not the
+same as the classified uses defined in clause A1 or the use groups defined in the change of use
+regulations, although there are similarities between each set of uses.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+16
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+Paragraph 4.6.9 requires that each ‘suite’ within the building (ie, each tenant’s
+bedroom / accommodation room or apartment16) shall be a separate firecell with
+fire separations that comply with the standards set in the Acceptable Solution. In
+addition, paragraph 4.6.8 provides that areas with “communal service functions”,
+such as shared kitchens and living areas,17 shall be separated from suites by
+compliant fire separations; and that paragraph 4.6.12 states that each “household
+unit” shall be a single firecell separated from every other firecell by compliant fire
+separations.
+5.42. I consider that the building being one large firecell, with no obvious fire separations
+anywhere within it, does not satisfy the requirements of C/AS2 for risk group SM.
+The building contains both multiple suites that the tenants live in on the first floor
+and the owners’ household unit on the ground floor and the Acceptable Solution
+requires compliant fire separations between them.
+5.43. In the dangerous building notice, the authority also identified that “the smoke
+detection system installed is insufficient to raise an alarm should a fire occur in a
+space that does not have a smoke/heat detector installed”” and that not all spaces
+have smoke detectors (or heat detectors in kitchens, if appropriate).
+5.44. The owner has provided evidence that that building is currently fitted with several
+Wi-Fi connected smoke detectors. This constitutes a Type 1 domestic alarm system
+(the various fire safety system types are defined in Appendix A of C/AS2).
+5.45. Table 2.2 of the Acceptable Solution specifies the types of fire safety systems
+required for the various risk groups. For buildings in risk group SM that have a
+permanent “occupant type”18, the minimum fire safety system required is a Type 1
+smoke detection, and Type 2 manual fire alarm system which conforms with NZS
+4512 and has manual call points throughout the building. Each suite and household
+unit requires its own Type 1 smoke alarm.
+5.46. However, table 2.2 note 1a specifies that a Type 2 system for risk group SM is not
+required where “the escape routes serve no more than 10 beds19, or where the exit
+doors from sleeping area firecells open directly into a safe place or external safe
+path”.
+
+16
+
+A suite is defined in C/AS2 as “A firecell providing residential accommodation for the exclusive use of one
+person or of several people known to one another. It comprises one or more rooms for sleeping and may
+include spaces used for associated domestic activities such as hygiene and cooking. A suite may include
+transient or educational accommodation.”
+17
+Defined in C/AS2 as “Spaces that provide day to day service function to support the sleeping areas and
+are higher fire risk than direct support functions. These are generally enclosed spaces which include but
+are not limited to offices, waiting rooms, lounges, stores, dining rooms, laundries and kitchens.”
+18
+I consider ‘permanent’ given the tenancy agreements, suggesting that the building is the home of those
+occupants, rather than transient accommodation.
+19
+Noting that “beds” do not necessarily equate to the number of rooms or tenancy agreements. However,
+the acceptable solution states ‘occupant load is derived by bed spaces’.
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+17
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+5.47. The owners have stated their intention is to have a maximum of seven or eight
+tenants. It is unclear if such tenancy agreements would be for individuals or
+couples. The exact number of escape routes for the building has also not been
+confirmed given that some areas of the upper floor include routes that utilise
+external walkways and ladders, that are in various state of repair or may not be
+accessible (refer to paragraph 5.49). If tenants and the owner’s household unit are
+required to use the same escape route, then it is possible that this route could
+potentially exceed “10 beds”.
+5.48. Accordingly, from the information provided, it is unclear if the Type 1 system
+currently installed in the owners’ building would satisfy the requirements of C/AS2
+for risk group SM or whether a full Type 2 system is also required. A full compliance
+assessment is recommended with a complete understanding of the occupant
+numbers (by bed spaces). Despite this, it is clear the type 1 smoke detection does
+not provide coverage of all areas, and in that respect does not comply.
+5.49. Other points raised in the dangerous building notice relate to the escape routes and
+final exits within and from the building. The authority has noted that the main stairs
+are not protected from the effects of smoke or fire, some of the exits to external
+walkways have been removed (by being covered over by cladding and lining) and
+that parts of the upper floor external walkways for the fire escape have been
+removed.
+5.50. From the floor plans and layout I have been provided with, it is unclear the exact
+number of escape routes and final exits in the owner’s building. Table 3.2 in C/AS2
+states that for buildings in risk group SM (with either no fire safety system or a Type
+2 fire alarm system) the maximum total open path20 length is 50m and the
+maximum dead end open path21 distance is 20m. Without further information
+relating to escape routes and final exits, I am unable to comment further as to
+whether the owners’ building complies. However, in my view, the lack of firecells
+and fire separations in the building make it unlikely that compliance will be
+achieved.
+5.51. Using C/AS2 as an evaluation tool, I conclude that the building’s compliance with
+the Building Code has not been established in its use as a boarding house providing
+permanent accommodation at the time the notice was issued.
+5.52. As noted above, Acceptable Solutions provide just one means of establishing
+compliance with the Code, and the fact that a building or building work does not
+comply with an Acceptable Solution does not automatically mean that it also does
+not comply with the Code. However, in situations where compliance is not
+established via an Acceptable Solution, then I would expect to see evidence of other
+features, systems or approaches that ensure the building complies with the Building
+20
+
+That part of an escape route (including dead ends) within a firecell where occupants may be exposed to
+fire or smoke while making their escape.
+21
+That part of an open path where escape is possible in only one direction.
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+18
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+Code by other means. I have seen no such evidence in relation to the owners’
+building. The building falls short in conforming with the Acceptable Solution, but
+there is no evidence of any compensatory features, systems or approaches which
+means this shortfall is not material and is otherwise addressed.
+5.53. Accordingly, I conclude that with respect to clause C3 and C4 of the Building Code,
+the owner’s building either does not comply or compliance has not been
+established.
+5.54. For the sake of completeness, I note that the authority raised a couple of other
+matters in the dangerous building notice that warrant discussion but do not come
+within the scope of C/AS2.
+5.55. The first is the authority’s contention that there is no emergency lighting associated
+with the main stairs in the owners’ building, and that should a fire occur and the
+power supply to fail this may mean the tenants cannot adequately see the escape
+route.
+5.56. C/AS2 does not include requirements for emergency lighting. However, clause
+C4.1(a) establishes a functional requirement that “buildings must be provided with
+visibility in escape routes complying with clause F6”. Clause F6.2 states that
+“specified features in escape routes must be made reasonably visible by lighting
+systems, other systems, or both, during failure of the main lighting”, with clause
+F6.3.1 establishing an associated performance requirement that “Specified
+features in escape routes must, when the systems for visibility are at their design
+level, be reasonably visible.” Specified features are defined in clause A2 and include
+stairs.
+5.57. As such, the lack of any type of emergency lighting or visibility system on the main
+staircase of the owner’s building means that the building does not comply with
+clause C4 in its intended and classified use as a boarding house.
+5.58. The second point raised by the authority in the dangerous building notice relates to
+the large amount of household items being stored on the ground floor of the
+building at the time of its inspection, and the “high fire load” this created. However,
+I do not consider it necessary to assess this point further as I judge it to be a
+situational and time-specific feature, and the owners advise the items have now
+been cleared.
+Whether the building was dangerous - Application of the section 121(1)(b) test
+5.59. Having established that the owners’ building did not comply with the Building Code,
+in respect of the fire safety requirements, at the time the dangerous building notice
+was issued, the second step in the analysis is assessing whether there are any
+particular features of the building (or lack of features) associated with the Building
+Code non-compliance that in combination result in the building being dangerous for
+the purposes of section 121(1)(b).
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+19
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+5.60. As stated in paragraph 5.14, there are some types of features that are especially
+relevant to consider, although this list is not exhaustive, and in no particular order.
+Nature, number and location of ignition sources
+
+5.61. The floor plans provided indicate there are potentially 10 sources of fire within the
+building, including two kitchens and two laundry areas on the ground floor, and two
+kitchens, a single laundry, a wood burner (in the family room) and a pellet fire (in
+the lounge) on the first floor.
+5.62. The existence of kitchens and laundries does not make the building inherently
+dangerous under s121(1)(b). However, the number of such facilities, when
+combined with the independent living arrangements of the owners’ household and
+the tenants, mean the risk of fire is significantly higher than for a typical single
+residential household unit.
+Means of escape
+
+5.63. The number and availability of the escape routes and the protection of the escape
+paths from the effects of fire are all relevant factors in analysing whether the
+building is dangerous.
+5.64. As outlined in paragraph 5.50, I have not seen any evidence as to the number of
+escape routes and their protection from the effects of fire (being heat, smoke or
+toxic products). However, the authority has recorded that there are no fire
+separations or fire-rated walls in the building, including around the single stairway
+between floors, and that the building is one large firecell. The authority has also
+recorded that some final exits have been blocked up and parts of the first floor
+external walkways for fire escape have been removed. In addition, satellite imagery
+available online22 shows that around the time the dangerous building notice was
+issued the external fire escape walkway on front of the building was in a state of
+considerable disrepair creating a potential fall hazard for escaping occupants using
+this route.
+5.65. In my opinion, these features or lack of features – in particular, the lack of fire
+separations around escape routes (single stairway) and the fact that some exits
+have been compromised – are likely to contribute to the risk of injury or death in
+the event of a fire and make the building dangerous in terms of section 121(1)(b).
+Warning systems
+
+5.66. From evidence provided, there is Wi-Fi connected Type 1 smoke alarm system
+installed in the owners’ building, which lacks adequate detectors in several areas.
+5.67. While a Type 1 system will offer early warning of a fire (and under C/AS2 is required
+in each household unit and suite, in addition to potentially a Type 2 system for the
+22
+
+Google maps street view dated December 2024.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+20
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+building as a whole), its efficacy depends on the ‘coverage’ of the system. If areas
+where fire could occur do not have, in this case, smoke detectors, then an outbreak
+of fire in those areas won’t be automatically detected until the fire/smoke reaches
+an area that does have smoke detectors. This will delay warning occupants to
+initiate escape, and the fire to grow and present a more significant hazard once
+occupants initiate escape. I consider this particularly an issue in this case as the
+areas that do not have smoke detection are areas on the ground floor that are in
+close proximity to the single stairs escape route. Delayed warning arising from the
+lack of smoke detection ‘coverage’ in these areas will likely result in a larger
+fire/more smoke impacting the single stair escape route. This, combined with the
+lack of fire separations protecting the escape route from the effects of a likely larger
+fire with more smoke at the ground floor, would contribute to the risk of injury or
+death to persons using the single stairs to escape in the event of a fire, making the
+building dangerous in terms of section 121(1)(b).
+The use of the building
+
+5.68. As discussed in paragraph 5.32, I consider that the owners’ building was being used
+as a boarding house at the time the dangerous building notice was issued, with the
+owners living as a household unit on the ground floor and the tenants living
+independently on the first floor. The owners have confirmed this use, stating they
+consider the building to be private accommodation and not a private home.
+5.69. As such, there is assumed to be little or no social cohesion between tenants and
+owners. The size of the building, the number of facilities, the individual tenancies
+and the locks on the individual room and apartment doors, and the fact that the
+tenants are not necessarily known to each other before they take up their tenancies
+and are under no obligation to develop relationships with each other once they do,
+all support this assessment of how the building is run.
+5.70. The significance of this in terms of section 121(1)(b) is that it reduces the degree of
+assistance that the building’s occupants can be expected to extend to each other in
+the event of a fire. With occupants living independently in separate spaces, they will
+have no necessary awareness of the other tenants’ whereabouts or activities, and
+may have limited ability to alert them in the event of a fire. In my view, this
+increases the risk of injury or death occurring in the event of a fire and contributes
+to making the building dangerous in terms of section 121(1)(b), particularly
+combined with the deficiencies in the smoke detection warning system and lack of
+fire separations.
+5.71. I have also taken into account the ‘sleeping’ activity of the building and the delay
+that can occur in initiating escape when occupants are asleep.
+Occupancy
+
+5.72. At the time the dangerous building notice was issued, the owners were living as a
+household unit on the ground floor with only five tenants on the upper floor. There
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+21
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+are, however, seven bedrooms on the upper floor and the owners have expressed
+an interest in increasing the number tenants in future up to seven or eight.
+5.73. In my view, at the time of the notice, the building did not have an occupancy level
+that contributed to it being dangerous. The nature of the occupancy, in terms of
+how the occupants use the building, did have an impact, as already discussed in
+paragraph 5.70 and 5.71.
+Conclusion on the section 121(1)(b) test and whether the building is dangerous
+5.74. Under section 121(1)(b), a building is considered dangerous if in the event of a fire,
+the injury or death to any persons in the building is likely. As discussed, there are
+two strands to the analysis required under this test: firstly, that the building does
+not comply with the Building Code, and secondly that particular features of the
+building associated with this non-compliance are such that they are likely to
+contribute to the risk of injury or death.
+5.75. In the case of the owners’ building, I have determined that there are multiple areas
+of non-compliance with clauses C3 and C4, and numerous features of the building
+associated with this non-compliance. These include the absence of any fire
+separations between individual units, between units and communal areas, around
+areas where potential fire sources are located, and to protect safe paths and escape
+routes; the inadequacy of the fire alarm system coverage installed for the intended
+use of the building; the closing up of final exits from the building; the state of repair
+of the fire escape walkways on the outside of the building; and the use of the
+building as a boarding house, with tenants living independently with no expectation
+of a relationship of care and assistance between them and the sleeping use.
+5.76. It does not mean Building Code non-compliance results in a dangerous building.
+Further, it is not necessary that there be one feature within a building that makes it
+definitely dangerous. In my view, it is the particular combination of the lack of
+smoke detection in some areas (particularly the ground floor), the lack of fire rated
+construction at the ground floor protecting the single stair escape path and the fact
+that some exits have been compromised, are building features that contribute to
+the likelihood of injury or death occurring should a fire breakout in the building, in
+combination with the nature or use of the occupancy of the building. In my view
+this likelihood has been established in this case.
+5.77. I therefore conclude that the owners’ building was dangerous in terms of section
+121(1)(b) at the time that the authority issued the dangerous building notice, and
+the authority therefore had grounds to issue the notice.
+The form and content of the authority’s dangerous building notice
+5.78. Having found that the authority had grounds for concluding that the owners’
+building was dangerous and for issuing a dangerous building notice under section
+124, I will now consider the form and content of that notice.
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+22
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+5.79. What is required under section 124(2)(c)(i) of the Act is for the notice to require
+work to be carried out to reduce or remove the danger. In other words, it is the
+reduction or removal of the danger that is the required outcome from the issue of
+such a notice.
+5.80. Section 125 specifies the requirements for a notice issued under section 124(2)(c)(i),
+in particular, section 125(1) requires the notice to state whether the owner of the
+building must obtain a building consent in order to carry out the work required by
+the notice (subsection (e)), and to state the time within which the building work
+must be carried out (subsection (d)). Section 125(2) prescribes who the notice
+should be given to. Section 128A(1) provides a person who fails to comply with a
+notice issued under section 124(2)(c) commits an offence and is liable to a fine.
+5.81. The authority’s notice was issued under section 124(2)(c)(i) requiring work to be
+carried out to reduce or remove the danger. The authority recommended that the
+following work be undertaken to remedy the issues identified in the notice:
+•
+
+Remove all material from the ground floor that is not specifically for the day-today use of residents, or for construction purposes.
+
+•
+
+Extend the smoke detection system into all spaces within the building including
+those spaces that are vacant or under construction, heat detectors may be
+installed in the kitchens to avoid false alarms. This must include replacement of
+the upstairs detector that has been removed from one of the bedrooms.
+
+5.82. In setting out in the notice the above work to be carried out, the authority must
+consider this is all of the work required to reduce or remove the danger so that the
+building is no longer dangerous, as this is the intended outcome from the issue of
+the notice.
+5.83. As stated above, the authority’s notice identified key features of the building that it
+considered are likely to cause injury or death in the event of a fire. However, the
+notice only recommends two areas of work to be carried out to fully reduce or
+remove the danger. In respect of this part of the notice:
+5.83.1. I am not satisfied that the two recommended areas of work that are stated
+in the notice would be sufficient to reduce or remove the dangerous nature
+of the building.
+5.83.2. I consider the building is dangerous in respect of other building features being the lack of fire rated protection of the stair escape path at the ground
+floor where the first floor occupants escape through the owners ground
+floor apartment and close to areas not covered by smoke detectors,
+especially given the adequacy of the other escape paths – and should have
+also considered works to be carried out to those areas that also make the
+building dangerous, so to reduce or remove the dangerous as is the
+intended outcome of such a notice.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+23
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+5.83.3. A dangerous building notice must be clear in its description of what has
+rendered the building dangerous and consequently what requires
+addressing to reduce or remove the danger, because it is an offence not to
+comply with the notice. In this respect I do not consider the notice has set
+out all of the work required to reduce or remove the danger in respect of
+section 124(2)(c)(i). If the authority does not consider works are required to
+the other items set out in the notice, it is not clear how or why those items
+contribute to rendering the building dangerous. If it is a matter of a
+combination of features resulting in the dangerous building but only
+requires one specific work to be carried out to reduce or remove the danger
+in respect of the combination of features, that could be made clear in the
+notice.
+5.84. The authority has submitted that it is unable to require specific work as part of this
+notice and has therefore made ‘recommendations’ on work to be carried out.
+Previous determinations23 have considered what is required of a notice. The
+seriousness of issuing a dangerous building notice has significant implications for
+the owner and the occupant. This seriousness obliges the authority to have a
+comprehensive understanding of the danger, and the building work required to
+reduce or remove the danger, before it issues a dangerous building notice. the
+description of required building work in a dangerous building notice should be
+focussed on the necessary outcome for the identified dangers that exist in the
+building. The generalised description of building work to reduce or remove each
+identified danger, with a focus on the outcome required, can be made clear without
+being prescriptive or limiting or providing an exhaustive list of options. It is open to
+the authority to recommend comprehensive specific work as one option for the
+owners to consider, alongside a second option enabling the owners to provide an
+alternative plan to reduce or remove the danger.
+5.85. Section 125(1)(d) also requires a notice issued under section 124(2)(c) to:
+state the time within which the building work must be carried out, which must
+not be less than a period of 10 days after the notice is given or a period
+reasonably sufficient to obtain a building consent if one is required, whichever
+period is longer.
+
+5.86. Section 125(1)(e) requires a notice issued under s124(2)(c) to:
+state whether the owner of the building must obtain a building consent in order
+to carry out the work required by the notice.
+
+5.87. The authority’s notice specifies that “this work should be carried out as soon as
+practicable, but within no later than 15 working days from the date of this notice”.
+The notice does not confirm if a building consent is required to undertake these
+works.
+23
+Determination 2020/027 Regarding the issue of a dangerous building notice requiring repair work to be
+carried out to the building (issued 5 October 2020) at paragraph 5.3.4 onwards.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+24
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+5.88. The particular reference to heat detectors being installed, given the use of the
+building, is considered a specified system (or part of),24 which would require a
+building consent for building work to install or alter them. As such, 15 working days
+would not be a reasonably sufficient period within which to gather sufficient
+information, apply and obtain a building consent and then carry out the work. This
+is also relevant to the matter of fire rated construction required to protect the stair
+escape path at the ground floor.
+5.89. For these reasons, I consider that, while the building is considered a dangerous
+building under s121(1)(b), the authority’s notice itself does not fully achieve the
+requirements of section 124(2)(c)(i), section 125(1)(d) and section 125(1)(e).
+Dangerous building notice conclusion
+5.90. A determination under section 177(1)(b) is in respect of an authority's exercise of its
+powers of decision. Section 188(1) provides that a determination can confirm,
+reverse, or modify that decision, or determine the matter to which it relates.
+5.91. The District Court, in Estate Properties Ltd v Hastings District Council stated “The
+Chief Executive's choice of remedy under s 188(1) is an exercise of discretion”25 and
+that it was open to the Chief Executive to not apply one of the positive steps
+required by section 188(1)(a).26 Further, the court took the view that declining to
+reverse a decision did not have the effect of confirming the decision. 27
+5.92. In this case I have concluded:
+5.92.1. that the owners’ building was dangerous in terms of section 121(1)(b) at the
+time that the authority issued the dangerous building notice, and the
+authority therefore had grounds to issue the notice,
+5.92.2. however, the notice itself has some inadequacies of the form and content of
+the notice in respect of sections 124(2)(c)(i), 125(1)(d) and 125(1)(e) and I
+consider the listed works to be carried out will not reduce or remove the
+danger without the addition of works to the fire rated construction required
+to protect the stair escape path at the ground floor.
+5.93. While I agree the building was dangerous at the time, despite the seriousness of a
+dangerous building notice I consider it is not appropriate to confirm the decision to
+issue the notice due to the inadequacies of the form and content of the notice
+24
+
+Under Schedule 1 of the Building (Specified Systems, Change the Use, and Earthquake-prone Buildings)
+Regulations 2005.
+25
+Estate Properties Ltd v Hastings District Council [2021] NZDC 17000 for discussion on section 188(1)(a) at
+[21].
+26
+The court dismissed an appeal against a decision of the Chief Executive that a code compliance certificate
+had been wrongly issued but declining to reverse the certificate (refer to Determination 2020/034
+“Regarding the compliance of fire safety precautions in a motel at 2 Arataki Road, Havelock North”, dated
+16 December 2020). See [2021] NZDC 17000 at [30].
+27
+[2021] NZDC 17000 at [29].
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+25
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+Further, the notice is now expired and is no longer in effect, and it not necessary to
+modify the notice. I also consider it not appropriate to reverse the notice as I agree
+the building was dangerous at the time and therefore grounds to issue the notice. I
+have therefore elected not to exercise a remedy in respect of section 188(1)(a) in
+this determination.
+
+The change of use
+5.94. I now consider the authority's decision to record a change of use of the building
+under section 115 in 2011. Under section 114, an owner of a building must give
+written notice to a territorial authority if the owner proposes to change the use of a
+building. Failure to give such notice is an offence.
+5.95. Section 115 sets out the new or additional code compliance requirements that
+apply where an owner proposes to change a building’s use; and the requirement for
+an authority to give written notice that it is satisfied that the building, in its new use
+will comply with those Building Code requirements.
+5.96. What is meant by “change the use” in the context of sections 114 and 115 is
+described in the change the use regulations.28 Regulation 5 makes it clear that for
+there to be a change of use of a building for the purposes of sections 114 and 115
+there must be both:
+•
+
+a change of use of all or a part of the building from one use (the old use) to
+another (the new use), as determined by regulation 6
+
+•
+
+additional or more onerous building code compliance requirements
+attaching to the building’s new use, compared to the old one.
+
+5.97. The various uses that a building may have are set out in schedule 2 of the
+regulations. The two uses that are relevant here are SA—Sleeping accommodation
+and SH—Sleeping single home, which are defined in schedule 2 as follows:
+Use
+
+Spaces or dwellings
+
+Examples
+
+SA (Sleeping
+Accommodation)
+
+spaces providing transient
+accommodation, or where
+limited assistance or care is
+provided for people
+
+motels, hotels, hostels,
+boarding houses, clubs
+(residential), boarding
+schools, dormitories, halls,
+wharenui
+
+SH (Sleeping Single Home)
+
+detached dwellings where
+people live as a single
+household or family,
+including attached selfcontained spaces such as
+
+dwellings or houses
+separated from each other by
+distance
+
+28
+
+See regulation 5 and 6, and schedule 2 of the Building (Specified Systems, Change the Use, and
+Earthquake-prone Buildings) Regulations 2005.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+26
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+granny flats when occupied
+by a member of the same
+family, and garages (whether
+detached or part of the same
+building) if primarily for
+storage of the occupants’
+vehicles, tools, and garden
+implements
+
+5.98. The authority has submitted that, according to its records, the original use of the
+building was changed from SA to SH in 2011. In late 2024, the authority became
+aware that the building was being used for transient accommodation or ‘fee paying
+tenants’ and that as a result the building’s use had changed back from SH to SA. This
+prompted the authority to undertake its site inspection in conjunction with FENZ
+relating to the fire safety features required for that use.
+5.99. The owners have challenged that a change of use has taken place. They state the
+building’s past and future use was always intended to be accommodation (SA), with
+14 bedrooms originally on the upper floor now reduced to 7.29
+5.100. Reviewing the evidence before me, it would appear that from its construction
+until early 2005, the building was used as a pub with accommodation. Although the
+pub ceased operating in 2005, the first floor continued to be used to provide bed
+and breakfast accommodation. After the October 2008 fire, the previous owner
+discontinued their accommodation activities.
+5.101. The authority’s property database records that the building’s compliance schedule
+(CS0040) was cancelled in February 2009. No evidence has been provided that the
+previous owner applied (under section 106) for this to happen.
+5.102. However, section 107 allows a territorial authority to amend a compliance
+schedule on its own initiative in certain circumstances. Where an authority ‘cancels’
+a compliance schedule pursuant to section 107, then it must advise the owner of its
+intention to do so,30 and provide written notice of the amendment to the owner.31 I
+have seen no evidence that these provisions were followed, or that the authority
+advised the previous owner of its intention to cancel the compliance schedule or of
+the actual cancellation.
+5.103. The previous owners then applied for a building consent to partially rectify the fire
+damage to the building, which the authority issued on 15 July 2009 (BC090177). In
+the application, the owner stated that the building’s use at that time was “storage”
+29
+
+It is noted that the owners’ initial submissions referenced the building falling under the clause A1
+classified use 2.0.4 group dwelling, which applies to a building or use where groups of people live as one
+large extended family, and that their extended family at one point did occupy the building in that manner.
+However, in subsequent submissions the owners is clear that the tenants occupy the building on
+individual tenancies and are not part of the same household as the owners.
+30
+Section 107(3)(a)
+31
+Section 107(4)(a).
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+27
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+and that there were no specified systems in the building. The authority’s processing
+check sheet for the application recorded “no change of use @ this stage”.
+5.104. The current owners purchased the property in 2010 with the intention of using
+the first floor for bed and breakfast accommodation. They applied for a building
+consent to install a solid fuel heater (BC110116), which the authority issued on 8
+June 2011. The authority’s processing check sheet for the application lists the
+building’s category as residential 1 (RES1), which is a reference to the authority’s
+internal processes for handling building consents, rather than describing the use of
+the building.32
+5.105. The owners have submitted that when they purchased the building it had no
+firecells or smoke alarms and all the fire doors had been removed, and that the
+authority issued a building consent for it as a residence and not as a commercial
+property. I assume this is a reference to the authority’s check sheet for BC110116.
+However, this form related specifically to a building consent for a solid fuel heating
+appliance and did not include any section relating to the building’s current or
+proposed use.
+5.106. The authority’s property database records the following building notes, dated 18
+July 2011:
+Change of use to habitable dwelling only by new owners in 2010 means building
+can be removed from earthquake-prone register. Any future work to convert to
+retail/commercial premises will require an engineer’s report for [an earthquakeprone building].
+
+5.107. The owners state that they were never informed of this change of use and would
+not have continued to reinstate the building had they known that it could only be
+used as accommodation for their family.
+5.108. On 4 June 2015, the owners submitted an application for building consent for
+internal alterations and recladding (BC150141), which was subsequently withdrawn.
+The application included a question whether the building work would ‘result in a
+change of use of any part of the building’, but this was not answered. Instead a note
+on the application stated:
+Will be used as residential building. Daughter in flat downstairs, mother-in-law
+master bdm. Possibly up to 5 boarders. Downstairs art/workshop.
+
+5.109. On 9 November 2023. the authority received a query from the owner regarding
+rate payments for the property. The property database file note states:
+Record show this was granted residential use and should have been rated as such
+from July 2011. This did not trigger any rating change at the time. Refund for
+32
+
+The national building consent authority competency assessment system includes competency levels for
+building consents which have been grouped into residential and commercial. Residential 1 to 3 (often
+referred to as RES1 – RES3) and Commercial 1 to 3 (referred to as COM1 to COM3).
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+28
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+payment 12 years has been processed … being the difference between the
+charged commercial rates and what it should have been as residential. This
+current year 23/24 has been reassessed as residential rates – a decrease of [21%].
+Planner’s note – this is still zoned commercial from a planning perspective and if
+this should be used as a commercial venture again, they will have to formally
+apply for a change of use as far as rating is concerned.
+
+5.110. The authority’s submissions note that following the owners’ discussions with the
+rates team in late 2023, the authority undertook a review, which confirmed the
+building’s SH specified use and that as a result a rates refund was applied.
+5.111. In my opinion, from the evidence provided, it remains unclear what initiated the
+authority to record a change of use for the building under section 115 in 2011. It
+appears that the building has been, and is intended to be, used as sleeping
+accommodation (SA) and not wholly as a single household unit (SH).
+5.112. However, the authority’s records do indicate that the owners were aware of the
+classification of the building as having a residential use prior to the authority’s
+inspection in late 2024. The confirmation of the building’s SH use and the
+reimbursement of commercial rates for the period 2011 to 2023 would further have
+indicated this to the owners.
+5.113. While the owners may not have been aware of their obligations under the Act,
+following their decision in 2024 to let parts of the building to tenants with tenancy
+agreements, this does not alleviate them of their legal requirements. This included
+notifying the authority under section 114 that the building no longer had a purely
+residential use for a single household (SH).
+5.114. As discussed above, the current use of the building as sleeping accommodation
+(SA) requires the building to include life safety features, which are specified
+systems. Section 100(1)(a)(i) requires that a building not used wholly as a single
+household unit requires a compliance schedule if it has specified systems33. Section
+101 states that an owner of a building for which a compliance schedule is required
+must obtain the compliance schedule. Failure to do so is an offence. These are all
+legal obligations that the owners need to be aware of and action if they intend to
+continue to lease parts of their building to tenants.
+5.115. I confirm that the current use of the building is sleeping accommodation (SA) in
+respect of schedule 2 of the change the use regulations 34, and note that there does
+not appear to be any dispute between the parties about this. With regards to the
+authority’s 2011 decision to record a change of use for the building under section
+115, I conclude there is insufficient evidence to establish why or on what basis a
+change of use was instigated, and hence to whether and to what degree the owners
+may have been notified about it.
+
+33
+34
+
+Refer to paragraphs 5.45 to 5.48 of this determination.
+Also the classified use under Building Code Clause A1 of ‘communal residential, community service’
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+29
+
+16 September 2025
+
+Reference 3805
+
+Determination 2025/046
+
+6. Decision
+6.1 In accordance with section 188 of the Building Act 2004, I determine that the building
+was dangerous, as defined by section 121(1)(b), at the time the dangerous building
+notice was issued on 10 October 2024, accordingly the authority had grounds to issue
+the notice under section 124. As per paragraph 5.93 I have elected not to exercise a
+remedy in respect of section 188(1)(a) in this determination.
+Signed for and on behalf of the Chief Executive of the Ministry of Business, Innovation
+and Employment on 16 September 2025.
+Rebecca Mackie
+Principal Advisor Determinations
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+30
+
+16 September 2025
+
+

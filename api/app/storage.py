@@ -1,4 +1,4 @@
-"""Supabase Storage helpers for RFI uploads and exports."""
+"""Supabase Storage helpers (single-user mode — no per-user prefix)."""
 
 from __future__ import annotations
 
@@ -12,18 +12,13 @@ EXPORTS_BUCKET = "exports"
 def upload_rfi_original(
     client: Client,
     *,
-    user_id: str,
     project_id: str,
     letter_id: str,
     filename: str,
     content_type: str,
     data: bytes,
 ) -> str:
-    """Upload original RFI file under {user_id}/{project_id}/{letter_id}/{filename}.
-
-    Returns the storage path.
-    """
-    path = f"{user_id}/{project_id}/{letter_id}/{filename}"
+    path = f"{project_id}/{letter_id}/{filename}"
     client.storage.from_(RFI_BUCKET).upload(
         path,
         data,
@@ -35,14 +30,13 @@ def upload_rfi_original(
 def upload_attachment(
     client: Client,
     *,
-    user_id: str,
     project_id: str,
     item_id: str,
     filename: str,
     content_type: str,
     data: bytes,
 ) -> str:
-    path = f"{user_id}/{project_id}/{item_id}/{filename}"
+    path = f"{project_id}/{item_id}/{filename}"
     client.storage.from_(ATTACH_BUCKET).upload(
         path,
         data,
@@ -54,14 +48,13 @@ def upload_attachment(
 def upload_export(
     client: Client,
     *,
-    user_id: str,
     project_id: str,
     letter_id: str,
     filename: str,
     content_type: str,
     data: bytes,
 ) -> str:
-    path = f"{user_id}/{project_id}/{letter_id}/{filename}"
+    path = f"{project_id}/{letter_id}/{filename}"
     client.storage.from_(EXPORTS_BUCKET).upload(
         path,
         data,

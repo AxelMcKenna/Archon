@@ -7,7 +7,7 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from supabase import Client
 
-from app.auth import CurrentUser, get_current_user, get_db_for, get_service_db
+from app.auth import get_db
 from app.extractors.markdown import render_letter
 from app.extractors.router import extract_document
 from app.persistence import insert_extraction_audit, insert_letter
@@ -24,9 +24,7 @@ async def extract(
     file: UploadFile = File(...),
     project_id: UUID = Form(...),
     bca: str = Form(...),
-    user: CurrentUser = Depends(get_current_user),
-    db: Client = Depends(get_db_for),
-    service_db: Client = Depends(get_service_db),
+    db: Client = Depends(get_db),
 ) -> dict[str, object]:
     if file.content_type not in ALLOWED_MEDIA:
         raise HTTPException(415, f"unsupported media type: {file.content_type}")
@@ -34,15 +32,10 @@ async def extract(
     if len(payload) > MAX_BYTES:
         raise HTTPException(413, "file exceeds 25MB")
 
-    # Pre-allocate the letter id so the storage path matches the DB row.
     letter_uuid = uuid4()
-
-    # Storage upload uses service-role client (file is namespaced under user id,
-    # bucket policy keeps us inside the user's prefix).
     filename = file.filename or "rfi.pdf"
     storage_path = upload_rfi_original(
-        service_db,
-        user_id=user.user_id,
+        db,
         project_id=str(project_id),
         letter_id=str(letter_uuid),
         filename=filename,
@@ -59,7 +52,6 @@ async def extract(
     )
     rendered = render_letter(canonical)
 
-    # User-scoped writes — RLS verifies project ownership.
     letter_id = insert_letter(
         db,
         project_id=str(project_id),

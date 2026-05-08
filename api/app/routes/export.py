@@ -7,7 +7,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from supabase import Client
 
-from app.auth import CurrentUser, get_current_user, get_db_for, get_service_db
+from app.auth import get_db
 from app.exporter import BundleItem, build_bundle
 from app.persistence import (
     fetch_attachments_for_letter,
@@ -26,9 +26,7 @@ router = APIRouter()
 @router.post("/{letter_id}")
 async def export_bundle(
     letter_id: str,
-    user: CurrentUser = Depends(get_current_user),
-    db: Client = Depends(get_db_for),
-    service_db: Client = Depends(get_service_db),
+    db: Client = Depends(get_db),
 ) -> dict[str, Any]:
     letter = fetch_letter(db, letter_id)
     if not letter:
@@ -92,15 +90,14 @@ async def export_bundle(
     )
 
     storage_path = upload_export(
-        service_db,
-        user_id=user.user_id,
+        db,
         project_id=proj["project_id"],
         letter_id=letter_id,
         filename=zip_filename,
         content_type="application/zip",
         data=zip_bytes,
     )
-    url = signed_url(service_db, bucket=EXPORTS_BUCKET, path=storage_path)
+    url = signed_url(db, bucket=EXPORTS_BUCKET, path=storage_path)
     update_letter_status(db, letter_id, "rfi-responded")
     return {
         "filename": zip_filename,

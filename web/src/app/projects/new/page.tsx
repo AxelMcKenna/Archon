@@ -5,13 +5,10 @@ import { taxonomy } from "@consentiq/shared";
 async function createProject(formData: FormData) {
   "use server";
   const supabase = await getSupabaseServer();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/sign-in");
 
   const { data, error } = await supabase
     .from("projects")
     .insert({
-      user_id: user.id,
       address: String(formData.get("address") ?? ""),
       bca: String(formData.get("bca") ?? ""),
       project_type: String(formData.get("project_type") ?? ""),

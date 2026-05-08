@@ -1,0 +1,707 @@
+Determination 2024/049
+An authority’s decision to issue a notice to fix for a small
+detached building
+1/213 Lake Road, Belmont, Auckland
+Summary
+This determination considers an authority’s decision to issue a notice to fix in relation
+to a small, detached building. The notice to fix alleges the owners have carried out
+building work without a building consent and that some of the building work does not
+comply with Building Code Clause B1 Structure. The determination considers the
+authority’s grounds for issuing the notice to fix, and the form and content of the notice.
+
+Figure 1: The building which is the subject of the notice to fix1
+
+1
+
+Image reproduced from a photograph provided by the authority from its inspection on 24 July 2023.
+
+Reference 3616
+
+Determination 2024/049
+
+In this determination, unless otherwise stated, references to “sections” are to sections of
+the Building Act 2004 (“the Act”) and references to “clauses” are to clauses in Schedule 1
+(“the Building Code”) of the Building Regulations 1992.
+The Act and the Building Code are available at www.legislation.govt.nz. Information about
+the legislation, as well as past determinations, compliance documents (eg Acceptable
+Solutions) and guidance issued by the Ministry, is available at www.building.govt.nz.
+
+1. The matter to be determined
+1.1. This is a determination made under due authorisation by me, Peta Hird, for and on
+behalf of the Chief Executive of the Ministry of Business, Innovation and
+Employment (“the Ministry”).2
+1.2. The parties to the determination are:
+1.2.1. the owners of the property, M and R Newsome (“the owners”), who applied
+for the determination
+1.2.2. Auckland Council (“the authority”), carrying out its duties as a territorial
+authority or building consent authority.
+1.3. This determination arises from the authority’s decision to issue a notice to fix to the
+owners in relation to the construction of the building shown in Figure 1. The
+authority considers the building work required a building consent, and that some of
+the work does not comply with the Building Code. The owners dispute the
+authority’s grounds for issuing the notice to fix, as well as the form and content of
+the notice (including the remedies).
+1.4. The matter to be determined, under section 177(1)(b) and 3(e), is the authority’s
+decision to issue notice to fix NOT21687796 dated 10 August 2023 (“the notice”).
+
+Issues outside this determination
+1.5. The owners are of the view that the authority has acted contrary to its inspection
+powers3 under the Act, in the way it carried out its visit to the owners’ property.
+However, the exercise of the authority’s inspection powers is not a determinable
+matter under section 177, therefore I have not considered this issue further.4
+
+2
+
+The Building Act 2004, section 185(1)(a) provides the Chief Executive of the Ministry with the power to
+make determinations.
+3
+Section 222 empowers a territorial authority to enter land to carry out inspections. Section 226 restricts
+entry to a household unit without the consent of the occupier or a court order.
+4
+There are other options available to the owners to address this issue, including provisions and procedures
+in the Act and in other enactments, or through the courts.
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+2
+
+24 September 2024
+
+Reference 3616
+
+Determination 2024/049
+
+1.6. I have also not considered:
+1.6.1. the infringement notice issued by the authority, except in relation to the
+owners’ argument regarding payment of the infringement fee (see from
+paragraph 4.7)
+1.6.2. the bylaw and abatement notices issued by the authority, as I have no
+jurisdiction to consider issues related to the Local Government Act 2002, the
+Resource Management Act 1991, or the authority’s District Plan
+requirements.
+
+2. Background and building work
+2.1. The owners have constructed a single storey detached building, approximately 6m
+by 3m,5 on timber pile foundations (refer to Figure 1). I have received no
+information about how the light‐weight steel frame structure is fixed to foundations
+(if it is).
+2.2. Photographs show timber bearers to the short ends of the building are nailed to the
+face of the piles at each end and, at one end of the building, to the top of a mid‐
+span pile (refer Figures 2 and 3). What appear to be 150 x 50mm timber members6
+are laid flat on top of the piles in the longitudinal direction.
+
+Nail fixing
+
+Nail fixing
+
+Figures 2 & 3: showing pile and bearer connections
+2.3. On one short end of the building, bracing struts are fixed to the top of the corner
+piles and bottom of the mid‐span pile, and at the other end (where there is no mid‐
+span pile) the bracing is fixed at the bottom of the corner pile and to the bearer.
+Bracing struts have also been installed in the longitudinal direction to one side of
+the building.
+
+5
+
+The owners have advised these dimensions. The notice states the building is approximately 15m2 in size,
+but there are no measurements recorded in the authority’s job sheet or records relating to the notice that
+were submitted to the Ministry.
+6
+These are referred to in the notice to fix as “beams”.
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+3
+
+24 September 2024
+
+Reference 3616
+
+Determination 2024/049
+
+2.4. The building is located between the existing dwelling on the property and the road.
+The owners state the building is “at the bottom of a steep bank that slopes up to
+the … road and frontage”. This bank can be seen in Figure 1 to the left of the
+building.
+2.5. Both parties have used Geographic Information System (GIS) mapping7 to identify
+the position of the building in relation to the existing dwelling and the property
+boundary; the authority showing the highlighted rectangle in Figure 4, and the
+owners pointing to the location identified in Figure 5. The owners also identified
+what they referred to as the “effective boundary in line with adjacent fences”
+(referred to in their submissions as the “relevant boundary”).
+boundary
+
+boundary
+“approximate
+location” of building
+
+“Effective boundary
+in line with adjacent
+fences”
+
+dwelling
+building
+
+Figure 4: Authority’s GIS map
+
+Figure 5: Owners’ GIS map
+
+2.6. On 24 July 2023, the authority visited the property in order to inspect the building.
+The authority’s record of the site visit noted that some construction was not
+complete and included a number of photographs.
+
+Notice to fix
+2.7. On 10 August 2023, the authority issued the notice to the owners.8 The ‘Particulars
+of Contravention or Non‐compliance’ section of the notice states:
+Contrary to Section 40 of the Building Act 2004 (the Act) the following building
+work has been carried out without first obtaining building consent:
+The construction of a single storey detached building approximately 15 square
+meters in size including the pile foundations which is founded into the ground
+
+7
+
+A GIS (Geographic Information System) map is a digital representation of geographic data and used to
+visualise and analyse spatial relationships. Property boundaries in GIS maps are based on data sourced
+from Land Information New Zealand.
+8
+On 27 July 2023, prior to the issue of the notice, the authority issued a notice to fix to a person who was
+not the owner of the property. That earlier notice came to the attention of the owners on 7 August 2023.
+On 10 August 2023, in a letter which accompanied the notice to fix that is the subject of this
+determination, the authority advised the owners to disregard the earlier notice as it had been “issued in
+error”.
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+4
+
+24 September 2024
+
+Reference 3616
+
+Determination 2024/049
+
+closest to the eastern boundary of the property This building is closer to its own
+height away from the legal boundary.
+Contrary to Section 17 of the Building Act 2004 (the Act): All building work must
+comply with the building code to the extent required by this Act, whether or not a
+building consent is required in respect of that building work.
+Incorrect fixings of the foundation piles and beams which appears to be inadequate
+to withstand the load (building) carried by the foundation as per the requirement
+under the performance of B1 of the Building Code.
+B1.3.1 Buildings, building elements and sitework shall have a low probability of
+rupturing, becoming unstable, losing equilibrium, or collapsing during construction
+or alteration and throughout their lives.
+To remedy the contravention or non‐compliance you must:
+(1) Pursue any legal option/s that may be available to you to make the structures
+fully compliant with the Building Act and Building Regulations (this may include
+applying for a Certificate of Acceptance); or
+(2) Remove the unauthorised building works.
+This notice must be complied with by:
+
+Date: 09 November 2023
+
+2.8. On the same day, the authority also issued the owners with an infringement notice
+for an offence against section 40. The owners paid the infringement fee (which the
+owners refer to as a “fine”) on 6 September 2023.
+2.9. On 25 September 2023, the owners wrote to the authority responding to the notice,
+stating that “the wrong boundary has been measured. The nails to piles are being
+replaced with bolts”. The owners advised the authority that the notice had been
+complied with (the owners have subsequently referred to this as a “section 167
+report” or “notice of compliance”).
+2.10. On 29 October 2023, following further correspondence between the parties, the
+authority advised the owners that the compliance date for the notice would be
+extended “until a sufficient time has been given at the conclusion of my answering
+the [owners’] emails”. On 2 November 2023, the owners applied for this
+determination.
+
+3. Submissions
+3.1. The parties’ submissions in relation to whether the building work is exempt from
+the requirement to obtain building consent under clause 3A of Schedule 1 of the
+Act, and whether the work complies with clause B1.3.1, are set out below in
+Tables 1 and 2 respectively.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+5
+
+24 September 2024
+
+Reference 3616
+
+Determination 2024/049
+
+The owners
+3.2. The owners submit (in summary):
+3.2.1. The notice is “technically defective” because the references to sections 17
+and 40 are “not supported with particulars and appropriate remed[ies]”:
+
+
+The reference to section 40 is “inappropriate as there is no offence
+under [section] 40 because no building work is identified as being
+undertaken by a person at this time”. There is no “current or continuing
+offence”.
+
+
+
+The reference to section 17 “refers to [clause] B1.3.1 without any
+evidence of a contravention or specific reference to the performance
+criteria”. There is “no offence attributable to [section] 17 in the [Act]”.
+
+
+
+The remedies are “misstated”, and the authority’s “inappropriate
+demands are indicative of the lack of a breach”.
+
+3.2.2. The “payment of the infringement fine has settled the [section] 40 offence
+and therefore the repetition in the [notice] is inappropriate given there is
+‘nothing to fix’”.
+3.2.3. The authority “has failed to properly consider [section] 167 and has not
+provide[d] adequate reasons for refusal of the owners notice of compliance
+with the [notice to fix]”.
+
+The authority
+3.3. The authority submits:
+3.3.1. The information contained in the notice is adequate. It “clearly identified
+the non‐compliant building elements (being the fixings and beams). It also
+identifies the specific requirement in the Building Code (being Clause B1.3.1)
+which has not been complied with. This level explanation … fairly tells the
+recipients of the non‐compliance”.
+3.3.2. Payment of the infringement fine does not address the breach of section 40.
+The “issue of an infringement notice and a [notice to fix] are distinct
+processes focused on distinct aspects. An infringement notice is a sanction
+for an unlawful activity; a [notice to fix] requires action to be taken to
+rectify, regularise, or remove the consequence of an illegal activity”.
+3.3.3. Regarding the owners’ argument that the offence stops when the work
+ceases, “If a person has carried out unconsented building work, the fact that
+the building work then ceased at some point does not mean an offence has
+not been committed. The Act has still been contravened, and [section]
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+6
+
+24 September 2024
+
+Reference 3616
+
+Determination 2024/049
+
+164(2) envisages the issuing of [notices to fix] requiring the remedying of
+contraventions of the Act or the Code”.
+3.3.4. The authority did not initially treat the ‘section 167 report’ as “notification
+under [section 167] that the required work had been completed, as the
+majority of the letter related to technical arguments challenging the issue of
+the [notice to fix]”. However, the authority “subsequently attended the
+Property on 23 February 2024, but did not observe a change from nails to
+bolts”.
+
+4. Discussion
+4.1. Notices to fix are governed by sections 163 to 168. Section 164(1)(a) provides for an
+authority to issue a notice to fix if it considers, on reasonable grounds, that a
+specified person is contravening or failing to comply with the Act or its
+regulations”.9 In this case, the notice alleges two contraventions or failures to
+comply, relating to sections 40 and 17. I will consider each of these in turn.
+
+Section 40
+4.2. Section 40(1) provides that a person must not carry out any building work except in
+accordance with a building consent.
+4.3. Section 41(1)(b) states that a building consent is not required if the building work
+falls within the exemptions under Schedule 1. Schedule 1 prescribes building work
+for which building consent is not required. Therefore, whether there has been a
+contravention of section 40 turns on whether the building work was exempt under
+Schedule 1.
+4.4. The owners consider that the building is exempt from the requirement to obtain
+building consent under clause 3A of Schedule 1. I have assessed the building work
+against this exemption in Table 1, and I conclude the exemption does not apply.
+Table 1: Assessment of clause 3A exemption
+3A Single storey detached buildings exceeding 10, but not exceeding 30, square metres in
+floor area and constructed of lightweight building products
+(1) Building work in connection with any detached building that—
+(a) is not more than 1 storey (being a floor level of up to 1 metre above the supporting
+ground and a height of up to 3.5 metres above the floor level); and
+(b) exceeds 10 square metres in floor area, but does not exceed 30 square metres; and
+(c) is built using lightweight building products for the walls and roof, and in accordance
+with Acceptable Solution B1/AS1 for timber or steel buildings; and
+9
+
+Section 163 defines a ‘specified person’ to whom a notice can be issued, and this includes the owner of
+the building and the person carrying out the building work if the notice relates to the building work being
+carried out. Section 7 defines ‘Regulations’ as meaning “regulations in force under this Act”.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+7
+
+24 September 2024
+
+Reference 3616
+
+Determination 2024/049
+
+(d) does not contain sanitary facilities or facilities for the storage of potable water; and
+(e) does not include sleeping accommodation, unless the building is used in connection
+with a dwelling and does not contain any cooking facilities; and
+(f) if it includes sleeping accommodation, has smoke alarms installed.
+(2) However, subclause (1) does not include building work in connection with a building that is
+closer than the measure of its own height to any residential building or to any legal
+boundary.
+Particular
+in notice
+
+ The construction of a single storey detached building approximately 15 square
+meters in size including the pile foundations which is founded into the ground
+closest to the eastern boundary of the property. This building is closer to its
+own height away from the legal boundary.
+
+Owners’
+view
+
+ “We realise we have made a mistake (thinking our boundary was closer to the
+road than it is)”.
+ The building was “understood to be a detached [building] that was exempt
+from the requirement for a consent under clause 3A of Schedule 1. There is
+“doubt as to the correct boundary location as the owners acted in good faith
+believing the top of the bank was the boundary or at least the relevant
+boundary when considering this aspect of [clause] 3A”.
+ “the relevant boundary should be considered. This is defined in [Clause A2
+Interpretation]. … the relevant boundary should be the road in this case”.
+
+Authority’s
+view
+
+ The criteria in subclause (1) “appear to be met”.
+ GIS records show the building “encroached over the legal boundary of the
+Property and into [authority]‐owned road reserve”.
+ The work does not comply with subclause (2) “due to it being located over the
+legal boundary”. Subclause (2) “refers expressly to the legal boundary”, and
+“Relevant boundary has its own distinct meaning [in] the context of the Act”.
+The definition of “boundary” in the Building Code is “consistent with the
+everyday meaning of the word, and it is not appropriate or necessary to read
+into the clause a different term that carries its own distinct meaning”.
+
+My
+conclusion
+
+ There does not appear to be any dispute between the parties as to the
+application of subclause (1), therefore I have not considered these
+requirements further.
+ The effect of subclause (2) is that any building that is closer than the measure
+of its own height to any legal boundary is excluded from the exemption.
+ The exemption does not use the term ‘relevant boundary’, which is a term
+only referred to in Clause C3 Fire affecting areas beyond the fire source. The
+‘relevant boundary’ is unrelated to subclause (2).
+ The exemption refers to the ‘legal boundary’, and I consider the appropriate
+definition of ‘boundary’ is in Clause A2 Interpretation, which states:
+boundary means any boundary that is shown on a survey plan that is approved
+by the Surveyor‐General and deposited with the Registrar‐General of Land,
+whether or not a new title has been issued.
+
+ I have considered the survey plan relating to the record of title for the
+property, as held by the Registrar‐General of Land, which shows the legal
+boundary. The plan is very similar to the GIS map referenced by both the
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+8
+
+24 September 2024
+
+Reference 3616
+
+Determination 2024/049
+authority and the owners.
+
+ The approximate location of the building has been identified by the authority
+as being on the east boundary (see Figure 4 above). It is not clear from the
+information provided by the authority how it has ascertained the building’s
+location relative to the boundary, as its inspection records do not include any
+measurements such as the height of the building, its distance from the main
+house on the property, or its position relative to the east boundary. However,
+based on the approximate distance between the building and the house that is
+apparent in the photographs submitted, I accept that the building is closer
+than its height to the boundary.
+ As the building is closer than the measure of its own height to the legal
+boundary, this exemption does not apply.
+
+4.5. Consequently, building work was undertaken without a building consent when a
+building consent was required, in contravention of section 40. Therefore, there
+were grounds to issue a notice to fix under section 164 on this basis.
+Other points raised by the owners in relation to section 40
+4.6. Regarding the owners’ view that there is no section 40 “current or continuing
+offence” because the building work was undertaken in the past, this argument was
+considered in Determination 2024/026.10 In that case, it was concluded that there is
+no requirement for building work to be ongoing for there to be grounds to issue a
+notice to fix. In addition, there is no time limit on when a notice to fix can be issued.
+I agree with those findings and that they apply in this case.
+4.7. The owners say that payment of the fine relating to the infringement notice “has
+settled the section 40 offence and therefore the repetition in the notice is
+inappropriate given there is ‘nothing to fix’”.
+4.8. It is correct that the form for an infringement notice (Building (Infringement
+Offences, Fees, and Forms) Regulations 2007, Schedule 2) states that it is “a
+complete defence against proceedings for an [infringement] offence if the fee for
+the offence has been paid” to the authority within the specified period. However,
+an infringement notice is a separate enforcement procedure to a notice to fix, and
+payment of an infringement fee (fine) is not a defence to a notice to fix.
+4.9. This difference has previously been considered in Christchurch City Council v Smith
+Crane & Construction Ltd, where the court stated:11
+[35] There is nothing in the Act to preclude a building consent authority laying a
+charge under section 40 and, either at the same time or at a later date, issuing a
+
+10
+
+Determination 2024/026 The authority’s decision to issue a notice to fix in relation to a retaining
+wall (27 May 2024), at [4.7]‐[4.9].
+11
+Christchurch City Council v Smith Crane & Construction Ltd DC Christchurch CRI‐2009‐009‐12480, 19
+February 2010.
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+9
+
+24 September 2024
+
+Reference 3616
+
+Determination 2024/049
+notice to fix. Non‐compliance with the notice may result in a second and more
+serious charge (in terms of penalty).
+
+Section 17
+4.10. Section 17 states that all building work needs to comply with the Building Code to
+the extent required by the Act, whether or not a building consent was required.
+4.11. The owners say that “there is no offence attributable to section 17” in the Act.12
+The owners are correct that it is not an offence to breach section 17, in the sense
+that a criminal prosecution cannot be taken. However, because section 17 imposes
+a positive obligation on those carrying out building work to ensure the work
+complies with the Building Code (to the extent required by the Act) it follows that if
+the work does not comply then section 17 has been contravened.
+4.12. I have assessed the compliance of the building work specified in the notice to fix in
+Table 2, and I conclude it does not comply with clause B1.3.1.
+Table 2: Assessment of compliance with clause B1.3.1
+B1.3.1 Buildings, building elements and sitework shall have a low probability of rupturing,
+becoming unstable, losing equilibrium, or collapsing during construction or alteration and
+throughout their lives
+Particular
+in the
+notice
+
+Incorrect fixings of the foundation piles and beams which appears to be
+inadequate to withstand the load (building) carried by the foundation as per the
+requirement under the performance of B1 of the Building Code.
+[quotes B1.3.1 as above]
+
+Owners’
+view
+
+ “The [building’s] structural behaviour that only needs support at 4 corners. The
+other timber is offering some lateral support to posts and bracing but the
+structure does not rely on this for stability, equilibrium or collapse”.
+ “The [building] is integral and structurally independent and only needs support
+with posts at the corners. …the cross members and bracing are simply adding
+greater lateral support. Bolts are being provided to complement the nail fixing
+which are not primary structural connections”.
+ The building abuts a deck that “also contributes to the [building’s] structural
+stability”.
+
+Authority’s
+view
+
+ “the timber beams did not appear to be of a structural grade and were nailed
+to the piles”
+ “the fixings used to connect the beams to the piles appears to be randomly
+nailed. No nail plates, bolts or staples were observed …”
+ “This was not considered to be an acceptable solution as contained in
+
+12
+
+It is not a contravention under Crimes Act 1961 section 107– this section provides that it is an offence to
+contravene any enactment, except in certain circumstances.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+10
+
+24 September 2024
+
+Reference 3616
+
+Determination 2024/049
+[Acceptable Solution] B1/AS1[13], [New Zealand Standard] NZS 3604:2011[14].
+Depending on the calculated loads, the pile foundation would, in the
+[authority’s] view, require bolts (at a minimum)”.
+
+My
+conclusion
+
+ In considering the performance requirement in clause B1.3.1, clause B1.3.3 is
+relevant. That clause states that “Account shall be taken of all physical
+conditions likely to affect the stability of buildings, building elements and
+sitework, including …” and then lists 18 conditions or factors, including self‐
+weight, earthquake and wind.
+ The steel framed structure is light weight, and the gravity load will be
+predominantly transferred to the corner piles. The remaining piles are for
+lateral loads (such as wind) and form part of the bracing of the foundation
+system. The connection between the pile and bearer (or ‘beams’) is to prevent
+the top of the pile moving laterally.
+ I agree with the authority that the fixings connecting the piles and beams are
+inadequate given the physical conditions likely that create lateral loads.
+ Consequently, I consider that the building will not have a low probability of
+rupturing, becoming unstable, losing equilibrium, or collapsing throughout its
+life. I am therefore of the view that the building work does not comply with
+clause B1.3.1.
+ I note that the authority re‐inspected the building work on 23 February 2024
+and advised “the nails have not been replaced by bolts”, so the contravention
+had not been remedied by then.
+
+4.13. As the building work does not comply with the Building Code, there were grounds
+to issue a notice to fix under section 164 for a contravention of section 17.
+
+Form and content of the notice
+4.14. Section 165 sets out the requirements for the form and content of a notice to fix.
+The prescribed form15 provides a space to insert the “particulars of contravention or
+non‐compliance”. The courts and previous determinations have discussed the
+requirement that the recipient of a notice to fix be “fairly and fully informed” by the
+particulars in a notice, so they can address the identified issues.16
+Particulars of contravention
+4.15. Where an authority is of the view a particular exemption in Schedule 1 does not
+apply, in setting out the basis for that view it is appropriate to refer to the words or
+wording in the exemption. In doing so the particulars of contravention are aligned
+13
+
+Acceptable Solution B1/AS1 (first edition, amendment 20, effective 29 November 2021 to 1 December
+2023).
+14
+New Zealand Standard NZS 3604:2011 Timber‐framed buildings.
+15
+Form 13 of the Building (Forms) Regulations 2004.
+16
+See Andrew Housing Ltd v Southland District Council [1996] 1 NZLR 589 (which related to a ‘notice to
+rectify’, the equivalent of a notice to fix in the predecessor to the Act, the Building Act 1991);
+Marlborough District Council v Bilsborough [2020] NZDC 9962 at [106]‐[107]; and Determination 2024/029
+An authority’s decisions to issue a series of notices to fix (27 May 2024) at [4.2]‐[4.3].
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+11
+
+24 September 2024
+
+Reference 3616
+
+Determination 2024/049
+
+to the wording of the relevant exemption. I consider the owners would have
+understood from the description of the contravention in the notice to fix why the
+authority was of the view the building work was not exempt under clause 3A(2).
+4.16. The authority identified the section 17 contravention as being in relation to clause
+B1.3.1 of the Building Code, and identified the building work as the fixings of
+foundation piles and beams. However, the notice states the fixings “appears to be
+inadequate”. This indicates a lack of certainty as to non‐compliance.
+4.17. Specific evidence that the Act or regulations are being contravened is required
+before a notice to fix can be issued.17 It is not sufficient that the authority thinks
+there may be a contravention, or that it appears there may be. It is not appropriate
+for an authority to invoke enforcement powers, which carry significant financial
+consequences for recipients, unless it is of the view, based on the evidence
+obtained, that there is in fact a contravention or non‐compliance.
+4.18. For this reason, I am of the view the section 17 particulars did not adequately
+specify the “particulars of contravention or non‐compliance” as required by the
+prescribed form. However, as I have subsequently concluded that the building work
+does not comply with clause B1.3.1 I can confirm there were grounds for issuing the
+notice to fix for a contravention of section 17.
+Remedies
+4.19. When read in conjunction with the particulars of the contraventions, I consider the
+remedies specified in the notice are appropriate. It is for the building owner to
+consider the options available to bring the building work into compliance with the
+Act and the Building Code.
+4.20. I also note the owners say the remedies in the notice required the “obtaining” of a
+certificate of acceptance. That is not correct; the notice stated, “this may include
+applying for a certificate of acceptance”, which is an available remedy under section
+165(1)(c) for building work carried out without building consent.18
+Date for compliance
+4.21. The authority advises that by email on 29 October 2023, the notice compliance date
+was extended to provide time for the authority to respond to the various matters
+raised in the owners’ correspondence. However, it appears no new date was
+specified, and the owners applied for the determination shortly after the extension,
+
+17
+
+As discussed in Determination 2019/036 Regarding a notice to fix and whether a structure on trailers is a
+vehicle or building (25 July 2019) at [6.3.12]‐[6.3.13].
+18
+The owners also say, “Obtaining a [certificate of acceptance] and removal of the unauthorised works (if
+so) cannot be required and is contrary to the [authority’s] own AC1805 guidance document”. This practice
+note, AC1805 How unauthorised building work is assessed (v9, March 2020), is guidance published by the
+authority and is outside the scope of this determination.
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+12
+
+24 September 2024
+
+Reference 3616
+
+Determination 2024/049
+
+which suspended the authority’s powers in relation to the notice (under section
+183).
+4.22. Section 165(1)(b) requires a notice “must state a reasonable timeframe within
+which it must be complied with”. It follows that if a compliance date is extended,
+the time by which it is extended, or the new compliance date, must be clearly
+stated. This did not occur in this case.
+
+Section 167
+4.23. The owners consider that section 167 applies because they provided a ‘section 167
+report’ to the authority that purported to notify the authority of compliance with
+the notice. Previous determinations have discussed the process in section 167
+regarding the inspection of building work that is required to be completed under a
+notice to fix.19
+4.24. I do not consider that the owners’ ‘notice of compliance’ was a notification under
+section 167 that building work had been completed, rather it was disputing the
+grounds on which the notice had been issued. In any event, as at the date of the
+‘section 167 report’ (25 September 2023), it appears the owners had not completed
+any building work that was required by the notice. The owners stated in the report
+the “nails to piles are being replaced with bolts”; they did not state that this had
+been done.20 Therefore, section 167 does not apply, as the authority had not been
+notified that relevant building work had been completed.
+
+5. Conclusion
+5.1. I have found that the notice was deficient in terms of the wording of the section 17
+contravention but there were grounds for the issuing of a notice to fix in relation to
+contraventions of both sections 40 and 17, because there was building work carried
+out without building consent when one was required and because the fixings of the
+bearers to the piles do not comply with clause B1.3.1.
+5.2. However, in extending the date for compliance with the notice to fix no new date
+was specified, and I consider the notice to fix no longer in effect after 9 November
+2023; therefore, I have elected not to reverse the authority’s decision to issue the
+notice to fix.
+
+19
+
+See Determination 2024/016 The issue of a notice to fix for building work associated with a two storey
+building with sanitary fixtures (11 April 2024), at [4.34]‐[4.36]; and Determination 2024/026 at [4.23]‐
+[4.25].
+20
+I also note the authority has advised it carried out a further inspection on 23 February 2024, at which it
+observed “the nails have not been replaced by bolts”.
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+13
+
+24 September 2024
+
+Reference 3616
+
+Determination 2024/049
+
+6. Decision
+6.1. In accordance with section 188 of the Building Act 2004, I determine there were
+grounds for issuing the notice in relation to the contraventions specified in the
+notice.
+
+Signed for and on behalf of the Chief Executive of the Ministry of Business, Innovation
+and Employment on 24 September 2024.
+
+Peta Hird
+Lead Determinations Specialist
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+14
+
+24 September 2024
+
+

@@ -1,0 +1,86 @@
+{
+  "source": "MBIE Annual Building Consent System Performance Monitoring, year ended June 2025",
+  "url": "https://www.mbie.govt.nz/dmsdocument/31078-annual-building-consent-system-performance-monitoring-june-2025-pdf",
+  "national": {
+    "applications_processed": 143022,
+    "building_consents_processed": 73213,
+    "ccc_processed": 66866,
+    "median_processing_days_all": 9.0,
+    "pass_rate_overall": 0.939,
+    "rfi_rate_overall": 0.646,
+    "median_rfi_response_days": 11.0,
+    "median_processing_with_rfi": 11.0,
+    "median_processing_without_rfi": 5.0,
+    "rfi_rate_by_complexity": {
+      "R1_residential_simple": 0.529,
+      "R2_residential_moderate": 0.670,
+      "R3_residential_complex": 0.778,
+      "C1_commercial_simple": 0.724,
+      "C2_commercial_moderate": 0.772,
+      "C3_commercial_complex": 0.778
+    },
+    "median_rfi_days_by_complexity": {
+      "R1": 7.0, "R2": 9.0, "R3": 16.0,
+      "C1": 17.8, "C2": 22.0, "C3": 21.0
+    },
+    "pass_rate_residential": 0.952,
+    "pass_rate_commercial": 0.872,
+    "median_processing_residential_bc": 13.0,
+    "median_processing_commercial_bc": 15.8
+  },
+  "canterbury_bcas": {
+    "christchurch_city": {
+      "applications": 9960,
+      "median_processing_days": 10.0,
+      "pass_rate": 0.944,
+      "median_rfi_response_days": 6.0,
+      "rfi_rate": 0.562,
+      "percent_r3_complex": 0.156,
+      "percent_c3_complex": 0.013
+    },
+    "selwyn": {
+      "applications": 4624,
+      "median_processing_days": 4.0,
+      "pass_rate": 0.968,
+      "median_rfi_response_days": 11.0,
+      "rfi_rate": 0.525,
+      "percent_r3_complex": 0.049,
+      "percent_c3_complex": 0.006
+    },
+    "waimakariri": {
+      "applications": 2841,
+      "median_processing_days": 7.0,
+      "pass_rate": 0.982,
+      "median_rfi_response_days": 10.0,
+      "rfi_rate": 0.502,
+      "percent_r3_complex": 0.085,
+      "percent_c3_complex": 0.009
+    },
+    "ashburton": {
+      "applications": 1607,
+      "median_processing_days": 11.0,
+      "pass_rate": 0.979,
+      "median_rfi_response_days": 10.0,
+      "rfi_rate": 0.444,
+      "percent_r3_complex": 0.041,
+      "percent_c3_complex": 0.011
+    },
+    "hurunui": {
+      "applications": 236,
+      "median_processing_days": 10.0,
+      "pass_rate": 0.990,
+      "median_rfi_response_days": 5.0,
+      "rfi_rate": 0.757,
+      "percent_r3_complex": 0.076,
+      "percent_c3_complex": 0.000
+    }
+  },
+  "key_observations": [
+    "All three target Canterbury BCAs have RFI rates BELOW the national average of 64.6%: WDC 50.2%, SDC 52.5%, CCC 56.2%.",
+    "Selwyn has the fastest median processing (4 days) of the three despite a higher RFI response time (11 days).",
+    "Waimakariri has the highest pass rate (98.2%) of the three.",
+    "Christchurch processes 3.5x more applications than Selwyn and 9x more than Hurunui — volume matters for the model's data leverage.",
+    "Higher complexity categories (R3, C3) have substantially higher RFI rates (78%) than simple residential (R1, 53%) — building complexity is a strong predictor.",
+    "Median applicant RFI response time (11 days nationally) matches the median processing time with RFI (11 days) — total clock impact ~22 days for an RFI'd application."
+  ]
+}

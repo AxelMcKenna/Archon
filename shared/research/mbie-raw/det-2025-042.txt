@@ -1,0 +1,766 @@
+Determination 2025/0421
+An authority’s decision to issue a notice to fix for a mixeduse building
+83 Hutt Road, Pipitea, Wellington
+Summary
+This determination considers whether a change of use occurred as a result of building
+work to increase the number of bedrooms for an existing residential unit in a mixed-use
+building. The determination discusses the features and arrangements of the unit and
+the authority’s decision to then issue a notice to fix. It also discusses whether the unit is
+classified as a ‘detached dwelling’ under Building Code Cause A1 Classified Uses.
+
+Figure 1: The property viewed from the road
+1
+
+This determination is subject to a clarification under section 189 of the Building Act 2004. The
+determination was originally issued on 29 August 2025. The clarification amended paragraphs 2.5, 5.6,
+5.10, 5.14-5.15, 5.17, table 1, and appendices A and B. It also deleted former paragraphs 5.6-5.8, 5.13,
+and 5.22.
+
+Reference 3802
+
+Determination 2025/042
+
+In this determination, unless otherwise stated, references to “sections” are to sections of
+the Building Act 2004 (“the Act”) and references to “clauses” are to clauses in Schedule 1
+(“the Building Code”) of the Building Regulations 1992.
+The Act and the Building Code are available at www.legislation.govt.nz. Information about
+the legislation, as well as past determinations, compliance documents (eg Acceptable
+Solutions) and guidance issued by the Ministry, is available at www.building.govt.nz.
+
+1. The matter to be determined
+1.1. This is a determination made under due authorisation by me, Andrew Eames,
+Principal Advisor Determinations, for and on behalf of the Chief Executive of the
+Ministry of Business, Innovation and Employment (“the Ministry”).2
+1.2. The parties to the determination are:
+1.2.1. Wellington Commercial Investments No1 Limited, the owner of the house
+(“the owner”), who applied for this determination.
+1.2.2. Wellington City Council (“the authority”), carrying out its duties as a
+territorial authority or building consent authority.
+1.3. The first matter to be determined, in terms of section 177(1)(b) and 3(e) of the Act,
+is the authority's decision to issue a notice to fix dated 18 March 2024 for a
+contravention of section 114 of the Act (“the notice to fix”). The determination will
+consider whether, for the purposes of the Act, there has been a ‘change of use’ of
+the unit concerned at the date that the first notice to fix was issued.
+1.4. The second matter to be determined, in terms of section 177(1)(a) of the Act, is
+whether, at the date the owner applied for the determination, being 6 December
+2024, the unit concerned was classified as a ‘detached dwelling’ under Clause A1
+Classified uses for the purposes of complying with the Building Code.
+1.5. This determination does not consider a second notice to fix (also issued 18 March
+2024) issued by the authority and the contravention of section 116B described in
+that notice.
+
+2. The background
+2.1. The unit concerned is an existing two-storey structure that includes a mezzanine
+level situated above the first floor. The unit shares structural elements, including
+the masonry veneer façade and party walls, with an adjoining property to the south,
+which is occupied by a rental car business, forming a building across the two
+properties.
+2
+
+The Building Act 2004, section 185(1)(a) provides the Chief Executive of the Ministry with the power to
+make determinations.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+2
+
+24 September 2025
+
+Reference 3802
+
+Determination 2025/042
+
+2.2. Historically, the unit was used for industrial purposes, including as a furniture
+warehouse.
+2.3. On 22 July 1994, the authority granted a building consent3 to convert the first floor
+and mezzanine into a residential unit comprising three bedrooms. The ground floor
+remained in industrial use. As recently as December 2018, signage on the building
+shows that the ground floor of the unit was being used a as a laser cutting and
+engraving workshop.4
+2.4. The current owner purchased the property on 26 February 2021.
+2.5. On 1 July 2022, the authority granted an amendment to the 1994 building consent.
+The amendment included the conversion of the ground floor from its industrial use
+to use as a garage for the residential unit above.
+2.6. On 13 July 2022, the authority granted a building consent5 for the construction of
+additional bathrooms. Alongside the work described in the building consents,
+further alterations were carried out to add several bedrooms to the unit, taking the
+total number of bedrooms to 17.
+2.7. On 27 November 2023, the owner applied for a building consent6 which was
+described by the authority as including alterations to existing fireplaces and the
+ventilation system, as well as “internal Schedule 1 partitions for habitable spaces”.
+2.8. On 5 December 2023, the authority opened an investigation into the tenancy
+arrangements for the unit and whether a change of use had occurred. On 12
+December 2023 the authority notified the owner that the investigation had been
+closed as it had “been demonstrated that [the unit was] currently being utilised as
+its specific building use” of sleeping single home, as set out in Schedule 2 of the
+Building (Specified Systems, Change the use, and Earthquake-prone Buildings)
+Regulations 2005 (“Schedule 2”).
+2.9. However, in January 2024, the authority reopened its investigation into whether a
+change of use had occurred. It cited determination 2023/0347 and an online
+advertisement for the unit, which described it as an “apartment complex” and listed
+individual rooms for rent, as the reasons why the investigation was reopened. As
+part of its investigation the authority carried out a site inspection on 25 January
+2024.
+
+3
+4
+5
+6
+7
+
+The authority’s reference number for the building consent is service request 6145.
+Google Street View (accessed 16 June 2025) Google <https://maps.app.goo.gl/ZkuJfCeyRtHn4XmD7>.
+The authority’s reference number for the building consent is service request 517942.
+The authority’s reference number for the building consent is service request 541028.
+Determination 2023/034 An authority’s decision to issue a notice to fix for a change of use of a building
+(15 November 2023).
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+3
+
+24 September 2025
+
+Reference 3802
+
+Determination 2025/042
+
+2.10. On 18 March 2024, the authority issued two notices to fix, accompanied by a cover
+letter. In their cover letter, the authority outlined why they believed a change of use
+had occurred:
+Due to the addition of 12 bedrooms, the minimum number of occupants at 83 Hutt
+Road will be 17 people, which exceeds the requirements of Building Code A1, 2.0.2
+which specifies it applies to either a group of people living as a single household or a
+boarding house accommodating fewer than 6 people.
+Further to above, a Trademe advert was listed on 11 February 2023 for 83 Hutt Road
+advertising individual rooms for rent ranging from $250 - $395 per week and the
+ground floor garage listed as being available for rent.
+During our site visit the following was observed:
+1. The interior of the property has been independently decorated by the
+property owner, none of the furniture or artwork within the communal areas
+has been supplied by the residents.
+2. Prior to [the authority’s] investigation, all bedrooms had exterior key locks,
+this is documented in the Trademe advert photos. (Where applicable these
+have since been removed).
+3. There is no fixed rental price, the rent fluctuates and is based off the number
+of rooms occupied.
+4. Vacant rooms do not contribute to the rent unless occupied. Usually when an
+“entire” property is rented, the household unit is responsible for covering the
+fixed rental price.
+5. The use of the garage is not limited to the residents of 83 Hutt Road and
+rented separately or used as storage by non-residents. It is noted the only
+separation between the garage and residential area is a single door.
+6. It was clarified during the visit that current residents are not consulted
+before rooms are filled, this differs to how a family or group of people living
+as a household unit is formed or operates.
+7. During our visit there was a general disconnect with the residents and
+communal spaces. There is a single three-seater couch in the lounge, a fiveseater table in the dining area and three bar stools in the kitchen. The
+communal areas are unable to entertain all 17 occupants at one time.
+
+2.11. The notice to fix alleged a contravention of section 114:
+Non-Compliance with Building Act 2004.
+On 25 January 2024 at 1:00PM the above property was inspected by [the authority’s]
+officers. It has been observed that the building has undergone a change of building
+use from Sleeping Single Home (SH) to Sleeping Accommodation (SA) without notice
+to the [authority]. It has been determined that the requirements of Section 114 of
+the Building Act 2004 have not been complied with.
+
+2.12. The notice to fix stated the following remedies and timeframe:
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+4
+
+24 September 2025
+
+Reference 3802
+
+Determination 2025/042
+
+To remedy the contravention or non-compliance you must:
+Non-Compliance with Building Act 2004.
+Notify [the authority] in writing of a Change of use and demonstrate compliance with
+the New Zealand Building Code within 165 Days of the date of this notice.
+Or
+Revert the building back to Sleeping Single Home (SH) in accordance with SR6145 as
+shown in approved amended plans.
+The following inspections are required with respect to the remedial work: any
+inspection required to comply with this notice.
+This notice must be complied with by Friday 30 August 2024.
+
+3. The building work
+3.1. Table 1 describes the layout and features of the unit before and after the building
+work carried out across 2022 and 2023.
+Table 1: Building layout comparison for the unit
+Floor
+
+Before alterations
+
+After alterations
+
+Ground
+Floor
+
+An entry lobby and stairs providing
+access to the upper floors.
+
+An entry lobby and stairs providing
+access to the upper floors.
+
+Storage and parking areas.
+
+Storage and parking areas.
+A converted storage area containing
+three single bedrooms.
+
+First Floor
+
+A kitchenette.
+
+A kitchenette.
+
+A toilet containing two cubicles.
+
+A toilet containing two cubicles.
+
+A garage area.
+
+A garage area.
+
+An open-plan living area including
+one lounge and an open plan
+lounge, dining area, and kitchen.
+
+A reduced open-plan living area
+including an open plan lounge,
+dining area, and kitchen.
+
+Two double bedrooms.
+
+Nine double bedrooms.
+One single bedroom.
+
+Four storage rooms.
+
+Three storage rooms.
+One study room.
+
+Five bathrooms.
+
+Five bathrooms.
+
+A laundry.
+
+A laundry.
+
+Mezzanine Three double bedrooms.
+Floor
+Two studies.
+
+Three double bedrooms.
+One single bedroom.
+One study.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+5
+
+24 September 2025
+
+Reference 3802
+
+Determination 2025/042
+One bathroom.
+
+One bathroom.
+
+4. Submissions
+The authority
+4.1. Regarding the notice to fix, the authority submits that it was appropriate to issue
+one as a change of use had occurred without the authority being notified. In
+forming this view the authority noted the following factors, in summary:
+4.1.1. In 2022, the unit contained five bedrooms. By 2023, this number had
+increased to seventeen bedrooms, which would be “exceptionally large” for
+a single household.
+4.1.2. Online rental listings described the unit as an “apartment complex”, with
+individual rooms advertised and priced separately. The online rental listings
+also referred to carparks as being available to rent.
+4.1.3. Though subsequently removed by the owner, the authority considers the
+prior presence of locks to be indicative of individualised occupancy
+arrangements.
+4.1.4. The authority considers the communal areas to be insufficient large enough
+to accommodate all occupants simultaneously and therefore inconsistent
+with the expectations of a single household or family living arrangement.
+4.1.5. The tenancy arrangements include a ‘head tenant’ who is the sole person on
+the tenancy agreement, collects rent, and flatmate agreements with other
+occupants. Other occupants are not involved in selecting new tenants and
+because they are not on the tenancy agreement they could leave with little
+consequence after short-term stays.
+4.1.6. The overall rental income depends on the number of occupied rooms, with
+each occupant paying rent only for their own room. The authority compares
+this to the rental of a “household property” where rental income is based on
+rental of a property as a whole.
+4.1.7. At the time the notice to fix was issued, the landlord was organising and
+paying for cleaning services.
+4.2. On the basis of the above factors, and in comparing the unit to determination
+2023/034, the authority submits that the building use under Schedule 2 for the unit
+is no longer a single household, as outlined in the definition for sleeping single
+home. Rather, the unit’s use more comparable to a commercial accommodation
+arrangement and therefore falls within the definition of sleeping accommodation.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+6
+
+24 September 2025
+
+Reference 3802
+
+Determination 2025/042
+
+4.3. Regarding the unit’s classified use, the authority submits that the residential unit
+does not meet the definition of a ‘detached dwelling’ under Clause A1, paragraph
+2.0.2. The authority referred to some of the factors listed in paragraph 4.2, but
+primarily submits that the unit is more akin to a boarding house “focused on
+commercial aspects, rather than the use of a building as a home” with a potential
+occupancy exceeding the fewer than 6 allowed for under subclause 2.0.2 of Clause
+A1.
+
+The owner
+4.5. The owner submits that the authority has not provided sufficient evidence to
+establish that the building use for the unit is sleeping accommodation and therefore
+the authority should uplift the notice to fix.
+4.6. The owner made several submissions on factors similar to those outlined by the
+authority, and as summarised in paragraph 4.1. In summary:
+4.6.1. The addition of 12 bedrooms does not mean the unit is no longer a
+detached dwelling, as “there is no limit to a single household … if it is not a
+boarding house” under Clause A1. Furthermore, given the size of the unit,
+the number of occupants is “not significant”.
+4.6.2. The online listing was a standard online listing for “flatmates wanted” and
+not in the same format as listings for boarding houses.
+4.6.3. The owner submits that the locks on the doors were removed prior to the
+authority’s inspection in January 2024 and therefore should not have been a
+factor in the issuing of the notice to fix. Furthermore, the lack of locks on the
+bedroom doors means the unit is unlike a boarding house, where locks
+would be expected.
+4.6.4. The owner states that the current occupants of the unit knew each other
+prior to moving in. Additional occupants have since moved in as well, and
+they are “family friends”. The owner submits that the occupants selfmanage and resolve disputes internally, without the involvement of the
+owner, or the “head tenant” acting on the owner’s behalf.
+4.6.5. Regarding the “head tenant” selecting new occupants without the
+involvement of other occupants, the owner stated that “the head tenant
+knows the existing [occupants] well and makes decisions on potential
+occupants based on what is best for the household”.
+4.6.6. The owner submits that different occupants paying different amounts of
+rent based on their room does not mean that the unit is being rented room
+by room. Furthermore, “it would be an unnecessary onerous financial
+burden on any head tenant to take responsibility for a full fixed rental of a
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+7
+
+24 September 2025
+
+Reference 3802
+
+Determination 2025/042
+
+17 room flat prior to full occupancy”. They also stated that they could “fix
+the overall building rent” if necessary.
+4.6.7. The owner stated that the occupants pay for the cleaning services for the
+unit.
+4.7. The owner made further submissions regarding the nature of the tenancy
+arrangements:
+4.7.1. The owner states that the tenancy arrangement comprises a single head
+tenant who holds a fixed-term tenancy agreement for the entire premises. A
+bond is lodged on behalf of the head tenant “for the whole property” with
+Tenancy Services, and other occupants enter into separate flatmate
+agreements with the head tenant.
+4.7.2. The owner stated that, in relation to the flatmate agreements, “individual
+bond amounts have been lodged with Tenancy Services” and that the
+agreements are for a minimum period of six months and are not for the
+exclusive use of specific bedrooms.
+4.8. The owner also made a comparison to the building described in determination
+2023/034. Some of their points are already outlined in paragraphs 4.6 and 4.7, with
+their comparison also noting factors such as: there being no video surveillance in
+the unit; the occupants’ ability to use the unit with few restrictions for example; no
+limits on heater use or shower times; and that there are no charges for visitors
+staying at the unit. They conclude that because the unit differed from the building
+in determination 2023/034 its building use is therefore sleeping single home under
+Schedule 2.
+4.9. Regarding the classified use of the unit the owner submits that because the unit is a
+single household, the authority is incorrect in applying a limit of six occupants. This
+limit would only apply if the unit were a boarding house, which the owner submits
+is not the case. To support their view, the owner referred to information provided
+on the Tenancy Services website regarding boarding houses under the Residential
+Tenancies Act 19868.
+
+5. Discussion
+The matter regarding the notice to fix
+5.1. The first matter to be determined is in relation to the notice to fix, dated 18 March
+2024, for a contravention of section 114.
+
+8
+
+Boarding houses (accessed 11 August 2025) Tenancy Services <https://www.tenancy.govt.nz/starting-atenancy/boarding-houses/>.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+8
+
+24 September 2025
+
+Reference 3802
+
+Determination 2025/042
+
+5.2. Notices to fix are governed by sections 163 to 168 of the Act. Section 164(1)(a)
+provides for an authority to issue a notice to fix if it considers, on reasonable
+grounds that a specified person is contravening of failing to comply with the Act or
+its regulations.
+5.3. I have previously discussed the legislative framework for changes of use in
+Determination 2025/0069. In summary: section 114(2)(a) requires that an owner
+notify the territorial authority of a proposed change of use.
+5.4. ‘Change of use’ is defined in regulations 5 and 6 of the Building (Specified Systems,
+Change the Use, and Earthquake-prone Buildings) Regulations 2005 (“the Change of
+Use regulations”). There are two criteria which I must assess:
+5.4.1. Firstly, whether all or part of a building has changed from one building use
+to another (as set out Schedule 2).
+5.4.2. Secondly, whether any new use gives rise to additional or more onerous
+Building Code requirements. In order to make this second assessment I must
+consider the classified use (as set out in Clause A1) for both the old and new
+use(es).
+
+Building use
+5.5. Excerpts of Schedule 2, defining and giving examples for the building uses discussed
+in this section can be found in Appendix A.
+Prior to the 2022–2023 alterations
+5.6. The parties do not dispute that the unit was occupied as a single household dwelling
+prior to the alterations. As noted in paragraph 2.1, the unit concerned is part of a
+building across two properties, with the neighbouring part of the building
+containing a rental car business. As a household unit attached to spaces with the
+same or other uses, the unit fell within the sleeping residential use group.
+After the 2022–2023 alterations
+5.7. Sleeping single home, sleeping residential, and sleeping accommodation building
+uses are discussed in Determination 2025/006, noting that the concept of a
+‘household unit’ underpins the former two building uses, while the definition for
+sleeping accommodation building use refers to ‘transient accommodation’ and
+‘limited assistance or care’10 . I have weighed similar factors here and considered
+the items laid out in the background and submissions and have arrived at some
+conclusions:
+9
+
+10
+
+Determination 2025/006 The decision to issue a notice to fix for a change of use of a building 5 February
+2025 at 4.1-4.7.
+Determination 2025/006 at 4.9-4.21 and specifically 4.19.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+9
+
+24 September 2025
+
+Reference 3802
+
+Determination 2025/042
+
+5.7.1. As a result of the alterations the unit now has a capacity of 29 occupants
+based on the number of beds shown on the plans. This number points to
+challenges in maintaining a sufficient connection between all occupants to
+act as a single household.
+5.7.2. The unit has a combined lounge, dining, and kitchen area. Considering the
+number of occupants above, this communal area is not large enough to
+adequately accommodate the occupants socialising together as a single
+household. This means there will be a reduced level of social cohesion11.
+5.7.3. The existing length of tenancy agreements outlined by the owner, where
+most of the occupants have resided for 12 months or more, indicates some
+level of ongoing connection amongst the occupants. However, both parties
+have noted that the head tenant makes decisions on new occupants without
+the input of other occupants. This reduces that degree to which all
+occupants have agreed to reside together as a single household.
+5.7.4. While the owner made other submissions around the nature of the tenancy
+arrangements, I have not been provided the tenancy agreement(s) for the
+unit. I note that the owner submits that there are “individual bonds” lodged
+on behalf of each of the occupants as well as a bond for the whole unit on
+behalf of the head tenant. I am therefore of the view that the owner is
+charging bond and rent on a per-room/occupant basis. This is in comparison
+to tenancy arrangements whereby bond and rent is for a unit or building as
+a whole, with the occupants self-managing individual payments towards
+that overall amount. I consider the arrangements for the unit in question to
+be more comparable to a commercial arrangement for accommodation than
+for a single household.
+5.7.5. Additionally, the owner organises cleaning of the unit to be carried out on
+behalf of the residents. I consider this to be indicative of limited assistance
+and care from the owner.
+5.8. After weighing the various factors and arguments, I find considering the cumulative
+effect of the size of the occupancy, the limited opportunity for social cohesion, the
+lesser degree to which there is agreement to reside together as a single household,
+commercial style tenancy arrangements, and the provision of limited support and
+care I find this to be a sleeping accommodation use under Schedule 2.
+5.9. I note the owner’s submissions in relation to whether the unit is specifically a
+boarding house or not12. While a boarding house is given as an example of a
+sleeping accommodation building use in Schedule 2, it is only one such example,
+
+11
+12
+
+A shared sense of belonging and connection.
+Their use of that term was in regards the definition in s66B of the Residential Tenancies Act, not the
+Building Act 2004.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+10
+
+24 September 2025
+
+Reference 3802
+
+Determination 2025/042
+
+and therefore this specific distinction is not determinative in of itself of the building
+use.
+Outcome
+5.10. The unit changed from a sleeping residential to a sleeping accommodation building
+use.
+5.11. As the building use has changed from one use to another, the first criterion for a
+change of use has been met.
+
+Classified use
+5.12. Excerpts of Clause A1 of the Building Code, giving definitions and examples for the
+classified uses discussed in this section can be found in Appendix B.
+5.13. Determination 2025/006 discusses classified uses, noting how the classified use of a
+building, or part of a building, is established as well as the interpretation of
+‘intended use’13.
+5.14. For this determination, the relevant classified uses are the ‘housing’ and ‘communal
+residential’ categories.
+5.15. The classified use for the unit, prior to the 2022-2023 alterations was within the
+housing category of classified uses. The unit was used as a single household or
+family involving self-care and service.
+5.16. I consider that the classified uses for the residential areas of the unit after the
+alterations is community service. As identified in paragraph 5.7, limited assistance
+and care is provided to the occupants, the unit does not operate as a single
+household or family, and the tenancy arrangements are more comparable to the
+examples of commercial accommodation given in the definition for community
+service.
+Outcome
+5.17. The unit changed from a housing category classified use to community service.
+Additional Building Code performance requirements, such as D1.3.3(i) and F6.2,
+now apply.
+5.18. As additional or more onerous requirements for compliance with the Building Code
+apply, the second criterion has been met, and a change of use has occurred.
+
+13
+
+Determination 2025/006 at 4.34-4.37.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+11
+
+24 September 2025
+
+Reference 3802
+
+Determination 2025/042
+
+Form and content of the notice to fix
+5.19. I have found that a change of use had occurred, and the owner did not notify the
+authority of this change of use in accordance with section 114(2)(a). Therefore,
+there were grounds to issue a notice to fix under section 164.
+5.20. Section 165 outlines the form and content requirements for a notice to fix. A notice
+to fix must be in the prescribed form14, sufficiently describe the particulars of the
+contravention so that the recipient is “fairly and fully informed”15, specify a
+reasonable timeframe for compliance, and may require applications for a certificate
+of acceptance or a building consent (or amendments to an existing consent)
+depending on the nature of the non-compliance. It must also require the
+responsible authority to be contacted upon completion of the work.
+5.21. The notice to fix describes a contravention of section 114, though its description
+only notes the use changing in relation to the building uses set out in Schedule 2. It
+does not mention the second criterion in relation to additional or more onerous
+Building Code requirements or outline a change in classified use which might lead to
+this criterion being met. I consider that the description of the contravention does
+not fully inform the owner how section 114 has been contravened.
+5.22. The cover letter attached to the notice to fix also alleged a contravention of 115,
+however this is not listed on the notice as a contravention, creating the possibility
+for confusion on what contraventions have occurred and are required to be
+remedied.
+5.23. The remedy requires:
+5.23.1. notification of a change of use, in line with section 114 and demonstration
+of “compliance with the New Zealand Building Code” within 165 days of the
+date of issue, or
+5.23.2. reversion of the use of the building back to the sleeping single home use
+with reference to the 2022 building consent amendment. I note that, as
+established in paragraph 5.6, the relevant building use prior to the 20222023 alterations was sleeping residential.
+5.24. The first remedy appears to be in relation to section 115, which sets out that an
+owner can only change the use of a building if a territorial authority notifies the
+owner that the compliance requirements set out in that section have been met.
+However, “compliance with the New Zealand Building Code” is not a valid remedy
+
+14
+15
+
+Form 13 of the Building (Forms) Regulations 2004.
+See Andrew Housing Ltd v Southland District Council [1996] 1 NZLR 589 (which related to a ‘notice to
+rectify’ in the Building Act 1991, the equivalent of a notice to fix in the current Act,); Marlborough
+District Council v Bilsborough [2020] NZDC 9962 at [106]-[107]; and Determination 2024/029 An
+authority’s decisions to issue a series of notices to fix (27 May 2024) at [4.2]-[4.3].
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+12
+
+24 September 2025
+
+Reference 3802
+
+Determination 2025/042
+
+for a contravention of 115, as this is not the level of compliance required by either
+section 115(a) or (b).
+5.25. As the notice to fix did not sufficiently describe the particulars of the contravention
+and included remedies that were not valid, the notice to fix did not meet the
+requirements of section 165.
+
+The matter regarding the classified use
+5.26. The second matter to be determined is in relation to the classified use of the unit at
+the time the application for a determination was made.
+5.27. The features of the building discussed in paragraph 5.16 did not materially change
+between the issuing of the notice to fix and the application for a determination. I
+therefore conclude that the classified use under Clause A1 at the time of application
+was community service.
+
+6. Decision
+6.1. Regarding the notice to fix, there were grounds to issue a notice to fix for a
+contravention of section 114. However, the notice to fix did not meet the
+requirements of section 165 and, in accordance with section 188, I reverse the
+authority’s decision to issue the notice to fix.
+6.2. Regarding the classified use of the unit at the time the application for a
+determination, 6 December 2024, I find that the unit did not have a classified use of
+detached dwelling as set out in Building Code Clause A1 – Classified uses.
+Signed for and on behalf of the Chief Executive of the Ministry of Business, Innovation
+and Employment on 24 September 2025.
+
+Andrew Eames
+Principal Advisor Determinations
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+13
+
+24 September 2025
+
+Reference 3802
+
+Determination 2025/042
+
+Appendix A: relevant excerpts from Schedule 2 of the
+Building (Specified Systems, Change the Use, and
+Earthquake-prone Buildings) Regulations 2005
+Uses related to sleeping activities
+Use
+
+Spaces or dwellings
+
+Examples
+
+SA (Sleeping
+Care)
+
+spaces providing transient
+accommodation, or where limited
+assistance or care is provided for
+people
+
+motels, hotels, hostels, boarding
+houses, clubs (residential), boarding
+schools, dormitories, halls, wharenui
+
+SR (Sleeping
+Residential)
+
+attached and multi-unit residential
+dwellings, including household units
+attached to spaces or dwellings with
+the same or other uses, such as
+caretakers’ flats, and residential
+accommodation above a shop
+
+multi-unit dwellings, flats, or
+apartments
+
+SH (Sleeping
+Single Home)
+
+detached dwellings where people live
+as a single household or family,
+including attached self-contained
+spaces such as granny flats when
+occupied by a member of the same
+family, and garages (whether
+detached or part of the same building)
+if primarily for storage of the
+occupants’ vehicles, tools, and garden
+implements
+
+dwellings or houses separated from
+each other by distance
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+14
+
+24 September 2025
+
+Reference 3802
+
+Determination 2025/042
+
+Appendix B: excerpt from Building Code Clause A1 –
+Classified uses
+1.0
+
+Explanation
+
+1.0.1 For the purposes of this building code buildings are classified according to type, under
+seven categories.
+1.0.2 A building with a given classified use may have one or more intended uses as defined in the
+Act.
+2.0
+
+Housing
+
+2.0.1 Applies to buildings or use where there is self care and service (internal management).
+There are three types:
+2.0.2 Detached dwellings
+Applies to a building or use where a group of people live as a single household or family.
+Examples: a holiday cottage, boarding house accommodating fewer than 6 people, dwelling
+or hut.
+2.0.3 Multi-unit dwelling
+Applies to a building or use which contains more than one separate household or family.
+Examples: an attached dwelling, flat or multi-unit apartment.
+2.0.4 Group dwelling
+Applies to a building or use where groups of people live as one large extended family.
+Examples: within a commune or marae.
+3.0
+
+Communal residential
+
+3.0.1 Applies to buildings or use where assistance or care is extended to the principal users.
+There are two types:
+3.0.2 Community service
+Applies to a residential building or use where limited assistance or care is extended to the
+principal users. Examples: a boarding house, hall of residence, holiday cabin, backcountry
+hut, hostel, hotel, motel, nurses’ home, retirement village, time-share accommodation, a
+work camp, or camping ground.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+15
+
+24 September 2025
+
+

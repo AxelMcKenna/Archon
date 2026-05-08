@@ -36,3 +36,4 @@ supabase/.temp
 # Build artefacts
 *.log
 coverage/
+.vercel
