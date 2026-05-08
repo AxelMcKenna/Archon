@@ -2,7 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
+import { taxonomy } from "@consentiq/shared";
 import type { ExtractedEntities } from "@consentiq/shared";
+
+type ReconLog = {
+  id: string;
+  state: "agree" | "ai_extends_rules" | "disagree" | "rules_override";
+  rules_output: { primary_category: string | null; hits: { rule_id: string }[] };
+  ai_output: {
+    primary_category: string;
+    secondary_category?: string | null;
+    severity: "must_resolve" | "nice_to_have";
+    confidence: "low" | "medium" | "high";
+    reasoning: string;
+  };
+  final_category: string;
+  final_severity: "must_resolve" | "nice_to_have";
+  user_resolved_choice: string | null;
+};
 
 type Item = {
   id: string;
@@ -13,6 +30,14 @@ type Item = {
   bbox: number[] | null;
   extracted: ExtractedEntities;
   ordering: number;
+  reconciliation: ReconLog | null;
+};
+
+const STATE_STYLE: Record<ReconLog["state"], string> = {
+  agree: "bg-emerald-100 text-emerald-800",
+  ai_extends_rules: "bg-sky-100 text-sky-800",
+  disagree: "bg-amber-100 text-amber-800",
+  rules_override: "bg-violet-100 text-violet-800",
 };
 
 export function LetterReview({
@@ -24,6 +49,8 @@ export function LetterReview({
 }) {
   const [items, setItems] = useState(initial);
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const [classifying, setClassifying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     apiFetch<{ url: string }>(`/letters/${letterId}/signed-url`)
@@ -40,6 +67,44 @@ export function LetterReview({
     setItems((curr) => curr.map((i) => (i.id === itemId ? { ...i, ...updated } : i)));
   }
 
+  async function classify() {
+    setClassifying(true);
+    setError(null);
+    try {
+      await apiFetch(`/classify/${letterId}`, { method: "POST" });
+      // Re-pull recon log via API (route returns recon_log).
+      const data = await apiFetch<{ reconciliation_log: ReconLog[] }>(
+        `/classify/${letterId}`,
+      );
+      const byItem = new Map(data.reconciliation_log.map((l) => [(l as ReconLog & { rfi_item_id?: string }).rfi_item_id ?? "", l]));
+      setItems((curr) =>
+        curr.map((i) => ({ ...i, reconciliation: byItem.get(i.id) ?? null })),
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Classify failed");
+    } finally {
+      setClassifying(false);
+    }
+  }
+
+  async function resolve(logId: string, user_choice: string) {
+    const updated = await apiFetch<ReconLog & { rfi_item_id: string }>(
+      `/reconciliation/${logId}/resolve`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_choice }),
+      },
+    );
+    setItems((curr) =>
+      curr.map((i) =>
+        i.id === updated.rfi_item_id ? { ...i, reconciliation: updated } : i,
+      ),
+    );
+  }
+
+  const classified = items.filter((i) => i.reconciliation).length;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-6">
       <aside className="lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)]">
@@ -55,8 +120,27 @@ export function LetterReview({
         </div>
       </aside>
       <section className="space-y-4">
+        <div className="flex items-center justify-between rounded-lg border border-ink-700/10 px-4 py-3">
+          <div className="text-sm">
+            <span className="font-medium">{items.length}</span> items ·{" "}
+            <span className="text-ink-500">{classified} classified</span>
+          </div>
+          <button
+            onClick={classify}
+            disabled={classifying}
+            className="rounded-lg bg-ink-900 text-white px-3 py-1.5 text-sm font-medium disabled:opacity-50"
+          >
+            {classifying ? "Classifying…" : classified ? "Re-classify" : "Classify"}
+          </button>
+        </div>
+        {error && <p className="text-sm text-red-600">{error}</p>}
         {items.map((item) => (
-          <ItemCard key={item.id} item={item} onSave={(t) => saveItem(item.id, t)} />
+          <ItemCard
+            key={item.id}
+            item={item}
+            onSave={(t) => saveItem(item.id, t)}
+            onResolve={(c) => item.reconciliation && resolve(item.reconciliation.id, c)}
+          />
         ))}
       </section>
     </div>
@@ -66,9 +150,11 @@ export function LetterReview({
 function ItemCard({
   item,
   onSave,
+  onResolve,
 }: {
   item: Item;
   onSave: (raw_text: string) => Promise<void>;
+  onResolve: (user_choice: string) => Promise<void>;
 }) {
   const [text, setText] = useState(item.raw_text);
   const [busy, setBusy] = useState(false);
@@ -85,7 +171,7 @@ function ItemCard({
 
   return (
     <article className="rounded-lg border border-ink-700/10 p-4">
-      <header className="flex items-baseline justify-between mb-3">
+      <header className="flex items-baseline justify-between mb-3 gap-3">
         <h3 className="font-semibold">
           Item {item.raw_number ?? item.ordering + 1}
           {item.page ? <span className="ml-2 text-xs text-ink-500">p.{item.page}</span> : null}
@@ -107,7 +193,84 @@ function ItemCard({
         className="w-full rounded border border-ink-700/15 px-3 py-2 text-sm font-mono leading-relaxed"
       />
       <Facets entities={item.extracted} />
+      {item.reconciliation && (
+        <Classification recon={item.reconciliation} onResolve={onResolve} />
+      )}
     </article>
+  );
+}
+
+function Classification({
+  recon,
+  onResolve,
+}: {
+  recon: ReconLog;
+  onResolve: (user_choice: string) => Promise<void>;
+}) {
+  const cat = taxonomy.categories.find((c) => c.id === recon.final_category);
+  return (
+    <div className="mt-4 border-t border-ink-700/10 pt-3 space-y-2">
+      <div className="flex items-center gap-2 text-sm flex-wrap">
+        <span className={`inline-block rounded px-2 py-0.5 text-xs ${STATE_STYLE[recon.state]}`}>
+          {recon.state}
+        </span>
+        <span className="font-mono text-xs">{recon.final_category}</span>
+        <span className="text-ink-500 text-xs">· {cat?.label}</span>
+        <span className="ml-auto text-xs text-ink-500">{recon.final_severity}</span>
+      </div>
+      <p className="text-xs text-ink-500 italic">{recon.ai_output.reasoning}</p>
+      {recon.state === "disagree" && !recon.user_resolved_choice && (
+        <Resolver recon={recon} onResolve={onResolve} />
+      )}
+      {recon.user_resolved_choice && (
+        <p className="text-xs text-ink-500">
+          You resolved this as <span className="font-mono">{recon.user_resolved_choice}</span>.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function Resolver({
+  recon,
+  onResolve,
+}: {
+  recon: ReconLog;
+  onResolve: (user_choice: string) => Promise<void>;
+}) {
+  const rules = recon.rules_output.primary_category;
+  const ai = recon.ai_output.primary_category;
+  const [busy, setBusy] = useState(false);
+  async function pick(choice: string) {
+    setBusy(true);
+    try {
+      await onResolve(choice);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="rounded bg-amber-50 border border-amber-200 px-3 py-2 text-xs">
+      <p className="mb-2 font-medium">Pick the right category:</p>
+      <div className="flex gap-2 flex-wrap">
+        {rules && (
+          <button
+            disabled={busy}
+            onClick={() => pick(rules)}
+            className="rounded border border-ink-700/20 bg-white px-2 py-1 hover:bg-ink-700/5"
+          >
+            rules: <span className="font-mono">{rules}</span>
+          </button>
+        )}
+        <button
+          disabled={busy}
+          onClick={() => pick(ai)}
+          className="rounded border border-ink-700/20 bg-white px-2 py-1 hover:bg-ink-700/5"
+        >
+          ai: <span className="font-mono">{ai}</span>
+        </button>
+      </div>
+    </div>
   );
 }
 

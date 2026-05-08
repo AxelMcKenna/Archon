@@ -70,7 +70,7 @@ rules:
     matcher:
       type: regex
       field: raw_text
-      pattern: "(?i)\\b(weathertight|weather-tight|cladding|flashing|junction|head\\s+and\\s+sill)\\b"
+      pattern: "(?i)\\b(weathertight|weather-tight|cladding|flashing|junction|head\\s+and\\s+sill|drained\\s+and\\s+ventilated\\s+cavity|cavity\\s+batten)\\b"
     category: building_code:E2
     confidence: medium
     severity_default: must_resolve
@@ -156,6 +156,18 @@ rules:
       field: raw_text
       pattern: "(?i)\\b(balustrade|barrier|glazing|safety\\s+glass|F4|F2)\\b"
     category: building_code:F
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.0.0"
+
+  - id: wet-area-e3
+    description: "Item mentions wet-area waterproofing (E3 proxy)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(wet\\s+area|waterproofing|shower\\s+lining|tanking|en[- ]?suite)\\b"
+    category: building_code:E3
     confidence: medium
     severity_default: must_resolve
     hard_assertion: false

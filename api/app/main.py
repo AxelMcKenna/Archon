@@ -21,3 +21,6 @@ app.include_router(extract_routes.router, prefix="/extract", tags=["extract"])
 app.include_router(letters_routes.router, prefix="/letters", tags=["letters"])
 app.include_router(letters_routes.items_router, prefix="/items", tags=["items"])
 app.include_router(classify_routes.router, prefix="/classify", tags=["classify"])
+app.include_router(
+    classify_routes.reconciliation_router, prefix="/reconciliation", tags=["reconciliation"]
+)

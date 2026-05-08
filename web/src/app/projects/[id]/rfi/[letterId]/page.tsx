@@ -25,6 +25,15 @@ export default async function LetterPage({
     .eq("rfi_letter_id", letterId)
     .order("ordering");
 
+  const itemIds = (items ?? []).map((i) => i.id);
+  const { data: log } = itemIds.length
+    ? await supabase
+        .from("reconciliation_log")
+        .select("*")
+        .in("rfi_item_id", itemIds)
+    : { data: [] };
+  const logByItem = new Map((log ?? []).map((l) => [l.rfi_item_id, l]));
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
       <div className="mb-6">
@@ -43,7 +52,13 @@ export default async function LetterPage({
           · {(items ?? []).length} items
         </p>
       </div>
-      <LetterReview letterId={letterId} items={items ?? []} />
+      <LetterReview
+        letterId={letterId}
+        items={(items ?? []).map((i) => ({
+          ...i,
+          reconciliation: logByItem.get(i.id) ?? null,
+        }))}
+      />
     </div>
   );
 }

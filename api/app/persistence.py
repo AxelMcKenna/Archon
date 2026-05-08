@@ -11,7 +11,7 @@ from typing import Any
 from supabase import Client
 
 from app.extractors.metrics import Metrics
-from app.models import CanonicalRfi
+from app.models import CanonicalRfi, FinalClassification
 
 
 def insert_letter(
@@ -103,6 +103,143 @@ def fetch_items(client: Client, letter_id: str) -> list[dict[str, Any]]:
         .execute()
     )
     return res.data or []
+
+
+def insert_classification_results(
+    client: Client,
+    *,
+    rfi_item_id: str,
+    final: FinalClassification,
+) -> str:
+    """Insert 3 classifications rows + 1 reconciliation_log row.
+
+    Returns the reconciliation_log row id (used by the resolver UI).
+    """
+    rules = final.rules_output
+    ai = final.ai_output
+    rule_ids = [h.rule_id for h in rules.hits]
+    rules_primary = rules.primary_category or "documentation:other"
+    rules_severity = (
+        rules.hits[0].severity if rules.hits else "must_resolve"
+    )
+    rules_confidence = (
+        rules.hits[0].confidence if rules.hits else "low"
+    )
+
+    client.table("classifications").insert(
+        [
+            {
+                "rfi_item_id": rfi_item_id,
+                "prong": "rules",
+                "primary_category": rules_primary,
+                "severity": rules_severity,
+                "confidence": rules_confidence,
+                "rule_ids": rule_ids,
+                "rules_version": rules.rules_version,
+            },
+            {
+                "rfi_item_id": rfi_item_id,
+                "prong": "ai",
+                "primary_category": ai.primary_category,
+                "secondary_category": ai.secondary_category,
+                "severity": ai.severity,
+                "confidence": ai.confidence,
+                "reasoning": ai.reasoning,
+                "prompt_version": ai.prompt_version,
+            },
+            {
+                "rfi_item_id": rfi_item_id,
+                "prong": "final",
+                "primary_category": final.primary_category,
+                "secondary_category": final.secondary_category,
+                "severity": final.severity,
+                "confidence": final.confidence,
+                "reasoning": ai.reasoning,
+                "rules_version": rules.rules_version,
+                "prompt_version": ai.prompt_version,
+            },
+        ]
+    ).execute()
+
+    log = client.table("reconciliation_log").insert(
+        {
+            "rfi_item_id": rfi_item_id,
+            "state": final.state,
+            "rules_output": rules.model_dump(mode="json"),
+            "ai_output": ai.model_dump(mode="json"),
+            "final_category": final.primary_category,
+            "final_severity": final.severity,
+            "rules_version": rules.rules_version,
+            "prompt_version": ai.prompt_version,
+        }
+    ).execute()
+    return log.data[0]["id"]
+
+
+def fetch_letter_canonical(client: Client, letter_id: str) -> dict[str, Any] | None:
+    res = (
+        client.table("rfi_letters")
+        .select("canonical_json, status")
+        .eq("id", letter_id)
+        .single()
+        .execute()
+    )
+    return res.data
+
+
+def fetch_classifications(client: Client, letter_id: str) -> list[dict[str, Any]]:
+    res = (
+        client.table("classifications")
+        .select("*, rfi_items!inner(id, item_id, rfi_letter_id)")
+        .eq("rfi_items.rfi_letter_id", letter_id)
+        .execute()
+    )
+    return res.data or []
+
+
+def fetch_reconciliation_for_letter(
+    client: Client, letter_id: str
+) -> list[dict[str, Any]]:
+    res = (
+        client.table("reconciliation_log")
+        .select("*, rfi_items!inner(id, item_id, ordering, rfi_letter_id)")
+        .eq("rfi_items.rfi_letter_id", letter_id)
+        .order("created_at", desc=True)
+        .execute()
+    )
+    return res.data or []
+
+
+def resolve_reconciliation(
+    client: Client,
+    *,
+    log_id: str,
+    user_choice: str,
+) -> dict[str, Any]:
+    res = (
+        client.table("reconciliation_log")
+        .update(
+            {
+                "user_resolved_choice": user_choice,
+                "user_resolved_at": "now()",
+                "final_category": user_choice,
+            }
+        )
+        .eq("id", log_id)
+        .execute()
+    )
+    if not res.data:
+        raise LookupError(log_id)
+    log = res.data[0]
+    # Sync the 'final' classification row.
+    client.table("classifications").update(
+        {"primary_category": user_choice}
+    ).eq("rfi_item_id", log["rfi_item_id"]).eq("prong", "final").execute()
+    return log
+
+
+def update_letter_status(client: Client, letter_id: str, status: str) -> None:
+    client.table("rfi_letters").update({"status": status}).eq("id", letter_id).execute()
 
 
 def update_item_text(
