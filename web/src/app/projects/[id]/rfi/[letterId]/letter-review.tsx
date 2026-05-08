@@ -244,7 +244,9 @@ export function LetterReview({
             key={item.id}
             item={item}
             onSave={(t) => saveItem(item.id, t)}
-            onResolve={(c) => item.reconciliation && resolve(item.reconciliation.id, c)}
+            onResolve={async (c) => {
+              if (item.reconciliation) await resolve(item.reconciliation.id, c);
+            }}
             onGenerateDraft={() => generateDraft(item.id)}
             onSaveDraft={(t) => saveDraftEdit(item.id, t)}
             onAttach={(f) => uploadAttachment(item.id, f)}

@@ -2,7 +2,7 @@
 const nextConfig = {
   transpilePackages: ["@consentiq/shared"],
   experimental: {
-    typedRoutes: true,
+    typedRoutes: false,
   },
 };
 
