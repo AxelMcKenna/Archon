@@ -57,7 +57,7 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
       </section>
 
       <section className="border-t border-ink-700/10 pt-8">
-        <AddressChecklist address={project.address} />
+        <AddressChecklist address={project.address} initialProjectType={project.project_type} />
       </section>
 
       <section className="border-t border-ink-700/10 pt-8">
