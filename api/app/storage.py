@@ -7,6 +7,7 @@ from supabase import Client
 RFI_BUCKET = "rfi-uploads"
 ATTACH_BUCKET = "attachments"
 EXPORTS_BUCKET = "exports"
+PLANS_BUCKET = "plans"
 
 
 def upload_rfi_original(
@@ -56,6 +57,24 @@ def upload_export(
 ) -> str:
     path = f"{project_id}/{letter_id}/{filename}"
     client.storage.from_(EXPORTS_BUCKET).upload(
+        path,
+        data,
+        {"content-type": content_type, "upsert": "true"},
+    )
+    return path
+
+
+def upload_plan(
+    client: Client,
+    *,
+    project_id: str,
+    plan_id: str,
+    filename: str,
+    content_type: str,
+    data: bytes,
+) -> str:
+    path = f"{project_id}/{plan_id}/{filename}"
+    client.storage.from_(PLANS_BUCKET).upload(
         path,
         data,
         {"content-type": content_type, "upsert": "true"},

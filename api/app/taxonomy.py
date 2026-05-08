@@ -16,10 +16,14 @@ def get_taxonomy() -> dict[str, Any]:
 
 
 def acceptable_solution_for(category: str) -> str | None:
-    """Return a short reference string for a given category, or None."""
+    """Return a short reference string for a given category, or None.
+
+    Handles hierarchical IDs introduced in taxonomy 1.1 by taking the first
+    clause segment (e.g. ``building_code:B1:geotech`` → ``B1``).
+    """
     if not category.startswith("building_code:"):
         return None
-    clause = category.split(":", 1)[1]
+    clause = category.split(":", 2)[1]  # 1st segment after "building_code:"
     tx = get_taxonomy()
     entry = tx["acceptable_solutions"].get(clause)
     if not entry:
