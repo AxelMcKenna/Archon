@@ -1,10 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
+import { ProjectSubnav } from "@/components/project-subnav";
 
 export function LayoutContent({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const pathname = usePathname();
+
+  // Extract project ID from URL if we're in a project
+  const projectMatch = pathname.match(/^\/projects\/([^/]+)/);
+  const projectId = projectMatch ? projectMatch[1] : null;
+  const isProjectPage = projectId && projectId !== "new";
 
   return (
     <div className="min-h-screen flex">
@@ -36,6 +44,7 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
             </a>
           </nav>
         </header>
+        {isProjectPage && projectId && <ProjectSubnav projectId={projectId} />}
         <main className="flex-1">{children}</main>
       </div>
     </div>

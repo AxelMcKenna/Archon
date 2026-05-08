@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { taxonomy } from "@consentiq/shared";
+import { ProjectCreateButton } from "@/components/project-create-button";
 
 async function createProject(formData: FormData) {
   "use server";
@@ -8,14 +9,36 @@ async function createProject(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/sign-in");
 
+  const address = String(formData.get("address") ?? "").trim();
+  const bca = String(formData.get("bca") ?? "").trim();
+  const projectType = String(formData.get("project_type") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim() || null;
+
+  const recentThreshold = new Date(Date.now() - 15_000).toISOString();
+  const { data: existingProject } = await supabase
+    .from("projects")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("address", address)
+    .eq("bca", bca)
+    .eq("project_type", projectType)
+    .gte("created_at", recentThreshold)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (existingProject) {
+    redirect(`/projects/${existingProject.id}`);
+  }
+
   const { data, error } = await supabase
     .from("projects")
     .insert({
       user_id: user.id,
-      address: String(formData.get("address") ?? ""),
-      bca: String(formData.get("bca") ?? ""),
-      project_type: String(formData.get("project_type") ?? ""),
-      description: String(formData.get("description") ?? "") || null,
+      address,
+      bca,
+      project_type: projectType,
+      description,
     })
     .select("id")
     .single();
@@ -48,9 +71,7 @@ export default function NewProjectPage() {
         <Field label="Description (optional)">
           <textarea name="description" rows={4} className="w-full rounded border border-ink-700/20 px-3 py-2" />
         </Field>
-        <button className="rounded-lg bg-ink-900 text-white px-5 py-2 text-sm font-medium">
-          Create
-        </button>
+        <ProjectCreateButton />
       </form>
     </div>
   );

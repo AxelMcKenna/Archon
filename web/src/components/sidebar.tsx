@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const sidebarTabs = [
-  { name: "Dashboard", href: "/" },
+const mainTabs = [
+  { name: "Dashboard", href: "/dashboard" },
   { name: "Projects", href: "/projects" },
-  { name: "Upload RFI", href: "/projects/new" },
-  { name: "Classification", href: "/projects/classification" },
-  { name: "Reconciliation", href: "/admin/reconciliation" },
+  { name: "Workflow", href: "/workflow" },
+  { name: "Documents", href: "/documents" },
   { name: "Settings", href: "/settings" },
   { name: "Help", href: "/help" },
 ];
@@ -21,8 +20,8 @@ export function Sidebar() {
       <div className="px-6 py-4 font-semibold tracking-tight text-lg">ConsentIQ</div>
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         <ul className="space-y-1">
-          {sidebarTabs.map((tab) => {
-            const isActive = pathname === tab.href;
+          {mainTabs.map((tab) => {
+            const isActive = pathname === tab.href || pathname.startsWith(tab.href + "/");
             return (
               <li key={tab.href}>
                 <Link
