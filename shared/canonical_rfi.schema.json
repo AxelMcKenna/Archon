@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://consentiq.nz/schema/canonical_rfi/1.0",
+  "title": "Canonical RFI Letter",
+  "description": "Source-of-truth structured representation of an RFI letter. Consumed by both classification prongs.",
+  "type": "object",
+  "required": ["schema_version", "rfi_letter"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "rfi_letter": {
+      "type": "object",
+      "required": ["rfi_id", "project_id", "bca", "extraction", "items"],
+      "properties": {
+        "rfi_id": { "type": "string", "format": "uuid" },
+        "project_id": { "type": "string", "format": "uuid" },
+        "bca": { "type": "string" },
+        "application_ref": { "type": ["string", "null"] },
+        "rfi_number": { "type": ["integer", "null"], "minimum": 1 },
+        "issue_date": { "type": ["string", "null"], "format": "date" },
+        "response_deadline": { "type": ["string", "null"], "format": "date" },
+        "officer_name": { "type": ["string", "null"] },
+        "extraction": {
+          "type": "object",
+          "required": ["extractor", "extractor_version", "processed_at"],
+          "properties": {
+            "extractor": { "enum": ["claude-vision", "pdfplumber"] },
+            "extractor_version": { "type": "string" },
+            "processed_at": { "type": "string", "format": "date-time" },
+            "warnings": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/item" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "item": {
+      "type": "object",
+      "required": ["item_id", "raw_text", "extracted"],
+      "properties": {
+        "item_id": { "type": "string" },
+        "raw_number": { "type": ["string", "null"] },
+        "raw_text": { "type": "string" },
+        "page": { "type": ["integer", "null"], "minimum": 1 },
+        "bbox": {
+          "type": ["array", "null"],
+          "items": { "type": "number" },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "[x1, y1, x2, y2] in PDF coordinate space"
+        },
+        "extracted": {
+          "type": "object",
+          "required": [
+            "clause_references",
+            "document_references",
+            "professional_references",
+            "standards_references",
+            "dimensions"
+          ],
+          "properties": {
+            "clause_references": { "type": "array", "items": { "type": "string" } },
+            "document_references": { "type": "array", "items": { "type": "string" } },
+            "professional_references": { "type": "array", "items": { "type": "string" } },
+            "standards_references": { "type": "array", "items": { "type": "string" } },
+            "dimensions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["value", "unit"],
+                "properties": {
+                  "value": { "type": "number" },
+                  "unit": { "type": "string" },
+                  "context": { "type": ["string", "null"] }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
