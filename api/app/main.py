@@ -8,6 +8,7 @@ from app.routes import export as export_routes
 from app.routes import extract as extract_routes
 from app.routes import health as health_routes
 from app.routes import letters as letters_routes
+from app.routes import risk as risk_routes
 
 app = FastAPI(title="ConsentIQ RFI API", version="0.1.0")
 
@@ -30,3 +31,4 @@ app.include_router(
 app.include_router(drafts_routes.router, prefix="/draft", tags=["draft"])
 app.include_router(attachments_routes.router, prefix="/attachments", tags=["attachments"])
 app.include_router(export_routes.router, prefix="/export", tags=["export"])
+app.include_router(risk_routes.router, prefix="/risk", tags=["risk"])

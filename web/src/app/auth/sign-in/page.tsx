@@ -7,7 +7,7 @@ import { getSupabaseBrowser } from "@/lib/supabase/client";
 export default function SignInPage() {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") ?? "/projects";
+  const defaultNext = params.get("next");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
@@ -28,7 +28,7 @@ export default function SignInPage() {
       setLoading(false);
       return;
     }
-    router.push(next);
+    router.push(defaultNext ?? (mode === "sign-up" ? "/welcome" : "/projects"));
     router.refresh();
   }
 

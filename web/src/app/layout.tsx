@@ -19,6 +19,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </nav>
           </header>
           <main className="flex-1">{children}</main>
+          <footer className="border-t border-ink-700/10 px-6 py-4 text-xs text-ink-500 flex justify-between">
+            <span>ConsentIQ — Canterbury BCA RFI assistant</span>
+            <nav className="flex gap-4">
+              <a href="/legal/privacy" className="hover:text-ink-900">Privacy</a>
+              <a href="/legal/terms" className="hover:text-ink-900">Terms</a>
+              <form action="/auth/sign-out" method="post"><button className="hover:text-ink-900">Sign out</button></form>
+            </nav>
+          </footer>
         </div>
       </body>
     </html>

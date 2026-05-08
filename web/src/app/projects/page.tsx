@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { taxonomy } from "@consentiq/shared";
+import { ProjectsTable, type Row } from "./projects-table";
 
 export const dynamic = "force-dynamic";
 
@@ -11,8 +12,52 @@ export default async function ProjectsPage() {
     .select("id, address, bca, project_type, status, updated_at")
     .order("updated_at", { ascending: false });
 
+  // For each project, compute open RFI count + oldest open issue date.
+  let rows: Row[] = [];
+  if (projects?.length) {
+    const ids = projects.map((p) => p.id);
+    const { data: letters } = await supabase
+      .from("rfi_letters")
+      .select("project_id, status, issue_date")
+      .in("project_id", ids);
+
+    const byProject = new Map<string, typeof letters>();
+    for (const l of letters ?? []) {
+      const list = byProject.get(l.project_id) ?? [];
+      list.push(l);
+      byProject.set(l.project_id, list);
+    }
+
+    rows = projects.map((p) => {
+      const all = byProject.get(p.id) ?? [];
+      const open = all.filter(
+        (l) => l.status === "uploaded" || l.status === "extracted" || l.status === "classified",
+      );
+      let oldestOpenDays: number | null = null;
+      for (const l of open) {
+        if (!l.issue_date) continue;
+        const days = Math.floor(
+          (Date.now() - new Date(l.issue_date).getTime()) / (1000 * 60 * 60 * 24),
+        );
+        if (oldestOpenDays === null || days > oldestOpenDays) oldestOpenDays = days;
+      }
+      const bcaName = taxonomy.bcas.find((b) => b.id === p.bca)?.name ?? p.bca;
+      return {
+        id: p.id,
+        address: p.address,
+        bca: p.bca,
+        bca_name: bcaName,
+        project_type: p.project_type,
+        status: p.status,
+        updated_at: p.updated_at,
+        open_rfis: open.length,
+        oldest_open_days: oldestOpenDays,
+      };
+    });
+  }
+
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10">
+    <div className="max-w-6xl mx-auto px-6 py-10">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-semibold">Projects</h1>
         <Link
@@ -22,42 +67,10 @@ export default async function ProjectsPage() {
           New project
         </Link>
       </div>
-      {!projects?.length ? (
+      {!rows.length ? (
         <p className="text-ink-500">No projects yet. Create one to start.</p>
       ) : (
-        <table className="w-full text-sm">
-          <thead className="text-left text-ink-500 border-b border-ink-700/10">
-            <tr>
-              <th className="py-2">Address</th>
-              <th>BCA</th>
-              <th>Type</th>
-              <th>Status</th>
-              <th>Updated</th>
-            </tr>
-          </thead>
-          <tbody>
-            {projects.map((p) => {
-              const bca = taxonomy.bcas.find((b) => b.id === p.bca);
-              return (
-                <tr key={p.id} className="border-b border-ink-700/5 hover:bg-ink-700/5">
-                  <td className="py-3">
-                    <Link href={`/projects/${p.id}`} className="hover:underline">
-                      {p.address}
-                    </Link>
-                  </td>
-                  <td>{bca?.name ?? p.bca}</td>
-                  <td>{p.project_type}</td>
-                  <td>
-                    <span className="inline-block rounded bg-ink-700/10 px-2 py-0.5 text-xs">
-                      {p.status}
-                    </span>
-                  </td>
-                  <td className="text-ink-500">{new Date(p.updated_at).toLocaleDateString()}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <ProjectsTable rows={rows} />
       )}
     </div>
   );
