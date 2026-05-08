@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from supabase import Client
 
 from app.auth import get_db
-from app.plan_analyzer import ANALYSER_VERSION, analyse_plan
+from app.plan_analyzer import ANALYSIS_VERSION, analyse_plan
 from app.storage import PLANS_BUCKET, signed_url, upload_plan
 
 router = APIRouter()
@@ -62,12 +62,13 @@ async def upload_and_analyse(
             "mime_type": file.content_type,
             "size_bytes": len(payload),
             "status": "analysing",
-            "analyser_version": ANALYSER_VERSION,
+            "analyser_version": ANALYSIS_VERSION,
+            "analysis_version": ANALYSIS_VERSION,
         }
     ).execute()
 
     try:
-        analysis, prompt_version, metrics = analyse_plan(
+        analysis, prompt_version, metrics, extras = analyse_plan(
             file_bytes=payload,
             media_type=file.content_type,
             bca=proj["bca"],
@@ -87,6 +88,11 @@ async def upload_and_analyse(
             "prompt_version": prompt_version,
             "processing_ms": metrics.processing_ms,
             "cost_usd": round(metrics.cost_usd, 6),
+            "analysis_version": extras["analysis_version"],
+            "verification_prompt_version": extras["verification_prompt_version"],
+            "verification_drops": extras["verification_drops"],
+            "image_count": extras["image_count"],
+            "dpi_breakdown": extras["dpi_breakdown"],
         }
     ).eq("id", plan_id).execute()
 
@@ -95,6 +101,8 @@ async def upload_and_analyse(
         "flags_count": len(analysis.get("flags", [])),
         "processing_ms": metrics.processing_ms,
         "cost_usd": round(metrics.cost_usd, 6),
+        "truncated": analysis.get("truncated", False),
+        "verification": analysis.get("verification", "verified"),
     }
 
 

@@ -25,6 +25,7 @@ type PlanRow = {
   filename: string;
   status: string;
   analyser_version: string | null;
+  analysis_version: string | null;
   prompt_version: string | null;
   processing_ms: number | null;
   cost_usd: number | null;
@@ -66,7 +67,7 @@ export default async function RfiPage({
   const { data: plansRaw } = await supabase
     .from("plan_uploads")
     .select(
-      "id, project_id, filename, status, analyser_version, prompt_version, " +
+      "id, project_id, filename, status, analyser_version, analysis_version, prompt_version, " +
         "processing_ms, cost_usd, analysis, created_at, " +
         "projects(address, bca, project_type)",
     )

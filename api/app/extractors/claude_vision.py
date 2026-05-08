@@ -21,6 +21,7 @@ import pdfplumber
 from app.config import get_settings
 from app.extractors.entities import extract_entities
 from app.extractors.metrics import Metrics
+from app.llm.gemini import call_gemini_tool
 from app.models import CanonicalRfi, ExtractionMeta, RfiItem, RfiLetter
 
 EXTRACTOR_VERSION = "1.0.0"
@@ -119,19 +120,38 @@ def extract_via_vision(
         }
     )
 
-    response = client.messages.create(
-        model=settings.anthropic_model,
-        max_tokens=8000,
-        system=_SYSTEM,
-        tools=[_TOOL_SCHEMA],
-        tool_choice={"type": "tool", "name": "record_rfi_letter"},
-        messages=[{"role": "user", "content": content}],
-    )
+    payload: dict[str, Any]
+    input_tokens = 0
+    output_tokens = 0
 
-    tool_use = next((b for b in response.content if b.type == "tool_use"), None)
-    if tool_use is None:
-        raise RuntimeError("Claude vision extractor did not return tool use")
-    payload: dict[str, Any] = tool_use.input  # type: ignore[assignment]
+    if settings.rfi_extractor_provider == "gemini":
+        gemini_result = call_gemini_tool(
+            images=images,
+            prompt=_SYSTEM
+            + "\n\nParse this RFI letter. Use the record_rfi_letter tool.",
+            tool_name=_TOOL_SCHEMA["name"],
+            tool_description=_TOOL_SCHEMA["description"],
+            tool_parameters=_TOOL_SCHEMA["input_schema"],
+            max_output_tokens=8000,
+        )
+        payload = gemini_result.payload
+        input_tokens = gemini_result.input_tokens
+        output_tokens = gemini_result.output_tokens
+    else:
+        response = client.messages.create(
+            model=settings.anthropic_model,
+            max_tokens=8000,
+            system=_SYSTEM,
+            tools=[_TOOL_SCHEMA],
+            tool_choice={"type": "tool", "name": "record_rfi_letter"},
+            messages=[{"role": "user", "content": content}],
+        )
+        tool_use = next((b for b in response.content if b.type == "tool_use"), None)
+        if tool_use is None:
+            raise RuntimeError("Claude vision extractor did not return tool use")
+        payload = tool_use.input  # type: ignore[assignment]
+        input_tokens = int(getattr(response.usage, "input_tokens", 0) or 0)
+        output_tokens = int(getattr(response.usage, "output_tokens", 0) or 0)
 
     items: list[RfiItem] = []
     for idx, raw in enumerate(payload.get("items", []), start=1):
@@ -168,7 +188,7 @@ def extract_via_vision(
     )
     metrics = Metrics(
         processing_ms=int((time.monotonic() - t0) * 1000),
-        input_tokens=int(getattr(response.usage, "input_tokens", 0) or 0),
-        output_tokens=int(getattr(response.usage, "output_tokens", 0) or 0),
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
     )
     return canonical, metrics
