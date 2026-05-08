@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://consentiq.nz/schema/zone_overlay/1.0",
+  "title": "Zone and Overlay Query Result",
+  "description": "Result from querying GCSP FeatureServer for zone and overlay information at a given NZTM2000 coordinate",
+  "type": "object",
+  "required": ["address", "zone_info", "overlays"],
+  "properties": {
+    "address": {
+      "type": "string",
+      "description": "The input address that was geocoded"
+    },
+    "coordinates": {
+      "type": "object",
+      "required": ["nztm_x", "nztm_y", "lat", "lon"],
+      "properties": {
+        "nztm_x": { "type": "number", "description": "NZTM2000 (EPSG:2193) X coordinate" },
+        "nztm_y": { "type": "number", "description": "NZTM2000 (EPSG:2193) Y coordinate" },
+        "lat": { "type": "number", "description": "WGS84 latitude (from geocoder)" },
+        "lon": { "type": "number", "description": "WGS84 longitude (from geocoder)" }
+      }
+    },
+    "zone_info": {
+      "type": "object",
+      "required": ["zone_code", "zone_type", "source_council"],
+      "properties": {
+        "zone_code": { "type": "string", "description": "GCSP zone code (e.g., RB, RMD, etc.)" },
+        "zone_type": { "type": "string", "description": "Full zone name (e.g., Residential Zone)" },
+        "source_council": { "type": "string", "enum": ["ccc", "selwyn", "waimakariki"], "description": "Council jurisdiction" }
+      }
+    },
+    "overlays": {
+      "type": "object",
+      "description": "Boolean flags indicating presence of each overlay at the coordinate",
+      "properties": {
+        "liquefaction": { "type": "boolean" },
+        "flood": { "type": "boolean" },
+        "slope": { "type": "boolean" },
+        "tsunami": { "type": "boolean" },
+        "coastal_erosion": { "type": "boolean" },
+        "coastal_inundation": { "type": "boolean" },
+        "heritage_item": { "type": "boolean" },
+        "heritage_character": { "type": "boolean" },
+        "residential_character": { "type": "boolean" },
+        "protected_vegetation": { "type": "boolean" },
+        "notable_trees": { "type": "boolean" }
+      }
+    },
+    "required_documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["document_type", "category", "reason"],
+        "properties": {
+          "document_type": { "type": "string", "description": "Type of document (e.g., Geotechnical Report, Heritage Impact Assessment)" },
+          "category": { "type": "string", "description": "Building Code category or RMA requirement" },
+          "reason": { "type": "string", "description": "Why this document is required" },
+          "triggered_by": { "type": "array", "items": { "type": "string" }, "description": "Zone/overlay/category that triggered this requirement" }
+        }
+      }
+    }
+  }
+}
