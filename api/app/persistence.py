@@ -242,6 +242,126 @@ def update_letter_status(client: Client, letter_id: str, status: str) -> None:
     client.table("rfi_letters").update({"status": status}).eq("id", letter_id).execute()
 
 
+def upsert_response(
+    client: Client,
+    *,
+    rfi_item_id: str,
+    draft_text: str,
+    prompt_version: str,
+) -> dict[str, Any]:
+    res = (
+        client.table("responses")
+        .upsert(
+            {
+                "rfi_item_id": rfi_item_id,
+                "draft_text": draft_text,
+                "prompt_version": prompt_version,
+                "edited_text": None,
+                "edit_distance": 0,
+            },
+            on_conflict="rfi_item_id",
+        )
+        .execute()
+    )
+    return res.data[0]
+
+
+def update_response_edit(
+    client: Client,
+    *,
+    rfi_item_id: str,
+    edited_text: str,
+    edit_distance: int,
+) -> dict[str, Any]:
+    res = (
+        client.table("responses")
+        .update({"edited_text": edited_text, "edit_distance": edit_distance})
+        .eq("rfi_item_id", rfi_item_id)
+        .execute()
+    )
+    if not res.data:
+        raise LookupError(rfi_item_id)
+    return res.data[0]
+
+
+def fetch_response(client: Client, rfi_item_id: str) -> dict[str, Any] | None:
+    res = (
+        client.table("responses")
+        .select("*")
+        .eq("rfi_item_id", rfi_item_id)
+        .maybe_single()
+        .execute()
+    )
+    return res.data
+
+
+def fetch_responses_for_letter(client: Client, letter_id: str) -> list[dict[str, Any]]:
+    res = (
+        client.table("responses")
+        .select("*, rfi_items!inner(id, item_id, ordering, raw_number, raw_text, rfi_letter_id)")
+        .eq("rfi_items.rfi_letter_id", letter_id)
+        .execute()
+    )
+    return res.data or []
+
+
+def fetch_classifications_final(
+    client: Client, letter_id: str
+) -> dict[str, dict[str, Any]]:
+    """Final classification keyed by rfi_item_id."""
+    res = (
+        client.table("classifications")
+        .select("*, rfi_items!inner(id, rfi_letter_id)")
+        .eq("rfi_items.rfi_letter_id", letter_id)
+        .eq("prong", "final")
+        .execute()
+    )
+    return {r["rfi_item_id"]: r for r in (res.data or [])}
+
+
+def insert_attachment(
+    client: Client,
+    *,
+    rfi_item_id: str | None,
+    project_id: str | None,
+    filename: str,
+    storage_path: str,
+    mime_type: str,
+    size_bytes: int,
+) -> dict[str, Any]:
+    res = (
+        client.table("attachments")
+        .insert(
+            {
+                "rfi_item_id": rfi_item_id,
+                "project_id": project_id,
+                "filename": filename,
+                "storage_path": storage_path,
+                "mime_type": mime_type,
+                "size_bytes": size_bytes,
+            }
+        )
+        .execute()
+    )
+    return res.data[0]
+
+
+def fetch_attachments_for_letter(
+    client: Client, letter_id: str
+) -> dict[str, list[dict[str, Any]]]:
+    """Attachments keyed by rfi_item_id."""
+    res = (
+        client.table("attachments")
+        .select("*, rfi_items!inner(id, rfi_letter_id)")
+        .eq("rfi_items.rfi_letter_id", letter_id)
+        .execute()
+    )
+    out: dict[str, list[dict[str, Any]]] = {}
+    for r in res.data or []:
+        out.setdefault(r["rfi_item_id"], []).append(r)
+    return out
+
+
 def update_item_text(
     client: Client,
     *,

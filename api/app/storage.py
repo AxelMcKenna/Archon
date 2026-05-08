@@ -32,6 +32,44 @@ def upload_rfi_original(
     return path
 
 
+def upload_attachment(
+    client: Client,
+    *,
+    user_id: str,
+    project_id: str,
+    item_id: str,
+    filename: str,
+    content_type: str,
+    data: bytes,
+) -> str:
+    path = f"{user_id}/{project_id}/{item_id}/{filename}"
+    client.storage.from_(ATTACH_BUCKET).upload(
+        path,
+        data,
+        {"content-type": content_type, "upsert": "true"},
+    )
+    return path
+
+
+def upload_export(
+    client: Client,
+    *,
+    user_id: str,
+    project_id: str,
+    letter_id: str,
+    filename: str,
+    content_type: str,
+    data: bytes,
+) -> str:
+    path = f"{user_id}/{project_id}/{letter_id}/{filename}"
+    client.storage.from_(EXPORTS_BUCKET).upload(
+        path,
+        data,
+        {"content-type": content_type, "upsert": "true"},
+    )
+    return path
+
+
 def signed_url(client: Client, *, bucket: str, path: str, expires_in: int = 3600) -> str:
     res = client.storage.from_(bucket).create_signed_url(path, expires_in)
     return res["signedURL"]

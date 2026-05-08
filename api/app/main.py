@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.routes import attachments as attachments_routes
 from app.routes import classify as classify_routes
+from app.routes import drafts as drafts_routes
+from app.routes import export as export_routes
 from app.routes import extract as extract_routes
 from app.routes import health as health_routes
 from app.routes import letters as letters_routes
@@ -24,3 +27,6 @@ app.include_router(classify_routes.router, prefix="/classify", tags=["classify"]
 app.include_router(
     classify_routes.reconciliation_router, prefix="/reconciliation", tags=["reconciliation"]
 )
+app.include_router(drafts_routes.router, prefix="/draft", tags=["draft"])
+app.include_router(attachments_routes.router, prefix="/attachments", tags=["attachments"])
+app.include_router(export_routes.router, prefix="/export", tags=["export"])

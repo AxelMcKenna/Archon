@@ -34,6 +34,21 @@ export default async function LetterPage({
     : { data: [] };
   const logByItem = new Map((log ?? []).map((l) => [l.rfi_item_id, l]));
 
+  const { data: drafts } = itemIds.length
+    ? await supabase.from("responses").select("*").in("rfi_item_id", itemIds)
+    : { data: [] };
+  const draftByItem = new Map((drafts ?? []).map((d) => [d.rfi_item_id, d]));
+
+  const { data: atts } = itemIds.length
+    ? await supabase.from("attachments").select("*").in("rfi_item_id", itemIds)
+    : { data: [] };
+  const attsByItem = new Map<string, typeof atts>();
+  for (const a of atts ?? []) {
+    const list = attsByItem.get(a.rfi_item_id) ?? [];
+    list.push(a);
+    attsByItem.set(a.rfi_item_id, list);
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
       <div className="mb-6">
@@ -57,6 +72,8 @@ export default async function LetterPage({
         items={(items ?? []).map((i) => ({
           ...i,
           reconciliation: logByItem.get(i.id) ?? null,
+          response: draftByItem.get(i.id) ?? null,
+          attachments: attsByItem.get(i.id) ?? [],
         }))}
       />
     </div>
