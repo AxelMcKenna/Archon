@@ -28,8 +28,9 @@ export async function GET(
     ...ccc.inspectionChecklist.map((item) => `- [${item.status === "complete" ? "x" : " "}] ${item.name}`),
     "",
     "Document Checklist",
-    ...ccc.documentChecklist.map(
-      (item) => `- [${item.status === "complete" ? "x" : " "}] ${item.label} (${item.matchedDocument ?? "not uploaded"})`,
+    ...[...ccc.requiredDocumentItems, ...ccc.conditionalDocumentItems].map(
+      (item) =>
+        `- [${item.status === "complete" ? "x" : " "}] ${item.label} (${item.matchedDocuments.join(", ") || "not uploaded"})`,
     ),
   ];
 
