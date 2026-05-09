@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { taxonomy } from "@consentiq/shared";
 import { ProjectCreateButton } from "@/components/project-create-button";
+import { AddressAutocompleteInput } from "@/components/address-autocomplete-input";
 
 async function createProject(formData: FormData) {
   "use server";
@@ -52,7 +53,7 @@ export default function NewProjectPage() {
       <h1 className="text-2xl font-semibold mb-6">New project</h1>
       <form action={createProject} className="space-y-4">
         <Field label="Project address">
-          <input name="address" required className="w-full rounded border border-ink-700/20 px-3 py-2" />
+          <AddressAutocompleteInput name="address" required />
         </Field>
         <Field label="BCA">
           <select name="bca" required className="w-full rounded border border-ink-700/20 px-3 py-2">

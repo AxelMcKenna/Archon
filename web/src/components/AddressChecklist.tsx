@@ -28,6 +28,7 @@ interface ChecklistResult {
   zone_info: ZoneInfo;
   overlays: Record<string, boolean>;
 }
+type DisplayGroup = "specialist" | "natural_disaster" | "infrastructure" | "planning_general";
 
 const PROJECT_TYPE_OPTIONS: Array<{ value: ProjectType; label: string }> = [
   { value: "new_dwelling", label: "New dwelling" },
@@ -47,6 +48,7 @@ export function AddressChecklist({
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ChecklistResult | null>(null);
   const [documents, setDocuments] = useState<ResolveDocumentsResponse | null>(null);
+  const [completedDocs, setCompletedDocs] = useState<Record<string, boolean>>({});
   const normalizedType = normalizeProjectType(initialProjectType);
   const [projectDetails, setProjectDetails] = useState<ProjectDetails>({
     projectType: normalizedType,
@@ -69,12 +71,35 @@ export function AddressChecklist({
       .filter(([, isActive]) => isActive)
       .map(([overlay]) => overlay);
   }, [result]);
+  const groupedDocuments = useMemo(() => {
+    if (!documents) return [];
+    const buckets: Record<DisplayGroup, ResolveDocumentsResponse["documents"]> = {
+      specialist: [],
+      natural_disaster: [],
+      infrastructure: [],
+      planning_general: [],
+    };
+    for (const doc of documents.documents) {
+      buckets[getDocumentDisplayGroup(doc)].push(doc);
+    }
+    return [
+      { key: "specialist", label: "Specialist Input & Inspections", docs: buckets.specialist },
+      { key: "natural_disaster", label: "Natural Disaster & Hazards", docs: buckets.natural_disaster },
+      { key: "infrastructure", label: "Infrastructure & Services", docs: buckets.infrastructure },
+      { key: "planning_general", label: "Planning & General Requirements", docs: buckets.planning_general },
+    ].filter((section) => section.docs.length > 0);
+  }, [documents]);
+  const totalCompleted = useMemo(
+    () => Object.values(completedDocs).filter(Boolean).length,
+    [completedDocs]
+  );
 
   const handleQuery = async () => {
     setIsLoading(true);
     setError(null);
     setResult(null);
     setDocuments(null);
+    setCompletedDocs({});
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
@@ -90,10 +115,11 @@ export function AddressChecklist({
       }
 
       const geoData = (await geoResponse.json()) as ChecklistResult;
+      console.info("address_to_checklist response", geoData);
       setResult(geoData);
 
       const payload: ResolveDocumentsRequest = {
-        zoneCategory: getZoneCategory(geoData.zone_info.zone_type),
+        zoneCategory: getZoneCategory(geoData.zone_info?.zone_type),
         activeOverlays: Object.entries(geoData.overlays)
           .filter(([, isActive]) => isActive)
           .map(([key]) => normalizeOverlayKey(key))
@@ -299,26 +325,79 @@ export function AddressChecklist({
           {documents && (
             <div className="rounded-lg border border-ink-700/10 p-4">
               <h3 className="font-semibold mb-4">Required Documents</h3>
-              <div className="space-y-4">
-                {documents.documents.map((doc) => (
-                  <div key={doc.id} className="pb-4 border-b border-ink-700/5 last:pb-0 last:border-0">
-                    <div className="flex items-start justify-between gap-4 mb-2">
-                      <div>
-                        <p className="font-medium text-sm">{doc.title}</p>
-                        <p className="text-xs text-ink-500">{doc.category}</p>
-                      </div>
-                    </div>
-                    <p className="text-sm text-ink-600 mb-2">{doc.description}</p>
-                    <p className="text-xs text-ink-500">Trigger: {doc.trigger}</p>
-                    {doc.specialist && (
-                      <p className="text-xs text-ink-500 mt-1">Specialist: {doc.specialist}</p>
-                    )}
-                    {doc.referenceClause && (
-                      <p className="text-xs text-ink-500 mt-1">Reference: {doc.referenceClause}</p>
-                    )}
-                  </div>
-                ))}
+              <div className="mb-2 h-2 w-full overflow-hidden rounded-full bg-ink-700/10">
+                <div
+                  className="h-full bg-ink-900 transition-all"
+                  style={{
+                    width: `${documents.totalCount ? Math.round((totalCompleted / documents.totalCount) * 100) : 0}%`,
+                  }}
+                />
               </div>
+              <p className="mb-4 text-xs text-ink-500">
+                {totalCompleted}/{documents.totalCount} completed
+              </p>
+              {groupedDocuments.map((section) => (
+                <details key={section.key} className="mb-3 rounded-lg border border-ink-700/10 px-3 py-2">
+                  <summary className="list-none cursor-pointer">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <h4 className="text-sm font-semibold">{section.label}</h4>
+                        <p className="text-xs text-ink-500">
+                          {section.docs.filter((doc) => completedDocs[doc.id]).length}/{section.docs.length} completed
+                        </p>
+                      </div>
+                      <span className="rounded-full bg-ink-700/10 px-2 py-1 text-xs text-ink-700">
+                        {section.docs.length} items
+                      </span>
+                    </div>
+                    <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-ink-700/10">
+                      <div
+                        className="h-full bg-ink-900 transition-all"
+                        style={{
+                          width: `${
+                            section.docs.length
+                              ? Math.round(
+                                  (section.docs.filter((doc) => completedDocs[doc.id]).length / section.docs.length) *
+                                    100
+                                )
+                              : 0
+                          }%`,
+                        }}
+                      />
+                    </div>
+                  </summary>
+                  <div className="mt-3 space-y-4">
+                    {section.docs.map((doc) => (
+                      <div key={doc.id} className="pb-4 border-b border-ink-700/5 last:pb-0 last:border-0">
+                        <div className="flex items-start justify-between gap-4 mb-2">
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm">{doc.title}</p>
+                            <p className="text-xs text-ink-500">{doc.category}</p>
+                          </div>
+                          <label className="inline-flex items-center gap-2 text-xs whitespace-nowrap">
+                            <input
+                              type="checkbox"
+                              checked={Boolean(completedDocs[doc.id])}
+                              onChange={(event) =>
+                                setCompletedDocs((prev) => ({ ...prev, [doc.id]: event.target.checked }))
+                              }
+                            />
+                            Done
+                          </label>
+                        </div>
+                        <p className="text-sm text-ink-600 mb-2">{doc.description}</p>
+                        <p className="text-xs text-ink-500">Trigger: {doc.trigger}</p>
+                        {doc.specialist && (
+                          <p className="text-xs text-ink-500 mt-1">Specialist: {doc.specialist}</p>
+                        )}
+                        {doc.referenceClause && (
+                          <p className="text-xs text-ink-500 mt-1">Reference: {doc.referenceClause}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              ))}
               <div className="mt-4 p-3 rounded bg-blue-50 border border-blue-200">
                 <p className="text-xs text-blue-900">
                   <strong>Total documents required:</strong> {documents.totalCount}. Specialist documents:{" "}
@@ -364,7 +443,8 @@ function normalizeProjectType(value: string): ProjectType {
   return "new_dwelling";
 }
 
-function getZoneCategory(zoneType: string): ZoneCategory {
+function getZoneCategory(zoneType: string | null | undefined): ZoneCategory {
+  if (!zoneType || typeof zoneType !== "string") return "general";
   const value = zoneType.toLowerCase();
   if (value.includes("residential")) return "residential";
   if (value.includes("commercial") || value.includes("city centre")) return "commercial";
@@ -404,4 +484,41 @@ function formatApiError(payload: unknown): string {
     return loc ? `${loc}: ${message}` : message;
   }
   return "";
+}
+
+function getDocumentDisplayGroup(
+  doc: ResolveDocumentsResponse["documents"][number]
+): DisplayGroup {
+  const text = `${doc.id} ${doc.title} ${doc.trigger} ${doc.referenceClause ?? ""}`.toLowerCase();
+  if (
+    doc.category === "specialist" ||
+    text.includes("producer statement") ||
+    text.includes("geotechnical") ||
+    text.includes("arborist") ||
+    text.includes("traffic impact")
+  ) {
+    return "specialist";
+  }
+  if (
+    text.includes("flood") ||
+    text.includes("liquefaction") ||
+    text.includes("tsunami") ||
+    text.includes("coastal") ||
+    text.includes("erosion") ||
+    text.includes("hazard") ||
+    text.includes("slope")
+  ) {
+    return "natural_disaster";
+  }
+  if (
+    text.includes("service") ||
+    text.includes("connection") ||
+    text.includes("stormwater") ||
+    text.includes("wastewater") ||
+    text.includes("water supply") ||
+    text.includes("infrastructure")
+  ) {
+    return "infrastructure";
+  }
+  return "planning_general";
 }
