@@ -3,7 +3,13 @@
 import { useRef } from "react";
 import { useFormStatus } from "react-dom";
 
-export function ProjectCreateButton() {
+export function ProjectCreateButton({
+  idleLabel = "Create",
+  pendingLabel = "Creating...",
+}: {
+  idleLabel?: string;
+  pendingLabel?: string;
+}) {
   const lockedRef = useRef(false);
   const { pending } = useFormStatus();
   const disabled = pending || lockedRef.current;
@@ -17,7 +23,7 @@ export function ProjectCreateButton() {
       }}
       className="rounded-sm bg-ink-900 px-5 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
     >
-      {pending ? "Creating..." : "Create"}
+      {pending ? pendingLabel : idleLabel}
     </button>
   );
 }
