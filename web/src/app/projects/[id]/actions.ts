@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
-import { normalizeProjectDetails, parseProjectFormData, parseProjectSettingsFormData } from "@/lib/project-details";
+import {
+  normalizeProjectDetails,
+  parseProjectFormData,
+  parseProjectSettingsFormData,
+} from "@/lib/project-details";
 import { getProjectById, updateProjectRecord } from "@/lib/projects";
 
 export async function deleteProject(projectId: string) {
@@ -38,12 +42,6 @@ export async function updateProject(projectId: string, formData: FormData) {
 
 export async function updateProjectSettings(projectId: string, formData: FormData) {
   const supabase = await getSupabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    redirect("/auth/sign-in");
-  }
 
   const { data: project, error: projectError } = await getProjectById(
     supabase,
@@ -102,7 +100,7 @@ export async function updateProjectSettings(projectId: string, formData: FormDat
     ownerEvidenceOfOwnershipType: settings.ownerEvidenceOfOwnershipType,
   };
 
-  const { error } = await updateProjectRecord(supabase, projectId, user.id, {
+  const { error } = await updateProjectRecord(supabase, projectId, {
     address: resolvedProject.address,
     bca: resolvedProject.bca,
     project_type: resolvedProject.project_type,

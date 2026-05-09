@@ -37,9 +37,7 @@ async function createProject(formData: FormData) {
     redirect(`/projects/${existing.data.id}`);
   }
 
-  const inserted = await supabase
-    .from("projects")
-    .insert({
+  const inserted = await insertProjectCompatible(supabase, {
       address,
       bca,
       project_type: projectType,
@@ -53,11 +51,12 @@ async function createProject(formData: FormData) {
       service_connection_water: formData.get("service_connection_water") === "on",
       service_connection_wastewater: formData.get("service_connection_wastewater") === "on",
       service_connection_stormwater: formData.get("service_connection_stormwater") === "on",
-    })
-    .select("id")
-    .single();
+    });
   if (inserted.error) {
     throw new Error(inserted.error.message || "Unable to create project.");
+  }
+  if (!inserted.data?.id) {
+    throw new Error("Unable to create project.");
   }
 
   const newProjectId = inserted.data.id;
@@ -147,6 +146,54 @@ function parseOptionalYear(value: FormDataEntryValue | null) {
   const parsed = Number(String(value ?? "").trim());
   const currentYear = new Date().getFullYear();
   return Number.isInteger(parsed) && parsed >= 1800 && parsed <= currentYear ? parsed : null;
+}
+
+type InsertProjectResult = {
+  data: { id: string } | null;
+  error: { code?: string; message?: string } | null;
+};
+
+async function insertProjectCompatible(
+  supabase: Awaited<ReturnType<typeof getSupabaseServer>>,
+  payload: Record<string, unknown>,
+): Promise<InsertProjectResult> {
+  const insertPayload: Record<string, unknown> = { ...payload };
+  const requiredColumns = new Set(["address", "bca", "project_type", "description"]);
+
+  for (let i = 0; i < 20; i++) {
+    const inserted = await supabase
+      .from("projects")
+      .insert(insertPayload)
+      .select("id")
+      .single<{ id: string }>();
+    if (!inserted.error) {
+      return inserted;
+    }
+
+    const missingColumn = extractMissingProjectsColumn(inserted.error);
+    if (!missingColumn || !(missingColumn in insertPayload) || requiredColumns.has(missingColumn)) {
+      return inserted;
+    }
+
+    delete insertPayload[missingColumn];
+  }
+
+  return {
+    data: null,
+    error: {
+      code: "PROJECT_INSERT_RETRY_EXHAUSTED",
+      message: "Unable to create project after schema compatibility retries.",
+    },
+  };
+}
+
+function extractMissingProjectsColumn(error: { code?: string; message?: string }) {
+  const message = error.message ?? "";
+  const pgrst = message.match(/Could not find the '([^']+)' column of 'projects'/);
+  if (pgrst?.[1]) return pgrst[1];
+  const postgres = message.match(/column \"([^\"]+)\" does not exist/);
+  if (postgres?.[1]) return postgres[1];
+  return null;
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {

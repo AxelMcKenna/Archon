@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { buildProjectSettingsValues } from "@/lib/project-details";
 import { getProjectById } from "@/lib/projects";
@@ -62,12 +62,6 @@ export default async function ProjectSettingsPage({
 }) {
   const { id } = await params;
   const supabase = await getSupabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    redirect("/auth/sign-in");
-  }
 
   const { data: project, error } = await getProjectById(
     supabase,

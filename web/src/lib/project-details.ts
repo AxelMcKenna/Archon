@@ -61,6 +61,7 @@ export function createDefaultProjectDetails(projectType?: string | null): Projec
     involvesStructuralWork: false,
     involvesEarthworks: false,
     existingStructureDemolished: false,
+    yearOfConstruction: null,
     newRoadAccess: false,
     newServiceConnections: {
       water: false,
@@ -107,6 +108,7 @@ export function normalizeProjectDetails(
     involvesStructuralWork: Boolean(input.involvesStructuralWork),
     involvesEarthworks: Boolean(input.involvesEarthworks),
     existingStructureDemolished: Boolean(input.existingStructureDemolished),
+    yearOfConstruction: normalizeNullableNumber(input.yearOfConstruction),
     newRoadAccess: Boolean(input.newRoadAccess),
     newServiceConnections: {
       water: Boolean(input.newServiceConnections?.water),
@@ -218,6 +220,9 @@ export function parseProjectFormData(formData: FormData): ProjectFormValues {
       existingStructureDemolished: hasCheckedValue(
         formData,
         "existing_structure_demolished",
+      ),
+      yearOfConstruction: parseNullableNumber(
+        String(formData.get("year_of_construction") ?? ""),
       ),
       newRoadAccess: hasCheckedValue(formData, "new_road_access"),
       newServiceConnections: {
