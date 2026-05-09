@@ -24,6 +24,26 @@ export interface ProjectDetails {
   yearOfConstruction: number | null;
   newRoadAccess: boolean;
   newServiceConnections: ServiceConnections;
+  buildingConsentNumbers?: string;
+  ownerPreferredFormOfAddress?: "" | "Mr" | "Mrs" | "Ms" | "Miss" | "Dr";
+  ownerFullName?: string;
+  ownerContactPersonFullName?: string;
+  ownerMailingAddress?: string;
+  ownerStreetAddressDifferent?: boolean;
+  ownerStreetAddress?: string;
+  ownerPhoneLandline?: string;
+  ownerPhoneMobile?: string;
+  ownerPhoneDaytime?: string;
+  ownerPhoneAfterHours?: string;
+  ownerPhoneFax?: string;
+  ownerEmailAddress?: string;
+  ownerWebsiteUrl?: string;
+  ownerEvidenceOfOwnershipType?:
+    | ""
+    | "Certificate of title"
+    | "Lease"
+    | "Agreement for sale and purchase"
+    | "Other document";
 }
 
 export interface ResolveDocumentsRequest {
