@@ -3,8 +3,15 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ProjectDetails } from "@/types/consent";
 import { CompletionCheckbox } from "./completion-checkbox";
+import {
+  CompletionBadge,
+  confirmDocumentRemoval,
+  ConsentErrorAlert,
+  UploadBadge,
+} from "./document-status";
 import { isManualDocument } from "./model";
 import { useConsentAssessment } from "./use-consent-assessment";
 
@@ -12,18 +19,20 @@ interface ConsentDocumentPageProps {
   projectId: string;
   address: string;
   documentId: string;
+  projectDetails: ProjectDetails;
 }
 
 export function ConsentDocumentPage({
   projectId,
   address,
   documentId,
+  projectDetails,
 }: ConsentDocumentPageProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [flashMessage, setFlashMessage] = useState<string | null>(null);
   const {
-    documents,
+    documentMap,
     uploads,
     completions,
     isLoading,
@@ -36,12 +45,17 @@ export function ConsentDocumentPage({
   } = useConsentAssessment({
     projectId,
     address,
+    projectDetails,
   });
 
-  const document = documents.find((item) => item.id === documentId);
+  const document = documentMap.get(documentId);
   const upload = uploads[documentId];
   const isCompleted = Boolean(completions[documentId]);
   const manual = isManualDocument(document);
+
+  useEffect(() => {
+    setFlashMessage(null);
+  }, [documentId]);
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -60,19 +74,12 @@ export function ConsentDocumentPage({
   }
 
   function handleDeleteDocument() {
-    if (!document) {
-      return;
-    }
-
-    const confirmed = window.confirm(
-      "Are you sure you want to remove this required document?",
-    );
-    if (!confirmed) {
+    if (!document || !confirmDocumentRemoval()) {
       return;
     }
 
     removeDocument(documentId);
-    router.push(`/projects/${projectId}/consent-assessment`);
+    router.push(`/projects/${projectId}/consent-assessment` as Route);
   }
 
   return (
@@ -94,11 +101,7 @@ export function ConsentDocumentPage({
         )}
       </div>
 
-      {error && (
-        <section className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-800">
-          {error}
-        </section>
-      )}
+      {error && <ConsentErrorAlert message={error} />}
 
       {!document ? (
         <section className="rounded-2xl border border-ink-700/10 bg-white p-8 shadow-sm">
@@ -137,7 +140,9 @@ export function ConsentDocumentPage({
                     </span>
                   )}
                 </div>
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-ink-600">{document.description}</p>
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-ink-600">
+                  {document.description}
+                </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <CompletionBadge completed={isCompleted} />
@@ -154,8 +159,9 @@ export function ConsentDocumentPage({
               <div className="mt-6 rounded-xl border border-ink-700/10 bg-ink-50 p-5">
                 <h3 className="text-sm font-semibold text-ink-900">NZ consent context</h3>
                 <p className="mt-2 text-sm leading-6 text-ink-600">
-                  This document helps the council assess the proposed work against site constraints,
-                  design requirements, and supporting technical information before submission.
+                  This document helps the council assess the proposed work against site
+                  constraints, design requirements, and supporting technical information before
+                  submission.
                 </p>
               </div>
 
@@ -175,7 +181,8 @@ export function ConsentDocumentPage({
               <section className="rounded-2xl border border-ink-700/10 bg-white p-6 shadow-sm">
                 <h2 className="text-lg font-semibold text-ink-900">Completion tracking</h2>
                 <p className="mt-2 text-sm text-ink-500">
-                  Mark this requirement complete once the document is reviewed and ready for submission.
+                  Mark this requirement complete once the document is reviewed and ready for
+                  submission.
                 </p>
                 <div className="mt-5">
                   <CompletionCheckbox
@@ -239,14 +246,18 @@ export function ConsentDocumentPage({
                   <div className="flex items-center justify-between rounded-xl bg-ink-50 px-4 py-3">
                     <span className="text-ink-500">Completion</span>
                     <span
-                      className={isCompleted ? "font-medium text-emerald-700" : "font-medium text-amber-700"}
+                      className={
+                        isCompleted ? "font-medium text-emerald-700" : "font-medium text-amber-700"
+                      }
                     >
                       {isCompleted ? "Complete" : "Incomplete"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between rounded-xl bg-ink-50 px-4 py-3">
                     <span className="text-ink-500">Upload</span>
-                    <span className={upload ? "font-medium text-sky-700" : "font-medium text-slate-600"}>
+                    <span
+                      className={upload ? "font-medium text-sky-700" : "font-medium text-slate-600"}
+                    >
                       {upload ? "Uploaded" : "Missing"}
                     </span>
                   </div>
@@ -274,33 +285,5 @@ export function ConsentDocumentPage({
         </>
       )}
     </div>
-  );
-}
-
-function CompletionBadge({ completed }: { completed: boolean }) {
-  return (
-    <span
-      className={`inline-flex rounded-full px-3 py-1.5 text-sm font-medium ${
-        completed
-          ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
-          : "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
-      }`}
-    >
-      {completed ? "Complete" : "Incomplete"}
-    </span>
-  );
-}
-
-function UploadBadge({ uploaded }: { uploaded: boolean }) {
-  return (
-    <span
-      className={`inline-flex rounded-full px-3 py-1.5 text-sm font-medium ${
-        uploaded
-          ? "bg-sky-50 text-sky-700 ring-1 ring-sky-200"
-          : "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
-      }`}
-    >
-      {uploaded ? "File uploaded" : "No file"}
-    </span>
   );
 }

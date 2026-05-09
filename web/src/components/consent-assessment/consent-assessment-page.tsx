@@ -2,8 +2,17 @@
 
 import type { Route } from "next";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import type { ProjectDetails } from "@/types/consent";
 import { CompletionCheckbox } from "./completion-checkbox";
+import { DocumentOrderManager } from "./document-order-manager";
+import {
+  CompletionBadge,
+  confirmDocumentRemoval,
+  ConsentErrorAlert,
+  UploadBadge,
+} from "./document-status";
+import { ManualDocumentForm } from "./manual-document-form";
 import type { ConsentDocument } from "./model";
 import { isManualDocument } from "./model";
 import { useConsentAssessment } from "./use-consent-assessment";
@@ -11,25 +20,13 @@ import { useConsentAssessment } from "./use-consent-assessment";
 interface ConsentAssessmentPageProps {
   projectId: string;
   address: string;
+  projectDetails: ProjectDetails;
 }
-
-interface ManualDocumentFormState {
-  title: string;
-  whyRequired: string;
-  referenceUrl: string;
-  completed: boolean;
-}
-
-const INITIAL_FORM: ManualDocumentFormState = {
-  title: "",
-  whyRequired: "",
-  referenceUrl: "",
-  completed: false,
-};
 
 export function ConsentAssessmentPage({
   projectId,
   address,
+  projectDetails,
 }: ConsentAssessmentPageProps) {
   const {
     checklist,
@@ -47,13 +44,10 @@ export function ConsentAssessmentPage({
   } = useConsentAssessment({
     projectId,
     address,
+    projectDetails,
   });
   const [showAddForm, setShowAddForm] = useState(false);
   const [isReorderMode, setIsReorderMode] = useState(false);
-  const [draftOrder, setDraftOrder] = useState<string[]>([]);
-  const [formState, setFormState] = useState(INITIAL_FORM);
-  const [formFile, setFormFile] = useState<File | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
   const hasRequirements = documents.length > 0;
   const actionLabel = isLoading
     ? hasRequirements
@@ -63,85 +57,12 @@ export function ConsentAssessmentPage({
       ? "Refresh Requirements"
       : "Generate Consent Requirements";
 
-  useEffect(() => {
-    if (!isReorderMode) {
-      return;
-    }
-    setDraftOrder(documents.map((document) => document.id));
-  }, [documents, isReorderMode]);
-
-  const reorderedDocuments = isReorderMode
-    ? draftOrder
-        .map((id) => documents.find((document) => document.id === id))
-        .filter((document): document is ConsentDocument => Boolean(document))
-    : documents;
-
-  function updateField<K extends keyof ManualDocumentFormState>(
-    key: K,
-    value: ManualDocumentFormState[K],
-  ) {
-    setFormState((current) => ({ ...current, [key]: value }));
-  }
-
-  function handleAddDocument() {
-    if (!formState.title.trim()) {
-      setFormError("Document name is required.");
-      return;
-    }
-
-    createManualDocument(
-      {
-        title: formState.title,
-        whyRequired: formState.whyRequired,
-        referenceUrl: formState.referenceUrl,
-        completed: formState.completed,
-      },
-      formFile,
-    );
-
-    setShowAddForm(false);
-    setFormState(INITIAL_FORM);
-    setFormFile(null);
-    setFormError(null);
-  }
-
   function handleRemoveDocument(document: ConsentDocument) {
-    const confirmed = window.confirm(
-      "Are you sure you want to remove this required document?",
-    );
-    if (!confirmed) {
+    if (!confirmDocumentRemoval()) {
       return;
     }
 
     removeDocument(document.id);
-  }
-
-  function moveDraftDocument(documentId: string, direction: "up" | "down") {
-    setDraftOrder((current) => {
-      const index = current.indexOf(documentId);
-      if (index === -1) {
-        return current;
-      }
-
-      const nextIndex = direction === "up" ? index - 1 : index + 1;
-      if (nextIndex < 0 || nextIndex >= current.length) {
-        return current;
-      }
-
-      const next = [...current];
-      [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
-      return next;
-    });
-  }
-
-  function handleConfirmOrder() {
-    saveDocumentOrder(draftOrder);
-    setIsReorderMode(false);
-  }
-
-  function handleCancelOrder() {
-    setDraftOrder(documents.map((document) => document.id));
-    setIsReorderMode(false);
   }
 
   return (
@@ -220,11 +141,7 @@ export function ConsentAssessmentPage({
         </div>
       </section>
 
-      {error && (
-        <section className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-800">
-          {error}
-        </section>
-      )}
+      {error && <ConsentErrorAlert message={error} />}
 
       <section className="space-y-4">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -233,16 +150,11 @@ export function ConsentAssessmentPage({
               Required Consent Documents
             </h2>
             <p className="mt-1 text-sm text-ink-500">
-              Review each required item, mark it complete when ready, and upload supporting files separately.
+              Review each required item, mark it complete when ready, and upload supporting files
+              separately.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            {checklist?.zone_info && (
-              <div className="rounded-xl border border-ink-700/10 bg-white px-4 py-3 text-right text-sm text-ink-500 shadow-sm">
-                <div>{checklist.zone_info.zone_type}</div>
-                <div className="capitalize">{checklist.zone_info.source_council}</div>
-              </div>
-            )}
             <button
               onClick={() => {
                 setShowAddForm((current) => !current);
@@ -261,168 +173,42 @@ export function ConsentAssessmentPage({
             >
               {isReorderMode ? "Exit Reorder" : "Reorder Documents"}
             </button>
+            {checklist?.zone_info && (
+              <div className="rounded-xl border border-ink-700/10 bg-white px-4 py-3 text-sm text-ink-500 shadow-sm">
+                <div className="font-medium text-ink-900">{checklist.zone_info.zone_type}</div>
+                <div className="capitalize">{checklist.zone_info.source_council}</div>
+              </div>
+            )}
           </div>
         </div>
 
         {showAddForm && (
-          <section className="rounded-2xl border border-ink-700/10 bg-white p-6 shadow-sm">
-            <div className="grid gap-5 lg:grid-cols-2">
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-ink-900">Document Name</label>
-                  <input
-                    value={formState.title}
-                    onChange={(event) => updateField("title", event.currentTarget.value)}
-                    placeholder="Arboricultural Assessment"
-                    className="mt-2 w-full rounded-xl border border-ink-700/10 px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/10"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-ink-900">Why It Is Required</label>
-                  <textarea
-                    value={formState.whyRequired}
-                    onChange={(event) => updateField("whyRequired", event.currentTarget.value)}
-                    rows={5}
-                    placeholder="Explain why council may require this document and what it supports."
-                    className="mt-2 w-full rounded-xl border border-ink-700/10 px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/10"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-ink-900">
-                    Open Guidance / Template Link
-                  </label>
-                  <input
-                    type="url"
-                    value={formState.referenceUrl}
-                    onChange={(event) => updateField("referenceUrl", event.currentTarget.value)}
-                    placeholder="https://..."
-                    className="mt-2 w-full rounded-xl border border-ink-700/10 px-4 py-3 text-sm text-ink-900 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/10"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <CompletionCheckbox
-                  checked={formState.completed}
-                  onChange={(checked) => updateField("completed", checked)}
-                  label={formState.completed ? "Complete" : "Mark as complete"}
-                  muted
-                />
-                <div className="rounded-xl border border-ink-700/10 bg-ink-50 p-4">
-                  <label className="text-sm font-medium text-ink-900">Upload Document / File</label>
-                  <input
-                    type="file"
-                    onChange={(event) => setFormFile(event.currentTarget.files?.[0] ?? null)}
-                    className="mt-3 block w-full text-sm text-ink-600 file:mr-4 file:rounded-lg file:border-0 file:bg-ink-900 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-ink-700"
-                  />
-                  <div className="mt-3 rounded-lg bg-white px-3 py-2 text-sm text-ink-500">
-                    {formFile ? formFile.name : "No file selected"}
-                  </div>
-                  {formFile && (
-                    <button
-                      onClick={() => setFormFile(null)}
-                      className="mt-3 inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100"
-                    >
-                      Remove Selected File
-                    </button>
-                  )}
-                </div>
-                {formError && (
-                  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-                    {formError}
-                  </div>
-                )}
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    onClick={handleAddDocument}
-                    className="inline-flex items-center rounded-xl bg-ink-900 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-ink-700"
-                  >
-                    Add Document
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowAddForm(false);
-                      setFormState(INITIAL_FORM);
-                      setFormFile(null);
-                      setFormError(null);
-                    }}
-                    className="inline-flex items-center rounded-xl border border-ink-700/10 bg-white px-4 py-3 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          </section>
+          <ManualDocumentForm
+            onCancel={() => setShowAddForm(false)}
+            onSubmit={(values, file) => {
+              createManualDocument(values, file);
+              setShowAddForm(false);
+            }}
+          />
         )}
 
-        {isReorderMode && reorderedDocuments.length > 0 && (
-          <section className="rounded-2xl border border-ink-700/10 bg-white p-6 shadow-sm">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-ink-900">Reorder Documents</h3>
-                <p className="mt-1 text-sm text-ink-500">
-                  Adjust the checklist order, then confirm to save it for this project.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  onClick={handleConfirmOrder}
-                  className="inline-flex items-center rounded-xl bg-ink-900 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-ink-700"
-                >
-                  Confirm Order
-                </button>
-                <button
-                  onClick={handleCancelOrder}
-                  className="inline-flex items-center rounded-xl border border-ink-700/10 bg-white px-4 py-3 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-            <div className="mt-5 space-y-3">
-              {reorderedDocuments.map((document, index) => (
-                <div
-                  key={document.id}
-                  className="flex items-center justify-between rounded-xl border border-ink-700/10 bg-ink-50 px-4 py-3"
-                >
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-medium text-ink-900">{index + 1}. {document.title}</span>
-                      {isManualDocument(document) && (
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-                          Manual
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-1 truncate text-xs text-ink-500">{document.whyRequired}</p>
-                  </div>
-                  <div className="ml-4 flex gap-2">
-                    <button
-                      onClick={() => moveDraftDocument(document.id, "up")}
-                      disabled={index === 0}
-                      className="rounded-lg border border-ink-700/10 bg-white px-3 py-2 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50 disabled:cursor-not-allowed disabled:text-ink-400"
-                    >
-                      Up
-                    </button>
-                    <button
-                      onClick={() => moveDraftDocument(document.id, "down")}
-                      disabled={index === reorderedDocuments.length - 1}
-                      className="rounded-lg border border-ink-700/10 bg-white px-3 py-2 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50 disabled:cursor-not-allowed disabled:text-ink-400"
-                    >
-                      Down
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+        {isReorderMode && documents.length > 0 && (
+          <DocumentOrderManager
+            documents={documents}
+            onCancel={() => setIsReorderMode(false)}
+            onConfirm={(nextDocumentOrder) => {
+              saveDocumentOrder(nextDocumentOrder);
+              setIsReorderMode(false);
+            }}
+          />
         )}
 
         {!documents.length ? (
           <div className="rounded-2xl border border-dashed border-ink-700/20 bg-white p-12 text-center shadow-sm">
             <p className="text-base font-medium text-ink-900">
-              {isLoading ? "Generating consent document requirements..." : "No consent documents available yet."}
+              {isLoading
+                ? "Generating consent document requirements..."
+                : "No consent documents available yet."}
             </p>
             <p className="mt-2 text-sm text-ink-500">
               {isLoading
@@ -516,33 +302,5 @@ function MetricCard({ label, value }: { label: string; value: string }) {
       <div className="text-xs font-medium uppercase tracking-[0.14em] text-ink-500">{label}</div>
       <div className="mt-2 text-2xl font-semibold tracking-tight text-ink-900">{value}</div>
     </div>
-  );
-}
-
-function CompletionBadge({ completed }: { completed: boolean }) {
-  return (
-    <span
-      className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-        completed
-          ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
-          : "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
-      }`}
-    >
-      {completed ? "Complete" : "Incomplete"}
-    </span>
-  );
-}
-
-function UploadBadge({ uploaded }: { uploaded: boolean }) {
-  return (
-    <span
-      className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-        uploaded
-          ? "bg-sky-50 text-sky-700 ring-1 ring-sky-200"
-          : "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
-      }`}
-    >
-      {uploaded ? "File uploaded" : "No file"}
-    </span>
   );
 }

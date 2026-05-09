@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { ConsentDocumentPage } from "@/components/consent-assessment/consent-document-page";
+import { normalizeProjectDetails } from "@/lib/project-details";
+import { getProjectById } from "@/lib/projects";
 
 export const dynamic = "force-dynamic";
 
@@ -11,13 +13,16 @@ export default async function ProjectConsentDocumentPage({
 }) {
   const { id, documentId } = await params;
   const supabase = await getSupabaseServer();
-  const { data: project } = await supabase
-    .from("projects")
-    .select("id, address")
-    .eq("id", id)
-    .single();
+  const { data: project, error } = await getProjectById(
+    supabase,
+    id,
+    "id, address, project_type",
+  );
 
   if (!project) {
+    if (error) {
+      throw error;
+    }
     notFound();
   }
 
@@ -26,6 +31,7 @@ export default async function ProjectConsentDocumentPage({
       projectId={project.id}
       address={project.address}
       documentId={documentId}
+      projectDetails={normalizeProjectDetails(project.project_details, project.project_type)}
     />
   );
 }
