@@ -66,6 +66,7 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
   const [deleteTarget, setDeleteTarget] = useState<ProjectDocumentItem | null>(null);
   const [editDrafts, setEditDrafts] = useState<Record<string, { name: string; type: DocumentType }>>({});
   const [metadataSupported, setMetadataSupported] = useState(true);
+  const [isDragOver, setIsDragOver] = useState(false);
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<"All" | DocumentType>("All");
   const [statusFilter, setStatusFilter] = useState<"All" | DocumentStatus>("All");
@@ -107,6 +108,12 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
+  }
+
+  function onDropUpload(event: React.DragEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    setIsDragOver(false);
+    uploadSelectedFiles(event.dataTransfer.files);
   }
 
   async function getSignedUrl(storagePath: string) {
@@ -287,11 +294,23 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
             onChange={(event) => uploadSelectedFiles(event.target.files)}
           />
           <button
+            type="button"
             onClick={() => fileInputRef.current?.click()}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setIsDragOver(true);
+            }}
+            onDragLeave={() => setIsDragOver(false)}
+            onDrop={onDropUpload}
             disabled={uploading}
-            className="rounded-lg bg-ink-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-ink-700 disabled:opacity-60"
+            className={`w-72 rounded-xl border border-dashed px-4 py-3 text-left text-sm shadow-sm transition ${
+              isDragOver
+                ? "border-ink-500 bg-ink-100 text-ink-900"
+                : "border-ink-300 bg-white text-ink-700 hover:bg-ink-50"
+            } disabled:opacity-60`}
           >
-            {uploading ? "Uploading…" : "Upload document"}
+            <p className="font-medium">{uploading ? "Uploading…" : "Upload document"}</p>
+            <p className="mt-1 text-xs text-ink-500">Drag and drop files here, or click to browse.</p>
           </button>
           {uploadError && <p className="text-xs text-red-600">{uploadError}</p>}
         </div>
