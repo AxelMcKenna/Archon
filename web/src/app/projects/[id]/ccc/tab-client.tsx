@@ -814,17 +814,10 @@ export function CccTabClient({
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
-      <header className="space-y-1.5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
-          Closeout
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
-          Code Compliance Certificate
-        </h1>
-        <p className="text-sm text-ink-500 max-w-2xl leading-relaxed">
-          Project {projectDisplay} · Christchurch City Council
-        </p>
+    <div className="mx-auto max-w-6xl space-y-4 px-4 py-6 sm:px-6">
+      <header>
+        <h1 className="text-2xl font-semibold text-ink-900">Code Compliance Certificate</h1>
+        <p className="mt-1 text-sm text-ink-600">Project {projectDisplay} · Christchurch City Council</p>
       </header>
 
       <Collapsible title="1. Status Bar" status={sectionStatus.statusBar}>

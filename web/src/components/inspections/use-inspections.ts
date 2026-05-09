@@ -293,7 +293,9 @@ async function persistInspectionRecords(
 
     const { error: checklistError } = await supabase
       .from("project_inspection_checklist_items")
-      .insert(checklistToRows(projectId, record));
+      .upsert(checklistToRows(projectId, record), {
+        onConflict: "project_id,inspection_id,sort_order",
+      });
     if (checklistError) {
       if (isMissingInspectionTables(checklistError)) return false;
 

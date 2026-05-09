@@ -8,7 +8,6 @@ export default function PrivacyPage() {
 
       <h2 className="mt-6 font-semibold text-lg">What we collect</h2>
       <ul className="list-disc pl-5 space-y-1 text-sm">
-        <li>Your email address and password (hashed) for authentication.</li>
         <li>Project metadata you enter: address, BCA, project type, description.</li>
         <li>RFI letters you upload, including any personal information they contain (e.g. application reference, council officer name).</li>
         <li>Supporting documents you attach to RFI items.</li>

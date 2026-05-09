@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { InspectionDetailPage } from "@/components/inspections/inspection-detail-page";
+import { loadInspectionRecords } from "@/components/inspections/persistence";
 import { getInspectionSchedule } from "@/lib/inspections";
+import { normalizeProjectMetadata } from "@/lib/project-metadata";
 import { getSupabaseServer } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -12,37 +14,28 @@ export default async function ProjectInspectionDetailRoute({
 }) {
   const { id, inspectionId } = await params;
   const supabase = await getSupabaseServer();
-  const { data: project } = await supabase
+  const { data: project, error } = await supabase
     .from("projects")
-    .select(`
-      id,
-      address,
-      project_type,
-      description,
-      estimated_floor_area_m2,
-      estimated_construction_value_nzd,
-      involves_structural_work,
-      involves_earthworks,
-      existing_structure_demolished,
-      new_road_access,
-      service_connection_water,
-      service_connection_wastewater,
-      service_connection_stormwater
-    `)
+    .select("*")
     .eq("id", id)
     .single();
 
   if (!project) {
+    if (error) {
+      throw error;
+    }
     notFound();
   }
 
-  const schedule = getInspectionSchedule(project);
+  const schedule = getInspectionSchedule(normalizeProjectMetadata(project));
+  const savedRecords = await loadInspectionRecords(supabase, project.id);
 
   return (
     <InspectionDetailPage
       projectId={project.id}
       inspectionId={inspectionId}
       schedule={schedule}
+      savedRecords={savedRecords}
     />
   );
 }
