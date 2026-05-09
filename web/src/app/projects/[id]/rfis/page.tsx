@@ -207,14 +207,14 @@ export default async function ProjectRfis({
         </p>
       </header>
 
-      <section className="space-y-4">
+      <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-8 space-y-4">
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
           Received an RFI?
         </h2>
         <UploadRfiInline projects={projectsForUpload} plans={plansForUpload} />
       </section>
 
-      <section className="space-y-4">
+      <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-8 space-y-4">
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
           RFI letters ({letters.length})
         </h2>

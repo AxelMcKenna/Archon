@@ -126,14 +126,14 @@ export default async function ProjectDrawings({
         </p>
       </header>
 
-      <section className="space-y-4">
+      <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-8 space-y-4">
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
           Analyse a drawing
         </h2>
         <UploadPlanInline projects={projectsForUpload} />
       </section>
 
-      <section className="space-y-4">
+      <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-8 space-y-4">
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
           Drawings ({rows.length})
         </h2>
