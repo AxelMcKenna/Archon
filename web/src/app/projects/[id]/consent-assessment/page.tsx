@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { ConsentAssessmentPage } from "@/components/consent-assessment/consent-assessment-page";
+import { AddressChecklist } from "@/components/AddressChecklist";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ export default async function ProjectConsentAssessmentPage({
   const supabase = await getSupabaseServer();
   const { data: project } = await supabase
     .from("projects")
-    .select("id, address")
+    .select("id, address, project_type")
     .eq("id", id)
     .single();
 
@@ -21,5 +22,10 @@ export default async function ProjectConsentAssessmentPage({
     notFound();
   }
 
-  return <ConsentAssessmentPage projectId={project.id} address={project.address} />;
+  return (
+    <div className="space-y-8">
+      <AddressChecklist address={project.address} initialProjectType={project.project_type} />
+      <ConsentAssessmentPage projectId={project.id} address={project.address} />
+    </div>
+  );
 }
