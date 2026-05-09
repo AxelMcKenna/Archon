@@ -115,7 +115,7 @@ export default async function ProjectDrawings({
   return (
     <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
       <header className="space-y-1.5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
+        <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
           Pre-flight
         </p>
         <h1 className="text-2xl font-semibold tracking-tight text-ink-900">Drawings</h1>
@@ -126,15 +126,15 @@ export default async function ProjectDrawings({
         </p>
       </header>
 
-      <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-8 space-y-4">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
+      <section className="rounded-sm bg-surface-raised shadow-depth p-8 space-y-4">
+        <h2 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
           Analyse a drawing
         </h2>
         <UploadPlanInline projects={projectsForUpload} />
       </section>
 
-      <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-8 space-y-4">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
+      <section className="rounded-sm bg-surface-raised shadow-depth p-8 space-y-4">
+        <h2 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
           Drawings ({rows.length})
         </h2>
         <RowsList rows={rows} active={selected?.id} projectId={projectId} />
@@ -175,7 +175,7 @@ function RowsList({
     );
   }
   return (
-    <ul className="divide-y divide-ink-200/70 rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card overflow-hidden">
+    <ul className="divide-y divide-ink-200/70 rounded-sm bg-surface-raised shadow-depth overflow-hidden">
       {rows.map((r) => {
         const bcaName =
           taxonomy.bcas.find((b) => b.id === r.projects?.bca)?.name ?? r.projects?.bca;
@@ -244,7 +244,7 @@ function SelectedHeader({ row, projectId }: { row: Row; projectId: string }) {
   return (
     <div className="flex items-baseline justify-between flex-wrap gap-2">
       <div className="space-y-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">{row.format.toUpperCase()}</p>
+        <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">{row.format.toUpperCase()}</p>
         <h2 className="text-xl font-semibold tracking-tight text-ink-900">{row.filename}</h2>
       </div>
       <Link

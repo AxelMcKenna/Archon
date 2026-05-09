@@ -22,7 +22,7 @@ export function ProjectDeleteButton({
 
       {isOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-          <div className="w-full max-w-md rounded-sm border border-slate-200 bg-white p-6 shadow-2xl">
+          <div className="w-full max-w-md rounded-sm border border-slate-200 bg-surface-raised p-6 shadow-2xl">
             <h2 className="text-lg font-semibold text-slate-950">Delete project?</h2>
             <p className="mt-3 text-sm leading-6 text-slate-600">
               Are you sure you want to delete this project? This action cannot be undone.

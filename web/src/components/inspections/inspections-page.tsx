@@ -14,52 +14,18 @@ import {
 } from "./model";
 import { useInspections } from "./use-inspections";
 
-export interface InspectionWorkflowSnapshot {
-  projectAddress: string | null;
-  projectStatus: string | null | undefined;
-  openRfis: number;
-  totalLetters: number;
-  totalRfiItems: number;
-  approvedDocuments: number;
-  pendingDocuments: number;
-  totalDocuments: number;
-  analysedPlans: number;
-  totalPlans: number;
-  mustResolveFlags: number;
-  averagePlanProcessingSeconds: number | null;
-  latestLetter:
-    | {
-        id: string;
-        status: string | null;
-        issueDate: string | null;
-      }
-    | null;
-  latestAttachment:
-    | {
-        uploadedAt: string;
-        documentType: string | null;
-      }
-    | null;
-  latestPlan:
-    | {
-        createdAt: string;
-        status: string;
-      }
-    | null;
-}
-
 interface InspectionsPageProps {
   projectId: string;
+  projectAddress: string | null;
   schedule: InspectionSchedule;
   savedRecords: Record<string, InspectionRecord>;
-  workflow: InspectionWorkflowSnapshot;
 }
 
 export function InspectionsPage({
   projectId,
+  projectAddress,
   schedule,
   savedRecords,
-  workflow,
 }: InspectionsPageProps) {
   const router = useRouter();
   const { inspections, stats, addManualInspection, reorderInspection, deleteInspection } =
@@ -125,31 +91,25 @@ export function InspectionsPage({
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
-      <section className="flex flex-col gap-4 rounded-2xl border border-ink-700/10 bg-white p-8 shadow-sm sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-ink-500">
+    <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
+      <header className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-3">
+          <p className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-ink-500">
+            <span className="inline-block h-1 w-1 rounded-full bg-accent" />
             Project Workflow
           </p>
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-ink-900">Inspections</h1>
-            <p className="mt-2 max-w-2xl text-sm text-ink-500">
-              Track inspection readiness alongside RFIs, document review, and plan-analysis
-              activity for {workflow.projectAddress ?? "this project"}.
-            </p>
-          </div>
+          <h1 className="font-display uppercase font-medium leading-[0.95] tracking-[0.02em] text-[36px] sm:text-[44px] text-ink-900">
+            Inspections
+          </h1>
+          <p className="text-sm text-ink-500 max-w-2xl leading-relaxed">
+            Inspection hold points for {projectAddress ?? "this project"}. Drag to reorder, open a stage to record results.
+          </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Link
-            href={`/projects/${projectId}/documents` as Route}
-            className="inline-flex items-center justify-center rounded-xl border border-ink-700/10 bg-white px-4 py-2.5 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
-          >
-            View Documents
-          </Link>
           <button
             type="button"
             onClick={handleAddManualInspection}
-            className="inline-flex items-center justify-center rounded-xl border border-ink-700/10 bg-white px-4 py-2.5 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
+            className="inline-flex items-center justify-center rounded-md border border-ink-200 bg-surface-raised px-4 py-2.5 text-[13px] font-medium text-ink-900 shadow-depth transition hover:bg-ink-50 cursor-pointer"
           >
             Add Inspection
           </button>
@@ -157,184 +117,23 @@ export function InspectionsPage({
             <button
               type="button"
               onClick={showCurrentInspection}
-              className="inline-flex items-center justify-center rounded-xl bg-ink-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-ink-700"
+              className="inline-flex items-center justify-center rounded-md bg-ink-900 px-4 py-2.5 text-[13px] font-semibold text-white shadow-depth transition-all hover:bg-ink-700 hover:shadow-depth-hover cursor-pointer"
             >
               Show Current Inspection
             </button>
           )}
         </div>
-      </section>
+      </header>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <WorkflowMetricCard
-          label="Open RFIs"
-          value={String(workflow.openRfis)}
-          detail={`${workflow.totalLetters} total letters`}
-        />
-        <WorkflowMetricCard
-          label="Pending documents"
-          value={String(workflow.pendingDocuments)}
-          detail={`${workflow.approvedDocuments}/${workflow.totalDocuments} approved`}
-        />
-        <WorkflowMetricCard
-          label="Plan issues"
-          value={String(workflow.mustResolveFlags)}
-          detail={`${workflow.analysedPlans}/${workflow.totalPlans} plans analysed`}
-        />
-        <WorkflowMetricCard
-          label="Inspections remaining"
-          value={String(stats.remaining)}
-          detail={`${stats.completed}/${stats.total} complete`}
-        />
-      </section>
-
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr),minmax(18rem,0.9fr)]">
-        <div className="space-y-6">
-          <section className="rounded-2xl border border-ink-700/10 bg-white p-8 shadow-sm">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <h2 className="text-xl font-semibold tracking-tight text-ink-900">
-                  Workflow Snapshot
-                </h2>
-                <p className="mt-2 text-sm text-ink-500">
-                  Current processing totals aggregated from RFIs, project attachments, plan
-                  analysis, and inspections.
-                </p>
-              </div>
-              <span className="rounded-full bg-ink-50 px-3 py-1 text-sm font-medium text-ink-700">
-                {formatProjectStatus(workflow.projectStatus)}
-              </span>
-            </div>
-
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <SummaryTile
-                title="RFI load"
-                body={`${workflow.totalRfiItems} items across ${workflow.totalLetters} letter${workflow.totalLetters === 1 ? "" : "s"}.`}
-              />
-              <SummaryTile
-                title="Supporting documents"
-                body={`${workflow.totalDocuments} uploaded files are available for council review.`}
-              />
-              <SummaryTile
-                title="Plan analysis"
-                body={
-                  workflow.averagePlanProcessingSeconds != null
-                    ? `Average analysis time is ${workflow.averagePlanProcessingSeconds.toFixed(1)}s per completed plan.`
-                    : "No completed plan analyses yet."
-                }
-              />
-              <SummaryTile
-                title="Inspection readiness"
-                body={`${stats.percent}% of required inspections are resolved.`}
-              />
-            </div>
-          </section>
-
-          <section className="rounded-2xl border border-ink-700/10 bg-white p-8 shadow-sm">
-            <h2 className="text-xl font-semibold tracking-tight text-ink-900">Current Activity</h2>
-            <div className="mt-5 grid gap-4 md:grid-cols-3">
-              <ActivityCard
-                title="Latest RFI"
-                href={
-                  workflow.latestLetter
-                    ? (`/projects/${projectId}/rfi/${workflow.latestLetter.id}` as Route)
-                    : (`/projects/${projectId}` as Route)
-                }
-                hrefLabel={workflow.latestLetter ? "Open RFI" : "Project overview"}
-                body={
-                  workflow.latestLetter
-                    ? `${formatWorkflowDate(workflow.latestLetter.issueDate)} · ${formatProjectStatus(workflow.latestLetter.status)}`
-                    : "No RFI letters recorded yet."
-                }
-              />
-              <ActivityCard
-                title="Latest document"
-                href={`/projects/${projectId}/documents` as Route}
-                hrefLabel="Open documents"
-                body={
-                  workflow.latestAttachment
-                    ? `${formatWorkflowDate(workflow.latestAttachment.uploadedAt)} · ${formatAttachmentType(workflow.latestAttachment.documentType)}`
-                    : "No supporting documents uploaded yet."
-                }
-              />
-              <ActivityCard
-                title="Latest plan analysis"
-                href={"/plans" as Route}
-                hrefLabel="Open plans"
-                body={
-                  workflow.latestPlan
-                    ? `${formatWorkflowDate(workflow.latestPlan.createdAt)} · ${workflow.latestPlan.status}`
-                    : "No plan uploads analysed yet."
-                }
-              />
-            </div>
-          </section>
-        </div>
-
-        <aside className="space-y-6">
-          <section className="rounded-2xl border border-ink-700/10 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-ink-900">Next actions</h2>
-            <ul className="mt-4 space-y-3 text-sm text-ink-600">
-              <ActionItem
-                active={workflow.openRfis > 0}
-                text={
-                  workflow.openRfis > 0
-                    ? `Review ${workflow.openRfis} open RFI${workflow.openRfis === 1 ? "" : "s"} and prepare responses.`
-                    : "No open RFIs are blocking the project right now."
-                }
-              />
-              <ActionItem
-                active={workflow.pendingDocuments > 0}
-                text={
-                  workflow.pendingDocuments > 0
-                    ? `Triage ${workflow.pendingDocuments} pending document${workflow.pendingDocuments === 1 ? "" : "s"} for approval.`
-                    : "Supporting documents are fully reviewed."
-                }
-              />
-              <ActionItem
-                active={workflow.mustResolveFlags > 0}
-                text={
-                  workflow.mustResolveFlags > 0
-                    ? `Resolve ${workflow.mustResolveFlags} must-fix plan flag${workflow.mustResolveFlags === 1 ? "" : "s"} before further review.`
-                    : "No critical plan-analysis flags are outstanding."
-                }
-              />
-              <ActionItem
-                active={stats.remaining > 0}
-                text={
-                  stats.remaining > 0
-                    ? `Prepare ${stats.remaining} remaining inspection stage${stats.remaining === 1 ? "" : "s"}.`
-                    : "Inspection workflow is fully resolved."
-                }
-              />
-            </ul>
-          </section>
-
-          <section className="rounded-2xl border border-ink-700/10 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-ink-900">Links</h2>
-            <div className="mt-4 grid gap-2">
-              <QuickLink
-                href={`/projects/${projectId}/project-application` as Route}
-                label="Project Application"
-              />
-              <QuickLink href={`/projects/${projectId}/documents` as Route} label="Project Documents" />
-              <QuickLink href={"/plans" as Route} label="Building Plans" />
-              <QuickLink href={`/projects/${projectId}/project-application` as Route} label="RFI Review" />
-            </div>
-          </section>
-        </aside>
-      </section>
-
-      <section className="rounded-2xl border border-ink-700/10 bg-gradient-to-br from-white to-slate-50 p-8 shadow-sm">
+      <section className="relative overflow-hidden rounded-md bg-surface-raised p-6 shadow-depth">
+        <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-accent" />
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-ink-500">Inspection Readiness</p>
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-ink-900">
-                {stats.completed} / {String(stats.total)} Inspections Complete
-              </h2>
-              <p className="mt-1 text-sm text-ink-500">{schedule.summary}</p>
-            </div>
+          <div className="space-y-2">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">Inspection Readiness</p>
+            <h2 className="font-display uppercase font-medium leading-[0.95] tracking-[0.02em] text-[28px] sm:text-[32px] text-ink-900">
+              {stats.completed} / {String(stats.total)} Complete
+            </h2>
+            <p className="text-sm text-ink-500 leading-relaxed">{schedule.summary}</p>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <MetricCard label="Required stages" value={String(stats.total)} />
@@ -343,22 +142,22 @@ export function InspectionsPage({
           </div>
         </div>
 
-        <div className="mt-6 space-y-3">
-          <div className="h-3 overflow-hidden rounded-full bg-ink-700/10">
+        <div className="mt-6 space-y-2">
+          <div className="relative h-1.5 overflow-hidden rounded-full bg-ink-100 shadow-inset">
             <div
               className="h-full rounded-full bg-accent transition-all"
               style={{ width: `${stats.percent}%` }}
             />
           </div>
-          <div className="flex items-center justify-between text-sm text-ink-500">
-            <span>{stats.percent}% complete</span>
-            <span>{stats.remaining} inspections still need attention</span>
+          <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-ink-500">
+            <span className="tabular-nums text-ink-900">{stats.percent}% complete</span>
+            <span>{stats.remaining} still need attention</span>
           </div>
         </div>
 
-        <div className="mt-6 rounded-xl border border-ink-700/10 bg-white/80 p-5">
-          <p className="text-sm font-medium text-ink-900">Next inspection</p>
-          <p className="mt-3 text-sm text-ink-600">
+        <div className="mt-6 rounded-md bg-ink-50 ring-1 ring-ink-200/70 p-4">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">Next inspection</p>
+          <p className="mt-2 text-sm text-ink-700 leading-relaxed">
             {nextInspection
               ? `${nextInspection.title} is the next inspection to prepare. ${nextInspection.timing}.`
               : "All inspections are complete."}
@@ -367,17 +166,18 @@ export function InspectionsPage({
       </section>
 
       <section className="space-y-4">
-        <div>
+        <div className="space-y-2">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">Schedule</p>
           <h2 className="text-xl font-semibold tracking-tight text-ink-900">
             Inspection Stages
           </h2>
-          <p className="mt-1 text-sm text-ink-500">
+          <p className="text-sm text-ink-500 leading-relaxed">
             Open each inspection to add booking details, due dates, checklist progress, results, and notes.
           </p>
           {schedule.notes.length > 0 && (
             <ul className="mt-3 space-y-1 text-sm text-ink-500">
               {schedule.notes.map((note) => (
-                <li key={note}>{note}</li>
+                <li key={note}>• {note}</li>
               ))}
             </ul>
           )}
@@ -410,12 +210,19 @@ export function InspectionsPage({
                 onDragOver={handleDragOver}
                 onDrop={(event) => handleDrop(event, index)}
                 className={[
-                  "group relative cursor-pointer overflow-hidden rounded-2xl border p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-ink-700/20 hover:shadow-md active:cursor-grabbing",
-                  isLocked ? "bg-slate-50" : "bg-white",
-                  isCurrent ? "border-accent ring-2 ring-accent/20" : "border-ink-700/10",
+                  "group relative cursor-pointer overflow-hidden rounded-md p-5 shadow-depth transition-all hover:shadow-depth-hover active:cursor-grabbing",
+                  isLocked ? "bg-ink-50" : "bg-surface-raised",
+                  isCurrent ? "ring-2 ring-accent/40" : "",
                   isDragging ? "opacity-60" : "",
                 ].filter(Boolean).join(" ")}
               >
+                <span
+                  aria-hidden
+                  className={[
+                    "pointer-events-none absolute inset-x-0 top-0 h-[2px]",
+                    isCurrent ? "bg-accent" : "bg-accent/30",
+                  ].join(" ")}
+                />
                 <div className="relative flex flex-col gap-4 lg:flex-row lg:items-stretch lg:justify-between">
                   <Link
                     href={href}
@@ -425,39 +232,42 @@ export function InspectionsPage({
 
                       event.preventDefault();
                     }}
-                    className="flex min-w-0 flex-1 flex-col gap-4 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 lg:flex-row lg:items-start lg:justify-between"
+                    className="flex min-w-0 flex-1 flex-col gap-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 lg:flex-row lg:items-start lg:justify-between"
                   >
                     <div className="space-y-3">
-                      <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span
                           className={[
-                            "text-lg font-semibold transition-colors group-hover:text-accent",
-                            isLocked ? "text-slate-500" : "text-ink-900",
+                            "text-[19px] font-semibold tracking-[-0.015em] transition-colors group-hover:text-accent",
+                            isLocked ? "text-ink-500" : "text-ink-900",
                           ].filter(Boolean).join(" ")}
                         >
                           {inspection.title}
                         </span>
                         <StatusBadge status={inspection.status} />
                         {isCurrent && (
-                          <span className="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent ring-1 ring-accent/20">
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-accent">
+                            <span className="h-1 w-1 rounded-full bg-accent" />
                             Current
                           </span>
                         )}
                         {isResolved && (
-                          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
-                            ✓ Done
+                          <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-emerald-700 ring-1 ring-emerald-200">
+                            Done
                           </span>
                         )}
                         <span
                           className={[
-                            "rounded-full px-2.5 py-1 text-xs font-medium",
-                            isLocked ? "bg-slate-100 text-slate-500" : "bg-ink-50 text-ink-500",
+                            "rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.18em] ring-1",
+                            isLocked
+                              ? "bg-ink-100 text-ink-500 ring-ink-200/70"
+                              : "bg-ink-50 text-ink-500 ring-ink-200/70",
                           ].filter(Boolean).join(" ")}
                         >
                           {inspection.category}
                         </span>
                       </div>
-                      <p className={["max-w-3xl text-sm", isLocked ? "text-slate-500" : "text-ink-600"].join(" ")}>
+                      <p className={["max-w-3xl text-[13px] leading-relaxed", isLocked ? "text-ink-500" : "text-ink-600"].join(" ")}>
                         {inspection.timing}
                       </p>
                     </div>
@@ -468,7 +278,7 @@ export function InspectionsPage({
                       type="button"
                       draggable={false}
                       onClick={() => deleteInspection(inspection.id)}
-                      className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50"
+                      className="rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-[12px] font-medium text-red-700 transition hover:bg-red-100 cursor-pointer"
                     >
                       Delete
                     </button>
@@ -493,12 +303,15 @@ function InspectionSummary({
   return (
     <div
       className={[
-        "flex min-w-56 flex-col items-start gap-3 rounded-xl px-4 py-3 text-sm",
-        isLocked ? "bg-slate-100 text-slate-500" : "bg-ink-50 text-ink-500",
+        "flex min-w-56 flex-col items-start gap-1 rounded-md px-4 py-3 text-sm ring-1",
+        isLocked
+          ? "bg-ink-100 text-ink-500 ring-ink-200/70"
+          : "bg-ink-50 text-ink-500 ring-ink-200/70",
       ].filter(Boolean).join(" ")}
     >
-      <span className={["font-medium", isLocked ? "text-slate-600" : "text-ink-900"].join(" ")}>
-        {inspection.dueDate ? `Due ${formatDate(inspection.dueDate)}` : "No due date"}
+      <span className="text-[10px] uppercase tracking-[0.22em] text-ink-500">Due</span>
+      <span className={["text-sm font-semibold tabular-nums", isLocked ? "text-ink-700" : "text-ink-900"].join(" ")}>
+        {inspection.dueDate ? formatDate(inspection.dueDate) : "Not scheduled"}
       </span>
     </div>
   );
@@ -506,100 +319,27 @@ function InspectionSummary({
 
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-ink-700/10 bg-white px-4 py-3 shadow-sm">
-      <div className="text-xs font-medium uppercase tracking-[0.14em] text-ink-500">{label}</div>
-      <div className="mt-2 text-2xl font-semibold tracking-tight text-ink-900">{value}</div>
+    <div className="rounded-md bg-surface-raised px-3.5 py-2.5 shadow-depth">
+      <p className="text-[10px] uppercase tracking-[0.22em] text-ink-500">{label}</p>
+      <p className="mt-1 text-[22px] leading-none font-semibold tracking-[-0.02em] tabular-nums text-ink-900">{value}</p>
     </div>
-  );
-}
-
-function WorkflowMetricCard({
-  label,
-  value,
-  detail,
-}: {
-  label: string;
-  value: string;
-  detail: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-ink-700/10 bg-white p-5 shadow-sm">
-      <p className="text-sm text-ink-500">{label}</p>
-      <p className="mt-2 text-3xl font-semibold tracking-tight text-ink-900">{value}</p>
-      <p className="mt-2 text-sm text-ink-500">{detail}</p>
-    </div>
-  );
-}
-
-function SummaryTile({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="rounded-xl border border-ink-700/10 bg-ink-50 px-4 py-4">
-      <p className="text-sm font-medium text-ink-900">{title}</p>
-      <p className="mt-2 text-sm text-ink-600">{body}</p>
-    </div>
-  );
-}
-
-function ActivityCard({
-  title,
-  body,
-  href,
-  hrefLabel,
-}: {
-  title: string;
-  body: string;
-  href: Route;
-  hrefLabel: string;
-}) {
-  return (
-    <div className="rounded-xl border border-ink-700/10 bg-ink-50 px-4 py-4">
-      <p className="text-sm font-medium text-ink-900">{title}</p>
-      <p className="mt-2 text-sm text-ink-600">{body}</p>
-      <Link href={href} className="mt-3 inline-flex text-sm font-medium text-ink-900 hover:text-accent">
-        {hrefLabel}
-      </Link>
-    </div>
-  );
-}
-
-function ActionItem({ active, text }: { active: boolean; text: string }) {
-  return (
-    <li className="flex items-start gap-3">
-      <span
-        className={`mt-0.5 inline-flex h-2.5 w-2.5 rounded-full ${
-          active ? "bg-amber-500" : "bg-emerald-500"
-        }`}
-      />
-      <span>{text}</span>
-    </li>
-  );
-}
-
-function QuickLink({ href, label }: { href: Route; label: string }) {
-  return (
-    <Link
-      href={href}
-      className="rounded-xl border border-ink-700/10 bg-ink-50 px-4 py-3 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-100"
-    >
-      {label}
-    </Link>
   );
 }
 
 export function StatusBadge({ status }: { status: EditableInspectionStatus }) {
   const styles: Record<EditableInspectionStatus, string> = {
-    "Not Conducted": "bg-slate-50 text-slate-700 ring-1 ring-slate-200",
-    Passed: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
-    Failed: "bg-red-50 text-red-700 ring-1 ring-red-200",
+    "Not Conducted": "bg-ink-50 text-ink-700 ring-ink-200/70",
+    Passed: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+    Failed: "bg-red-50 text-red-700 ring-red-200",
   };
   const labels: Record<EditableInspectionStatus, string> = {
     "Not Conducted": "Not Conducted",
-    Passed: "✓ Passed",
-    Failed: "✓ Failed",
+    Passed: "Passed",
+    Failed: "Failed",
   };
 
   return (
-    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${styles[status]}`}>
+    <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.18em] ring-1 ${styles[status]}`}>
       {labels[status]}
     </span>
   );
@@ -611,31 +351,6 @@ function formatDate(value: string) {
     month: "short",
     year: "numeric",
   });
-}
-
-function formatProjectStatus(value: string | null | undefined) {
-  if (!value) return "Unknown";
-  return value
-    .split(/[-_]/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
-function formatWorkflowDate(value: string | null | undefined) {
-  if (!value) return "No date";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("en-NZ", { year: "numeric", month: "short", day: "numeric" });
-}
-
-function formatAttachmentType(value: string | null | undefined) {
-  if (!value) return "General document";
-  return value
-    .split(/[-_]/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
 }
 
 function getInspectionCardId(inspectionId: string) {

@@ -3,90 +3,115 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  FolderOpen,
-  Settings,
-  LifeBuoy,
-  type LucideIcon,
-} from "lucide-react";
-import { ProjectSubnav } from "@/components/project-subnav";
+import { ProjectSubnav, activeTabSlug } from "@/components/project-subnav";
+import { AgentPanel } from "@/components/agent/agent-panel";
+import { AgentProvider } from "@/components/agent/agent-provider";
+import { AgentTrigger } from "@/components/agent/agent-trigger";
+import { TabContextProvider } from "@/components/agent/tab-context";
 
-type NavItem = { name: string; href: Route; icon: LucideIcon };
+type NavItem = { name: string; href: Route };
 
 const PRIMARY_NAV: NavItem[] = [
-  { name: "Dashboard", href: "/dashboard" as Route, icon: LayoutDashboard },
-  { name: "Projects", href: "/projects" as Route, icon: FolderOpen },
+  { name: "Dashboard", href: "/dashboard" as Route },
+  { name: "Projects", href: "/projects" as Route },
 ];
 
 const SECONDARY_NAV: NavItem[] = [
-  { name: "Settings", href: "/settings" as Route, icon: Settings },
-  { name: "Help", href: "/help" as Route, icon: LifeBuoy },
+  { name: "Settings", href: "/settings" as Route },
+  { name: "Help", href: "/help" as Route },
 ];
 
 export function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
+  // Landing page renders fullbleed without the app chrome.
+  if (pathname === "/") {
+    return <>{children}</>;
+  }
+
   const projectMatch = pathname.match(/^\/projects\/([^/]+)/);
   const projectId = projectMatch ? projectMatch[1] : null;
   const isProjectPage = projectId && projectId !== "new";
+  const activeSlug = isProjectPage && projectId ? activeTabSlug(pathname, projectId) : null;
 
   return (
-    <div className="min-h-screen bg-surface-canvas flex flex-col">
-      <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-md shadow-header">
-        <div className="flex items-center gap-1 px-8 py-3.5">
-          <Link
-            href="/dashboard"
-            className="group inline-flex items-center gap-2.5 mr-6 text-[15px] font-semibold tracking-tight text-ink-900 transition-colors hover:text-ink-700"
-          >
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-sm bg-ink-900 text-tan-300 text-xs font-bold ring-1 ring-tan-300/30 shadow-card">
-              C
-            </span>
-            ConsentIQ
-          </Link>
-          <NavList items={PRIMARY_NAV} pathname={pathname} />
-          <div className="ml-auto flex items-center gap-1">
-            <NavList items={SECONDARY_NAV} pathname={pathname} compact />
-          </div>
+    <TabContextProvider>
+      <AgentProvider>
+        <div className="min-h-screen bg-surface-canvas flex flex-col">
+          <header className="sticky top-0 z-30 bg-surface-canvas/80 backdrop-blur-xl">
+            <div className="flex w-full items-center justify-between px-10 py-6">
+              <Link
+                href="/dashboard"
+                className="font-display uppercase font-bold tracking-[0.16em] text-[22px] text-ink-900 transition-colors hover:text-ink-700"
+              >
+                Atlas
+              </Link>
+              <nav className="flex items-center gap-10">
+                <NavList items={PRIMARY_NAV} pathname={pathname} />
+                <span aria-hidden className="h-4 w-px bg-ink-900/15" />
+                <NavList items={SECONDARY_NAV} pathname={pathname} />
+              </nav>
+            </div>
+          </header>
+          <main className="flex-1">
+            {isProjectPage && projectId && (
+              <div className="flex w-full items-center gap-4 px-10 pt-8">
+                <div className="flex-1 min-w-0">
+                  <ProjectSubnav projectId={projectId} />
+                </div>
+                {activeSlug && (
+                  <div className="shrink-0 pr-1">
+                    <AgentTrigger
+                      tab={activeSlug}
+                      projectId={projectId}
+                      size="lg"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+            {children}
+          </main>
         </div>
-        {isProjectPage && projectId && <ProjectSubnav projectId={projectId} />}
-      </header>
-      <main className="flex-1">{children}</main>
-    </div>
+        <AgentPanel />
+      </AgentProvider>
+    </TabContextProvider>
   );
 }
 
 function NavList({
   items,
   pathname,
-  compact = false,
 }: {
   items: NavItem[];
   pathname: string;
-  compact?: boolean;
 }) {
   return (
-    <nav className="flex items-center gap-0.5">
+    <ul className="flex items-center gap-8">
       {items.map((tab) => {
         const isActive =
           pathname === tab.href || pathname.startsWith(tab.href + "/");
-        const Icon = tab.icon;
         return (
-          <Link
-            key={tab.href}
-            href={tab.href}
-            className={`inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-sm transition-colors ${
-              isActive
-                ? "bg-ink-900 text-white font-medium shadow-card"
-                : "text-ink-600 hover:bg-ink-150 hover:text-ink-900"
-            }`}
-            title={tab.name}
-          >
-            <Icon className="h-4 w-4" strokeWidth={2} />
-            {!compact && <span>{tab.name}</span>}
-          </Link>
+          <li key={tab.href}>
+            <Link
+              href={tab.href}
+              className={`relative font-display uppercase tracking-[0.14em] text-[14px] transition-colors ${
+                isActive
+                  ? "text-ink-900 font-semibold"
+                  : "text-ink-500 font-medium hover:text-ink-900"
+              }`}
+            >
+              {tab.name}
+              {isActive && (
+                <span
+                  aria-hidden
+                  className="absolute -bottom-2 left-0 right-0 h-[2px] bg-ink-900"
+                />
+              )}
+            </Link>
+          </li>
         );
       })}
-    </nav>
+    </ul>
   );
 }

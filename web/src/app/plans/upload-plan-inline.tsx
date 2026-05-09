@@ -101,7 +101,7 @@ export function UploadPlanInline({ projects }: { projects: Project[] }) {
       </label>
       <button
         disabled={!file || busy}
-        className="rounded-sm bg-ink-900 text-white px-4 py-2 text-sm font-medium shadow-card disabled:opacity-50 sm:self-end cursor-pointer hover:bg-ink-700 transition-colors"
+        className="rounded-sm bg-ink-900 text-white px-4 py-2 text-sm font-medium shadow-depth disabled:opacity-50 sm:self-end cursor-pointer hover:bg-ink-700 transition-colors"
       >
         {busy ? <AiThinking label="Analysing" variant="button" /> : "Analyse plan"}
       </button>

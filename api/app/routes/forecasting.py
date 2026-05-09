@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 from app.services.cost_calculator import calculate_consent_costs
 from app.services.duration_estimator import estimate_duration
+from app.services.forecast_summarizer import summarize_forecast
 from app.services.mbie_scraper import scrape_mbie_data
 from app.services.risk_profiler import build_risk_profile
 
@@ -95,3 +96,18 @@ async def forecast(payload: ForecastRequest) -> dict:
             "making financial commitments."
         ),
     }
+
+
+class ForecastSummaryRequest(BaseModel):
+    address: str | None = None
+    projectType: str | None = None
+    councilName: str | None = None
+    costs: dict | None = None
+    duration: dict | None = None
+    risk: dict | None = None
+
+
+@router.post("/forecast/summary")
+async def forecast_summary(payload: ForecastSummaryRequest) -> dict:
+    summary, error = summarize_forecast(payload.model_dump(exclude_none=True))
+    return {"summary": summary, "error": error}

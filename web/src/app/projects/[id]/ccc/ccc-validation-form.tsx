@@ -26,7 +26,7 @@ export function CccValidationForm({ requiredItems, conditionalItems, inspectionB
   const canSubmit = errors.length === 0;
 
   return (
-    <section className="bg-white rounded-lg border border-ink-200 p-5">
+    <section className="bg-surface-raised rounded-lg border border-ink-200 p-5">
       <h2 className="text-xl font-semibold">CCC Application Validation</h2>
       <p className="mt-2 text-sm text-ink-600">
         Required documents are mandatory. “If Applicable” items only become mandatory when selected.

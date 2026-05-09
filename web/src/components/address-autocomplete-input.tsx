@@ -71,7 +71,7 @@ export function AddressAutocompleteInput({
       />
       {isLoading && <span className="absolute right-3 top-2.5 text-xs text-ink-500">Searching…</span>}
       {isOpen && (
-        <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-sm border border-ink-700/20 bg-white py-1 text-sm shadow">
+        <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-md bg-surface-elevated py-1 text-sm shadow-elevated">
           {suggestions.map((suggestion) => (
             <li key={suggestion.display_name}>
               <button

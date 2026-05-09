@@ -1,6 +1,7 @@
 import { CccTabClient } from "./tab-client";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { getCccViewModel } from "@/lib/ccc";
+import { ConstructionSubnav } from "@/components/construction-subnav";
 import { notFound } from "next/navigation";
 
 interface LbpMemorandaAttachment {
@@ -133,13 +134,16 @@ export default async function CccPage({ params }: { params: Promise<{ id: string
   }
 
   return (
-    <CccTabClient
-      projectId={id}
-      projectName={project.address ?? null}
-      uploadedFileByRow={uploadedFileByRow}
-      lbpMemorandaAttachments={lbpMemorandaAttachments}
-      consentIssueDate={ccc.consentGrantDate}
-      consentExpiryDate={ccc.deadlineDate}
-    />
+    <>
+      <ConstructionSubnav projectId={id} />
+      <CccTabClient
+        projectId={id}
+        projectName={project.address ?? null}
+        uploadedFileByRow={uploadedFileByRow}
+        lbpMemorandaAttachments={lbpMemorandaAttachments}
+        consentIssueDate={ccc.consentGrantDate}
+        consentExpiryDate={ccc.deadlineDate}
+      />
+    </>
   );
 }

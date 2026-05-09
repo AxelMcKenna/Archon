@@ -1,19 +1,60 @@
-export default function ApplicationPrep() {
+import { notFound } from "next/navigation";
+import { getSupabaseServer } from "@/lib/supabase/server";
+import { ConsentAssessmentPage } from "@/components/consent-assessment/consent-assessment-page";
+import type { ProjectIntake } from "@/components/consent-assessment/use-consent-assessment";
+
+export const dynamic = "force-dynamic";
+
+export default async function LodgementPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const supabase = await getSupabaseServer();
+  const { data } = await supabase
+    .from("projects")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  const project = data as
+    | {
+        id: string;
+        address: string;
+        project_type?: string | null;
+        estimated_floor_area_m2?: number | null;
+        estimated_construction_value_nzd?: number | null;
+        involves_structural_work?: boolean | null;
+        involves_earthworks?: boolean | null;
+        existing_structure_demolished?: boolean | null;
+        new_road_access?: boolean | null;
+        service_connection_water?: boolean | null;
+        service_connection_wastewater?: boolean | null;
+        service_connection_stormwater?: boolean | null;
+      }
+    | null;
+
+  if (!project) notFound();
+
+  const intake: ProjectIntake = {
+    projectType: project.project_type ?? "new_dwelling",
+    estimatedFloorAreaM2: project.estimated_floor_area_m2 ?? null,
+    estimatedConstructionValueNZD: project.estimated_construction_value_nzd ?? null,
+    involvesStructuralWork: project.involves_structural_work ?? false,
+    involvesEarthworks: project.involves_earthworks ?? false,
+    existingStructureDemolished: project.existing_structure_demolished ?? false,
+    newRoadAccess: project.new_road_access ?? false,
+    serviceConnectionWater: project.service_connection_water ?? false,
+    serviceConnectionWastewater: project.service_connection_wastewater ?? false,
+    serviceConnectionStormwater: project.service_connection_stormwater ?? false,
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
-      <header className="space-y-1.5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
-          Lodgement
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
-          Application Preparation
-        </h1>
-      </header>
-      <div className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-8">
-        <p className="text-sm text-ink-600 leading-relaxed">
-          Application preparation documents and checklists will appear here.
-        </p>
-      </div>
-    </div>
+    <ConsentAssessmentPage
+      projectId={project.id}
+      address={project.address}
+      projectIntake={intake}
+    />
   );
 }

@@ -311,7 +311,7 @@ function PageView({
 }) {
   return (
     <div
-      className="relative w-full bg-white border border-ink-700/10 rounded-sm shadow-sm"
+      className="relative w-full bg-surface-raised border border-ink-700/10 rounded-sm shadow-sm"
       style={{ aspectRatio: `${info.width} / ${info.height}` }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}

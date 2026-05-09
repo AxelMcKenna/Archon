@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { ProjectDetails, ResolveDocumentsResponse } from "@/types/consent";
+import type { ProjectDetails, ProjectType, ResolveDocumentsResponse } from "@/types/consent";
 import {
   type ChecklistResult,
   type CompletionRecord,
@@ -16,90 +16,62 @@ import {
   isManualDocument,
   slugifyDocument,
 } from "./model";
+import {
+  type ConsentAssessmentRow,
+  EMPTY_ROW,
+  browserClient,
+  loadConsentAssessment,
+  saveConsentAssessment,
+} from "./persistence";
+
+export interface ProjectIntake {
+  projectType: string;
+  estimatedFloorAreaM2?: number | null;
+  estimatedConstructionValueNZD?: number | null;
+  involvesStructuralWork?: boolean;
+  involvesEarthworks?: boolean;
+  existingStructureDemolished?: boolean;
+  newRoadAccess?: boolean;
+  serviceConnectionWater?: boolean;
+  serviceConnectionWastewater?: boolean;
+  serviceConnectionStormwater?: boolean;
+  yearOfConstruction?: number | null;
+}
 
 interface UseConsentAssessmentOptions {
   projectId: string;
   address: string;
   projectDetails?: ProjectDetails;
+  projectIntake?: ProjectIntake;
 }
-
-interface ConsentAssessmentState {
-  checklist: ChecklistResult | null;
-  manualDocuments: StoredManualConsentDocument[];
-  hiddenDocumentIds: string[];
-  documentOrder: string[];
-  uploads: Record<string, UploadRecord>;
-  completions: Record<string, CompletionRecord>;
-}
-
-const CHECKLIST_STORAGE_PREFIX = "consent-assessment-checklist";
-const UPLOAD_STORAGE_PREFIX = "consent-assessment-uploads";
-const COMPLETION_STORAGE_PREFIX = "consent-assessment-completions";
-const MANUAL_DOCUMENT_STORAGE_PREFIX = "consent-assessment-manual-documents";
-const HIDDEN_DOCUMENT_STORAGE_PREFIX = "consent-assessment-hidden-documents";
-const DOCUMENT_ORDER_STORAGE_PREFIX = "consent-assessment-document-order";
-const STORAGE_SYNC_EVENT = "consent-assessment-sync";
-const STORAGE_KEY_SUFFIX_SEPARATOR = ":";
-const EMPTY_STATE: ConsentAssessmentState = {
-  checklist: null,
-  manualDocuments: [],
-  hiddenDocumentIds: [],
-  documentOrder: [],
-  uploads: {},
-  completions: {},
-};
 
 export function useConsentAssessment({
   projectId,
   address,
   projectDetails,
+  projectIntake,
 }: UseConsentAssessmentOptions) {
-  const instanceIdRef = useRef(
-    `consent-assessment-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
-  );
   const requestIdRef = useRef(0);
-  const [state, setState] = useState<ConsentAssessmentState>(EMPTY_STATE);
+  const supabaseRef = useRef(browserClient());
+  const [state, setState] = useState<ConsentAssessmentRow>(EMPTY_ROW);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasHydrated, setHasHydrated] = useState(false);
 
   useEffect(() => {
-    requestIdRef.current += 1;
-    setState(loadStateFromStorage(projectId));
-    setError(null);
-    setIsLoading(false);
-    setHasHydrated(true);
-  }, [projectId]);
-
-  useEffect(() => {
-    const handleSync = (event: Event) => {
-      const syncEvent = event as CustomEvent<{ projectId?: string; source?: string }>;
-      if (
-        syncEvent.detail?.projectId &&
-        syncEvent.detail.projectId !== projectId
-      ) {
-        return;
-      }
-      if (syncEvent.detail?.source === instanceIdRef.current) {
-        return;
-      }
-
-      setState(loadStateFromStorage(projectId));
-    };
-    const handleStorageSync = (event: StorageEvent) => {
-      if (event.key && !event.key.endsWith(`${STORAGE_KEY_SUFFIX_SEPARATOR}${projectId}`)) {
-        return;
-      }
-
-      setState(loadStateFromStorage(projectId));
-    };
-
-    window.addEventListener(STORAGE_SYNC_EVENT, handleSync);
-    window.addEventListener("storage", handleStorageSync);
-
+    let cancelled = false;
+    setHasHydrated(false);
+    void (async () => {
+      const row = await loadConsentAssessment(supabaseRef.current, projectId);
+      if (cancelled) return;
+      requestIdRef.current += 1;
+      setState(row);
+      setError(null);
+      setIsLoading(false);
+      setHasHydrated(true);
+    })();
     return () => {
-      window.removeEventListener(STORAGE_SYNC_EVENT, handleSync);
-      window.removeEventListener("storage", handleStorageSync);
+      cancelled = true;
     };
   }, [projectId]);
 
@@ -125,12 +97,11 @@ export function useConsentAssessment({
   );
 
   function commitState(
-    updater: (current: ConsentAssessmentState) => ConsentAssessmentState,
+    updater: (current: ConsentAssessmentRow) => ConsentAssessmentRow,
   ) {
     setState((current) => {
       const next = updater(current);
-      persistState(projectId, next);
-      emitSync(projectId, instanceIdRef.current);
+      void saveConsentAssessment(supabaseRef.current, projectId, next);
       return next;
     });
   }
@@ -164,10 +135,12 @@ export function useConsentAssessment({
         return;
       }
 
+      const effectiveDetails =
+        projectDetails ?? intakeToProjectDetails(projectIntake);
       const resolvedDocuments = await resolveProjectDocuments(
         apiUrl,
         payload,
-        projectDetails,
+        effectiveDetails,
       );
       const nextChecklist: ChecklistResult = {
         ...payload,
@@ -177,9 +150,16 @@ export function useConsentAssessment({
         ),
       };
 
+      const nextForecastContext = buildForecastContext(
+        address,
+        nextChecklist,
+        projectIntake,
+      );
+
       commitState((current) => ({
         ...current,
         checklist: nextChecklist,
+        forecastContext: nextForecastContext,
       }));
     } catch (requestError) {
       if (requestIdRef.current !== requestId) {
@@ -327,6 +307,7 @@ export function useConsentAssessment({
     documentOrder: state.documentOrder,
     uploads: state.uploads,
     completions: state.completions,
+    forecastContext: state.forecastContext,
     completion,
     isLoading,
     error,
@@ -342,10 +323,40 @@ export function useConsentAssessment({
   };
 }
 
+function intakeToProjectDetails(
+  intake: ProjectIntake | undefined,
+): ProjectDetails {
+  const allowedTypes: ProjectType[] = [
+    "new_dwelling",
+    "extension",
+    "accessory_building",
+    "deck",
+  ];
+  const rawType = (intake?.projectType ?? "new_dwelling") as ProjectType;
+  const projectType: ProjectType = allowedTypes.includes(rawType)
+    ? rawType
+    : "new_dwelling";
+  return {
+    projectType,
+    estimatedFloorAreaM2: intake?.estimatedFloorAreaM2 ?? null,
+    estimatedConstructionValueNZD: intake?.estimatedConstructionValueNZD ?? null,
+    involvesStructuralWork: intake?.involvesStructuralWork ?? false,
+    involvesEarthworks: intake?.involvesEarthworks ?? false,
+    existingStructureDemolished: intake?.existingStructureDemolished ?? false,
+    yearOfConstruction: intake?.yearOfConstruction ?? null,
+    newRoadAccess: intake?.newRoadAccess ?? false,
+    newServiceConnections: {
+      water: intake?.serviceConnectionWater ?? false,
+      wastewater: intake?.serviceConnectionWastewater ?? false,
+      stormwater: intake?.serviceConnectionStormwater ?? false,
+    },
+  };
+}
+
 async function resolveProjectDocuments(
   apiUrl: string,
   checklist: ChecklistResult,
-  projectDetails: ProjectDetails | undefined,
+  projectDetails: ProjectDetails,
 ) {
   const response = await fetch(`${apiUrl}/api/resolve-documents`, {
     method: "POST",
@@ -452,97 +463,45 @@ function normalizeOverlayKey(sourceKey: string): string | null {
   return map[sourceKey] ?? null;
 }
 
-function getDocumentsForState(state: ConsentAssessmentState) {
+function buildForecastContext(
+  address: string,
+  checklist: ChecklistResult,
+  intake: ProjectIntake | undefined,
+): Record<string, unknown> {
+  const activeOverlays = Object.entries(checklist.overlays ?? {})
+    .filter(([, isActive]) => isActive)
+    .map(([key]) => normalizeOverlayKey(key))
+    .filter((key): key is string => Boolean(key));
+
+  return {
+    address,
+    lat: checklist.coordinates?.lat ?? 0,
+    lon: checklist.coordinates?.lon ?? 0,
+    zoneCategory: getZoneCategory(checklist.zone_info?.zone_type),
+    activeOverlays,
+    projectType: intake?.projectType ?? "new_dwelling",
+    estimatedFloorAreaM2: intake?.estimatedFloorAreaM2 ?? null,
+    estimatedConstructionValueNZD: intake?.estimatedConstructionValueNZD ?? null,
+    involvesStructuralWork: intake?.involvesStructuralWork ?? false,
+    involvesEarthworks: intake?.involvesEarthworks ?? false,
+    existingStructureDemolished: intake?.existingStructureDemolished ?? false,
+    newRoadAccess: intake?.newRoadAccess ?? false,
+    yearOfConstruction: intake?.yearOfConstruction ?? null,
+    newServiceConnections: {
+      water: intake?.serviceConnectionWater ?? false,
+      wastewater: intake?.serviceConnectionWastewater ?? false,
+      stormwater: intake?.serviceConnectionStormwater ?? false,
+    },
+  };
+}
+
+function getDocumentsForState(state: ConsentAssessmentRow) {
   return normalizeDocuments(
     state.checklist?.required_documents ?? [],
     state.manualDocuments,
     state.hiddenDocumentIds,
     state.documentOrder,
   );
-}
-
-function loadStateFromStorage(projectId: string): ConsentAssessmentState {
-  return {
-    checklist: readFromStorage<ChecklistResult>(getChecklistStorageKey(projectId)),
-    manualDocuments:
-      readFromStorage<StoredManualConsentDocument[]>(getManualDocumentsStorageKey(projectId)) ?? [],
-    hiddenDocumentIds: readFromStorage<string[]>(getHiddenDocumentsStorageKey(projectId)) ?? [],
-    documentOrder: readFromStorage<string[]>(getDocumentOrderStorageKey(projectId)) ?? [],
-    uploads: readFromStorage<Record<string, UploadRecord>>(getUploadStorageKey(projectId)) ?? {},
-    completions:
-      readFromStorage<Record<string, CompletionRecord>>(getCompletionStorageKey(projectId)) ?? {},
-  };
-}
-
-function persistState(projectId: string, state: ConsentAssessmentState) {
-  writeToStorage(getChecklistStorageKey(projectId), state.checklist);
-  writeToStorage(getManualDocumentsStorageKey(projectId), state.manualDocuments);
-  writeToStorage(getHiddenDocumentsStorageKey(projectId), state.hiddenDocumentIds);
-  writeToStorage(getDocumentOrderStorageKey(projectId), state.documentOrder);
-  writeToStorage(getUploadStorageKey(projectId), state.uploads);
-  writeToStorage(getCompletionStorageKey(projectId), state.completions);
-}
-
-function getChecklistStorageKey(projectId: string) {
-  return `${CHECKLIST_STORAGE_PREFIX}:${projectId}`;
-}
-
-function getManualDocumentsStorageKey(projectId: string) {
-  return `${MANUAL_DOCUMENT_STORAGE_PREFIX}:${projectId}`;
-}
-
-function getHiddenDocumentsStorageKey(projectId: string) {
-  return `${HIDDEN_DOCUMENT_STORAGE_PREFIX}:${projectId}`;
-}
-
-function getDocumentOrderStorageKey(projectId: string) {
-  return `${DOCUMENT_ORDER_STORAGE_PREFIX}:${projectId}`;
-}
-
-function getUploadStorageKey(projectId: string) {
-  return `${UPLOAD_STORAGE_PREFIX}:${projectId}`;
-}
-
-function getCompletionStorageKey(projectId: string) {
-  return `${COMPLETION_STORAGE_PREFIX}:${projectId}`;
-}
-
-function readFromStorage<T>(key: string): T | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const raw = window.localStorage.getItem(key);
-  if (!raw) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(raw) as T;
-  } catch {
-    return null;
-  }
-}
-
-function writeToStorage(key: string, value: unknown) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  if (value === null) {
-    window.localStorage.removeItem(key);
-    return;
-  }
-
-  window.localStorage.setItem(key, JSON.stringify(value));
-}
-
-function emitSync(projectId: string, source: string) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  window.dispatchEvent(new CustomEvent(STORAGE_SYNC_EVENT, { detail: { projectId, source } }));
 }
 
 function formatApiError(payload: unknown): string {

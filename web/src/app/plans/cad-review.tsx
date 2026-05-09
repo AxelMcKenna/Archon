@@ -194,7 +194,7 @@ export function CadReview({ cad }: { cad: Cad }) {
         </div>
         <div className="flex-1 p-4">
           <div
-            className="relative w-full bg-white border border-ink-700/10 rounded-sm shadow-sm overflow-hidden"
+            className="relative w-full bg-surface-raised border border-ink-700/10 rounded-sm shadow-sm overflow-hidden"
             style={
               activeViewInfo
                 ? { aspectRatio: `${activeViewInfo.width} / ${activeViewInfo.height}` }
@@ -259,8 +259,8 @@ export function CadReview({ cad }: { cad: Cad }) {
         </div>
       </div>
 
-      <aside className="space-y-3">
-        <div className="flex items-center justify-between">
+      <aside className="flex flex-col min-h-0 overflow-hidden self-stretch">
+        <div className="flex items-center justify-between shrink-0">
           <h3 className="font-semibold">
             Flags ({numbered.length}
             {resolved.size > 0 ? ` · ${resolved.size} resolved` : ""})
@@ -276,13 +276,14 @@ export function CadReview({ cad }: { cad: Cad }) {
         {revUrl && (
           <a
             href={revUrl}
-            className="block text-sm text-blue-700 underline"
+            className="block text-sm text-blue-700 underline shrink-0 mt-3"
             target="_blank"
             rel="noreferrer"
           >
             Download revised DXF
           </a>
         )}
+        <div className="flex-1 min-h-0 overflow-y-auto mt-3 pr-1 -mr-1 space-y-3">
         <ul className="space-y-2">
           {numbered.map((f) => {
             const sev =
@@ -292,7 +293,7 @@ export function CadReview({ cad }: { cad: Cad }) {
               <li
                 key={f._i}
                 onClick={() => setActiveFlag(f._n)}
-                className={`border-l-4 ${sev} bg-white border rounded-sm p-3 text-sm space-y-1 cursor-pointer ${
+                className={`border-l-4 ${sev} bg-surface-raised border rounded-sm p-3 text-sm space-y-1 cursor-pointer ${
                   isActive ? "ring-2 ring-yellow-500" : ""
                 }`}
               >
@@ -353,7 +354,7 @@ export function CadReview({ cad }: { cad: Cad }) {
         </ul>
 
         {resolvedFlags.length > 0 && (
-          <div className="pt-4 mt-2 border-t border-ink-700/15">
+          <div className="pt-4 border-t border-ink-700/15">
             <h4 className="text-[11px] uppercase tracking-wide text-ink-500 mb-2">
               Resolved ({resolvedFlags.length})
             </h4>
@@ -381,6 +382,7 @@ export function CadReview({ cad }: { cad: Cad }) {
             </ul>
           </div>
         )}
+        </div>
       </aside>
     </section>
   );

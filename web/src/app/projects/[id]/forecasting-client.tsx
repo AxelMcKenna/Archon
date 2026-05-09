@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { AiThinking, AiBadge } from "@/components/ai-thinking";
+import { AiThinking } from "@/components/ai-thinking";
 
 type ForecastResponse = {
   costs: {
@@ -52,28 +52,28 @@ type RiskDimension = {
 
 export function ForecastingClient({
   projectId,
-  address,
-  projectType,
+  initialPayload = null,
 }: {
   projectId: string;
-  address: string;
-  projectType: string;
+  initialPayload?: Record<string, unknown> | null;
 }) {
   const [data, setData] = useState<ForecastResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [requestPayload, setRequestPayload] = useState<Record<string, unknown> | null>(null);
+  const [loading, setLoading] = useState(initialPayload !== null);
+  const [error, setError] = useState<string | null>(
+    initialPayload === null
+      ? "Forecast data is unavailable until consent requirements are generated at least once."
+      : null,
+  );
+  const [requestPayload, setRequestPayload] = useState<Record<string, unknown> | null>(
+    initialPayload,
+  );
 
   useEffect(() => {
-    const raw = window.localStorage.getItem(`forecast-context:${projectId}`);
-    if (!raw) {
-      setLoading(false);
-      setError("Forecast data is unavailable until consent requirements are generated at least once.");
-      return;
+    if (initialPayload) {
+      setRequestPayload(initialPayload);
+      setError(null);
     }
-    const parsed = JSON.parse(raw) as Record<string, unknown>;
-    setRequestPayload(parsed);
-  }, [projectId]);
+  }, [initialPayload]);
 
   async function fetchForecast(payload: Record<string, unknown>) {
     setLoading(true);
@@ -113,33 +113,7 @@ export function ForecastingClient({
   }, [data]);
 
   return (
-    <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-1.5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
-            Forecast
-          </p>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink-900">Forecasting</h1>
-            <AiBadge label="AI estimate" />
-          </div>
-          <p className="text-sm text-ink-500 max-w-2xl leading-relaxed">{address} · {projectType}</p>
-          {data && (
-            <p className="text-xs text-ink-500">
-              MBIE data freshness: {new Date(data.dataFreshness).toLocaleString()}
-            </p>
-          )}
-        </div>
-        {data && requestPayload && (
-          <button
-            onClick={() => void fetchForecast(requestPayload)}
-            className="inline-flex items-center justify-center rounded-sm border border-ink-200 bg-white px-4 py-2.5 text-sm font-medium shadow-card transition hover:border-ink-300 hover:bg-ink-50 cursor-pointer"
-          >
-            Refresh
-          </button>
-        )}
-      </header>
-
+    <div className="space-y-6">
       {loading && (
         <AiThinking
           label="Generating forecast"
@@ -148,22 +122,22 @@ export function ForecastingClient({
         />
       )}
       {error && (
-        <div className="rounded-sm border border-red-200 bg-red-50 p-6 text-sm text-red-800 shadow-card">
+        <div className="rounded-sm border border-red-200 bg-red-50 p-6 text-sm text-red-800 shadow-depth">
           <p>{error}</p>
           <div className="mt-4 flex gap-3">
             {requestPayload && (
               <button
                 onClick={() => void fetchForecast(requestPayload)}
-                className="rounded-sm bg-red-700 px-3 py-2 text-xs font-medium text-white shadow-card transition hover:bg-red-800 cursor-pointer"
+                className="rounded-sm bg-red-700 px-3 py-2 text-xs font-medium text-white shadow-depth transition hover:bg-red-800 cursor-pointer"
               >
                 Retry
               </button>
             )}
             <Link
-              href={`/projects/${projectId}/consent-assessment`}
-              className="rounded-sm border border-red-300 bg-white px-3 py-2 text-xs font-medium transition hover:bg-red-50 cursor-pointer"
+              href={`/projects/${projectId}/application-prep`}
+              className="rounded-sm border border-red-300 bg-surface-raised px-3 py-2 text-xs font-medium transition hover:bg-red-50 cursor-pointer"
             >
-              Go to Consent Assessment
+              Go to Lodgement
             </Link>
           </div>
         </div>
@@ -171,7 +145,7 @@ export function ForecastingClient({
 
       {data && (
         <div className="grid gap-5 lg:grid-cols-3">
-          <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-6">
+          <section className="rounded-sm bg-surface-raised shadow-depth p-6">
             <h2 className="text-base font-semibold tracking-tight text-ink-900">Consent Costs</h2>
             {data.costs ? (
               <>
@@ -195,7 +169,7 @@ export function ForecastingClient({
               <div className="mt-4 rounded-sm border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                 Construction value is missing. Add it in project details to see cost estimates.
                 <div className="mt-2">
-                  <Link href={`/projects/${projectId}/consent-assessment`} className="text-xs font-medium underline">
+                  <Link href={`/projects/${projectId}/application-prep`} className="text-xs font-medium underline">
                     Go to project details
                   </Link>
                 </div>
@@ -204,35 +178,34 @@ export function ForecastingClient({
             <p className="mt-5 text-xs text-ink-500 leading-relaxed">{data.disclaimer}</p>
           </section>
 
-          <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-6">
+          <section className="rounded-sm bg-surface-raised shadow-depth p-6">
             <h2 className="text-base font-semibold tracking-tight text-ink-900">Consent Duration</h2>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="rounded-sm bg-ink-50 ring-1 ring-ink-200/70 px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">P50</p>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">P50</p>
                 <p className="mt-1 text-2xl font-semibold tracking-tight tabular-nums">{data.duration.calendarWeeksP50}<span className="text-xs ml-1 text-ink-500 font-normal">weeks</span></p>
               </div>
               <div className="rounded-sm bg-ink-50 ring-1 ring-ink-200/70 px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">P90</p>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">P90</p>
                 <p className="mt-1 text-2xl font-semibold tracking-tight tabular-nums">{data.duration.calendarWeeksP90}<span className="text-xs ml-1 text-ink-500 font-normal">weeks</span></p>
               </div>
             </div>
-            <div className="mt-4 rounded-sm bg-ink-50 ring-1 ring-ink-200/70 p-3 text-xs text-ink-600 leading-relaxed">
-              Lodgement → Consent ({data.duration.p50TotalElapsedDays} wd) → CCC (+{data.duration.cccAdditionalDays} wd)
-            </div>
-            <p className="mt-4 text-sm text-ink-700 leading-relaxed">
-              There is a <strong className="text-ink-900 tabular-nums">{Math.round(data.duration.rfiProbability * 100)}%</strong> chance of an RFI, typically adding{" "}
-              <strong className="text-ink-900 tabular-nums">{data.duration.expectedRfiSuspensionDays}</strong> working days.
-            </p>
+            <DurationTimeline
+              consentDays={data.duration.p50TotalElapsedDays}
+              cccDays={data.duration.cccAdditionalDays}
+              rfiProbability={data.duration.rfiProbability}
+              rfiDays={data.duration.expectedRfiSuspensionDays}
+            />
             <ul className="mt-3 space-y-1 text-xs text-ink-500">
               {data.duration.notes.map((note) => <li key={note}>• {note}</li>)}
             </ul>
           </section>
 
-          <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-6">
+          <section className="rounded-sm bg-surface-raised shadow-depth p-6">
             <h2 className="text-base font-semibold tracking-tight text-ink-900">Risk Profile</h2>
             <div className="mt-4 space-y-2.5">
               {riskCards.map((card) => (
-                <details key={card.name} className="group rounded-sm border border-ink-200/80 bg-white p-3.5 transition hover:border-ink-300">
+                <details key={card.name} className="group rounded-sm border border-ink-200/80 bg-surface-raised p-3.5 transition hover:border-ink-300">
                   <summary className="cursor-pointer list-none">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-ink-900">{card.name}</span>
@@ -261,6 +234,108 @@ export function ForecastingClient({
           </section>
         </div>
       )}
+    </div>
+  );
+}
+
+function DurationTimeline({
+  consentDays,
+  cccDays,
+  rfiProbability,
+  rfiDays,
+}: {
+  consentDays: number;
+  cccDays: number;
+  rfiProbability: number;
+  rfiDays: number;
+}) {
+  const rfiPct = Math.round(rfiProbability * 100);
+  const rfiLikely = rfiProbability >= 0.5;
+  const baseTotal = consentDays + cccDays;
+  const worstTotal = baseTotal + rfiDays;
+  const consentPct = (consentDays / worstTotal) * 100;
+  const rfiPctW = (rfiDays / worstTotal) * 100;
+  const cccPctW = (cccDays / worstTotal) * 100;
+
+  return (
+    <div className="mt-5 space-y-3">
+      <div className="flex items-baseline justify-between text-[10px] uppercase tracking-[0.18em] text-ink-500">
+        <span>Lodgement</span>
+        <span>CCC issued</span>
+      </div>
+
+      <div className="relative h-9">
+        <div className="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-ink-100" />
+        <div className="absolute inset-y-0 left-0 flex h-9 items-stretch" style={{ width: "100%" }}>
+          <div
+            className="relative flex items-center justify-center bg-ink-900 text-[10px] font-medium text-white"
+            style={{ width: `${consentPct}%` }}
+          >
+            <span className="px-1 tabular-nums">{consentDays} wd</span>
+          </div>
+          <div
+            className="relative flex items-center justify-center bg-amber-300/70 text-[10px] font-medium text-amber-950"
+            style={{
+              width: `${rfiPctW}%`,
+              backgroundImage:
+                "repeating-linear-gradient(45deg, rgba(180,83,9,0.18) 0 4px, transparent 4px 8px)",
+            }}
+            title={`RFI suspension — ${rfiPct}% likely`}
+          >
+            <span className="px-1 tabular-nums whitespace-nowrap">+{rfiDays} wd</span>
+          </div>
+          <div
+            className="relative flex items-center justify-center bg-ink-300 text-[10px] font-medium text-ink-900"
+            style={{ width: `${cccPctW}%` }}
+          >
+            <span className="px-1 tabular-nums">+{cccDays} wd</span>
+          </div>
+        </div>
+        <span
+          className="absolute top-0 h-9 w-px bg-ink-900"
+          style={{ left: `${consentPct}%` }}
+          aria-hidden
+        />
+      </div>
+
+      <div className="grid grid-cols-3 gap-3 text-[11px]">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-sm bg-ink-900" />
+            <span className="font-medium text-ink-900">Statutory</span>
+          </div>
+          <p className="text-ink-500">Lodgement → consent</p>
+        </div>
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-1.5">
+            <span
+              className="h-2 w-2 rounded-sm bg-amber-300"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(45deg, rgba(180,83,9,0.4) 0 2px, transparent 2px 4px)",
+              }}
+            />
+            <span className={`font-medium ${rfiLikely ? "text-amber-900" : "text-ink-900"}`}>
+              RFI risk
+            </span>
+            <span
+              className={`ml-auto rounded-sm px-1 text-[10px] font-semibold tabular-nums ${
+                rfiLikely ? "bg-amber-100 text-amber-900" : "bg-ink-100 text-ink-700"
+              }`}
+            >
+              {rfiPct}%
+            </span>
+          </div>
+          <p className="text-ink-500">Adds ~{rfiDays} wd if raised</p>
+        </div>
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-sm bg-ink-300" />
+            <span className="font-medium text-ink-900">CCC</span>
+          </div>
+          <p className="text-ink-500">Post-consent</p>
+        </div>
+      </div>
     </div>
   );
 }

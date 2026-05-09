@@ -12,6 +12,17 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "cv11";
+}
+
+/* Tabular numerics by default in data-heavy contexts */
+table, .data, [data-num] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hairline divider with engraved highlight */
+.hairline {
+  box-shadow: 0 1px 0 rgba(8, 9, 11, 0.06), 0 2px 0 rgba(255, 255, 255, 0.5);
 }
 
 /* Tabular numerals for any data-heavy element */
@@ -39,7 +50,7 @@ body {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(214, 184, 127, 0.18),
+    rgba(59, 130, 246, 0.18),
     transparent
   );
   transform: translateX(-100%);

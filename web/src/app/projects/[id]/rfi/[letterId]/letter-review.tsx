@@ -378,7 +378,7 @@ export function LetterReview({
                   <button
                     onClick={reground}
                     disabled={regrounding}
-                    className="rounded-sm border border-ink-700/20 bg-white text-ink-900 px-3 py-1.5 text-sm font-medium disabled:opacity-50 cursor-pointer hover:bg-ink-700/5"
+                    className="rounded-sm border border-ink-700/20 bg-surface-raised text-ink-900 px-3 py-1.5 text-sm font-medium disabled:opacity-50 cursor-pointer hover:bg-ink-700/5"
                     title="Re-run plan matching against the linked plan"
                   >
                     {regrounding ? "Re-matching…" : "Re-match"}
@@ -395,7 +395,7 @@ export function LetterReview({
                   <button
                     onClick={classify}
                     disabled={classifying}
-                    className="rounded-sm border border-ink-700/20 bg-white text-ink-900 px-3 py-1.5 text-sm font-medium disabled:opacity-50 cursor-pointer hover:bg-ink-700/5"
+                    className="rounded-sm border border-ink-700/20 bg-surface-raised text-ink-900 px-3 py-1.5 text-sm font-medium disabled:opacity-50 cursor-pointer hover:bg-ink-700/5"
                   >
                     {classifying ? (
                       <AiThinking label="Classifying" variant="button" />
@@ -409,7 +409,7 @@ export function LetterReview({
                     <button
                       onClick={generateAllMissing}
                       disabled={draftingAll || classified === 0}
-                      className="rounded-sm border border-ink-700/20 bg-white text-ink-900 px-3 py-1.5 text-sm font-medium disabled:opacity-50 cursor-pointer hover:bg-ink-700/5"
+                      className="rounded-sm border border-ink-700/20 bg-surface-raised text-ink-900 px-3 py-1.5 text-sm font-medium disabled:opacity-50 cursor-pointer hover:bg-ink-700/5"
                       title={
                         classified === 0
                           ? "Classify the letter first"
@@ -593,7 +593,7 @@ function CoveringLetterModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-sm shadow-xl max-w-3xl w-full max-h-[85vh] flex flex-col"
+        className="bg-surface-raised rounded-sm shadow-xl max-w-3xl w-full max-h-[85vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-3 border-b border-ink-700/10">
@@ -607,20 +607,20 @@ function CoveringLetterModal({
             <button
               onClick={onCopy}
               disabled={!text}
-              className="rounded-sm border border-ink-700/20 bg-white text-ink-900 px-3 py-1.5 text-sm font-medium disabled:opacity-50 cursor-pointer hover:bg-ink-700/5"
+              className="rounded-sm border border-ink-700/20 bg-surface-raised text-ink-900 px-3 py-1.5 text-sm font-medium disabled:opacity-50 cursor-pointer hover:bg-ink-700/5"
             >
               {copied ? "Copied" : "Copy markdown"}
             </button>
             <button
               onClick={() => text && openPrintWindow(text)}
               disabled={!text}
-              className="rounded-sm border border-ink-700/20 bg-white text-ink-900 px-3 py-1.5 text-sm font-medium disabled:opacity-50 cursor-pointer hover:bg-ink-700/5"
+              className="rounded-sm border border-ink-700/20 bg-surface-raised text-ink-900 px-3 py-1.5 text-sm font-medium disabled:opacity-50 cursor-pointer hover:bg-ink-700/5"
             >
               Print → PDF
             </button>
             <button
               onClick={onClose}
-              className="rounded-sm border border-ink-700/20 bg-white text-ink-900 px-3 py-1.5 text-sm font-medium cursor-pointer hover:bg-ink-700/5"
+              className="rounded-sm border border-ink-700/20 bg-surface-raised text-ink-900 px-3 py-1.5 text-sm font-medium cursor-pointer hover:bg-ink-700/5"
             >
               Close
             </button>
@@ -1009,7 +1009,7 @@ function Resolver({
           <button
             disabled={busy}
             onClick={() => pick(rules)}
-            className="text-left rounded-sm border border-ink-700/20 bg-white px-2.5 py-2 hover:bg-ink-700/5 cursor-pointer disabled:opacity-50"
+            className="text-left rounded-sm border border-ink-700/20 bg-surface-raised px-2.5 py-2 hover:bg-ink-700/5 cursor-pointer disabled:opacity-50"
           >
             <div className="text-[10px] uppercase tracking-wide text-ink-500">
               Rules engine
@@ -1020,7 +1020,7 @@ function Resolver({
         <button
           disabled={busy}
           onClick={() => pick(ai)}
-          className="text-left rounded-sm border border-ink-700/20 bg-white px-2.5 py-2 hover:bg-ink-700/5 cursor-pointer disabled:opacity-50"
+          className="text-left rounded-sm border border-ink-700/20 bg-surface-raised px-2.5 py-2 hover:bg-ink-700/5 cursor-pointer disabled:opacity-50"
         >
           <div className="text-[10px] uppercase tracking-wide text-ink-500">AI</div>
           <div className="font-medium">{aiLabel ?? ai}</div>

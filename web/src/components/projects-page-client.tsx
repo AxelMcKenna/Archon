@@ -58,15 +58,6 @@ const lifecycle = [
   { key: "CCC", label: "CCC" },
 ] as const;
 
-const stageIndex: Record<ProjectStage, number> = {
-  ASSESSMENT: 0,
-  APPLICATION: 1,
-  RFI: 2,
-  PROCESSING: 3,
-  INSPECTION: 4,
-  CCC: 5,
-};
-
 const projectTypeLabels: Record<ProjectListItem["project_type"], string> = {
   new_dwelling: "New Dwelling",
   extension: "Extension",
@@ -130,7 +121,6 @@ const filterOptions: Array<{ value: FilterValue; label: string }> = [
 ];
 
 export function ProjectsPageClient({ projects }: { projects: ProjectListItem[] }) {
-  const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterValue>("ALL");
 
   const uniqueProjects = useMemo(
@@ -140,34 +130,31 @@ export function ProjectsPageClient({ projects }: { projects: ProjectListItem[] }
   const cards = useMemo(() => uniqueProjects.map(mapProjectToCard), [uniqueProjects]);
 
   const filteredCards = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-
     return cards.filter((project) => {
-      const matchesQuery =
-        !normalizedQuery ||
-        project.name.toLowerCase().includes(normalizedQuery) ||
-        project.address.toLowerCase().includes(normalizedQuery);
-
-      const matchesFilter = filter === "ALL" || project.filterStatus === filter;
-      return matchesQuery && matchesFilter;
+      return filter === "ALL" || project.filterStatus === filter;
     });
-  }, [cards, filter, query]);
+  }, [cards, filter]);
 
   return (
     <div className="min-h-full">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-8 py-10">
-        <section className="overflow-hidden rounded-sm border border-ink-200 bg-surface-raised shadow-card">
-          <div className="border-b border-slate-200 bg-white px-6 py-8 sm:px-8">
+        <section className="overflow-hidden rounded-md bg-surface-raised shadow-depth">
+          <div className="relative border-b border-ink-900/[0.06] bg-surface-raised px-6 py-8 sm:px-8">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-accent/40"
+            />
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-2xl space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-                  ConsentIQ Portfolio
+                <p className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-ink-500">
+                  <span className="inline-block h-1 w-1 rounded-full bg-accent" />
+                  Atlas Portfolio
                 </p>
                 <div className="space-y-2">
-                  <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                  <h1 className="font-display uppercase font-medium leading-[0.95] tracking-[0.02em] text-[44px] text-ink-900 sm:text-[56px]">
                     Projects
                   </h1>
-                  <p className="text-sm leading-6 text-slate-600 sm:text-base">
+                  <p className="text-sm leading-6 text-ink-500 sm:text-[15px]">
                     Central command for active building consent applications, readiness,
                     and lifecycle progress across the NZ approval journey.
                   </p>
@@ -175,76 +162,51 @@ export function ProjectsPageClient({ projects }: { projects: ProjectListItem[] }
               </div>
               <Link
                 href="/projects/new"
-                className="inline-flex items-center justify-center rounded-sm bg-ink-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-ink-700"
+                className="inline-flex items-center justify-center rounded-md bg-ink-900 px-4 py-2.5 text-[13px] font-semibold text-white shadow-depth transition-all hover:bg-ink-700 hover:shadow-depth-hover cursor-pointer"
               >
-                New Project
+                + New Project
               </Link>
             </div>
           </div>
 
-          <div className="flex flex-col gap-4 px-6 py-5 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
-            <div className="grid flex-1 gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
-              <label className="relative block">
-                <span className="sr-only">Search projects</span>
-                <svg
-                  className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="m21 21-4.35-4.35m1.85-5.15a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
-                  />
-                </svg>
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search by project name or address"
-                  className="w-full rounded-sm border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-ink-900 focus:ring-2 focus:ring-ink-900/10"
+          <div className="flex flex-col gap-4 px-6 py-4 sm:px-8 lg:flex-row lg:items-center lg:justify-end">
+            <label className="relative block w-full sm:w-[220px]">
+              <span className="sr-only">Filter projects</span>
+              <select
+                value={filter}
+                onChange={(event) => setFilter(event.target.value as FilterValue)}
+                className="w-full appearance-none rounded-md bg-surface-sunken px-4 py-2.5 pr-10 text-[13px] text-ink-900 outline-none transition shadow-inset focus:ring-2 focus:ring-brand-500/30 cursor-pointer"
+              >
+                {filterOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <svg
+                className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="m6 9 6 6 6-6"
                 />
-              </label>
-
-              <label className="relative block">
-                <span className="sr-only">Filter projects</span>
-                <select
-                  value={filter}
-                  onChange={(event) => setFilter(event.target.value as FilterValue)}
-                  className="w-full appearance-none rounded-sm border border-slate-200 bg-white px-4 py-3 pr-10 text-sm text-slate-900 outline-none transition focus:border-ink-900 focus:ring-2 focus:ring-ink-900/10"
-                >
-                  {filterOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                <svg
-                  className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="m6 9 6 6 6-6"
-                  />
-                </svg>
-              </label>
-            </div>
+              </svg>
+            </label>
           </div>
         </section>
 
         {!cards.length ? (
           <EmptyState />
         ) : !filteredCards.length ? (
-          <section className="rounded-sm border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
-            <p className="text-lg font-semibold text-slate-900">No matching projects</p>
-            <p className="mt-2 text-sm text-slate-500">
-              Try adjusting your search or filter to see more consent applications.
+          <section className="rounded-md border border-dashed border-ink-900/[0.10] bg-white/60 px-6 py-16 text-center">
+            <p className="text-lg font-semibold text-ink-900">No matching projects</p>
+            <p className="mt-2 text-sm text-ink-500">
+              Try a different filter to see more consent applications.
             </p>
           </section>
         ) : (
@@ -266,143 +228,61 @@ function ProjectCard({ project }: { project: ProjectCardViewModel }) {
   return (
     <Link
       href={`/projects/${project.id}`}
-      className="group block rounded-sm border border-ink-200 bg-surface-raised p-6 shadow-card transition duration-200 hover:-translate-y-0.5 hover:border-ink-300 hover:shadow-raised cursor-pointer"
+      className="group relative block overflow-hidden rounded-md bg-surface-raised p-5 shadow-depth transition-shadow duration-200 hover:shadow-depth-hover cursor-pointer"
     >
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-3">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-accent opacity-60 transition-opacity group-hover:opacity-100"
+      />
+      <div className="flex flex-col gap-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-tan-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-tan-700">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.16em] text-accent">
+                <span className="h-1 w-1 rounded-full bg-accent" />
                 {getStageLabel(project.stage)}
               </span>
-              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${riskClasses}`}>
-                Risk {capitalize(project.risk)}
+              <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] font-medium ${riskClasses}`}>
+                Risk · {capitalize(project.risk)}
               </span>
             </div>
-            <div>
-              <h2 className="text-xl font-semibold tracking-tight text-slate-950 transition group-hover:text-slate-700">
-                {project.name}
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">{project.address}</p>
-            </div>
+            <h2 className="mt-2.5 text-[17px] font-semibold tracking-[-0.015em] text-ink-900 transition group-hover:text-accent">
+              {project.name}
+            </h2>
+            <p className="mt-0.5 text-[12px] text-ink-500 truncate">{project.address}</p>
           </div>
-
-          <div className="grid grid-cols-2 gap-3 sm:min-w-[240px]">
-            <MetricTile label="Readiness" value={`${project.readinessScore}%`} />
-            <MetricTile label="Progress" value={`${project.progress}%`} />
+          <div className="shrink-0 text-right">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-ink-500">Progress</p>
+            <p className="mt-0.5 text-[18px] font-semibold leading-none tabular-nums text-ink-900">{project.progress}%</p>
           </div>
         </div>
 
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs font-medium uppercase tracking-wide text-slate-500">
-            <span>Consent progress</span>
-            <span>{project.progress}% complete</span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-            <div
-              className="h-full rounded-full bg-ink-900"
-              style={{ width: `${project.progress}%` }}
-            />
-          </div>
+        <div className="relative h-1 overflow-hidden rounded-full bg-ink-100">
+          <div
+            className="h-full rounded-full bg-accent transition-all"
+            style={{ width: `${project.progress}%` }}
+          />
         </div>
 
-        <LifecycleBar stage={project.stage} />
-
-        <div className="grid gap-3 sm:grid-cols-3">
-          <ProjectStat
-            label="Open RFIs"
-            value={String(project.openRFIs)}
-            hint={project.openRFIs > 0 ? "Requires response planning" : "No active requests"}
-          />
-          <ProjectStat
-            label="Missing docs"
-            value={String(project.missingDocs)}
-            hint={project.missingDocs > 0 ? "Likely to impact readiness" : "Document set on track"}
-          />
-          <ProjectStat label="Last updated" value={updatedLabel} hint="Latest activity timestamp" />
+        <div className="flex items-center justify-between text-[11px] text-ink-500">
+          <span className="tabular-nums">
+            <span className="text-ink-900 font-medium">{project.openRFIs}</span> open RFIs
+            <span className="mx-2 text-ink-300">·</span>
+            <span className="text-ink-900 font-medium">{project.missingDocs}</span> missing docs
+          </span>
+          <span className="tabular-nums">{updatedLabel}</span>
         </div>
       </div>
     </Link>
   );
 }
 
-function LifecycleBar({ stage }: { stage: ProjectStage }) {
-  const currentIndex = stageIndex[stage];
-
-  return (
-    <div className="rounded-sm border border-slate-200 bg-slate-50/80 p-4">
-      <div className="flex flex-wrap gap-3">
-        {lifecycle.map((item, index) => {
-          const state =
-            index < currentIndex ? "complete" : index === currentIndex ? "current" : "upcoming";
-
-          return (
-            <div key={item.key} className="flex min-w-[120px] flex-1 items-center gap-3">
-              <div
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-semibold ${
-                  state === "complete"
-                    ? "border-ink-900 bg-ink-900 text-white"
-                    : state === "current"
-                      ? "border-ink-900 bg-white text-ink-900 ring-2 ring-ink-900/10"
-                      : "border-slate-200 bg-white text-slate-400"
-                }`}
-              >
-                {index + 1}
-              </div>
-              <div className="min-w-0">
-                <p
-                  className={`text-xs font-semibold uppercase tracking-wide ${
-                    state === "current"
-                      ? "text-ink-900"
-                      : state === "complete"
-                        ? "text-ink-700"
-                        : "text-slate-400"
-                  }`}
-                >
-                  {item.label}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function MetricTile({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-sm border border-slate-200 bg-slate-50 px-4 py-3">
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{value}</p>
-    </div>
-  );
-}
-
-function ProjectStat({
-  label,
-  value,
-  hint,
-}: {
-  label: string;
-  value: string;
-  hint: string;
-}) {
-  return (
-    <div className="rounded-sm border border-slate-200 bg-white px-4 py-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-2 text-lg font-semibold text-slate-950">{value}</p>
-      <p className="mt-1 text-xs leading-5 text-slate-500">{hint}</p>
-    </div>
-  );
-}
-
 function EmptyState() {
   return (
-    <section className="overflow-hidden rounded-sm border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
+    <section className="overflow-hidden rounded-md bg-surface-raised px-6 py-16 text-center shadow-depth">
       <div className="mx-auto flex max-w-md flex-col items-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-sm bg-slate-100 text-slate-500">
-          <svg className="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-ink-50 text-ink-500 shadow-inset">
+          <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -411,18 +291,18 @@ function EmptyState() {
             />
           </svg>
         </div>
-        <h2 className="mt-6 text-2xl font-semibold tracking-tight text-slate-950">
+        <h2 className="mt-6 text-2xl font-semibold tracking-[-0.02em] text-ink-900">
           No projects yet
         </h2>
-        <p className="mt-3 text-sm leading-6 text-slate-500">
+        <p className="mt-3 text-sm leading-6 text-ink-500">
           Start a consent application workspace to track lifecycle progress, RFIs,
           and readiness in one place.
         </p>
         <Link
           href="/projects/new"
-          className="mt-8 inline-flex items-center justify-center rounded-sm bg-ink-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-ink-700"
+          className="mt-8 inline-flex items-center justify-center rounded-md bg-ink-900 px-5 py-2.5 text-[13px] font-semibold text-white shadow-depth transition-all hover:bg-ink-700 hover:shadow-depth-hover cursor-pointer"
         >
-          Create your first project
+          + Create your first project
         </Link>
       </div>
     </section>
@@ -495,9 +375,9 @@ function getStageLabel(stage: ProjectStage) {
 }
 
 function getRiskClasses(risk: RiskLevel) {
-  if (risk === "HIGH") return "bg-rose-50 text-rose-700";
-  if (risk === "MEDIUM") return "bg-amber-50 text-amber-700";
-  return "bg-emerald-50 text-emerald-700";
+  if (risk === "HIGH") return "bg-red-50 text-red-700 before:bg-red-500";
+  if (risk === "MEDIUM") return "bg-amber-50 text-amber-700 before:bg-amber-500";
+  return "bg-emerald-50 text-emerald-700 before:bg-emerald-500";
 }
 
 function formatUpdatedAt(value: string) {

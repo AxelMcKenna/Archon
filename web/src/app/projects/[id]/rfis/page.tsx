@@ -196,7 +196,7 @@ export default async function ProjectRfis({
   return (
     <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
       <header className="space-y-1.5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
+        <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
           Requests for information
         </p>
         <h1 className="text-2xl font-semibold tracking-tight text-ink-900">RFIs</h1>
@@ -207,15 +207,15 @@ export default async function ProjectRfis({
         </p>
       </header>
 
-      <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-8 space-y-4">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
+      <section className="rounded-sm bg-surface-raised shadow-depth p-8 space-y-4">
+        <h2 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
           Received an RFI?
         </h2>
         <UploadRfiInline projects={projectsForUpload} plans={plansForUpload} />
       </section>
 
-      <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-8 space-y-4">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
+      <section className="rounded-sm bg-surface-raised shadow-depth p-8 space-y-4">
+        <h2 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
           RFI letters ({letters.length})
         </h2>
         <LettersList
@@ -265,7 +265,7 @@ function LettersList({
   }
   const bcaName = taxonomy.bcas.find((b) => b.id === projectBca)?.name ?? projectBca;
   return (
-    <ul className="divide-y divide-ink-200/70 rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card overflow-hidden">
+    <ul className="divide-y divide-ink-200/70 rounded-sm bg-surface-raised shadow-depth overflow-hidden">
       {letters.map((l) => {
         const isActive = l.id === activeId;
         const p = progress.get(l.id);
@@ -313,7 +313,7 @@ function SelectedLetterHeader({
   return (
     <div className="flex items-baseline justify-between flex-wrap gap-2">
       <div className="space-y-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">{bcaName}</p>
+        <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">{bcaName}</p>
         <h2 className="text-xl font-semibold tracking-tight text-ink-900">
           RFI {l.rfi_number ?? "?"}
           {l.issue_date ? ` — ${l.issue_date}` : ""}

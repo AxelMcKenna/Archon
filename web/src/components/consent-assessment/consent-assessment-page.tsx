@@ -6,11 +6,12 @@ import { useEffect, useState } from "react";
 import { CompletionCheckbox } from "./completion-checkbox";
 import type { ConsentDocument } from "./model";
 import { isManualDocument } from "./model";
-import { useConsentAssessment } from "./use-consent-assessment";
+import { useConsentAssessment, type ProjectIntake } from "./use-consent-assessment";
 
 interface ConsentAssessmentPageProps {
   projectId: string;
   address: string;
+  projectIntake?: ProjectIntake;
 }
 
 interface ManualDocumentFormState {
@@ -30,6 +31,7 @@ const INITIAL_FORM: ManualDocumentFormState = {
 export function ConsentAssessmentPage({
   projectId,
   address,
+  projectIntake,
 }: ConsentAssessmentPageProps) {
   const {
     checklist,
@@ -39,7 +41,6 @@ export function ConsentAssessmentPage({
     completion,
     isLoading,
     error,
-    generateChecklist,
     createManualDocument,
     removeDocument,
     saveDocumentOrder,
@@ -47,6 +48,7 @@ export function ConsentAssessmentPage({
   } = useConsentAssessment({
     projectId,
     address,
+    projectIntake,
   });
   const [showAddForm, setShowAddForm] = useState(false);
   const [isReorderMode, setIsReorderMode] = useState(false);
@@ -54,15 +56,6 @@ export function ConsentAssessmentPage({
   const [formState, setFormState] = useState(INITIAL_FORM);
   const [formFile, setFormFile] = useState<File | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-  const hasRequirements = documents.length > 0;
-  const actionLabel = isLoading
-    ? hasRequirements
-      ? "Refreshing requirements..."
-      : "Generating requirements..."
-    : hasRequirements
-      ? "Refresh Requirements"
-      : "Generate Consent Requirements";
-
   useEffect(() => {
     if (!isReorderMode) {
       return;
@@ -146,28 +139,19 @@ export function ConsentAssessmentPage({
 
   return (
     <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-1.5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
-            Project Workflow
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
-            Consent Assessment
-          </h1>
-          <p className="text-sm text-ink-500 max-w-2xl leading-relaxed">
-            Track and prepare required documentation for consent submission.
-          </p>
-        </div>
-        <button
-          onClick={() => void generateChecklist()}
-          disabled={isLoading}
-          className="inline-flex items-center justify-center rounded-sm bg-ink-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-ink-700 disabled:cursor-not-allowed disabled:bg-ink-700/60"
-        >
-          {actionLabel}
-        </button>
+      <header className="space-y-1.5">
+        <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
+          Project Workflow
+        </p>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+          Consent Assessment
+        </h1>
+        <p className="text-sm text-ink-500 max-w-2xl leading-relaxed">
+          Track and prepare required documentation for consent submission.
+        </p>
       </header>
 
-      <section className="rounded-sm bg-gradient-to-br from-white to-slate-50 ring-1 ring-ink-700/10 shadow-card p-8">
+      <section className="rounded-sm bg-surface-raised shadow-depth p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
             <p className="text-sm font-medium text-ink-500">Consent Readiness</p>
@@ -236,7 +220,7 @@ export function ConsentAssessmentPage({
           </div>
           <div className="flex flex-wrap items-center gap-3">
             {checklist?.zone_info && (
-              <div className="rounded-sm border border-ink-700/10 bg-white px-4 py-3 text-right text-sm text-ink-500 shadow-sm">
+              <div className="rounded-sm border border-ink-700/10 bg-surface-raised px-4 py-3 text-right text-sm text-ink-500 shadow-sm">
                 <div>{checklist.zone_info.zone_type}</div>
                 <div className="capitalize">{checklist.zone_info.source_council}</div>
               </div>
@@ -246,7 +230,7 @@ export function ConsentAssessmentPage({
                 setShowAddForm((current) => !current);
                 setIsReorderMode(false);
               }}
-              className="inline-flex items-center rounded-sm border border-ink-700/10 bg-white px-4 py-3 text-sm font-medium text-ink-900 shadow-sm transition-colors hover:bg-ink-50"
+              className="inline-flex items-center rounded-sm border border-ink-700/10 bg-surface-raised px-4 py-3 text-sm font-medium text-ink-900 shadow-sm transition-colors hover:bg-ink-50"
             >
               {showAddForm ? "Close Form" : "Add Required Document"}
             </button>
@@ -255,7 +239,7 @@ export function ConsentAssessmentPage({
                 setIsReorderMode((current) => !current);
                 setShowAddForm(false);
               }}
-              className="inline-flex items-center rounded-sm border border-ink-700/10 bg-white px-4 py-3 text-sm font-medium text-ink-900 shadow-sm transition-colors hover:bg-ink-50"
+              className="inline-flex items-center rounded-sm border border-ink-700/10 bg-surface-raised px-4 py-3 text-sm font-medium text-ink-900 shadow-sm transition-colors hover:bg-ink-50"
             >
               {isReorderMode ? "Exit Reorder" : "Reorder Documents"}
             </button>
@@ -263,7 +247,7 @@ export function ConsentAssessmentPage({
         </div>
 
         {showAddForm && (
-          <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-6">
+          <section className="rounded-sm bg-surface-raised shadow-depth p-6">
             <div className="grid gap-5 lg:grid-cols-2">
               <div className="space-y-4">
                 <div>
@@ -313,7 +297,7 @@ export function ConsentAssessmentPage({
                     onChange={(event) => setFormFile(event.currentTarget.files?.[0] ?? null)}
                     className="mt-3 block w-full text-sm text-ink-600 file:mr-4 file:rounded-sm file:border-0 file:bg-ink-900 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-ink-700"
                   />
-                  <div className="mt-3 rounded-sm bg-white px-3 py-2 text-sm text-ink-500">
+                  <div className="mt-3 rounded-sm bg-surface-raised px-3 py-2 text-sm text-ink-500">
                     {formFile ? formFile.name : "No file selected"}
                   </div>
                   {formFile && (
@@ -344,7 +328,7 @@ export function ConsentAssessmentPage({
                       setFormFile(null);
                       setFormError(null);
                     }}
-                    className="inline-flex items-center rounded-sm border border-ink-700/10 bg-white px-4 py-3 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
+                    className="inline-flex items-center rounded-sm border border-ink-700/10 bg-surface-raised px-4 py-3 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
                   >
                     Cancel
                   </button>
@@ -355,7 +339,7 @@ export function ConsentAssessmentPage({
         )}
 
         {isReorderMode && reorderedDocuments.length > 0 && (
-          <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-6">
+          <section className="rounded-sm bg-surface-raised shadow-depth p-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-ink-900">Reorder Documents</h3>
@@ -372,7 +356,7 @@ export function ConsentAssessmentPage({
                 </button>
                 <button
                   onClick={handleCancelOrder}
-                  className="inline-flex items-center rounded-sm border border-ink-700/10 bg-white px-4 py-3 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
+                  className="inline-flex items-center rounded-sm border border-ink-700/10 bg-surface-raised px-4 py-3 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
                 >
                   Cancel
                 </button>
@@ -399,14 +383,14 @@ export function ConsentAssessmentPage({
                     <button
                       onClick={() => moveDraftDocument(document.id, "up")}
                       disabled={index === 0}
-                      className="rounded-sm border border-ink-700/10 bg-white px-3 py-2 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50 disabled:cursor-not-allowed disabled:text-ink-400"
+                      className="rounded-sm border border-ink-700/10 bg-surface-raised px-3 py-2 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50 disabled:cursor-not-allowed disabled:text-ink-400"
                     >
                       Up
                     </button>
                     <button
                       onClick={() => moveDraftDocument(document.id, "down")}
                       disabled={index === reorderedDocuments.length - 1}
-                      className="rounded-sm border border-ink-700/10 bg-white px-3 py-2 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50 disabled:cursor-not-allowed disabled:text-ink-400"
+                      className="rounded-sm border border-ink-700/10 bg-surface-raised px-3 py-2 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50 disabled:cursor-not-allowed disabled:text-ink-400"
                     >
                       Down
                     </button>
@@ -418,14 +402,16 @@ export function ConsentAssessmentPage({
         )}
 
         {!documents.length ? (
-          <div className="rounded-sm border border-dashed border-ink-700/20 bg-white p-12 text-center shadow-sm">
+          <div className="rounded-sm border border-dashed border-ink-700/20 bg-surface-raised p-12 text-center shadow-sm">
             <p className="text-base font-medium text-ink-900">
-              {isLoading ? "Generating consent document requirements..." : "No consent documents available yet."}
+              {isLoading
+                ? "Generating consent document requirements..."
+                : "Consent requirements are being prepared."}
             </p>
             <p className="mt-2 text-sm text-ink-500">
               {isLoading
                 ? "We are analysing the project address and council context."
-                : "Generate consent requirements or add a manual document to start this project workflow."}
+                : "This usually appears within a few seconds of project creation. Add a manual document below if anything is missing."}
             </p>
           </div>
         ) : (
@@ -439,7 +425,7 @@ export function ConsentAssessmentPage({
               return (
                 <div
                   key={document.id}
-                  className="rounded-sm border border-ink-700/10 bg-white p-5 shadow-sm transition-all hover:border-ink-700/20 hover:shadow-md"
+                  className="rounded-sm border border-ink-700/10 bg-surface-raised p-5 shadow-sm transition-all hover:border-ink-700/20 hover:shadow-md"
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="flex flex-1 gap-4">
@@ -510,7 +496,7 @@ export function ConsentAssessmentPage({
 
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-sm border border-ink-700/10 bg-white px-4 py-3 shadow-sm">
+    <div className="rounded-sm border border-ink-700/10 bg-surface-raised px-4 py-3 shadow-sm">
       <div className="text-xs font-medium uppercase tracking-[0.14em] text-ink-500">{label}</div>
       <div className="mt-2 text-2xl font-semibold tracking-tight text-ink-900">{value}</div>
     </div>

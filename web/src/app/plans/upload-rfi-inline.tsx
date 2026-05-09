@@ -224,7 +224,7 @@ export function UploadRfiInline({
         </p>
         <button
           disabled={!rfiFile || busy}
-          className="rounded-sm bg-ink-900 text-white px-4 py-2 text-sm font-medium shadow-card disabled:opacity-50 cursor-pointer hover:bg-ink-700 transition-colors"
+          className="rounded-sm bg-ink-900 text-white px-4 py-2 text-sm font-medium shadow-depth disabled:opacity-50 cursor-pointer hover:bg-ink-700 transition-colors"
         >
           {busy ? (
             <AiThinking label={stage || "Processing"} variant="button" />

@@ -31,9 +31,9 @@ export function AiThinking({
   if (variant === "inline") {
     return (
       <span
-        className={`inline-flex items-center gap-2 rounded-full bg-ink-900 text-white px-3 py-1 text-xs font-medium shadow-card ${className}`}
+        className={`inline-flex items-center gap-2 rounded-full bg-ink-900 text-white px-3 py-1 text-xs font-medium shadow-depth ${className}`}
       >
-        <Sparkles className={`${sizeMap.sm} text-tan-300 ai-glow`} />
+        <Sparkles className={`${sizeMap.sm} text-cyan-500 ai-glow`} />
         <span>{label}</span>
         <Dots />
       </span>
@@ -43,10 +43,10 @@ export function AiThinking({
   // block
   return (
     <div
-      className={`ai-shimmer relative overflow-hidden rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-5 ${className}`}
+      className={`ai-shimmer relative overflow-hidden rounded-sm bg-surface-raised shadow-depth p-5 ${className}`}
     >
       <div className="relative flex items-start gap-3.5">
-        <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-ink-900 text-tan-300 shadow-card ring-1 ring-tan-300/20">
+        <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-ink-900 text-cyan-500 shadow-depth ring-1 ring-brand-400/20">
           <Sparkles className={`${sizeMap.md} ai-glow`} />
         </div>
         <div className="min-w-0 flex-1">
@@ -82,7 +82,7 @@ export function AiBadge({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full bg-tan-100 text-tan-700 ring-1 ring-tan-300/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${className}`}
+      className={`inline-flex items-center gap-1 rounded-full bg-brand-50 text-brand-700 ring-1 ring-brand-200 px-2 py-0.5 text-[10px] uppercase tracking-[0.22em] font-medium ${className}`}
     >
       <Sparkles className="h-3 w-3" />
       {label}
