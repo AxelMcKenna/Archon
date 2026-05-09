@@ -21,12 +21,18 @@ interface ConsentAssessmentPageProps {
   projectId: string;
   address: string;
   projectDetails: ProjectDetails;
+  heading?: string;
+  description?: string;
+  basePath?: string;
 }
 
 export function ConsentAssessmentPage({
   projectId,
   address,
   projectDetails,
+  heading = "Consent Assessment",
+  description = "Track and prepare required documentation for consent submission.",
+  basePath = "consent-assessment",
 }: ConsentAssessmentPageProps) {
   const {
     checklist,
@@ -74,10 +80,10 @@ export function ConsentAssessmentPage({
           </p>
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-ink-900">
-              Consent Assessment
+              {heading}
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-ink-500">
-              Track and prepare required documentation for consent submission.
+              {description}
             </p>
           </div>
         </div>
@@ -221,7 +227,7 @@ export function ConsentAssessmentPage({
             {documents.map((document) => {
               const upload = uploads[document.id];
               const isCompleted = Boolean(completions[document.id]);
-              const href = `/projects/${projectId}/consent-assessment/${document.id}` as Route;
+              const href = `/projects/${projectId}/${basePath}/${document.id}` as Route;
               const manual = isManualDocument(document);
 
               return (

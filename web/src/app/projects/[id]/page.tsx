@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { taxonomy } from "@consentiq/shared";
-import { UploadRfi } from "./upload-rfi";
 import { deleteProject } from "./actions";
 import { ProjectDeleteButton } from "@/components/project-delete-button";
+import { ProjectDocumentsSection } from "@/components/project-documents-section";
 import {
   buildProjectFormValues,
   normalizeProjectDetails,
@@ -104,15 +104,29 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
         </dl>
       </section>
 
-      <section>
-        <h2 className="text-lg font-semibold mb-3">RFI letters</h2>
+      <section className="rounded-2xl border border-ink-700/10 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-ink-900">Project activity</h2>
+            <p className="mt-1 text-sm text-ink-500">
+              Recent RFI activity and shortcuts into the current consent workflow.
+            </p>
+          </div>
+          <a
+            href={`/projects/${id}/project-application`}
+            className="inline-flex items-center rounded-lg border border-ink-700/10 bg-white px-4 py-2 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
+          >
+            Open Project Application
+          </a>
+        </div>
+
         {!letters?.length ? (
-          <p className="text-ink-500 text-sm mb-4">No RFI letters yet.</p>
+          <p className="mt-5 text-sm text-ink-500">No RFI letters recorded yet.</p>
         ) : (
-          <ul className="divide-y divide-ink-700/10 mb-6">
-            {letters.map((l) => (
-              <li key={l.id} className="py-3 flex justify-between text-sm">
-                <a href={`/projects/${id}/rfis`} className="hover:underline">
+          <ul className="mt-5 divide-y divide-ink-700/10">
+            {letters.slice(0, 5).map((l) => (
+              <li key={l.id} className="flex justify-between py-3 text-sm">
+                <a href={`/projects/${id}/project-application`} className="hover:underline">
                   RFI {l.rfi_number ?? "?"} — {l.issue_date ?? "(no date)"}
                 </a>
                 <span className="text-ink-500">{l.status}</span>
@@ -120,8 +134,13 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
             ))}
           </ul>
         )}
-        <UploadRfi projectId={id} bca={project.bca} />
       </section>
+
+      <ProjectDocumentsSection
+        projectId={id}
+        address={project.address}
+        projectDetails={projectDetails}
+      />
       <section className="border-t border-ink-700/10 pt-8">
         <div className="rounded-2xl border border-red-200 bg-red-50/60 p-5">
           <h2 className="text-lg font-semibold text-red-900">Danger zone</h2>

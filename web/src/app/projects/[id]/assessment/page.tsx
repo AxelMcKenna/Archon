@@ -6,5 +6,5 @@ export default async function AssessmentRedirect({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  redirect(`/projects/${id}/consent-assessment`);
+  redirect(`/projects/${id}/project-application`);
 }

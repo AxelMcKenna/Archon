@@ -14,13 +14,53 @@ import {
 } from "./model";
 import { useInspections } from "./use-inspections";
 
+export interface InspectionWorkflowSnapshot {
+  projectAddress: string | null;
+  projectStatus: string | null | undefined;
+  openRfis: number;
+  totalLetters: number;
+  totalRfiItems: number;
+  approvedDocuments: number;
+  pendingDocuments: number;
+  totalDocuments: number;
+  analysedPlans: number;
+  totalPlans: number;
+  mustResolveFlags: number;
+  averagePlanProcessingSeconds: number | null;
+  latestLetter:
+    | {
+        id: string;
+        status: string | null;
+        issueDate: string | null;
+      }
+    | null;
+  latestAttachment:
+    | {
+        uploadedAt: string;
+        documentType: string | null;
+      }
+    | null;
+  latestPlan:
+    | {
+        createdAt: string;
+        status: string;
+      }
+    | null;
+}
+
 interface InspectionsPageProps {
   projectId: string;
   schedule: InspectionSchedule;
   savedRecords: Record<string, InspectionRecord>;
+  workflow: InspectionWorkflowSnapshot;
 }
 
-export function InspectionsPage({ projectId, schedule, savedRecords }: InspectionsPageProps) {
+export function InspectionsPage({
+  projectId,
+  schedule,
+  savedRecords,
+  workflow,
+}: InspectionsPageProps) {
   const router = useRouter();
   const { inspections, stats, addManualInspection, reorderInspection, deleteInspection } =
     useInspections(projectId, schedule, savedRecords);
@@ -92,15 +132,20 @@ export function InspectionsPage({ projectId, schedule, savedRecords }: Inspectio
             Project Workflow
           </p>
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-ink-900">
-              Inspections
-            </h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-ink-900">Inspections</h1>
             <p className="mt-2 max-w-2xl text-sm text-ink-500">
-              Automatically generated BCO hold points for {schedule.profile.toLowerCase()}.
+              Track inspection readiness alongside RFIs, document review, and plan-analysis
+              activity for {workflow.projectAddress ?? "this project"}.
             </p>
           </div>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
+          <Link
+            href={`/projects/${projectId}/documents` as Route}
+            className="inline-flex items-center justify-center rounded-xl border border-ink-700/10 bg-white px-4 py-2.5 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
+          >
+            View Documents
+          </Link>
           <button
             type="button"
             onClick={handleAddManualInspection}
@@ -118,6 +163,166 @@ export function InspectionsPage({ projectId, schedule, savedRecords }: Inspectio
             </button>
           )}
         </div>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <WorkflowMetricCard
+          label="Open RFIs"
+          value={String(workflow.openRfis)}
+          detail={`${workflow.totalLetters} total letters`}
+        />
+        <WorkflowMetricCard
+          label="Pending documents"
+          value={String(workflow.pendingDocuments)}
+          detail={`${workflow.approvedDocuments}/${workflow.totalDocuments} approved`}
+        />
+        <WorkflowMetricCard
+          label="Plan issues"
+          value={String(workflow.mustResolveFlags)}
+          detail={`${workflow.analysedPlans}/${workflow.totalPlans} plans analysed`}
+        />
+        <WorkflowMetricCard
+          label="Inspections remaining"
+          value={String(stats.remaining)}
+          detail={`${stats.completed}/${stats.total} complete`}
+        />
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr),minmax(18rem,0.9fr)]">
+        <div className="space-y-6">
+          <section className="rounded-2xl border border-ink-700/10 bg-white p-8 shadow-sm">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h2 className="text-xl font-semibold tracking-tight text-ink-900">
+                  Workflow Snapshot
+                </h2>
+                <p className="mt-2 text-sm text-ink-500">
+                  Current processing totals aggregated from RFIs, project attachments, plan
+                  analysis, and inspections.
+                </p>
+              </div>
+              <span className="rounded-full bg-ink-50 px-3 py-1 text-sm font-medium text-ink-700">
+                {formatProjectStatus(workflow.projectStatus)}
+              </span>
+            </div>
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <SummaryTile
+                title="RFI load"
+                body={`${workflow.totalRfiItems} items across ${workflow.totalLetters} letter${workflow.totalLetters === 1 ? "" : "s"}.`}
+              />
+              <SummaryTile
+                title="Supporting documents"
+                body={`${workflow.totalDocuments} uploaded files are available for council review.`}
+              />
+              <SummaryTile
+                title="Plan analysis"
+                body={
+                  workflow.averagePlanProcessingSeconds != null
+                    ? `Average analysis time is ${workflow.averagePlanProcessingSeconds.toFixed(1)}s per completed plan.`
+                    : "No completed plan analyses yet."
+                }
+              />
+              <SummaryTile
+                title="Inspection readiness"
+                body={`${stats.percent}% of required inspections are resolved.`}
+              />
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-ink-700/10 bg-white p-8 shadow-sm">
+            <h2 className="text-xl font-semibold tracking-tight text-ink-900">Current Activity</h2>
+            <div className="mt-5 grid gap-4 md:grid-cols-3">
+              <ActivityCard
+                title="Latest RFI"
+                href={
+                  workflow.latestLetter
+                    ? (`/projects/${projectId}/rfi/${workflow.latestLetter.id}` as Route)
+                    : (`/projects/${projectId}` as Route)
+                }
+                hrefLabel={workflow.latestLetter ? "Open RFI" : "Project overview"}
+                body={
+                  workflow.latestLetter
+                    ? `${formatWorkflowDate(workflow.latestLetter.issueDate)} · ${formatProjectStatus(workflow.latestLetter.status)}`
+                    : "No RFI letters recorded yet."
+                }
+              />
+              <ActivityCard
+                title="Latest document"
+                href={`/projects/${projectId}/documents` as Route}
+                hrefLabel="Open documents"
+                body={
+                  workflow.latestAttachment
+                    ? `${formatWorkflowDate(workflow.latestAttachment.uploadedAt)} · ${formatAttachmentType(workflow.latestAttachment.documentType)}`
+                    : "No supporting documents uploaded yet."
+                }
+              />
+              <ActivityCard
+                title="Latest plan analysis"
+                href={"/plans" as Route}
+                hrefLabel="Open plans"
+                body={
+                  workflow.latestPlan
+                    ? `${formatWorkflowDate(workflow.latestPlan.createdAt)} · ${workflow.latestPlan.status}`
+                    : "No plan uploads analysed yet."
+                }
+              />
+            </div>
+          </section>
+        </div>
+
+        <aside className="space-y-6">
+          <section className="rounded-2xl border border-ink-700/10 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-ink-900">Next actions</h2>
+            <ul className="mt-4 space-y-3 text-sm text-ink-600">
+              <ActionItem
+                active={workflow.openRfis > 0}
+                text={
+                  workflow.openRfis > 0
+                    ? `Review ${workflow.openRfis} open RFI${workflow.openRfis === 1 ? "" : "s"} and prepare responses.`
+                    : "No open RFIs are blocking the project right now."
+                }
+              />
+              <ActionItem
+                active={workflow.pendingDocuments > 0}
+                text={
+                  workflow.pendingDocuments > 0
+                    ? `Triage ${workflow.pendingDocuments} pending document${workflow.pendingDocuments === 1 ? "" : "s"} for approval.`
+                    : "Supporting documents are fully reviewed."
+                }
+              />
+              <ActionItem
+                active={workflow.mustResolveFlags > 0}
+                text={
+                  workflow.mustResolveFlags > 0
+                    ? `Resolve ${workflow.mustResolveFlags} must-fix plan flag${workflow.mustResolveFlags === 1 ? "" : "s"} before further review.`
+                    : "No critical plan-analysis flags are outstanding."
+                }
+              />
+              <ActionItem
+                active={stats.remaining > 0}
+                text={
+                  stats.remaining > 0
+                    ? `Prepare ${stats.remaining} remaining inspection stage${stats.remaining === 1 ? "" : "s"}.`
+                    : "Inspection workflow is fully resolved."
+                }
+              />
+            </ul>
+          </section>
+
+          <section className="rounded-2xl border border-ink-700/10 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-ink-900">Links</h2>
+            <div className="mt-4 grid gap-2">
+              <QuickLink
+                href={`/projects/${projectId}/project-application` as Route}
+                label="Project Application"
+              />
+              <QuickLink href={`/projects/${projectId}/documents` as Route} label="Project Documents" />
+              <QuickLink href={"/plans" as Route} label="Building Plans" />
+              <QuickLink href={`/projects/${projectId}/project-application` as Route} label="RFI Review" />
+            </div>
+          </section>
+        </aside>
       </section>
 
       <section className="rounded-2xl border border-ink-700/10 bg-gradient-to-br from-white to-slate-50 p-8 shadow-sm">
@@ -308,6 +513,79 @@ function MetricCard({ label, value }: { label: string; value: string }) {
   );
 }
 
+function WorkflowMetricCard({
+  label,
+  value,
+  detail,
+}: {
+  label: string;
+  value: string;
+  detail: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-ink-700/10 bg-white p-5 shadow-sm">
+      <p className="text-sm text-ink-500">{label}</p>
+      <p className="mt-2 text-3xl font-semibold tracking-tight text-ink-900">{value}</p>
+      <p className="mt-2 text-sm text-ink-500">{detail}</p>
+    </div>
+  );
+}
+
+function SummaryTile({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="rounded-xl border border-ink-700/10 bg-ink-50 px-4 py-4">
+      <p className="text-sm font-medium text-ink-900">{title}</p>
+      <p className="mt-2 text-sm text-ink-600">{body}</p>
+    </div>
+  );
+}
+
+function ActivityCard({
+  title,
+  body,
+  href,
+  hrefLabel,
+}: {
+  title: string;
+  body: string;
+  href: Route;
+  hrefLabel: string;
+}) {
+  return (
+    <div className="rounded-xl border border-ink-700/10 bg-ink-50 px-4 py-4">
+      <p className="text-sm font-medium text-ink-900">{title}</p>
+      <p className="mt-2 text-sm text-ink-600">{body}</p>
+      <Link href={href} className="mt-3 inline-flex text-sm font-medium text-ink-900 hover:text-accent">
+        {hrefLabel}
+      </Link>
+    </div>
+  );
+}
+
+function ActionItem({ active, text }: { active: boolean; text: string }) {
+  return (
+    <li className="flex items-start gap-3">
+      <span
+        className={`mt-0.5 inline-flex h-2.5 w-2.5 rounded-full ${
+          active ? "bg-amber-500" : "bg-emerald-500"
+        }`}
+      />
+      <span>{text}</span>
+    </li>
+  );
+}
+
+function QuickLink({ href, label }: { href: Route; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="rounded-xl border border-ink-700/10 bg-ink-50 px-4 py-3 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-100"
+    >
+      {label}
+    </Link>
+  );
+}
+
 export function StatusBadge({ status }: { status: EditableInspectionStatus }) {
   const styles: Record<EditableInspectionStatus, string> = {
     "Not Conducted": "bg-slate-50 text-slate-700 ring-1 ring-slate-200",
@@ -333,6 +611,31 @@ function formatDate(value: string) {
     month: "short",
     year: "numeric",
   });
+}
+
+function formatProjectStatus(value: string | null | undefined) {
+  if (!value) return "Unknown";
+  return value
+    .split(/[-_]/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function formatWorkflowDate(value: string | null | undefined) {
+  if (!value) return "No date";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("en-NZ", { year: "numeric", month: "short", day: "numeric" });
+}
+
+function formatAttachmentType(value: string | null | undefined) {
+  if (!value) return "General document";
+  return value
+    .split(/[-_]/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }
 
 function getInspectionCardId(inspectionId: string) {

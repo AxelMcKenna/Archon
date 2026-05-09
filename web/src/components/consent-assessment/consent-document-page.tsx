@@ -20,6 +20,8 @@ interface ConsentDocumentPageProps {
   address: string;
   documentId: string;
   projectDetails: ProjectDetails;
+  basePath?: string;
+  pageLabel?: string;
 }
 
 export function ConsentDocumentPage({
@@ -27,6 +29,8 @@ export function ConsentDocumentPage({
   address,
   documentId,
   projectDetails,
+  basePath = "consent-assessment",
+  pageLabel = "Consent Assessment",
 }: ConsentDocumentPageProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -79,17 +83,17 @@ export function ConsentDocumentPage({
     }
 
     removeDocument(documentId);
-    router.push(`/projects/${projectId}/consent-assessment` as Route);
+    router.push(`/projects/${projectId}/${basePath}` as Route);
   }
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-6 py-8">
       <div className="flex items-center justify-between gap-4">
         <Link
-          href={`/projects/${projectId}/consent-assessment` as Route}
+          href={`/projects/${projectId}/${basePath}` as Route}
           className="text-sm font-medium text-ink-500 transition-colors hover:text-ink-900"
         >
-          ← Back to Consent Assessment
+          ← Back to {pageLabel}
         </Link>
         {document && (
           <button

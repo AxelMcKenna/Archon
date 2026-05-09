@@ -10,12 +10,10 @@ interface ProjectSubnavProps {
 
 const projectTabs = [
   { name: "Overview", href: "" },
-  { name: "Consent Assessment", href: "/consent-assessment" },
-  { name: "Application Prep", href: "/application-prep" },
-  { name: "RFIs", href: "/rfis" },
-  { name: "Processing", href: "/processing" },
+  { name: "Forecast", href: "/forecast" },
+  { name: "Project Application", href: "/project-application" },
   { name: "Inspections", href: "/inspections" },
-  { name: "CCC", href: "/ccc" },
+  { name: "C.C.C", href: "/ccc" },
 ];
 
 export function ProjectSubnav({ projectId }: ProjectSubnavProps) {
