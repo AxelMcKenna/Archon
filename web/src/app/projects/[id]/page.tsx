@@ -3,8 +3,59 @@ import { notFound } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { taxonomy } from "@consentiq/shared";
 import { ForecastingClient } from "./forecasting-client";
+import { buildProjectSettingsValues } from "@/lib/project-details";
+import type { ProjectSettingsValues } from "@/lib/project-details";
+import { ProjectOwnerDetailsSettings } from "@/components/project-owner-details-settings";
+import { updateProjectSettings } from "./actions";
 
 export const dynamic = "force-dynamic";
+
+function normalizePreferred(value: string): ProjectSettingsValues["ownerPreferredFormOfAddress"] {
+  if (value === "Mr" || value === "Mrs" || value === "Ms" || value === "Miss" || value === "Dr") {
+    return value;
+  }
+  return "";
+}
+
+function normalizeEvidence(value: string): ProjectSettingsValues["ownerEvidenceOfOwnershipType"] {
+  if (
+    value === "Certificate of title" ||
+    value === "Lease" ||
+    value === "Agreement for sale and purchase" ||
+    value === "Other document"
+  ) {
+    return value;
+  }
+  return "";
+}
+
+function normalizeSettingsSnapshot(value: unknown): Partial<ProjectSettingsValues> | null {
+  if (!value || typeof value !== "object") return null;
+  const record = value as Record<string, unknown>;
+  const settings =
+    record.settings && typeof record.settings === "object"
+      ? (record.settings as Record<string, unknown>)
+      : record;
+  const preferred = String(settings.ownerPreferredFormOfAddress ?? "");
+  const evidence = String(settings.ownerEvidenceOfOwnershipType ?? "");
+  return {
+    buildingConsentNumbers: String(settings.buildingConsentNumbers ?? ""),
+    ownerPreferredFormOfAddress: normalizePreferred(preferred),
+    ownerFullName: String(settings.ownerFullName ?? ""),
+    ownerContactPersonFullName: String(settings.ownerContactPersonFullName ?? ""),
+    ownerMailingAddress: String(settings.ownerMailingAddress ?? ""),
+    ownerStreetAddressDifferent: Boolean(settings.ownerStreetAddressDifferent),
+    ownerStreetAddress: String(settings.ownerStreetAddress ?? ""),
+    ownerPhoneLandline: String(settings.ownerPhoneLandline ?? ""),
+    ownerPhoneMobile: String(settings.ownerPhoneMobile ?? ""),
+    ownerPhoneDaytime: String(settings.ownerPhoneDaytime ?? ""),
+    ownerPhoneAfterHours: String(settings.ownerPhoneAfterHours ?? ""),
+    ownerPhoneFax: String(settings.ownerPhoneFax ?? ""),
+    ownerEmailAddress: String(settings.ownerEmailAddress ?? ""),
+    ownerWebsiteUrl: String(settings.ownerWebsiteUrl ?? ""),
+    ownerEvidenceOfOwnershipType: normalizeEvidence(evidence),
+  };
+}
 
 export default async function ProjectOverview({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -17,6 +68,7 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
     { count: cadCount },
     { count: letterCount },
     { data: assessmentRow },
+    { data: settingsSnapshotRows },
   ] = await Promise.all([
     supabase
       .from("plan_uploads")
@@ -35,10 +87,59 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
       .select("forecast_context")
       .eq("project_id", id)
       .maybeSingle(),
+    supabase
+      .from("audit_log")
+      .select("metadata")
+      .eq("project_id", id)
+      .eq("action", "project_settings_snapshot")
+      .order("created_at", { ascending: false })
+      .limit(1),
   ]);
   const forecastPayload =
     (assessmentRow as { forecast_context?: Record<string, unknown> | null } | null)
       ?.forecast_context ?? null;
+  const settingsSnapshot = normalizeSettingsSnapshot(settingsSnapshotRows?.[0]?.metadata);
+  const initialSettings = buildProjectSettingsValues(project);
+  const mergedSettings: ProjectSettingsValues = settingsSnapshot
+    ? {
+        ...initialSettings,
+        ...settingsSnapshot,
+      }
+    : initialSettings;
+
+  const { data: richAttachments, error: richAttachmentsError } = await supabase
+    .from("attachments")
+    .select("id, filename, storage_path, uploaded_at, size_bytes, mime_type, linked_requirement_key")
+    .eq("project_id", id)
+    .order("uploaded_at", { ascending: false });
+  const { data: basicAttachments, error: basicAttachmentsError } = richAttachmentsError
+    ? await supabase
+        .from("attachments")
+        .select("id, filename, storage_path, uploaded_at, size_bytes, mime_type")
+        .eq("project_id", id)
+        .order("uploaded_at", { ascending: false })
+    : { data: null };
+  const { data: minimalAttachments } = basicAttachmentsError
+    ? await supabase
+        .from("attachments")
+        .select("id, filename, storage_path")
+        .eq("project_id", id)
+    : { data: null };
+  const attachments = (richAttachments ?? basicAttachments ?? minimalAttachments ?? []) as Array<{
+    id: string;
+    filename: string;
+    storage_path: string;
+    uploaded_at?: string;
+    size_bytes?: number | null;
+    mime_type?: string | null;
+    linked_requirement_key?: string | null;
+  }>;
+  const ownershipEvidenceFile =
+    (attachments ?? []).find(
+      (item) =>
+        item.linked_requirement_key === "owner_evidence" ||
+        item.filename.toLowerCase().startsWith("ownership evidence - "),
+    ) ?? null;
 
   const bca = taxonomy.bcas.find((b) => b.id === project.bca);
   const drawingsTotal = (drawingCount ?? 0) + (cadCount ?? 0);
@@ -90,6 +191,29 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
         <ForecastingClient
           projectId={project.id}
           initialPayload={forecastPayload}
+        />
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
+          Project settings
+        </h2>
+        <ProjectOwnerDetailsSettings
+          projectId={id}
+          initialValues={mergedSettings}
+          initialOwnershipEvidenceFile={
+            ownershipEvidenceFile
+              ? {
+                  id: ownershipEvidenceFile.id,
+                  filename: ownershipEvidenceFile.filename,
+                  storagePath: ownershipEvidenceFile.storage_path,
+                  uploadedAt: ownershipEvidenceFile.uploaded_at ?? "",
+                  sizeBytes: ownershipEvidenceFile.size_bytes ?? null,
+                  mimeType: ownershipEvidenceFile.mime_type ?? null,
+                }
+              : null
+          }
+          action={updateProjectSettings.bind(null, id)}
         />
       </section>
     </div>

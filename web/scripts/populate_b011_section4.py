@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Populate Section 4 fields in B-011 DOCX using python-docx OOXML tree access."""
+"""Populate Section 1, Section 2, Section 4 and Section 5 fields in B-011 DOCX."""
 
 from __future__ import annotations
 
@@ -123,6 +123,14 @@ def find_table(root, required_terms: list[str]):
     return None
 
 
+def find_table_within(scope, required_terms: list[str]):
+    for tbl in scope.xpath(".//w:tbl"):
+        text = element_text(tbl).lower()
+        if all(term.lower() in text for term in required_terms):
+            return tbl
+    return None
+
+
 def find_table_by_header_cells(root, required_terms: list[str]):
     needed = [term.lower() for term in required_terms]
     for tbl in root.xpath(".//w:tbl"):
@@ -157,6 +165,234 @@ def find_ancestor(element, tag_qname: str):
     while current is not None and current.tag != tag_qname:
         current = current.getparent()
     return current
+
+
+def find_next_sibling_table(paragraph):
+    current = paragraph
+    while current is not None:
+        current = current.getnext()
+        if current is None:
+            return None
+        if current.tag == qn("w:tbl"):
+            return current
+    return None
+
+
+def set_table_row_values(table, row_index: int, values: list[str]) -> bool:
+    rows = table.xpath("./w:tr")
+    if len(rows) <= row_index:
+        return False
+    fill_row(rows[row_index], values)
+    return True
+
+
+def set_single_value_table_after_label(section_table, label_match: str, value: str) -> bool:
+    target = normalize(label_match).lower()
+    for paragraph in section_table.xpath(".//w:p"):
+        text = element_text(paragraph).lower()
+        if target not in text:
+            continue
+        next_table = find_next_sibling_table(paragraph)
+        if next_table is None:
+            continue
+        if set_table_row_values(next_table, 0, [value]):
+            return True
+    return False
+
+
+def populate_section1_consent(root, payload: dict[str, Any]) -> None:
+    consent = payload.get("consent")
+    if not isinstance(consent, dict):
+        return
+
+    consent_number = normalize(str(consent.get("consentNumber", "") or ""))
+    if not consent_number:
+        return
+
+    section_table = find_table(
+        root,
+        [
+            "the building consent",
+            "building consent number(s):",
+            "issued by:",
+        ],
+    )
+    if section_table is None:
+        return
+
+    consent_table = find_table_within(
+        section_table,
+        [
+            "Building consent number(s):",
+            "Issued by:",
+            "Christchurch City Council",
+        ],
+    )
+    if consent_table is None:
+        return
+
+    # Row 0 is "Building consent number(s):" with value in column 1.
+    rows = consent_table.xpath("./w:tr")
+    if not rows:
+        return
+    cells = rows[0].xpath("./w:tc")
+    if len(cells) < 2:
+        return
+    set_first_paragraph_text(cells[1], consent_number)
+
+
+def set_section2_phone_numbers(section_table, owner: dict[str, Any]) -> None:
+    phone_table = find_table_within(
+        section_table,
+        ["landline:", "mobile:", "daytime:", "after hours:", "fax:"],
+    )
+    if phone_table is None:
+        return
+    set_table_row_values(
+        phone_table,
+        1,
+        [
+            normalize(str(owner.get("landline", owner.get("phoneLandline", "")) or "")),
+            normalize(str(owner.get("mobile", owner.get("phoneMobile", "")) or "")),
+            normalize(str(owner.get("daytime", owner.get("phoneDaytime", "")) or "")),
+            normalize(str(owner.get("afterHours", owner.get("phoneAfterHours", "")) or "")),
+            normalize(str(owner.get("fax", owner.get("phoneFax", "")) or "")),
+        ],
+    )
+
+
+def set_section2_email_website(section_table, owner: dict[str, Any]) -> None:
+    for paragraph in section_table.xpath(".//w:p"):
+        text = element_text(paragraph).lower()
+        if "email address:" not in text or "website:" not in text:
+            continue
+        next_table = find_next_sibling_table(paragraph)
+        if next_table is None:
+            continue
+        set_table_row_values(
+            next_table,
+            0,
+            [
+                normalize(str(owner.get("email", owner.get("emailAddress", "")) or "")),
+                normalize(str(owner.get("website", owner.get("websiteUrl", "")) or "")),
+            ],
+        )
+        return
+
+
+def tick_section2_owner_evidence_checkbox(section_table, selected_label: str) -> None:
+    def canonical(text: str) -> str:
+        return re.sub(r"[^a-z0-9]+", "", text.lower())
+
+    selected = canonical(normalize(selected_label))
+    if not selected:
+        return
+
+    valid_labels = [
+        "certificate of title",
+        "lease",
+        "agreement for sale and purchase",
+        "other document",
+    ]
+
+    # Evidence checkboxes are laid out as table rows where checkbox and label are in separate cells.
+    for table in section_table.xpath(".//w:tbl"):
+        for row in table.xpath("./w:tr"):
+            cells = row.xpath("./w:tc")
+            if not cells:
+                continue
+
+            matched_label_index = None
+            for idx, cell in enumerate(cells):
+                cell_text = canonical(element_text(cell))
+                for label in valid_labels:
+                    label_key = canonical(label)
+                    if label_key and label_key in cell_text and label_key == selected:
+                        matched_label_index = idx
+                        break
+                if matched_label_index is not None:
+                    break
+
+            if matched_label_index is None:
+                continue
+
+            candidate_indexes = []
+            if matched_label_index > 0:
+                candidate_indexes.append(matched_label_index - 1)
+            if matched_label_index + 1 < len(cells):
+                candidate_indexes.append(matched_label_index + 1)
+            candidate_indexes.append(matched_label_index)
+
+            for candidate_index in candidate_indexes:
+                cell = cells[candidate_index]
+                has_checkbox_control = bool(cell.xpath(".//w14:checkbox"))
+                has_checkbox_glyph = any((t.text or "") in {"☐", "☑"} for t in cell.xpath(".//w:t"))
+                if not has_checkbox_control and not has_checkbox_glyph:
+                    continue
+                if has_checkbox_control:
+                    set_checkbox_in_element(cell, True, checked_glyph="x")
+                for t in cell.xpath(".//w:t"):
+                    if (t.text or "") in {"☐", "☑"}:
+                        t.text = "x"
+                return
+    return
+
+
+def populate_section2_owner(root, payload: dict[str, Any]) -> None:
+    owner = payload.get("owner")
+    if not isinstance(owner, dict):
+        owner = payload.get("ownerDetails")
+    if not isinstance(owner, dict):
+        return
+
+    preferred = normalize(str(owner.get("preferredAddress", owner.get("preferredFormOfAddress", "")) or ""))
+    full_name_raw = normalize(str(owner.get("fullName", "") or ""))
+    if preferred and full_name_raw.lower().startswith(f"{preferred.lower()} "):
+        owner_name = full_name_raw
+    elif preferred and full_name_raw:
+        owner_name = f"{preferred} {full_name_raw}"
+    else:
+        owner_name = full_name_raw
+
+    section_table = find_table(
+        root,
+        [
+            "the owner",
+            "name of owner",
+            "evidence of the ownership is attached to this application",
+        ],
+    )
+    if section_table is None:
+        return
+
+    set_single_value_table_after_label(
+        section_table,
+        "Name of owner:",
+        owner_name,
+    )
+    set_single_value_table_after_label(
+        section_table,
+        "Contact person:",
+        normalize(str(owner.get("contactPerson", owner.get("contactPersonFullName", "")) or "")),
+    )
+    set_single_value_table_after_label(
+        section_table,
+        "Mailing address:",
+        normalize(str(owner.get("mailingAddress", "") or "")),
+    )
+
+    street_address_value = normalize(str(owner.get("streetAddress", "") or ""))
+    set_single_value_table_after_label(
+        section_table,
+        "Street address/Registered office:",
+        street_address_value,
+    )
+
+    set_section2_phone_numbers(section_table, owner)
+    set_section2_email_website(section_table, owner)
+
+    selected = normalize(str(owner.get("ownershipEvidence", owner.get("evidenceOfOwnershipType", "")) or ""))
+    tick_section2_owner_evidence_checkbox(section_table, selected)
 
 
 def replace_insert_date(root, completion_date: str) -> None:
@@ -331,6 +567,9 @@ def main() -> int:
 
     document = Document(input_docx)
     root = document._element
+
+    populate_section1_consent(root, payload)
+    populate_section2_owner(root, payload)
 
     completion_date = payload.get("completionDate")
     if isinstance(completion_date, str):

@@ -164,11 +164,6 @@ export function createManualInspection(
   };
 }
 
-export function getCurrentInspectionIndex(records: InspectionRecord[]) {
-  const index = records.findIndex((record) => !isInspectionResolved(record));
-  return index === -1 ? records.length - 1 : index;
-}
-
 export function isInspectionResolved(record: InspectionRecord) {
   return record.status === "Passed" || record.status === "Failed";
 }
@@ -204,6 +199,8 @@ function mergeStageIntoRecord(
   saved: InspectionRecord,
   sortOrder: number,
 ): InspectionRecord {
+  const requirements = saved.requirements?.length ? saved.requirements : stage.requirements;
+
   return {
     ...saved,
     sortOrder,
@@ -211,12 +208,12 @@ function mergeStageIntoRecord(
     title: stage.title,
     category: stage.category,
     timing: stage.timing,
-    requirements: stage.requirements,
+    requirements,
     bookedDate: saved.bookedDate ?? "",
     status: normalizeInspectionStatus(saved.status),
     pdfs: saved.pdfs ?? [],
     checklist: {
-      ...Object.fromEntries(stage.requirements.map((requirement) => [requirement, false])),
+      ...Object.fromEntries(requirements.map((requirement) => [requirement, false])),
       ...saved.checklist,
     },
   };

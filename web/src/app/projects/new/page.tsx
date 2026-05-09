@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import { after } from "next/server";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { taxonomy } from "@consentiq/shared";
 import { ProjectCreateButton } from "@/components/project-create-button";
 import { AddressAutocompleteInput } from "@/components/address-autocomplete-input";
 import { bootstrapConsentAssessment } from "@/lib/consent-assessment-bootstrap";
+import { ProjectDetailFlagsFields } from "./project-detail-flags-fields";
 
 async function createProject(formData: FormData) {
   "use server";
@@ -16,6 +16,7 @@ async function createProject(formData: FormData) {
   const description = String(formData.get("description") ?? "").trim() || null;
   const estimatedFloorArea = parseOptionalNumber(formData.get("estimated_floor_area_m2"));
   const estimatedConstructionValue = parseOptionalNumber(formData.get("estimated_construction_value_nzd"));
+  const yearOfConstruction = parseOptionalYear(formData.get("year_of_construction"));
 
   // Idempotency: if an identical project was created within the last 15s, reuse it.
   const recentThreshold = new Date(Date.now() - 15_000).toISOString();
@@ -36,9 +37,7 @@ async function createProject(formData: FormData) {
     redirect(`/projects/${existing.data.id}`);
   }
 
-  const inserted = await supabase
-    .from("projects")
-    .insert({
+  const inserted = await insertProjectCompatible(supabase, {
       address,
       bca,
       project_type: projectType,
@@ -52,11 +51,12 @@ async function createProject(formData: FormData) {
       service_connection_water: formData.get("service_connection_water") === "on",
       service_connection_wastewater: formData.get("service_connection_wastewater") === "on",
       service_connection_stormwater: formData.get("service_connection_stormwater") === "on",
-    })
-    .select("id")
-    .single();
+    });
   if (inserted.error) {
     throw new Error(inserted.error.message || "Unable to create project.");
+  }
+  if (!inserted.data?.id) {
+    throw new Error("Unable to create project.");
   }
 
   const newProjectId = inserted.data.id;
@@ -67,16 +67,14 @@ async function createProject(formData: FormData) {
     involvesStructuralWork: formData.get("involves_structural_work") === "on",
     involvesEarthworks: formData.get("involves_earthworks") === "on",
     existingStructureDemolished: formData.get("existing_structure_demolished") === "on",
+    yearOfConstruction,
     newRoadAccess: formData.get("new_road_access") === "on",
     serviceConnectionWater: formData.get("service_connection_water") === "on",
     serviceConnectionWastewater: formData.get("service_connection_wastewater") === "on",
     serviceConnectionStormwater: formData.get("service_connection_stormwater") === "on",
   };
 
-  after(async () => {
-    const sb = await getSupabaseServer();
-    await bootstrapConsentAssessment(sb, newProjectId, address, intake);
-  });
+  await bootstrapConsentAssessment(supabase, newProjectId, address, intake);
 
   redirect(`/projects/${newProjectId}`);
 }
@@ -121,12 +119,7 @@ export default function NewProjectPage() {
             className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
           />
         </Field>
-        <div className="grid gap-3 rounded-sm border border-ink-700/10 bg-surface-raised p-4 sm:grid-cols-2">
-          <CheckboxField name="involves_structural_work" label="Involves structural work" />
-          <CheckboxField name="involves_earthworks" label="Involves earthworks" />
-          <CheckboxField name="existing_structure_demolished" label="Existing structure demolished" />
-          <CheckboxField name="new_road_access" label="New road access" />
-        </div>
+        <ProjectDetailFlagsFields />
         <fieldset className="rounded-sm border border-ink-700/10 bg-surface-raised p-4">
           <legend className="text-sm text-ink-500">New service connections</legend>
           <div className="mt-3 grid gap-3 sm:grid-cols-3">
@@ -149,6 +142,60 @@ function parseOptionalNumber(value: FormDataEntryValue | null) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
+function parseOptionalYear(value: FormDataEntryValue | null) {
+  const parsed = Number(String(value ?? "").trim());
+  const currentYear = new Date().getFullYear();
+  return Number.isInteger(parsed) && parsed >= 1800 && parsed <= currentYear ? parsed : null;
+}
+
+type InsertProjectResult = {
+  data: { id: string } | null;
+  error: { code?: string; message?: string } | null;
+};
+
+async function insertProjectCompatible(
+  supabase: Awaited<ReturnType<typeof getSupabaseServer>>,
+  payload: Record<string, unknown>,
+): Promise<InsertProjectResult> {
+  const insertPayload: Record<string, unknown> = { ...payload };
+  const requiredColumns = new Set(["address", "bca", "project_type", "description"]);
+
+  for (let i = 0; i < 20; i++) {
+    const inserted = await supabase
+      .from("projects")
+      .insert(insertPayload)
+      .select("id")
+      .single<{ id: string }>();
+    if (!inserted.error) {
+      return inserted;
+    }
+
+    const missingColumn = extractMissingProjectsColumn(inserted.error);
+    if (!missingColumn || !(missingColumn in insertPayload) || requiredColumns.has(missingColumn)) {
+      return inserted;
+    }
+
+    delete insertPayload[missingColumn];
+  }
+
+  return {
+    data: null,
+    error: {
+      code: "PROJECT_INSERT_RETRY_EXHAUSTED",
+      message: "Unable to create project after schema compatibility retries.",
+    },
+  };
+}
+
+function extractMissingProjectsColumn(error: { code?: string; message?: string }) {
+  const message = error.message ?? "";
+  const pgrst = message.match(/Could not find the '([^']+)' column of 'projects'/);
+  if (pgrst?.[1]) return pgrst[1];
+  const postgres = message.match(/column \"([^\"]+)\" does not exist/);
+  if (postgres?.[1]) return postgres[1];
+  return null;
+}
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
@@ -166,3 +213,4 @@ function CheckboxField({ name, label }: { name: string; label: string }) {
     </label>
   );
 }
+

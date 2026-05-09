@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { AiThinking } from "@/components/ai-thinking";
+import { RiskGraph3D } from "@/components/risk-graph-3d";
 
 type ForecastResponse = {
   costs: {
@@ -201,9 +202,13 @@ export function ForecastingClient({
             </ul>
           </section>
 
-          <section className="rounded-sm bg-surface-raised shadow-depth p-6">
+          <section className="h-full">
+            <RiskGraph3D risks={riskCards} />
+          </section>
+
+          <section className="rounded-sm bg-surface-raised shadow-depth p-6 lg:col-span-3">
             <h2 className="text-base font-semibold tracking-tight text-ink-900">Risk Profile</h2>
-            <div className="mt-4 space-y-2.5">
+            <div className="mt-4 grid gap-2.5 lg:grid-cols-5">
               {riskCards.map((card) => (
                 <details key={card.name} className="group rounded-sm border border-ink-200/80 bg-surface-raised p-3.5 transition hover:border-ink-300">
                   <summary className="cursor-pointer list-none">
