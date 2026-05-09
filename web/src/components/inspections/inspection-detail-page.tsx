@@ -4,7 +4,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { InspectionSchedule } from "@/lib/inspections";
-import { type EditableInspectionStatus, getCurrentInspectionIndex } from "./model";
+import { type EditableInspectionStatus, type InspectionPdf, getCurrentInspectionIndex } from "./model";
 import { StatusBadge } from "./inspections-page";
 import { useInspections } from "./use-inspections";
 
@@ -14,13 +14,8 @@ interface InspectionDetailPageProps {
   schedule: InspectionSchedule;
 }
 
-const statuses: EditableInspectionStatus[] = [
-  "Not booked",
-  "Booked",
-  "Passed",
-  "Failed",
-  "Rescheduled",
-];
+const statuses: EditableInspectionStatus[] = ["Passed", "Failed", "Not Conducted"];
+const MAX_PDF_SIZE_BYTES = 2 * 1024 * 1024;
 
 export function InspectionDetailPage({
   projectId,
@@ -31,7 +26,7 @@ export function InspectionDetailPage({
   const inspection = inspections.find((item) => item.id === inspectionId);
   const inspectionIndex = inspections.findIndex((item) => item.id === inspectionId);
   const currentInspectionIndex = getCurrentInspectionIndex(inspections);
-  const isResultLocked = inspectionIndex > currentInspectionIndex;
+  const isResultLocked = inspection ? !inspection.manual && inspectionIndex > currentInspectionIndex : false;
   const [flashMessage, setFlashMessage] = useState<string | null>(null);
 
   const checkedCount = useMemo(
@@ -85,6 +80,40 @@ export function InspectionDetailPage({
         ? "Inspection marked failed. A rescheduled follow-up has been added to the inspection list."
         : "Inspection status updated.",
     );
+  }
+
+  async function uploadPdf(file: File | undefined) {
+    if (!inspection || !file) return;
+
+    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      setFlashMessage("Upload a PDF file.");
+      return;
+    }
+
+    if (file.size > MAX_PDF_SIZE_BYTES) {
+      setFlashMessage(`PDF must be ${formatFileSize(MAX_PDF_SIZE_BYTES)} or smaller.`);
+      return;
+    }
+
+    try {
+      const pdf: InspectionPdf = {
+        id: `inspection-pdf-${Date.now()}`,
+        name: file.name,
+        size: file.size,
+        uploadedAt: new Date().toISOString(),
+        dataUrl: await readFileAsDataUrl(file),
+      };
+
+      save({ pdfs: [...inspection.pdfs, pdf] }, "PDF uploaded.");
+    } catch {
+      setFlashMessage("PDF upload failed.");
+    }
+  }
+
+  function removePdf(pdfId: string) {
+    if (!inspection) return;
+    save({ pdfs: inspection.pdfs.filter((pdf) => pdf.id !== pdfId) }, "PDF removed.");
   }
 
   return (
@@ -142,6 +171,16 @@ export function InspectionDetailPage({
               </label>
 
               <label className="block">
+                <span className="text-sm font-medium text-ink-500">Booked date</span>
+                <input
+                  type="date"
+                  value={inspection.bookedDate}
+                  onChange={(event) => save({ bookedDate: event.target.value }, "Booked date updated.")}
+                  className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
+                />
+              </label>
+
+              <label className="block">
                 <span className="text-sm font-medium text-ink-500">Booking and site details</span>
                 <textarea
                   value={inspection.details}
@@ -187,8 +226,13 @@ export function InspectionDetailPage({
           <section className="rounded-2xl border border-ink-700/10 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-ink-900">Result</h2>
             <p className="mt-2 text-sm text-ink-500">
-              Mark the outcome after the BCO inspection. Failed inspections create a rescheduled follow-up.
+              Mark the outcome after the BCO inspection. Failed inspections create a follow-up.
             </p>
+            {(inspection.status === "Passed" || inspection.status === "Failed") && (
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+                ✓ Inspection result recorded
+              </div>
+            )}
             {isResultLocked && (
               <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
                 This inspection is locked until the current inspection is passed or failed.
@@ -224,16 +268,56 @@ export function InspectionDetailPage({
                 placeholder="Record BCO comments, failed items, remedial work required, or pass evidence."
               />
             </label>
-          </section>
 
-          <section className="rounded-2xl border border-ink-700/10 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-ink-900">Inspection summary</h2>
-            <div className="mt-4 space-y-3 text-sm">
-              <SummaryRow label="Category" value={inspection.category} />
-              <SummaryRow label="Due date" value={inspection.dueDate || "Not set"} />
-              <SummaryRow label="Checklist" value={`${checkedCount}/${inspection.requirements.length} ready`} />
-              {isResultLocked && <SummaryRow label="Sequence" value="Waiting for current inspection" />}
-              {inspection.rescheduledFrom && <SummaryRow label="Rescheduled from" value="Failed inspection" />}
+            <div className="mt-6 border-t border-ink-700/10 pt-5">
+              <h3 className="text-sm font-semibold text-ink-900">Returned inspection PDF</h3>
+              <label className="mt-3 block">
+                <span className="sr-only">Upload returned inspection PDF</span>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  disabled={isResultLocked}
+                  onChange={(event) => {
+                    void uploadPdf(event.target.files?.[0]);
+                    event.currentTarget.value = "";
+                  }}
+                  className="block w-full text-sm text-ink-600 file:mr-4 file:rounded-lg file:border-0 file:bg-ink-900 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </label>
+              <p className="mt-2 text-xs text-ink-500">
+                PDF only. Maximum file size {formatFileSize(MAX_PDF_SIZE_BYTES)}.
+              </p>
+
+              <div className="mt-4 space-y-2">
+                {inspection.pdfs.map((pdf) => (
+                  <div
+                    key={pdf.id}
+                    className="flex items-center justify-between gap-3 rounded-xl border border-ink-700/10 bg-ink-50 px-3 py-2 text-sm"
+                  >
+                    <a
+                      href={pdf.dataUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="min-w-0 truncate font-medium text-ink-900 underline-offset-2 hover:underline"
+                    >
+                      {pdf.name}
+                    </a>
+                    <div className="flex shrink-0 items-center gap-3 text-xs text-ink-500">
+                      <span>{formatFileSize(pdf.size)}</span>
+                      <button
+                        type="button"
+                        onClick={() => removePdf(pdf.id)}
+                        className="font-medium text-red-600 hover:text-red-700"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {inspection.pdfs.length === 0 && (
+                  <p className="text-sm text-ink-500">No returned PDFs uploaded.</p>
+                )}
+              </div>
             </div>
           </section>
         </aside>
@@ -253,11 +337,16 @@ function BackLink({ projectId }: { projectId: string }) {
   );
 }
 
-function SummaryRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl bg-ink-50 px-4 py-3">
-      <div className="text-ink-500">{label}</div>
-      <div className="mt-1 font-medium text-ink-900">{value}</div>
-    </div>
-  );
+function readFileAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }

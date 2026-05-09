@@ -3,11 +3,14 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import type { DragEvent } from "react";
 import type { InspectionSchedule } from "@/lib/inspections";
 import {
   type EditableInspectionStatus,
   type InspectionRecord,
   getCurrentInspectionIndex,
+  isInspectionResolved,
 } from "./model";
 import { useInspections } from "./use-inspections";
 
@@ -18,13 +21,46 @@ interface InspectionsPageProps {
 
 export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
   const router = useRouter();
-  const { inspections, stats, addManualInspection } = useInspections(projectId, schedule);
+  const { inspections, stats, addManualInspection, reorderManualInspection } =
+    useInspections(projectId, schedule);
+  const [draggedInspectionId, setDraggedInspectionId] = useState<string | null>(null);
   const currentInspectionIndex = getCurrentInspectionIndex(inspections);
   const nextInspection = inspections[currentInspectionIndex];
 
   function handleAddManualInspection() {
     const inspection = addManualInspection();
     router.push(`/projects/${projectId}/inspections/${inspection.id}`);
+  }
+
+  function handleDragStart(event: DragEvent<HTMLAnchorElement>, inspection: InspectionRecord) {
+    if (!inspection.manual || isInspectionResolved(inspection)) {
+      event.preventDefault();
+      return;
+    }
+
+    setDraggedInspectionId(inspection.id);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", inspection.id);
+  }
+
+  function handleDragOver(event: DragEvent<HTMLAnchorElement>) {
+    if (!draggedInspectionId) return;
+
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  }
+
+  function handleDrop(event: DragEvent<HTMLAnchorElement>, targetIndex: number) {
+    const draggedId = event.dataTransfer.getData("text/plain") || draggedInspectionId;
+    if (!draggedId) return;
+
+    event.preventDefault();
+    const targetBounds = event.currentTarget.getBoundingClientRect();
+    const shouldPlaceAfter = event.clientY > targetBounds.top + targetBounds.height / 2;
+    const nextTargetIndex = targetIndex + (shouldPlaceAfter ? 1 : 0);
+
+    reorderManualInspection(draggedId, nextTargetIndex);
+    setDraggedInspectionId(null);
   }
 
   return (
@@ -68,7 +104,7 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
             <p className="text-sm font-medium text-ink-500">Inspection Readiness</p>
             <div>
               <h2 className="text-2xl font-semibold tracking-tight text-ink-900">
-                {stats.completed} / {String(stats.total)} Inspections Passed
+                {stats.completed} / {String(stats.total)} Inspections Complete
               </h2>
               <p className="mt-1 text-sm text-ink-500">{schedule.summary}</p>
             </div>
@@ -88,7 +124,7 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
             />
           </div>
           <div className="flex items-center justify-between text-sm text-ink-500">
-            <span>{stats.percent}% passed</span>
+            <span>{stats.percent}% complete</span>
             <span>{stats.remaining} inspections still need attention</span>
           </div>
         </div>
@@ -125,19 +161,37 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
             const checkedCount = Object.values(inspection.checklist).filter(Boolean).length;
             const href = `/projects/${projectId}/inspections/${inspection.id}` as Route;
             const index = inspections.findIndex((item) => item.id === inspection.id);
-            const isLocked = index > currentInspectionIndex;
+            const isLocked = !inspection.manual && index > currentInspectionIndex;
+            const isResolved = isInspectionResolved(inspection);
+            const canDrag = inspection.manual && !isResolved;
+            const isDragging = draggedInspectionId === inspection.id;
 
             return (
               <Link
                 key={inspection.id}
                 href={href}
-                className="group rounded-2xl border border-ink-700/10 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-ink-700/20 hover:shadow-md"
+                draggable={canDrag}
+                onDragStart={(event) => handleDragStart(event, inspection)}
+                onDragEnd={() => setDraggedInspectionId(null)}
+                onDragOver={handleDragOver}
+                onDrop={(event) => handleDrop(event, index)}
+                className={[
+                  "group relative overflow-hidden rounded-2xl border border-ink-700/10 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-ink-700/20 hover:shadow-md",
+                  canDrag ? "cursor-grab active:cursor-grabbing" : "",
+                  isDragging ? "opacity-60" : "",
+                ].filter(Boolean).join(" ")}
               >
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                {isLocked && <div className="pointer-events-none absolute inset-0 bg-slate-200/30" />}
+                <div className="relative flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-3">
                       <h3 className="text-lg font-semibold text-ink-900">{inspection.title}</h3>
                       <StatusBadge status={inspection.status} />
+                      {isResolved && (
+                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
+                          ✓ Done
+                        </span>
+                      )}
                       {isLocked && (
                         <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 ring-1 ring-slate-200">
                           Locked
@@ -209,16 +263,19 @@ function MetricCard({ label, value }: { label: string; value: string }) {
 
 export function StatusBadge({ status }: { status: EditableInspectionStatus }) {
   const styles: Record<EditableInspectionStatus, string> = {
-    "Not booked": "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
-    Booked: "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
+    "Not Conducted": "bg-slate-50 text-slate-700 ring-1 ring-slate-200",
     Passed: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
     Failed: "bg-red-50 text-red-700 ring-1 ring-red-200",
-    Rescheduled: "bg-violet-50 text-violet-700 ring-1 ring-violet-200",
+  };
+  const labels: Record<EditableInspectionStatus, string> = {
+    "Not Conducted": "Not Conducted",
+    Passed: "✓ Passed",
+    Failed: "✓ Failed",
   };
 
   return (
     <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${styles[status]}`}>
-      {status}
+      {labels[status]}
     </span>
   );
 }

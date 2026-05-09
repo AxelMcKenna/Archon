@@ -1,20 +1,31 @@
 import type { InspectionSchedule, InspectionStage } from "@/lib/inspections";
 
-export type EditableInspectionStatus = "Not booked" | "Booked" | "Passed" | "Failed" | "Rescheduled";
+export type EditableInspectionStatus = "Not Conducted" | "Passed" | "Failed";
+
+export interface InspectionPdf {
+  id: string;
+  name: string;
+  size: number;
+  uploadedAt: string;
+  dataUrl: string;
+}
 
 export interface InspectionRecord {
   id: string;
   baseInspectionId: string;
   manual?: boolean;
+  sortOrder?: number;
   title: string;
   category: string;
   timing: string;
   requirements: string[];
   details: string;
   dueDate: string;
+  bookedDate: string;
   status: EditableInspectionStatus;
   resultNotes: string;
   checklist: Record<string, boolean>;
+  pdfs: InspectionPdf[];
   rescheduledFrom?: string;
   createdAt: string;
   updatedAt: string;
@@ -27,33 +38,46 @@ export interface InspectionUpdate {
   requirements?: string[];
   details?: string;
   dueDate?: string;
+  bookedDate?: string;
   status?: EditableInspectionStatus;
   resultNotes?: string;
   checklist?: Record<string, boolean>;
+  pdfs?: InspectionPdf[];
+  sortOrder?: number;
 }
 
 export function buildInspectionRecords(
   schedule: InspectionSchedule,
   savedRecords: Record<string, InspectionRecord>,
 ) {
-  const generatedRecords = schedule.stages.flatMap((stage) => {
+  const generatedRecords = schedule.stages.flatMap((stage, index) => {
     const saved = savedRecords[stage.id];
-    const record = saved ? mergeStageIntoRecord(stage, saved) : createRecordFromStage(stage);
-    return [record, ...getChildInspections(record.id, savedRecords)];
+    const sortOrder = (index + 1) * 1000;
+    const record = saved
+      ? mergeStageIntoRecord(stage, saved, sortOrder)
+      : createRecordFromStage(stage, sortOrder);
+
+    return [record, ...getChildInspections(record.id, savedRecords, sortOrder)];
   });
 
   const generatedIds = new Set(generatedRecords.map((record) => record.id));
   const manualRecords = Object.values(savedRecords).filter(
     (record) => record.manual && !generatedIds.has(record.id),
-  );
+  ).map((record, index) => ({
+    ...record,
+    bookedDate: record.bookedDate ?? "",
+    status: normalizeInspectionStatus(record.status),
+    pdfs: record.pdfs ?? [],
+    sortOrder: record.sortOrder ?? (generatedRecords.length + index + 1) * 1000,
+  }));
 
-  return [...generatedRecords, ...manualRecords].sort(compareManualInspections);
+  return [...generatedRecords, ...manualRecords].sort(compareInspectionRecords);
 }
 
 export function getInspectionStats(records: InspectionRecord[]) {
-  const completed = records.filter((record) => record.status === "Passed").length;
+  const completed = records.filter(isInspectionResolved).length;
   const failed = records.filter((record) => record.status === "Failed").length;
-  const length = records.length - failed;
+  const length = records.length;
   const remaining = length - completed;
   const percent = records.length === 0 ? 0 : Math.round((completed / length) * 100);
 
@@ -70,11 +94,14 @@ export function createRescheduledInspection(record: InspectionRecord): Inspectio
     ...record,
     id,
     manual: false,
+    sortOrder: (record.sortOrder ?? 0) + 100,
     title: `${record.title.replace(/\s+reinspection\s+\d+$/i, "")} reinspection ${sequence}`,
-    status: "Rescheduled",
+    status: "Not Conducted",
     dueDate: "",
+    bookedDate: "",
     resultNotes: "",
     checklist: Object.fromEntries(record.requirements.map((requirement) => [requirement, false])),
+    pdfs: [],
     rescheduledFrom: record.id,
     createdAt: now,
     updatedAt: now,
@@ -94,20 +121,24 @@ export function createManualInspection(existingRecords: InspectionRecord[]): Ins
   const now = new Date().toISOString();
   const manualCount = existingRecords.filter((record) => record.manual).length + 1;
   const id = `manual-inspection-${Date.now()}`;
+  const maxSortOrder = Math.max(0, ...existingRecords.map((record) => record.sortOrder ?? 0));
 
   return {
     id,
     baseInspectionId: id,
     manual: true,
+    sortOrder: maxSortOrder + 1000,
     title: `Manual inspection ${manualCount}`,
     category: "Manual",
     timing: "User-added inspection",
     requirements: ["Confirm inspection scope"],
     details: "",
     dueDate: "",
-    status: "Not booked",
+    bookedDate: "",
+    status: "Not Conducted",
     resultNotes: "",
     checklist: { "Confirm inspection scope": false },
+    pdfs: [],
     createdAt: now,
     updatedAt: now,
   };
@@ -122,34 +153,45 @@ export function isInspectionResolved(record: InspectionRecord) {
   return record.status === "Passed" || record.status === "Failed";
 }
 
-function createRecordFromStage(stage: InspectionStage): InspectionRecord {
+function createRecordFromStage(stage: InspectionStage, sortOrder: number): InspectionRecord {
   const now = new Date().toISOString();
 
   return {
     id: stage.id,
     baseInspectionId: stage.id,
     manual: false,
+    sortOrder,
     title: stage.title,
     category: stage.category,
     timing: stage.timing,
     requirements: stage.requirements,
     details: "",
     dueDate: "",
-    status: stage.status === "Upcoming" ? "Not booked" : "Not booked",
+    bookedDate: "",
+    status: "Not Conducted",
     resultNotes: "",
     checklist: Object.fromEntries(stage.requirements.map((requirement) => [requirement, false])),
+    pdfs: [],
     createdAt: now,
     updatedAt: now,
   };
 }
 
-function mergeStageIntoRecord(stage: InspectionStage, saved: InspectionRecord): InspectionRecord {
+function mergeStageIntoRecord(
+  stage: InspectionStage,
+  saved: InspectionRecord,
+  sortOrder: number,
+): InspectionRecord {
   return {
     ...saved,
+    sortOrder,
     title: stage.title,
     category: stage.category,
     timing: stage.timing,
     requirements: stage.requirements,
+    bookedDate: saved.bookedDate ?? "",
+    status: normalizeInspectionStatus(saved.status),
+    pdfs: saved.pdfs ?? [],
     checklist: {
       ...Object.fromEntries(stage.requirements.map((requirement) => [requirement, false])),
       ...saved.checklist,
@@ -157,14 +199,34 @@ function mergeStageIntoRecord(stage: InspectionStage, saved: InspectionRecord): 
   };
 }
 
-function getChildInspections(parentId: string, records: Record<string, InspectionRecord>): InspectionRecord[] {
+function getChildInspections(
+  parentId: string,
+  records: Record<string, InspectionRecord>,
+  parentSortOrder: number,
+): InspectionRecord[] {
   return Object.values(records)
     .filter((record) => record.rescheduledFrom === parentId)
     .sort((left, right) => left.createdAt.localeCompare(right.createdAt))
-    .flatMap((record) => [record, ...getChildInspections(record.id, records)]);
+    .flatMap((record, index) => {
+      const sortOrder = record.sortOrder ?? parentSortOrder + (index + 1) * 100;
+      const child = {
+        ...record,
+        sortOrder,
+        bookedDate: record.bookedDate ?? "",
+        status: normalizeInspectionStatus(record.status),
+        pdfs: record.pdfs ?? [],
+      };
+      return [child, ...getChildInspections(record.id, records, sortOrder)];
+    });
 }
 
-function compareManualInspections(left: InspectionRecord, right: InspectionRecord) {
-  if (!left.manual || !right.manual) return 0;
+function compareInspectionRecords(left: InspectionRecord, right: InspectionRecord) {
+  const sortDifference = (left.sortOrder ?? 0) - (right.sortOrder ?? 0);
+  if (sortDifference !== 0) return sortDifference;
   return left.createdAt.localeCompare(right.createdAt);
+}
+
+function normalizeInspectionStatus(status: string): EditableInspectionStatus {
+  if (status === "Passed" || status === "Failed") return status;
+  return "Not Conducted";
 }
