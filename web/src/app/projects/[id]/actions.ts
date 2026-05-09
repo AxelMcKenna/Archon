@@ -74,7 +74,7 @@ export async function updateProjectSettings(projectId: string, formData: FormDat
 
   if (!("project_details" in resolvedProject)) {
     revalidatePath(`/projects/${projectId}`);
-    redirect(`/projects/${projectId}/settings`);
+    redirect(`/projects/${projectId}`);
   }
 
   const currentDetails = normalizeProjectDetails(
@@ -110,5 +110,5 @@ export async function updateProjectSettings(projectId: string, formData: FormDat
   if (error) throw error;
 
   revalidatePath(`/projects/${projectId}`);
-  redirect(`/projects/${projectId}/settings`);
+  redirect(`/projects/${projectId}`);
 }
