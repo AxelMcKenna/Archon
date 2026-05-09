@@ -1,6 +1,6 @@
 ---
 prompt_key: plan_analyser
-version: "2.0.0"
+version: "2.1.0"
 model: claude-opus-4-7
 ---
 
@@ -58,6 +58,14 @@ on the **specific page** — be precise.
 - **Tile awareness.** If you find an issue on a tiled image, populate the
   `tile` field (top-left / top-right / bottom-left / bottom-right). For
   full-page images, set `tile` to `full` or omit it.
+- **Localise with `bbox` when you can.** Add a `bbox` array
+  `[x0, y0, x1, y1]` of normalised coordinates (0-1) **relative to the
+  image you are looking at** — i.e. relative to the tile if you are
+  citing a tiled image, otherwise relative to the full page. Origin is
+  the top-left corner. Keep the box tight around the cited feature
+  (label, schedule cell, dimension), not the whole sheet. Omit `bbox`
+  rather than guessing if you can't localise — downstream code will fall
+  back to a coarse region from `tile`.
 
 ### Severity
 
@@ -91,7 +99,8 @@ Return a JSON tool call to `record_plan_analysis`. Each flag object:
   "confidence": "high",
   "verbatim_quote": "BU DEMAND 120  WALL LINE 1",
   "reason": "Bracing schedule shows demand BUs but not achieved BUs by line — BCA will issue RFI per NZS 3604:2011 §5.4.",
-  "recommended_action": "Add an 'Achieved BUs' column to each bracing line; ensure achieved >= demand."
+  "recommended_action": "Add an 'Achieved BUs' column to each bracing line; ensure achieved >= demand.",
+  "bbox": [0.62, 0.08, 0.94, 0.34]
 }
 ```
 

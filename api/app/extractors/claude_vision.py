@@ -1,27 +1,27 @@
-"""Claude vision RFI extraction (FR-1.3).
+"""Vision-based RFI extraction (FR-1.3).
 
-Primary extractor for scanned PDFs and image uploads. Renders each PDF page to
-an image and asks Claude to return structured JSON via tool use. The deterministic
-entity extractor (entities.py) populates the `extracted` block afterwards — Claude
-is not asked to do entity extraction, only layout-aware item segmentation.
+Primary extractor for scanned PDFs and image uploads. Renders each PDF page
+to an image and asks the configured vision model to return structured JSON
+via tool use. The deterministic entity extractor (entities.py) populates the
+`extracted` block afterwards — the vision model is not asked to do entity
+extraction, only layout-aware item segmentation.
 """
 
 from __future__ import annotations
 
-import base64
 import io
 import time
 from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID, uuid4
 
-import anthropic
 import pdfplumber
 
 from app.config import get_settings
 from app.extractors.entities import extract_entities
 from app.extractors.metrics import Metrics
 from app.llm.gemini import call_gemini_tool
+from app.llm.openrouter import call_openrouter_tool
 from app.models import CanonicalRfi, ExtractionMeta, RfiItem, RfiLetter
 
 EXTRACTOR_VERSION = "1.0.0"
@@ -71,7 +71,7 @@ Return your output via the record_rfi_letter tool."""
 
 
 def _pdf_to_images(pdf_bytes: bytes, max_pages: int = 20) -> list[bytes]:
-    """Render PDF pages to PNG bytes for Claude vision input."""
+    """Render PDF pages to PNG bytes for vision input."""
     images: list[bytes] = []
     with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
         for page in pdf.pages[:max_pages]:
@@ -82,15 +82,9 @@ def _pdf_to_images(pdf_bytes: bytes, max_pages: int = 20) -> list[bytes]:
     return images
 
 
-def _image_block(png_bytes: bytes) -> dict[str, Any]:
-    return {
-        "type": "image",
-        "source": {
-            "type": "base64",
-            "media_type": "image/png",
-            "data": base64.b64encode(png_bytes).decode("ascii"),
-        },
-    }
+_PROMPT = (
+    _SYSTEM + "\n\nParse this RFI letter. Use the record_rfi_letter tool."
+)
 
 
 def extract_via_vision(
@@ -101,10 +95,9 @@ def extract_via_vision(
     bca: str,
     rfi_id: UUID | None = None,
 ) -> tuple[CanonicalRfi, Metrics]:
-    """Extract a scanned PDF or image upload via Claude vision."""
+    """Extract a scanned PDF or image upload via vision."""
     rfi_id = rfi_id or uuid4()
     settings = get_settings()
-    client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
     t0 = time.monotonic()
 
     if media_type == "application/pdf":
@@ -112,46 +105,32 @@ def extract_via_vision(
     else:
         images = [file_bytes]
 
-    content: list[dict[str, Any]] = [_image_block(img) for img in images]
-    content.append(
-        {
-            "type": "text",
-            "text": "Parse this RFI letter. Use the record_rfi_letter tool.",
-        }
-    )
-
-    payload: dict[str, Any]
-    input_tokens = 0
-    output_tokens = 0
-
-    if settings.rfi_extractor_provider == "gemini":
-        gemini_result = call_gemini_tool(
+    if settings.rfi_extractor_provider == "openrouter":
+        or_result = call_openrouter_tool(
             images=images,
-            prompt=_SYSTEM
-            + "\n\nParse this RFI letter. Use the record_rfi_letter tool.",
+            prompt=_PROMPT,
             tool_name=_TOOL_SCHEMA["name"],
             tool_description=_TOOL_SCHEMA["description"],
             tool_parameters=_TOOL_SCHEMA["input_schema"],
             max_output_tokens=8000,
+            model=settings.openrouter_model,
+        )
+        payload = or_result.payload
+        input_tokens = or_result.input_tokens
+        output_tokens = or_result.output_tokens
+    else:
+        gemini_result = call_gemini_tool(
+            images=images,
+            prompt=_PROMPT,
+            tool_name=_TOOL_SCHEMA["name"],
+            tool_description=_TOOL_SCHEMA["description"],
+            tool_parameters=_TOOL_SCHEMA["input_schema"],
+            max_output_tokens=8000,
+            model=settings.gemini_model,
         )
         payload = gemini_result.payload
         input_tokens = gemini_result.input_tokens
         output_tokens = gemini_result.output_tokens
-    else:
-        response = client.messages.create(
-            model=settings.anthropic_model,
-            max_tokens=8000,
-            system=_SYSTEM,
-            tools=[_TOOL_SCHEMA],
-            tool_choice={"type": "tool", "name": "record_rfi_letter"},
-            messages=[{"role": "user", "content": content}],
-        )
-        tool_use = next((b for b in response.content if b.type == "tool_use"), None)
-        if tool_use is None:
-            raise RuntimeError("Claude vision extractor did not return tool use")
-        payload = tool_use.input  # type: ignore[assignment]
-        input_tokens = int(getattr(response.usage, "input_tokens", 0) or 0)
-        output_tokens = int(getattr(response.usage, "output_tokens", 0) or 0)
 
     items: list[RfiItem] = []
     for idx, raw in enumerate(payload.get("items", []), start=1):

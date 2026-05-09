@@ -1,21 +1,23 @@
 """Per-item response drafter (FR-3.1, FR-3.2).
 
-Versioned prompt; Claude tool-use for structured output. Caches by item +
-category + prompt version.
+Versioned prompt; tool-use for structured output via the configured
+provider (gemini or openrouter). Caches by item + category + prompt
+version.
 """
 
 from __future__ import annotations
 
 import hashlib
 import re
+import time
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-import anthropic
-
 from app.config import get_settings
 from app.extractors.metrics import Metrics
+from app.llm.gemini import call_gemini_tool
+from app.llm.openrouter import call_openrouter_tool
 
 PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
 ACTIVE_PROMPT = "drafter_v1.md"
@@ -83,7 +85,6 @@ def draft_response(
         return cached, ver, Metrics()
 
     settings = get_settings()
-    client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
 
     prompt = _fill(
         template,
@@ -99,25 +100,35 @@ def draft_response(
         acceptable_solution=acceptable_solution or "(none for this category)",
     )
 
-    import time
-
     t0 = time.monotonic()
-    response = client.messages.create(
-        model=settings.anthropic_model,
-        max_tokens=2000,
-        tools=[_TOOL_SCHEMA],
-        tool_choice={"type": "tool", "name": "record_draft"},
-        messages=[{"role": "user", "content": prompt}],
-    )
-    tool_use = next((b for b in response.content if b.type == "tool_use"), None)
-    if tool_use is None:
-        raise RuntimeError("Drafter did not return tool use")
-    payload: dict[str, Any] = tool_use.input  # type: ignore[assignment]
-    draft = payload["draft_text"]
+    if settings.drafter_provider == "openrouter":
+        result = call_openrouter_tool(
+            images=[],
+            prompt=prompt,
+            tool_name=_TOOL_SCHEMA["name"],
+            tool_description=_TOOL_SCHEMA["description"],
+            tool_parameters=_TOOL_SCHEMA["input_schema"],
+            max_output_tokens=2000,
+            model=settings.openrouter_model,
+        )
+    else:
+        result = call_gemini_tool(
+            images=[],
+            prompt=prompt,
+            tool_name=_TOOL_SCHEMA["name"],
+            tool_description=_TOOL_SCHEMA["description"],
+            tool_parameters=_TOOL_SCHEMA["input_schema"],
+            max_output_tokens=2000,
+            model=settings.gemini_model,
+        )
+
+    draft = result.payload.get("draft_text")
+    if not draft:
+        raise RuntimeError("Drafter returned no draft_text")
     _DRAFT_CACHE[cache_key] = (draft, version)
     metrics = Metrics(
         processing_ms=int((time.monotonic() - t0) * 1000),
-        input_tokens=int(getattr(response.usage, "input_tokens", 0) or 0),
-        output_tokens=int(getattr(response.usage, "output_tokens", 0) or 0),
+        input_tokens=result.input_tokens,
+        output_tokens=result.output_tokens,
     )
     return draft, version, metrics

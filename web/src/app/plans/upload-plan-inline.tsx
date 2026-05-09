@@ -34,7 +34,7 @@ export function UploadPlanInline({ projects }: { projects: Project[] }) {
       fd.append("file", file);
       fd.append("project_id", project.id);
       const res = await apiUpload<AnalyseResponse>("/plans", fd);
-      router.push(`/rfi?plan=${res.plan_id}`);
+      router.push(`/plans?plan=${res.plan_id}`);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Plan analysis failed");

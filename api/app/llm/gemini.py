@@ -24,16 +24,38 @@ class GeminiResult:
     output_tokens: int
 
 
+_STRIP_KEYS = {
+    "$schema",
+    "additionalProperties",
+    "minLength",
+    "maxLength",
+    "minimum",
+    "maximum",
+    "minItems",
+    "maxItems",
+    "format",
+    "pattern",
+    "default",
+    "examples",
+    "title",
+    "description",
+}
+
+
 def _strip_unsupported_keys(schema: Any) -> Any:
-    """Gemini's function-declaration schema is JSONSchema-ish but rejects
-    a handful of keys Claude accepts. Walk the schema and drop them.
+    """Gemini's function-declaration schema is JSONSchema-ish but stricter
+    on state-space complexity. Drop bounds + descriptive keys that Claude
+    accepts but Gemini rejects (or that blow up the state count when an
+    array/enum sits inside another array).
     """
     if isinstance(schema, dict):
-        out = {}
+        out: dict[str, Any] = {}
         for k, v in schema.items():
-            if k in ("$schema", "additionalProperties", "minLength", "maxLength"):
+            if k in _STRIP_KEYS:
                 continue
             out[k] = _strip_unsupported_keys(v)
+        if "enum" in out and "type" not in out:
+            out["type"] = "string"
         return out
     if isinstance(schema, list):
         return [_strip_unsupported_keys(x) for x in schema]
@@ -50,6 +72,7 @@ def call_gemini_tool(
     image_captions: list[str] | None = None,
     max_output_tokens: int = 6000,
     model: str | None = None,
+    temperature: float = 0.0,
 ) -> GeminiResult:
     """Run a single Gemini call with a forced function call.
 
@@ -85,6 +108,7 @@ def call_gemini_tool(
             )
         ),
         max_output_tokens=max_output_tokens,
+        temperature=temperature,
     )
 
     response = client.models.generate_content(

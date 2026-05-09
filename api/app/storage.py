@@ -85,3 +85,7 @@ def upload_plan(
 def signed_url(client: Client, *, bucket: str, path: str, expires_in: int = 3600) -> str:
     res = client.storage.from_(bucket).create_signed_url(path, expires_in)
     return res["signedURL"]
+
+
+def download(client: Client, *, bucket: str, path: str) -> bytes:
+    return client.storage.from_(bucket).download(path)

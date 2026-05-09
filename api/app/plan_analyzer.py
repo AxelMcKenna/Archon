@@ -17,12 +17,13 @@ import json
 import logging
 import re
 import time
+from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-import anthropic
 import pdfplumber
 from PIL import Image
 
@@ -31,6 +32,9 @@ from app.extractors.doc_rules import run_doc_rules
 from app.extractors.metrics import Metrics
 from app.extractors.plan_text import PlanTextExtraction, extract_plan_text
 from app.llm.gemini import call_gemini_tool
+from app.llm.openrouter import call_openrouter_tool
+from app.plan_bbox_refiner import refine_flag_bboxes
+from app.plan_ocr_refiner import refine_via_ocr
 from app.taxonomy import get_taxonomy
 
 log = logging.getLogger(__name__)
@@ -38,7 +42,7 @@ log = logging.getLogger(__name__)
 PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
 ACTIVE_PROMPT = "plan_analyser_v2.md"
 ACTIVE_VERIFICATION_PROMPT = "plan_verification_v1.md"
-ANALYSIS_VERSION = "2.0.0"
+ANALYSIS_VERSION = "2.2.0"
 # Back-compat: routes/tests still import ANALYSER_VERSION.
 ANALYSER_VERSION = ANALYSIS_VERSION
 
@@ -103,6 +107,24 @@ _ANALYSIS_TOOL_SCHEMA: dict[str, Any] = {
                             "type": "string",
                             "minLength": 8,
                             "maxLength": 500,
+                        },
+                        "bbox": {
+                            "type": "array",
+                            "description": (
+                                "Optional bounding box around the cited "
+                                "feature, in normalised coordinates (0-1) "
+                                "RELATIVE TO THE IMAGE YOU ARE LOOKING AT "
+                                "(the tile if tiled, otherwise the full "
+                                "page). Order: [x0, y0, x1, y1] with origin "
+                                "at top-left. Omit if you cannot localise."
+                            ),
+                            "minItems": 4,
+                            "maxItems": 4,
+                            "items": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1,
+                            },
                         },
                     },
                 },
@@ -314,6 +336,14 @@ def _normalise_area(area: str) -> str:
     return re.sub(r"\s+", " ", area or "").strip().lower()
 
 
+def _flag_key(f: dict[str, Any]) -> tuple[int, str, str]:
+    return (
+        int(f.get("page") or 0),
+        _normalise_area(f.get("area", "")),
+        str(f.get("category") or ""),
+    )
+
+
 def _dedup_flags(flags: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Merge flags with the same (page, normalised_area, category) key.
 
@@ -322,11 +352,7 @@ def _dedup_flags(flags: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """
     seen: dict[tuple[int, str, str], dict[str, Any]] = {}
     for f in flags:
-        key = (
-            int(f.get("page") or 0),
-            _normalise_area(f.get("area", "")),
-            str(f.get("category") or ""),
-        )
+        key = _flag_key(f)
         existing = seen.get(key)
         if existing is None:
             seen[key] = f
@@ -338,6 +364,187 @@ def _dedup_flags(flags: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return list(seen.values())
 
 
+def _quote_signature(q: str | None) -> str:
+    """Aggressive normalisation for cross-run bucket keys.
+
+    Strips non-alphanumeric and lowercases. "Kitchen 4,050 x 2,900" and
+    "Kitchen 4.050 x 2.900" both reduce to "kitchen4050x2900" so they
+    bucket together regardless of punctuation drift between runs.
+    """
+    return re.sub(r"[^a-z0-9]+", "", (q or "").lower())
+
+
+def _vote_key(f: dict[str, Any]) -> tuple[int, str]:
+    """Bucket key for cross-run voting.
+
+    Prefer the verbatim quote (anchored in real drawing text and stable
+    across runs). Fall back to the area description only when no quote
+    is present, so unquoted flags don't all collapse into one bucket.
+    """
+    page = int(f.get("page") or 0)
+    quote_sig = _quote_signature(f.get("verbatim_quote"))
+    if quote_sig:
+        return (page, f"q:{quote_sig}")
+    return (page, f"a:{_normalise_area(f.get('area', ''))}")
+
+
+def _vote_flags(
+    runs: list[list[dict[str, Any]]], *, threshold: int
+) -> list[dict[str, Any]]:
+    """Cross-run consensus voting.
+
+    Bucket every flag by ``_vote_key`` — primarily by (page, normalised
+    verbatim_quote). The model labels the same observation with different
+    `area` prose and different `category` labels across runs, but the
+    verbatim quote (a string copied off the drawing) is much more stable
+    — so it's the strongest cross-run anchor we have.
+
+    Within a single run, duplicate keys count once (so a hyperactive run
+    can't pad the vote). Keep buckets that appear in >= threshold
+    distinct runs; the surviving representative is the highest-confidence
+    hit, with ties broken by most-common category within the bucket
+    (a soft signal of consensus categorisation).
+    """
+    threshold = max(1, threshold)
+    buckets: dict[tuple[int, str], list[dict[str, Any]]] = defaultdict(list)
+    for run in runs:
+        seen_in_run: set[tuple[int, str]] = set()
+        for f in run:
+            key = _vote_key(f)
+            if key in seen_in_run:
+                continue
+            seen_in_run.add(key)
+            buckets[key].append(f)
+
+    out: list[dict[str, Any]] = []
+    for hits in buckets.values():
+        if len(hits) < threshold:
+            continue
+        cat_counts = Counter(f.get("category") for f in hits)
+
+        def _score(f: dict[str, Any]) -> tuple[int, int]:
+            return (
+                _CONFIDENCE_RANK.get(f.get("confidence", "low"), 0),
+                cat_counts[f.get("category")],
+            )
+
+        best = max(hits, key=_score)
+        out.append(best)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Bbox normalisation: tile-local → page-relative
+# ---------------------------------------------------------------------------
+
+
+# Page-relative offset/scale per tile. Tiles are quartered so each maps to
+# a 0.5×0.5 region of the parent page.
+_TILE_TRANSFORM: dict[str, tuple[float, float, float, float]] = {
+    # tile_name: (x_offset, y_offset, x_scale, y_scale)
+    "top-left":     (0.0, 0.0, 0.5, 0.5),
+    "top-right":    (0.5, 0.0, 0.5, 0.5),
+    "bottom-left":  (0.0, 0.5, 0.5, 0.5),
+    "bottom-right": (0.5, 0.5, 0.5, 0.5),
+    "full":         (0.0, 0.0, 1.0, 1.0),
+}
+
+
+def _tile_region(tile: str | None) -> tuple[float, float, float, float]:
+    """Coarse page-relative bbox covering the entire tile region."""
+    ox, oy, sx, sy = _TILE_TRANSFORM.get(tile or "full", _TILE_TRANSFORM["full"])
+    return (ox, oy, ox + sx, oy + sy)
+
+
+def _normalise_bbox(
+    bbox: Any, tile: str | None
+) -> tuple[float, float, float, float] | None:
+    """Convert a tile-local bbox to page-relative coords, clamped to [0,1].
+
+    Returns None if the bbox is malformed. Callers should fall back to
+    `_tile_region(tile)` when they want a coarse region instead.
+    """
+    if not isinstance(bbox, (list, tuple)) or len(bbox) != 4:
+        return None
+    try:
+        x0, y0, x1, y1 = (float(v) for v in bbox)
+    except (TypeError, ValueError):
+        return None
+    # Reject NaN/inf and obviously bad ordering.
+    vals = (x0, y0, x1, y1)
+    if any(v != v or v in (float("inf"), float("-inf")) for v in vals):
+        return None
+    # Tolerate swapped corners.
+    x0, x1 = sorted((x0, x1))
+    y0, y1 = sorted((y0, y1))
+    # Clamp tile-local coords to [0,1] before mapping.
+    x0 = max(0.0, min(1.0, x0))
+    y0 = max(0.0, min(1.0, y0))
+    x1 = max(0.0, min(1.0, x1))
+    y1 = max(0.0, min(1.0, y1))
+    if x1 <= x0 or y1 <= y0:
+        return None
+    ox, oy, sx, sy = _TILE_TRANSFORM.get(tile or "full", _TILE_TRANSFORM["full"])
+    return (ox + x0 * sx, oy + y0 * sy, ox + x1 * sx, oy + y1 * sy)
+
+
+def _attach_page_bbox(flags: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Replace tile-local `bbox` with a page-relative one, falling back to
+    the tile region when the model omitted/fumbled the box.
+    """
+    out: list[dict[str, Any]] = []
+    for f in flags:
+        tile = f.get("tile") or "full"
+        page_bbox = _normalise_bbox(f.get("bbox"), tile)
+        if page_bbox is None:
+            page_bbox = _tile_region(tile)
+            f = {**f, "bbox_source": "tile_fallback"}
+        else:
+            f = {**f, "bbox_source": "model"}
+        f["bbox"] = list(page_bbox)
+        out.append(f)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Vision pass (single run; analyse_plan calls this N times for voting)
+# ---------------------------------------------------------------------------
+
+
+def _run_single_vision_pass(
+    *,
+    settings: Any,
+    images: list[bytes],
+    captions: list[str],
+    prompt: str,
+) -> tuple[dict[str, Any], int, int]:
+    """One analyser call. Returns (payload, input_tokens, output_tokens)."""
+    if settings.plan_analyser_provider == "openrouter":
+        result = call_openrouter_tool(
+            images=images,
+            image_captions=captions,
+            prompt=prompt,
+            tool_name=_ANALYSIS_TOOL_SCHEMA["name"],
+            tool_description=_ANALYSIS_TOOL_SCHEMA["description"],
+            tool_parameters=_ANALYSIS_TOOL_SCHEMA["input_schema"],
+            max_output_tokens=6000,
+            model=settings.openrouter_model,
+        )
+        return result.payload, result.input_tokens, result.output_tokens
+
+    result = call_gemini_tool(
+        images=images,
+        image_captions=captions,
+        prompt=prompt,
+        tool_name=_ANALYSIS_TOOL_SCHEMA["name"],
+        tool_description=_ANALYSIS_TOOL_SCHEMA["description"],
+        tool_parameters=_ANALYSIS_TOOL_SCHEMA["input_schema"],
+        max_output_tokens=6000,
+        model=settings.gemini_model,
+    )
+    return result.payload, result.input_tokens, result.output_tokens
+
+
 # ---------------------------------------------------------------------------
 # Verification pass (FR-3)
 # ---------------------------------------------------------------------------
@@ -345,7 +552,6 @@ def _dedup_flags(flags: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 def _verify_flags(
     *,
-    client: anthropic.Anthropic,
     images: list[RenderedImage],
     flags: list[dict[str, Any]],
     metrics: Metrics,
@@ -376,20 +582,28 @@ def _verify_flags(
     )
     prompt = _fill(template, flags_block=flags_block)
 
-    content: list[dict[str, Any]] = []
-    for img in images:
-        content.append(_image_block(img))
-        content.append(_image_caption(img))
-    content.append({"type": "text", "text": prompt})
-
     settings = get_settings()
+    captions = [
+        f"Image: page {img.page}, tile {img.tile} (rendered at {img.dpi} DPI)."
+        for img in images
+    ]
     payload: dict[str, Any]
     try:
-        if settings.plan_verifier_provider == "gemini":
-            captions = [
-                f"Image: page {img.page}, tile {img.tile} (rendered at {img.dpi} DPI)."
-                for img in images
-            ]
+        if settings.plan_verifier_provider == "openrouter":
+            or_result = call_openrouter_tool(
+                images=[img.png for img in images],
+                image_captions=captions,
+                prompt=prompt,
+                tool_name=_VERIFICATION_TOOL_SCHEMA["name"],
+                tool_description=_VERIFICATION_TOOL_SCHEMA["description"],
+                tool_parameters=_VERIFICATION_TOOL_SCHEMA["input_schema"],
+                max_output_tokens=2000,
+                model=settings.openrouter_verifier_model,
+            )
+            payload = or_result.payload
+            metrics.verification_input_tokens += or_result.input_tokens
+            metrics.verification_output_tokens += or_result.output_tokens
+        else:
             gemini_result = call_gemini_tool(
                 images=[img.png for img in images],
                 image_captions=captions,
@@ -398,31 +612,11 @@ def _verify_flags(
                 tool_description=_VERIFICATION_TOOL_SCHEMA["description"],
                 tool_parameters=_VERIFICATION_TOOL_SCHEMA["input_schema"],
                 max_output_tokens=2000,
+                model=settings.gemini_verifier_model,
             )
             payload = gemini_result.payload
             metrics.verification_input_tokens += gemini_result.input_tokens
             metrics.verification_output_tokens += gemini_result.output_tokens
-        else:
-            response = client.messages.create(
-                model=settings.anthropic_verification_model,
-                max_tokens=2000,
-                tools=[_VERIFICATION_TOOL_SCHEMA],
-                tool_choice={"type": "tool", "name": "record_verification"},
-                messages=[{"role": "user", "content": content}],
-            )
-            metrics.verification_input_tokens += int(
-                getattr(response.usage, "input_tokens", 0) or 0
-            )
-            metrics.verification_output_tokens += int(
-                getattr(response.usage, "output_tokens", 0) or 0
-            )
-            tool_use = next(
-                (b for b in response.content if b.type == "tool_use"), None
-            )
-            if tool_use is None:
-                log.warning("plan verification returned no tool_use; treating as skipped")
-                return list(flags), [], "skipped", version
-            payload = dict(tool_use.input)  # type: ignore[arg-type]
     except Exception as exc:  # noqa: BLE001
         log.warning("plan verification skipped: %s", exc)
         return list(flags), [], "skipped", version
@@ -474,7 +668,6 @@ def analyse_plan(
     """
     template, prompt_version = _load_prompt(ACTIVE_PROMPT)
     settings = get_settings()
-    client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
 
     # --- Phase A: deterministic text-layer extraction ---------------------
     if media_type == "application/pdf":
@@ -502,85 +695,109 @@ def analyse_plan(
         taxonomy=_taxonomy_block(),
     )
 
-    # --- Phase B: vision pass -------------------------------------------
-    content: list[dict[str, Any]] = []
-    for img in images:
-        content.append(_image_block(img))
-        content.append(_image_caption(img))
+    # --- Phase B: vision pass (with N-of-K self-consistency voting) -----
+    captions = [
+        f"Image: page {img.page}, tile {img.tile} (rendered at {img.dpi} DPI)."
+        for img in images
+    ]
+    text_blocks: list[str] = []
     if text_extraction.title_blocks or text_extraction.drawing_register:
-        content.append(
-            {
-                "type": "text",
-                "text": (
-                    "Structured PDF text-layer extraction (treat as ground truth):\n```json\n"
-                    + json.dumps(text_extraction.to_prompt_block(), indent=2)
-                    + "\n```"
-                ),
-            }
+        text_blocks.append(
+            "Structured PDF text-layer extraction (treat as ground truth):\n```json\n"
+            + json.dumps(text_extraction.to_prompt_block(), indent=2)
+            + "\n```"
         )
-    content.append({"type": "text", "text": prompt})
+    text_blocks.append(prompt)
+    flat_prompt = "\n\n".join(text_blocks)
+    image_pngs = [img.png for img in images]
 
     metrics = Metrics()
     t0 = time.monotonic()
 
-    if settings.plan_analyser_provider == "gemini":
-        captions = [
-            f"Image: page {img.page}, tile {img.tile} (rendered at {img.dpi} DPI)."
-            for img in images
-        ]
-        # The trailing extracted_text JSON block + the analysis prompt are
-        # already part of `content`; for Gemini we re-flatten them into a
-        # single text prompt and let `call_gemini_tool` handle the images.
-        text_blocks = [b["text"] for b in content if b.get("type") == "text"]
-        gemini_result = call_gemini_tool(
-            images=[img.png for img in images],
-            image_captions=captions,
-            prompt="\n\n".join(text_blocks),
-            tool_name=_ANALYSIS_TOOL_SCHEMA["name"],
-            tool_description=_ANALYSIS_TOOL_SCHEMA["description"],
-            tool_parameters=_ANALYSIS_TOOL_SCHEMA["input_schema"],
-            max_output_tokens=6000,
-        )
-        payload = gemini_result.payload
-        metrics.input_tokens = gemini_result.input_tokens
-        metrics.output_tokens = gemini_result.output_tokens
-    else:
-        response = client.messages.create(
-            model=settings.anthropic_model,
-            max_tokens=6000,
-            tools=[_ANALYSIS_TOOL_SCHEMA],
-            tool_choice={"type": "tool", "name": "record_plan_analysis"},
-            messages=[{"role": "user", "content": content}],
-        )
-        metrics.input_tokens = int(getattr(response.usage, "input_tokens", 0) or 0)
-        metrics.output_tokens = int(getattr(response.usage, "output_tokens", 0) or 0)
-        tool_use = next((b for b in response.content if b.type == "tool_use"), None)
-        if tool_use is None:
-            raise RuntimeError("plan analyser did not return tool use")
-        payload = dict(tool_use.input)  # type: ignore[arg-type]
+    n = max(1, settings.plan_analyser_voting_n)
+    threshold = max(1, min(settings.plan_analyser_voting_threshold, n))
 
-    vision_flags: list[dict[str, Any]] = list(payload.get("flags") or [])
+    def _one_pass() -> tuple[dict[str, Any], int, int]:
+        return _run_single_vision_pass(
+            settings=settings,
+            images=image_pngs,
+            captions=captions,
+            prompt=flat_prompt,
+        )
+
+    if n == 1:
+        results = [_one_pass()]
+    else:
+        with ThreadPoolExecutor(max_workers=n) as pool:
+            results = list(pool.map(lambda _i: _one_pass(), range(n)))
+
+    # Sum tokens across all runs for honest cost reporting.
+    metrics.input_tokens = sum(r[1] for r in results)
+    metrics.output_tokens = sum(r[2] for r in results)
+
+    run_flag_lists = [list(r[0].get("flags") or []) for r in results]
+    vision_flags = _vote_flags(run_flag_lists, threshold=threshold)
+
+    # Stash per-run pre-vote summaries for post-hoc diagnosis. Keep only
+    # the fields needed to explain why voting did or didn't bucket flags
+    # together; never surfaced to end users, just queryable from the row.
+    runs_debug = [
+        {
+            "run": idx,
+            "flag_count": len(run),
+            "flags": [
+                {
+                    "page": f.get("page"),
+                    "area": f.get("area"),
+                    "category": f.get("category"),
+                    "confidence": f.get("confidence"),
+                    "verbatim_quote": f.get("verbatim_quote"),
+                    "vote_key": list(_vote_key(f)),
+                }
+                for f in run
+            ],
+        }
+        for idx, run in enumerate(run_flag_lists)
+    ]
+
+    # Pick the longest non-empty summary as the canonical narrative.
+    summary = max(
+        (r[0].get("summary") or "" for r in results), key=len, default=""
+    )
 
     # --- Phase C: dedup vision flags before verification ----------------
     vision_flags = _dedup_flags(vision_flags)
+    vision_flags = _attach_page_bbox(vision_flags)
 
     # --- Phase D: verification pass -------------------------------------
     kept, drops, verification_status, verification_version = _verify_flags(
-        client=client, images=images, flags=vision_flags, metrics=metrics
+        images=images, flags=vision_flags, metrics=metrics
     )
 
     # --- Phase E: merge rule flags + verified flags ---------------------
-    merged_flags = rule_flags + kept
+    merged_flags = _attach_page_bbox(rule_flags) + kept
+
+    # --- Phase F: snap bboxes to PDF text layer where possible ----------
+    merged_flags = refine_flag_bboxes(
+        file_bytes=file_bytes, media_type=media_type, flags=merged_flags
+    )
+
+    # --- Phase G: OCR fallback for flags the text layer didn't find ----
+    merged_flags = refine_via_ocr(
+        file_bytes=file_bytes, media_type=media_type, flags=merged_flags
+    )
 
     metrics.processing_ms = int((time.monotonic() - t0) * 1000)
 
     final_payload = {
         "flags": merged_flags,
-        "summary": payload.get("summary", ""),
+        "summary": summary,
         "taxonomy_version": tx.get("schema_version", "1.0"),
         "pages_analysed": len({img.page for img in images}),
         "truncated": truncated,
         "verification": verification_status,
+        "_debug_runs": runs_debug,
+        "_debug_voting_threshold": threshold,
     }
 
     extras = {
