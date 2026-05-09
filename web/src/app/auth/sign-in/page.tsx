@@ -1,13 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import type { Route } from "next";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
 
 export default function SignInPage() {
+  return (
+    <Suspense fallback={<SignInPageSkeleton />}>
+      <SignInForm />
+    </Suspense>
+  );
+}
+
+function SignInForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") ?? "/projects";
+  const next = (params.get("next") ?? "/projects") as Route;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
@@ -72,4 +81,8 @@ export default function SignInPage() {
       </button>
     </div>
   );
+}
+
+function SignInPageSkeleton() {
+  return <div className="max-w-sm mx-auto px-6 py-16" />;
 }

@@ -1,4 +1,4 @@
-export default function ApplicationPrep({ params }: { params: { id: string } }) {
+export default function ApplicationPrep() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
       <h1 className="text-3xl font-semibold mb-8">Application Preparation</h1>

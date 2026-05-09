@@ -235,10 +235,6 @@ export function ProjectsPageClient({ projects }: { projects: ProjectListItem[] }
                 </svg>
               </label>
             </div>
-
-            <div className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-600">
-              {filteredCards.length} {filteredCards.length === 1 ? "project" : "projects"}
-            </div>
           </div>
         </section>
 

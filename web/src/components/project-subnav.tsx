@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -9,7 +10,7 @@ interface ProjectSubnavProps {
 
 const projectTabs = [
   { name: "Overview", href: "" },
-  { name: "Assessment", href: "/assessment" },
+  { name: "Consent Assessment", href: "/consent-assessment" },
   { name: "Application Prep", href: "/application-prep" },
   { name: "RFIs", href: "/rfis" },
   { name: "Processing", href: "/processing" },
@@ -24,8 +25,9 @@ export function ProjectSubnav({ projectId }: ProjectSubnavProps) {
     <nav className="border-b border-ink-700/10 px-6 py-3 bg-ink-50">
       <ul className="flex gap-6 text-sm">
         {projectTabs.map((tab) => {
-          const tabPath = `/projects/${projectId}${tab.href}`;
-          const isActive = pathname === tabPath;
+          const tabPath = `/projects/${projectId}${tab.href}` as Route;
+          const isActive =
+            pathname === tabPath || (tab.href && pathname.startsWith(`${tabPath}/`));
           return (
             <li key={tab.href}>
               <Link

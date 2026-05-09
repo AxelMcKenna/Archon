@@ -4,7 +4,6 @@ import { taxonomy } from "@consentiq/shared";
 import { UploadRfi } from "./upload-rfi";
 import { deleteProject } from "./actions";
 import { ProjectDeleteButton } from "@/components/project-delete-button";
-import { AddressChecklist } from "@/components/AddressChecklist";
 
 export const dynamic = "force-dynamic";
 
@@ -55,11 +54,6 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
         )}
         <UploadRfi projectId={id} bca={project.bca} />
       </section>
-
-      <section className="border-t border-ink-700/10 pt-8">
-        <AddressChecklist address={project.address} />
-      </section>
-
       <section className="border-t border-ink-700/10 pt-8">
         <div className="rounded-2xl border border-red-200 bg-red-50/60 p-5">
           <h2 className="text-lg font-semibold text-red-900">Danger zone</h2>

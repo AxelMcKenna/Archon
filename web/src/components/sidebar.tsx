@@ -1,15 +1,16 @@
 "use client";
 
+import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const mainTabs = [
-  { name: "Dashboard", href: "/dashboard" },
-  { name: "Projects", href: "/projects" },
-  { name: "Workflow", href: "/workflow" },
-  { name: "Documents", href: "/documents" },
-  { name: "Settings", href: "/settings" },
-  { name: "Help", href: "/help" },
+  { name: "Dashboard", href: "/dashboard" as Route },
+  { name: "Projects", href: "/projects" as Route },
+  { name: "Workflow", href: "/workflow" as Route },
+  { name: "Documents", href: "/documents" as Route },
+  { name: "Settings", href: "/settings" as Route },
+  { name: "Help", href: "/help" as Route },
 ];
 
 export function Sidebar() {
