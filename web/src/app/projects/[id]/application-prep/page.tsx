@@ -17,6 +17,11 @@ export default async function LodgementPage({
     .select("*")
     .eq("id", id)
     .single();
+  const { data: assessmentRow } = await supabase
+    .from("consent_assessments")
+    .select("forecast_context")
+    .eq("project_id", id)
+    .maybeSingle();
 
   const project = data as
     | {
@@ -36,6 +41,12 @@ export default async function LodgementPage({
     | null;
 
   if (!project) notFound();
+  const forecastContext =
+    (assessmentRow as { forecast_context?: Record<string, unknown> | null } | null)
+      ?.forecast_context ?? null;
+  const yearOfConstruction =
+    toNumber(forecastContext?.yearOfConstruction) ??
+    toNumber(forecastContext?.year_of_construction);
 
   const intake: ProjectIntake = {
     projectType: project.project_type ?? "new_dwelling",
@@ -44,6 +55,7 @@ export default async function LodgementPage({
     involvesStructuralWork: project.involves_structural_work ?? false,
     involvesEarthworks: project.involves_earthworks ?? false,
     existingStructureDemolished: project.existing_structure_demolished ?? false,
+    yearOfConstruction,
     newRoadAccess: project.new_road_access ?? false,
     serviceConnectionWater: project.service_connection_water ?? false,
     serviceConnectionWastewater: project.service_connection_wastewater ?? false,
@@ -57,4 +69,13 @@ export default async function LodgementPage({
       projectIntake={intake}
     />
   );
+}
+
+function toNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
 }

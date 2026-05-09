@@ -2,7 +2,7 @@
 
 import type { Route } from "next";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CompletionCheckbox } from "./completion-checkbox";
 import type { ConsentDocument } from "./model";
 import { isManualDocument } from "./model";
@@ -68,6 +68,23 @@ export function ConsentAssessmentPage({
         .map((id) => documents.find((document) => document.id === id))
         .filter((document): document is ConsentDocument => Boolean(document))
     : documents;
+  const groupedDocuments = useMemo(() => {
+    const groups = new Map<string, ConsentDocument[]>();
+    for (const document of documents) {
+      const category = normalizeCategory(document.category);
+      const existing = groups.get(category) ?? [];
+      existing.push(document);
+      groups.set(category, existing);
+    }
+
+    return Array.from(groups.entries())
+      .sort(([left], [right]) => categorySortKey(left) - categorySortKey(right))
+      .map(([category, items]) => ({
+        id: category.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        label: category,
+        items,
+      }));
+  }, [documents]);
 
   function updateField<K extends keyof ManualDocumentFormState>(
     key: K,
@@ -414,7 +431,7 @@ export function ConsentAssessmentPage({
                 : "This usually appears within a few seconds of project creation. Add a manual document below if anything is missing."}
             </p>
           </div>
-        ) : (
+        ) : isReorderMode ? (
           <div className="grid gap-4">
             {documents.map((document) => {
               const upload = uploads[document.id];
@@ -488,10 +505,116 @@ export function ConsentAssessmentPage({
               );
             })}
           </div>
+        ) : (
+          <div className="space-y-4">
+            {groupedDocuments.map((group, groupIndex) => (
+              <details
+                key={group.id}
+                open={groupIndex === 0}
+                className="rounded-sm border border-ink-700/10 bg-surface-raised shadow-sm"
+              >
+                <summary className="flex cursor-pointer items-center justify-between px-5 py-4 text-sm font-semibold text-ink-900">
+                  <span>{group.label}</span>
+                  <span className="rounded-full bg-ink-50 px-2.5 py-1 text-xs font-medium text-ink-500">
+                    {group.items.length}
+                  </span>
+                </summary>
+                <div className="grid gap-4 border-t border-ink-700/10 px-4 py-4">
+                  {group.items.map((document) => {
+                    const upload = uploads[document.id];
+                    const isCompleted = Boolean(completions[document.id]);
+                    const href = `/projects/${projectId}/application-prep/${document.id}` as Route;
+                    const manual = isManualDocument(document);
+
+                    return (
+                      <div
+                        key={document.id}
+                        className="rounded-sm border border-ink-700/10 bg-surface-raised p-5 transition-all hover:border-ink-700/20 hover:shadow-md"
+                      >
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                          <div className="flex flex-1 gap-4">
+                            <CompletionCheckbox
+                              checked={isCompleted}
+                              onChange={(checked) => setDocumentCompleted(document.id, checked)}
+                              label={isCompleted ? "Completed" : "Mark complete"}
+                              muted
+                            />
+
+                            <Link href={href} className="group min-w-0 flex-1">
+                              <div className="space-y-3">
+                                <div className="flex flex-wrap items-center gap-3">
+                                  <h3 className="text-lg font-semibold text-ink-900">{document.title}</h3>
+                                  <CompletionBadge completed={isCompleted} />
+                                  <UploadBadge uploaded={Boolean(upload)} />
+                                  {manual && (
+                                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                                      Manual
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="max-w-3xl text-sm text-ink-600">{document.whyRequired}</p>
+                                {document.triggered_by.length > 0 && (
+                                  <div className="flex flex-wrap gap-2">
+                                    {document.triggered_by.map((trigger) => (
+                                      <span
+                                        key={trigger}
+                                        className="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent"
+                                      >
+                                        {trigger}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </Link>
+                          </div>
+
+                          <div className="flex min-w-56 flex-col items-start gap-2 rounded-sm bg-ink-50 px-4 py-3 text-sm text-ink-500">
+                            <span className="font-medium text-ink-900">
+                              {upload ? "Uploaded file" : "No file uploaded"}
+                            </span>
+                            <span>{upload ? upload.fileName : "Upload available on the document page"}</span>
+                            <Link href={href} className="text-xs font-medium text-ink-700 hover:text-ink-900">
+                              View document details
+                            </Link>
+                            <button
+                              onClick={() => handleRemoveDocument(document)}
+                              className="text-xs font-medium text-red-700 transition-colors hover:text-red-800"
+                            >
+                              Remove document
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </details>
+            ))}
+          </div>
         )}
       </section>
     </div>
   );
+}
+
+function normalizeCategory(value: string) {
+  const normalized = value?.trim();
+  if (!normalized) return "General";
+  return normalized
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function categorySortKey(category: string) {
+  const key = category.toLowerCase();
+  if (key === "baseline") return 0;
+  if (key === "location") return 1;
+  if (key === "project") return 2;
+  if (key === "specialist") return 3;
+  if (key.includes("additional")) return 9;
+  return 5;
 }
 
 function MetricCard({ label, value }: { label: string; value: string }) {
