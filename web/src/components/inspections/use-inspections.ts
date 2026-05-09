@@ -297,7 +297,17 @@ async function persistInspectionRecords(
     if (checklistError) {
       if (isMissingInspectionTables(checklistError)) return false;
 
-      console.error("Unable to persist inspection checklist", checklistError);
+      console.error(
+        "Unable to persist inspection checklist",
+        {
+          message: checklistError.message,
+          details: checklistError.details,
+          hint: checklistError.hint,
+          code: checklistError.code,
+          inspectionId: record.id,
+          rowCount: record.requirements.length,
+        },
+      );
       return false;
     }
 
