@@ -27,9 +27,12 @@ export interface ChecklistResult {
 }
 
 export interface UploadRecord {
+  id: string;
   fileName: string;
   fileSize: number;
   uploadedAt: string;
+  storagePath: string;
+  mimeType: string | null;
 }
 
 export interface CompletionRecord {
@@ -49,6 +52,15 @@ export interface StoredManualConsentDocument {
   whyRequired: string;
   referenceUrl: string;
   createdAt: string;
+}
+
+export interface SubmissionPackage {
+  id: string;
+  projectId: string;
+  title: string;
+  createdAt: string;
+  submittedAt: string | null;
+  status: string | null;
 }
 
 export interface ConsentDocument extends RequiredDocument {
@@ -217,6 +229,20 @@ export function createManualDocumentRecord(
     whyRequired: input.whyRequired.trim(),
     referenceUrl: input.referenceUrl?.trim() || DEFAULT_REFERENCE_URL,
     createdAt: new Date().toISOString(),
+  };
+}
+
+export function createSubmissionPackageRecord(
+  projectId: string,
+  title: string,
+): SubmissionPackage {
+  return {
+    id: `submission-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+    projectId,
+    title: title.trim(),
+    createdAt: new Date().toISOString(),
+    submittedAt: null,
+    status: "draft",
   };
 }
 

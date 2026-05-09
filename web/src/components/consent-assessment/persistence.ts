@@ -3,6 +3,7 @@ import { getSupabaseBrowser } from "@/lib/supabase/client";
 import type {
   ChecklistResult,
   CompletionRecord,
+  SubmissionPackage,
   StoredManualConsentDocument,
   UploadRecord,
 } from "./model";
@@ -12,9 +13,11 @@ export interface ConsentAssessmentRow {
   manualDocuments: StoredManualConsentDocument[];
   hiddenDocumentIds: string[];
   documentOrder: string[];
-  uploads: Record<string, UploadRecord>;
+  uploads: Record<string, UploadRecord[]>;
   completions: Record<string, CompletionRecord>;
   forecastContext: Record<string, unknown> | null;
+  submissionPackages: SubmissionPackage[];
+  documentSubmissionIds: Record<string, string>;
 }
 
 export const EMPTY_ROW: ConsentAssessmentRow = {
@@ -25,6 +28,8 @@ export const EMPTY_ROW: ConsentAssessmentRow = {
   uploads: {},
   completions: {},
   forecastContext: null,
+  submissionPackages: [],
+  documentSubmissionIds: {},
 };
 
 interface RawRow {
@@ -32,9 +37,11 @@ interface RawRow {
   manual_documents: StoredManualConsentDocument[] | null;
   hidden_document_ids: string[] | null;
   document_order: string[] | null;
-  uploads: Record<string, UploadRecord> | null;
+  uploads: Record<string, UploadRecord | UploadRecord[]> | null;
   completions: Record<string, CompletionRecord> | null;
   forecast_context: Record<string, unknown> | null;
+  submission_packages?: SubmissionPackage[] | null;
+  document_submission_ids?: Record<string, string> | null;
 }
 
 function fromRow(row: RawRow): ConsentAssessmentRow {
@@ -43,9 +50,11 @@ function fromRow(row: RawRow): ConsentAssessmentRow {
     manualDocuments: row.manual_documents ?? [],
     hiddenDocumentIds: row.hidden_document_ids ?? [],
     documentOrder: row.document_order ?? [],
-    uploads: row.uploads ?? {},
+    uploads: normalizeUploads(row.uploads),
     completions: row.completions ?? {},
     forecastContext: row.forecast_context ?? null,
+    submissionPackages: row.submission_packages ?? [],
+    documentSubmissionIds: row.document_submission_ids ?? {},
   };
 }
 
@@ -53,15 +62,31 @@ export async function loadConsentAssessment(
   client: SupabaseClient,
   projectId: string,
 ): Promise<ConsentAssessmentRow> {
-  const { data, error } = await client
+  const fullQuery = await client
+    .from("consent_assessments")
+    .select(
+      "checklist, manual_documents, hidden_document_ids, document_order, uploads, completions, forecast_context, submission_packages, document_submission_ids",
+    )
+    .eq("project_id", projectId)
+    .maybeSingle();
+  if (!fullQuery.error) {
+    if (!fullQuery.data) return EMPTY_ROW;
+    return fromRow(fullQuery.data as unknown as RawRow);
+  }
+
+  if (!isMissingSubmissionColumnsError(fullQuery.error)) {
+    return EMPTY_ROW;
+  }
+
+  const legacyQuery = await client
     .from("consent_assessments")
     .select(
       "checklist, manual_documents, hidden_document_ids, document_order, uploads, completions, forecast_context",
     )
     .eq("project_id", projectId)
     .maybeSingle();
-  if (error || !data) return EMPTY_ROW;
-  return fromRow(data as unknown as RawRow);
+  if (legacyQuery.error || !legacyQuery.data) return EMPTY_ROW;
+  return fromRow(legacyQuery.data as unknown as RawRow);
 }
 
 export async function saveConsentAssessment(
@@ -69,7 +94,7 @@ export async function saveConsentAssessment(
   projectId: string,
   row: ConsentAssessmentRow,
 ): Promise<void> {
-  const { error } = await client.from("consent_assessments").upsert(
+  const fullSave = await client.from("consent_assessments").upsert(
     {
       project_id: projectId,
       checklist: row.checklist,
@@ -79,12 +104,37 @@ export async function saveConsentAssessment(
       uploads: row.uploads,
       completions: row.completions,
       forecast_context: row.forecastContext,
+      submission_packages: row.submissionPackages,
+      document_submission_ids: row.documentSubmissionIds,
     },
     { onConflict: "project_id" },
   );
-  if (error) {
-    console.warn("[consent-assessment] save failed", error.message);
+  if (!fullSave.error) {
+    return;
   }
+
+  if (isMissingSubmissionColumnsError(fullSave.error)) {
+    const { error } = await client.from("consent_assessments").upsert(
+      {
+        project_id: projectId,
+        checklist: row.checklist,
+        manual_documents: row.manualDocuments,
+        hidden_document_ids: row.hiddenDocumentIds,
+        document_order: row.documentOrder,
+        uploads: row.uploads,
+        completions: row.completions,
+        forecast_context: row.forecastContext,
+      },
+      { onConflict: "project_id" },
+    );
+    if (!error) {
+      return;
+    }
+    console.warn("[consent-assessment] save failed", error.message);
+    return;
+  }
+
+  console.warn("[consent-assessment] save failed", fullSave.error.message);
 }
 
 export async function loadForecastContext(
@@ -102,4 +152,30 @@ export async function loadForecastContext(
 
 export function browserClient() {
   return getSupabaseBrowser();
+}
+
+function isMissingSubmissionColumnsError(error: { message?: string | null }) {
+  const message = String(error.message ?? "");
+  return (
+    message.includes("submission_packages") ||
+    message.includes("document_submission_ids")
+  );
+}
+
+function normalizeUploads(
+  uploads: Record<string, UploadRecord | UploadRecord[]> | null | undefined,
+): Record<string, UploadRecord[]> {
+  const normalized: Record<string, UploadRecord[]> = {};
+  for (const [documentId, value] of Object.entries(uploads ?? {})) {
+    const list = Array.isArray(value) ? value : value ? [value] : [];
+    normalized[documentId] = list.filter(Boolean).map((upload) => ({
+      id: upload.id,
+      fileName: upload.fileName,
+      fileSize: upload.fileSize,
+      uploadedAt: upload.uploadedAt,
+      storagePath: upload.storagePath,
+      mimeType: upload.mimeType ?? null,
+    }));
+  }
+  return normalized;
 }

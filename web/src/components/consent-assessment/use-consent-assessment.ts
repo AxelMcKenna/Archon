@@ -5,12 +5,14 @@ import type { ProjectDetails, ProjectType, ResolveDocumentsResponse } from "@/ty
 import {
   type ChecklistResult,
   type CompletionRecord,
+  createSubmissionPackageRecord,
   createManualDocumentRecord,
   getOrderedDocumentIds,
   type ManualConsentDocumentInput,
   normalizeDocuments,
   type StoredManualConsentDocument,
   type ConsentDocument,
+  type SubmissionPackage,
   type UploadRecord,
   getCompletionStats,
   isManualDocument,
@@ -105,6 +107,10 @@ export function useConsentAssessment({
     () => getCompletionStats(documents, state.completions),
     [documents, state.completions],
   );
+  const submissionPackageMap = useMemo(
+    () => new Map<string, SubmissionPackage>(state.submissionPackages.map((item) => [item.id, item])),
+    [state.submissionPackages],
+  );
 
   function commitState(
     updater: (current: ConsentAssessmentRow) => ConsentAssessmentRow,
@@ -197,17 +203,9 @@ export function useConsentAssessment({
 
     commitState((current) => {
       const nextCompletions = { ...current.completions };
-      const nextUploads = { ...current.uploads };
 
       if (input.completed) {
         nextCompletions[record.id] = { completedAt: new Date().toISOString() };
-      }
-      if (file) {
-        nextUploads[record.id] = {
-          fileName: file.name,
-          fileSize: file.size,
-          uploadedAt: new Date().toISOString(),
-        };
       }
 
       return {
@@ -216,7 +214,6 @@ export function useConsentAssessment({
         hiddenDocumentIds: current.hiddenDocumentIds.filter((id) => id !== record.id),
         documentOrder: [...current.documentOrder.filter((id) => id !== record.id), record.id],
         completions: nextCompletions,
-        uploads: nextUploads,
       };
     });
 
@@ -229,9 +226,11 @@ export function useConsentAssessment({
       const target = currentDocuments.find((document) => document.id === documentId);
       const nextCompletions = { ...current.completions };
       const nextUploads = { ...current.uploads };
+      const nextSubmissionIds = { ...current.documentSubmissionIds };
 
       delete nextCompletions[documentId];
       delete nextUploads[documentId];
+      delete nextSubmissionIds[documentId];
 
       return {
         ...current,
@@ -244,8 +243,36 @@ export function useConsentAssessment({
         documentOrder: current.documentOrder.filter((id) => id !== documentId),
         completions: nextCompletions,
         uploads: nextUploads,
+        documentSubmissionIds: nextSubmissionIds,
       };
     });
+  }
+
+  function createSubmissionPackage(title: string, documentIds: string[]) {
+    const normalizedTitle = title.trim();
+    const uniqueDocumentIds = Array.from(
+      new Set(documentIds.filter((documentId) => documentMap.has(documentId))),
+    );
+    if (!normalizedTitle || uniqueDocumentIds.length === 0) {
+      return null;
+    }
+
+    const submissionPackage = createSubmissionPackageRecord(projectId, normalizedTitle);
+
+    commitState((current) => {
+      const nextSubmissionIds = { ...current.documentSubmissionIds };
+      for (const documentId of uniqueDocumentIds) {
+        nextSubmissionIds[documentId] = submissionPackage.id;
+      }
+
+      return {
+        ...current,
+        submissionPackages: [submissionPackage, ...current.submissionPackages],
+        documentSubmissionIds: nextSubmissionIds,
+      };
+    });
+
+    return submissionPackage.id;
   }
 
   function saveDocumentOrder(nextDocumentOrder: string[]) {
@@ -269,24 +296,82 @@ export function useConsentAssessment({
     }));
   }
 
-  function saveUpload(documentId: string, file: File) {
+  async function saveUpload(documentId: string, file: File) {
+    const document = documentMap.get(documentId);
+    if (!document) {
+      throw new Error("Document not found.");
+    }
+
+    const safeName = file.name.replace(/\s+/g, "_");
+    const storagePath = `${projectId}/consent-assessment/${documentId}/${Date.now()}-${safeName}`;
+    const { error: storageError } = await supabaseRef.current.storage
+      .from("attachments")
+      .upload(storagePath, file, { upsert: false, contentType: file.type });
+    if (storageError) throw storageError;
+
+    const baseRecord = {
+      project_id: projectId,
+      filename: file.name,
+      storage_path: storagePath,
+      mime_type: file.type || null,
+      size_bytes: file.size,
+    };
+    const { data: inserted, error: insertError } = await supabaseRef.current
+      .from("attachments")
+      .insert({
+        ...baseRecord,
+        linked_requirement_key: documentId,
+        linked_requirement_label: document.title,
+        linked_requirement_source: "consent_assessment",
+        display_name: document.title,
+      })
+      .select("id, filename, storage_path, uploaded_at, size_bytes, mime_type")
+      .single();
+
+    const uploadRecord =
+      insertError || !inserted
+        ? await insertConsentAttachmentFallback(supabaseRef.current, baseRecord)
+        : {
+            id: inserted.id,
+            fileName: inserted.filename,
+            fileSize: Number(inserted.size_bytes ?? file.size),
+            uploadedAt: inserted.uploaded_at,
+            storagePath: inserted.storage_path,
+            mimeType: inserted.mime_type ?? null,
+          };
+
     commitState((current) => ({
       ...current,
       uploads: {
         ...current.uploads,
-        [documentId]: {
-          fileName: file.name,
-          fileSize: file.size,
-          uploadedAt: new Date().toISOString(),
-        },
+        [documentId]: [...(current.uploads[documentId] ?? []), uploadRecord],
       },
     }));
   }
 
-  function removeUpload(documentId: string) {
+  async function removeUpload(documentId: string, uploadId: string) {
+    const upload = (state.uploads[documentId] ?? []).find((item) => item.id === uploadId);
+    if (!upload) return;
+
+    const { error: storageError } = await supabaseRef.current.storage
+      .from("attachments")
+      .remove([upload.storagePath]);
+    if (storageError) throw storageError;
+
+    const { error: deleteError } = await supabaseRef.current
+      .from("attachments")
+      .delete()
+      .eq("id", upload.id);
+    if (deleteError) throw deleteError;
+
     commitState((current) => {
       const nextUploads = { ...current.uploads };
-      delete nextUploads[documentId];
+      const remaining = (nextUploads[documentId] ?? []).filter((item) => item.id !== uploadId);
+      if (remaining.length > 0) {
+        nextUploads[documentId] = remaining;
+      } else {
+        delete nextUploads[documentId];
+      }
 
       return {
         ...current,
@@ -322,12 +407,16 @@ export function useConsentAssessment({
     uploads: state.uploads,
     completions: state.completions,
     forecastContext: state.forecastContext,
+    submissionPackages: state.submissionPackages,
+    documentSubmissionIds: state.documentSubmissionIds,
+    submissionPackageMap,
     completion,
     isLoading,
     error,
     hasHydrated,
     generateChecklist,
     createManualDocument,
+    createSubmissionPackage,
     removeDocument,
     saveDocumentOrder,
     resetDocumentOrder,
@@ -537,6 +626,35 @@ function getDocumentsForState(state: ConsentAssessmentRow) {
     state.hiddenDocumentIds,
     state.documentOrder,
   );
+}
+
+async function insertConsentAttachmentFallback(
+  client: ReturnType<typeof browserClient>,
+  baseRecord: {
+    project_id: string;
+    filename: string;
+    storage_path: string;
+    mime_type: string | null;
+    size_bytes: number;
+  },
+) {
+  const { data, error } = await client
+    .from("attachments")
+    .insert(baseRecord)
+    .select("id, filename, storage_path, uploaded_at, size_bytes, mime_type")
+    .single();
+  if (error || !data) {
+    throw error ?? new Error("Unable to record uploaded file.");
+  }
+
+  return {
+    id: data.id,
+    fileName: data.filename,
+    fileSize: Number(data.size_bytes ?? baseRecord.size_bytes),
+    uploadedAt: data.uploaded_at,
+    storagePath: data.storage_path,
+    mimeType: data.mime_type ?? null,
+  };
 }
 
 function formatApiError(payload: unknown): string {
