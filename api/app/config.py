@@ -7,16 +7,25 @@ Provider = Literal["gemini", "openrouter"]
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=(".env", ".env.local"), extra="ignore")
 
     supabase_url: str = ""
     supabase_service_role_key: str = ""
     supabase_anon_key: str = ""
 
+    # ── Anthropic (consent assessment / legacy) ──────────────────────────
+    anthropic_api_key: str = ""
+    anthropic_model: str = "claude-opus-4-7"
+
+    # ── Address checklist / geocoding ────────────────────────────────────
+    geoapify_api_key: str = ""
+
+    # ── Gemini (direct) ──────────────────────────────────────────────────
     gemini_api_key: str = ""
     gemini_model: str = "gemini-3.1-pro-preview"
     gemini_verifier_model: str = "gemini-2.5-flash"
 
+    # ── OpenRouter ───────────────────────────────────────────────────────
     openrouter_api_key: str = ""
     openrouter_model: str = "openai/gpt-5"
     openrouter_verifier_model: str = "openai/gpt-4o-mini"

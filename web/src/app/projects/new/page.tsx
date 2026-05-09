@@ -1,18 +1,45 @@
 import { redirect } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { taxonomy } from "@consentiq/shared";
+import { ProjectCreateButton } from "@/components/project-create-button";
+import { AddressAutocompleteInput } from "@/components/address-autocomplete-input";
 
 async function createProject(formData: FormData) {
   "use server";
   const supabase = await getSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/auth/sign-in");
+
+  const address = String(formData.get("address") ?? "").trim();
+  const bca = String(formData.get("bca") ?? "").trim();
+  const projectType = String(formData.get("project_type") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim() || null;
+
+  const recentThreshold = new Date(Date.now() - 15_000).toISOString();
+  const { data: existingProject } = await supabase
+    .from("projects")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("address", address)
+    .eq("bca", bca)
+    .eq("project_type", projectType)
+    .gte("created_at", recentThreshold)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (existingProject) {
+    redirect(`/projects/${existingProject.id}`);
+  }
 
   const { data, error } = await supabase
     .from("projects")
     .insert({
-      address: String(formData.get("address") ?? ""),
-      bca: String(formData.get("bca") ?? ""),
-      project_type: String(formData.get("project_type") ?? ""),
-      description: String(formData.get("description") ?? "") || null,
+      user_id: user.id,
+      address,
+      bca,
+      project_type: projectType,
+      description,
     })
     .select("id")
     .single();
@@ -26,7 +53,7 @@ export default function NewProjectPage() {
       <h1 className="text-2xl font-semibold mb-6">New project</h1>
       <form action={createProject} className="space-y-4">
         <Field label="Project address">
-          <input name="address" required className="w-full rounded border border-ink-700/20 px-3 py-2" />
+          <AddressAutocompleteInput name="address" required />
         </Field>
         <Field label="BCA">
           <select name="bca" required className="w-full rounded border border-ink-700/20 px-3 py-2">
@@ -45,9 +72,7 @@ export default function NewProjectPage() {
         <Field label="Description (optional)">
           <textarea name="description" rows={4} className="w-full rounded border border-ink-700/20 px-3 py-2" />
         </Field>
-        <button className="rounded-lg bg-ink-900 text-white px-5 py-2 text-sm font-medium">
-          Create
-        </button>
+        <ProjectCreateButton />
       </form>
     </div>
   );

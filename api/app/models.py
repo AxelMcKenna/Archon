@@ -6,7 +6,7 @@ from datetime import date, datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field # type: ignore
 
 ExtractorKind = Literal["pdfplumber", "claude-vision"]
 SeverityT = Literal["must_resolve", "nice_to_have"]

@@ -1,8 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.routes import address_checklist as address_checklist_routes
+from app.routes import address_suggest as address_suggest_routes
 from app.routes import attachments as attachments_routes
 from app.routes import classify as classify_routes
+from app.routes import debug_env as debug_env_routes
+from app.routes import documents as documents_routes
 from app.routes import drafts as drafts_routes
 from app.routes import export as export_routes
 from app.routes import extract as extract_routes
@@ -34,3 +38,9 @@ app.include_router(attachments_routes.router, prefix="/attachments", tags=["atta
 app.include_router(export_routes.router, prefix="/export", tags=["export"])
 app.include_router(risk_routes.router, prefix="/risk", tags=["risk"])
 app.include_router(plans_routes.router, prefix="/plans", tags=["plans"])
+app.include_router(
+    address_checklist_routes.router, prefix="/address-to-checklist", tags=["address-to-checklist"]
+)
+app.include_router(address_suggest_routes.router, prefix="/address-suggest", tags=["address-suggest"])
+app.include_router(documents_routes.router, prefix="/api/resolve-documents", tags=["documents"])
+app.include_router(debug_env_routes.router, prefix="/debug/env", tags=["debug"])

@@ -1,0 +1,250 @@
+{
+  "schema_version": "1.0",
+  "description": "Document requirement rules matrix: maps zones + overlays to required documents under RMA Schedule 4 and Building Code",
+  "baseline_documents": [
+    {
+      "document_type": "Site Plan",
+      "category": "General",
+      "building_code": null,
+      "reason": "RMA Schedule 4: Site plan showing north arrow, scale, and property boundary (required for all resource consents)"
+    },
+    {
+      "document_type": "Architectural Plans",
+      "category": "General",
+      "building_code": null,
+      "reason": "RMA Schedule 4: Plans and elevations at 1:100 minimum showing dimensions, levels, and finishes"
+    },
+    {
+      "document_type": "Assessment of Environmental Effects",
+      "category": "General",
+      "building_code": null,
+      "reason": "RMA Schedule 4: AEE assessing actual or potential environmental effects (scope varies by zone and use)"
+    }
+  ],
+  "zone_based_requirements": {
+    "RB": {
+      "zone_name": "Residential Zone - Base",
+      "documents": []
+    },
+    "RMD": {
+      "zone_name": "Residential Zone - Medium Density",
+      "documents": [
+        {
+          "document_type": "Transport Assessment",
+          "category": "RMA Schedule 4",
+          "reason": "Medium density zones require traffic impact assessment"
+        }
+      ]
+    },
+    "RH": {
+      "zone_name": "Residential Zone - High Density",
+      "documents": [
+        {
+          "document_type": "Transport Assessment",
+          "category": "RMA Schedule 4",
+          "reason": "High density zones require detailed traffic impact assessment"
+        }
+      ]
+    },
+    "CHB": {
+      "zone_name": "Commercial - Business",
+      "documents": [
+        {
+          "document_type": "Transport Assessment",
+          "category": "RMA Schedule 4",
+          "reason": "Commercial zones require transport and parking assessment"
+        },
+        {
+          "document_type": "Parking & Loading Assessment",
+          "category": "RMA Schedule 4",
+          "reason": "Commercial zones must demonstrate adequate parking and loading"
+        }
+      ]
+    },
+    "CHC": {
+      "zone_name": "Commercial - City Centre",
+      "documents": [
+        {
+          "document_type": "Transport Assessment",
+          "category": "RMA Schedule 4",
+          "reason": "City centre zone requires transport assessment"
+        }
+      ]
+    },
+    "INB": {
+      "zone_name": "Industrial - Base",
+      "documents": [
+        {
+          "document_type": "Noise Impact Assessment",
+          "category": "Building Code E1 / RMA",
+          "reason": "Industrial zones require noise and vibration assessment"
+        },
+        {
+          "document_type": "Hazardous Substances Assessment",
+          "category": "RMA Schedule 4",
+          "reason": "Industrial use requires assessment of hazardous materials storage and handling"
+        }
+      ]
+    },
+    "IND": {
+      "zone_name": "Industrial - Heavy",
+      "documents": [
+        {
+          "document_type": "Noise Impact Assessment",
+          "category": "Building Code E1 / RMA",
+          "reason": "Heavy industrial requires comprehensive noise assessment"
+        },
+        {
+          "document_type": "Hazardous Substances Assessment",
+          "category": "RMA Schedule 4",
+          "reason": "Heavy industrial requires detailed hazmat assessment"
+        },
+        {
+          "document_type": "Air Quality Impact Assessment",
+          "category": "RMA Schedule 4",
+          "reason": "Heavy industrial activities may generate air emissions"
+        }
+      ]
+    }
+  },
+  "overlay_based_requirements": {
+    "liquefaction": {
+      "overlay_name": "Liquefaction Hazard",
+      "documents": [
+        {
+          "document_type": "Geotechnical Report",
+          "category": "Building Code B1",
+          "reason": "Liquefaction hazard areas require geotechnical assessment of foundation design and ground improvement"
+        }
+      ]
+    },
+    "flood": {
+      "overlay_name": "Flood Hazard",
+      "documents": [
+        {
+          "document_type": "Flood Risk Assessment",
+          "category": "Building Code E1 / RMA",
+          "reason": "Flood-prone area requires assessment of flood risk and management measures"
+        },
+        {
+          "document_type": "Finished Floor Level Certification",
+          "category": "Building Code E1",
+          "reason": "Building must be set above flood risk level (FRL)"
+        }
+      ]
+    },
+    "slope": {
+      "overlay_name": "Slope Hazard",
+      "documents": [
+        {
+          "document_type": "Geotechnical Report",
+          "category": "Building Code B1",
+          "reason": "Steep slope areas require geotechnical assessment of slope stability and site suitability"
+        }
+      ]
+    },
+    "tsunami": {
+      "overlay_name": "Tsunami Hazard",
+      "documents": [
+        {
+          "document_type": "Tsunami Risk Assessment",
+          "category": "RMA Schedule 4",
+          "reason": "Tsunami-prone coastal areas require risk assessment and evacuation planning considerations"
+        }
+      ]
+    },
+    "coastal_erosion": {
+      "overlay_name": "Coastal Erosion Hazard",
+      "documents": [
+        {
+          "document_type": "Coastal Erosion Assessment",
+          "category": "RMA Schedule 4",
+          "reason": "Coastal erosion areas require assessment of long-term building viability"
+        }
+      ]
+    },
+    "coastal_inundation": {
+      "overlay_name": "Coastal Inundation Hazard",
+      "documents": [
+        {
+          "document_type": "Coastal Inundation Assessment",
+          "category": "Building Code E1",
+          "reason": "Inundation-prone coastal areas require assessment of flood risk and resilience measures"
+        }
+      ]
+    },
+    "heritage_item": {
+      "overlay_name": "Heritage Item",
+      "documents": [
+        {
+          "document_type": "Heritage Impact Assessment",
+          "category": "RMA Schedule 4 / District Plan",
+          "reason": "Works affecting scheduled heritage items require assessment of heritage values and design appropriateness"
+        }
+      ]
+    },
+    "heritage_character": {
+      "overlay_name": "Heritage Character Area",
+      "documents": [
+        {
+          "document_type": "Heritage Character Assessment",
+          "category": "RMA Schedule 4 / District Plan",
+          "reason": "Character area design must align with heritage values and streetscape characteristics"
+        }
+      ]
+    },
+    "residential_character": {
+      "overlay_name": "Residential Character Area",
+      "documents": [
+        {
+          "document_type": "Residential Character Assessment",
+          "category": "RMA Schedule 4 / District Plan",
+          "reason": "Buildings in character areas must demonstrate design consistency with existing character"
+        }
+      ]
+    },
+    "protected_vegetation": {
+      "overlay_name": "Protected Vegetation",
+      "documents": [
+        {
+          "document_type": "Vegetation Protection Plan",
+          "category": "RMA Schedule 4 / District Plan",
+          "reason": "Scheduled trees/vegetation require management plan and arboricultural assessment"
+        }
+      ]
+    },
+    "notable_trees": {
+      "overlay_name": "Notable Trees",
+      "documents": [
+        {
+          "document_type": "Arboricultural Assessment",
+          "category": "RMA Schedule 4 / District Plan",
+          "reason": "Proposed works affecting notable trees require arboricultural report and management plan"
+        }
+      ]
+    }
+  },
+  "project_type_requirements": {
+    "new_dwelling": {
+      "requires_resource_consent": false,
+      "documents": []
+    },
+    "extension": {
+      "requires_resource_consent": false,
+      "documents": []
+    },
+    "accessory": {
+      "requires_resource_consent": false,
+      "documents": []
+    },
+    "deck": {
+      "requires_resource_consent": false,
+      "documents": []
+    }
+  },
+  "combined_requirements_notes": {
+    "multiple_overlays": "Where multiple overlays apply, consolidate assessments where possible (e.g., single geotechnical report addressing both liquefaction and slope hazards)",
+    "zone_and_overlay": "Where both zone and overlay requirements apply, the stricter requirement takes precedence",
+    "regional_consent": "Some activities may require concurrent regional consent if they involve water use, discharge to water, or other ECan-regulated activities"
+  }
+}

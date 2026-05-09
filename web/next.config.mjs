@@ -1,9 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@consentiq/shared"],
-  experimental: {
-    typedRoutes: false,
-  },
+  typedRoutes: true,
 };
 
 export default nextConfig;

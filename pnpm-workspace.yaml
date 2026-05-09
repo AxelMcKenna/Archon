@@ -4,6 +4,3 @@ packages:
 allowBuilds:
   sharp: false
   unrs-resolver: false
-onlyBuiltDependencies:
-  - sharp
-  - unrs-resolver
