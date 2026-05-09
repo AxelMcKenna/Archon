@@ -126,7 +126,7 @@ def _summarise_attachments(sb: Any, project_id: str) -> dict[str, Any]:
         sb.table("attachments")
         .select(
             "id,filename,display_name,document_status,document_type,"
-            "linked_requirement_label,uploaded_at"
+            "rfi_item_id,uploaded_at"
         )
         .eq("project_id", project_id)
         .order("uploaded_at", desc=True)
@@ -161,7 +161,7 @@ def _summarise_attachments(sb: Any, project_id: str) -> dict[str, Any]:
                 "display_name": latest.get("display_name"),
                 "document_status": latest.get("document_status"),
                 "document_type": latest.get("document_type"),
-                "linked_requirement_label": latest.get("linked_requirement_label"),
+                "rfi_item_id": latest.get("rfi_item_id"),
                 "uploaded_at": latest.get("uploaded_at"),
             }
             if latest

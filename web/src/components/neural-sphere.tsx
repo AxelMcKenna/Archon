@@ -51,20 +51,21 @@ interface IntentParams {
   edgeAlphaBoost: number;  // additive on edge alpha
   ink: [number, number, number];
   pulse: number;           // 0–1, drives global outward shimmer
+  wave: number;            // 0–1, drives scanning wave intensity
 }
 
 function paramsForIntent(intent: SphereIntent): IntentParams {
   switch (intent) {
     case "active":
-      return { spin: 0.32, breathBoost: 1.4, edgeAlphaBoost: 0.04, ink: [11, 14, 20], pulse: 0.25 };
+      return { spin: 0.32, breathBoost: 1.4, edgeAlphaBoost: 0.04, ink: [11, 14, 20], pulse: 0.25, wave: 0 };
     case "alert":
       // desaturated brand-warning red — same ink density, just hue shift
-      return { spin: 0.22, breathBoost: 1.6, edgeAlphaBoost: 0.06, ink: [180, 50, 50], pulse: 0.5 };
+      return { spin: 0.22, breathBoost: 1.6, edgeAlphaBoost: 0.06, ink: [180, 50, 50], pulse: 0.5, wave: 0 };
     case "thinking":
-      return { spin: 0.5, breathBoost: 2.2, edgeAlphaBoost: 0.12, ink: [11, 14, 20], pulse: 0.9 };
+      return { spin: 0.12, breathBoost: 1.4, edgeAlphaBoost: 0.06, ink: [11, 14, 20], pulse: 0.35, wave: 1 };
     case "calm":
     default:
-      return { spin: 0.14, breathBoost: 1, edgeAlphaBoost: 0, ink: [11, 14, 20], pulse: 0 };
+      return { spin: 0.14, breathBoost: 1, edgeAlphaBoost: 0, ink: [11, 14, 20], pulse: 0, wave: 0 };
   }
 }
 
@@ -148,6 +149,23 @@ export function NeuralSphere({
     const nodes = fibonacciSphere(nodeCount);
     const edges = buildEdges(nodes, EDGE_NEIGHBORS);
 
+    // Richer neighbor map for lightning random-walks (more branching options
+    // than the visible edge graph, which only connects 2 nearest neighbors).
+    const CHAIN_K = 6;
+    const chainNeighbors: number[][] = new Array(nodes.length);
+    for (let i = 0; i < nodes.length; i++) {
+      const dists: { j: number; d: number }[] = [];
+      for (let j = 0; j < nodes.length; j++) {
+        if (i === j) continue;
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const dz = nodes[i].z - nodes[j].z;
+        dists.push({ j, d: dx * dx + dy * dy + dz * dz });
+      }
+      dists.sort((a, b) => a.d - b.d);
+      chainNeighbors[i] = dists.slice(0, CHAIN_K).map((x) => x.j);
+    }
+
     let dpr = Math.min(window.devicePixelRatio || 1, 2);
     let w = 0;
     let h = 0;
@@ -185,6 +203,14 @@ export function NeuralSphere({
     // Smoothed intent params so changes ease rather than snap.
     const live: IntentParams = { ...paramsForIntent(intentRef.current) };
 
+    // Lightning-strike state: each strike picks a random start node and
+    // random-walks neighbours to form a chain; nodes light in sequence.
+    let nextStrikeAt = performance.now() + 600;
+    let strikeStart = -1;
+    let strikeChain: number[] = [];
+    let strikeIntensity = 1;
+    const STRIKE_DUR = 950;
+
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
     const render = (now: number) => {
@@ -197,6 +223,7 @@ export function NeuralSphere({
       live.breathBoost = lerp(live.breathBoost, target.breathBoost, k);
       live.edgeAlphaBoost = lerp(live.edgeAlphaBoost, target.edgeAlphaBoost, k);
       live.pulse = lerp(live.pulse, target.pulse, k);
+      live.wave = lerp(live.wave, target.wave, k);
       live.ink[0] = lerp(live.ink[0], target.ink[0], k);
       live.ink[1] = lerp(live.ink[1], target.ink[1], k);
       live.ink[2] = lerp(live.ink[2], target.ink[2], k);
@@ -225,6 +252,59 @@ export function NeuralSphere({
       // Global pulse: outward shimmer that breathes with intent
       const pulseT = (Math.sin(now * 0.0035) * 0.5 + 0.5) * live.pulse;
 
+      // Lightning strike: build a random chain through the neighbour graph,
+      // then light each chain node in sequence over STRIKE_DUR.
+      if (live.wave > 0.05 && strikeStart < 0 && now >= nextStrikeAt) {
+        const len = 20 + Math.floor(Math.random() * 9); // 20–28 hops
+        const chain: number[] = [Math.floor(Math.random() * nodes.length)];
+        const visited = new Set<number>(chain);
+        while (chain.length < len) {
+          const cur = chain[chain.length - 1];
+          const opts = chainNeighbors[cur].filter((j) => !visited.has(j));
+          if (opts.length === 0) break;
+          const next = opts[Math.floor(Math.random() * opts.length)];
+          chain.push(next);
+          visited.add(next);
+        }
+        strikeChain = chain;
+        strikeStart = now;
+        strikeIntensity = 0.9 + Math.random() * 0.5;
+        nextStrikeAt = now + 1400 + Math.random() * 2600;
+      }
+      let strikeT = -1;
+      let strikeFlicker = 1;
+      if (strikeStart > 0) {
+        const t = (now - strikeStart) / STRIKE_DUR;
+        if (t > 1) {
+          strikeStart = -1;
+          strikeChain = [];
+        } else {
+          strikeT = t;
+          strikeFlicker = 0.78 + 0.22 * Math.sin(now * 0.22);
+        }
+      }
+      // Per-node lightning intensity, indexed sparsely via the chain only.
+      const nodeStrike = new Float32Array(nodes.length);
+      if (strikeT >= 0 && strikeChain.length > 1) {
+        const head = strikeT * (strikeChain.length - 1);
+        // sigma in chain-index units controls how sharp the leading flash is.
+        const SIGMA = 0.7;
+        const tail = 2.4; // exponential decay behind the leading edge
+        for (let k = 0; k < strikeChain.length; k++) {
+          const d = head - k;
+          let env: number;
+          if (d < 0) {
+            // not yet reached
+            env = Math.exp(-(d * d) / (SIGMA * SIGMA));
+          } else {
+            // reached: bright spark, decaying tail
+            env = Math.exp(-d * tail);
+          }
+          nodeStrike[strikeChain[k]] =
+            env * strikeFlicker * strikeIntensity * live.wave;
+        }
+      }
+
       const proj: {
         sx: number;
         sy: number;
@@ -232,6 +312,7 @@ export function NeuralSphere({
         lift: number;
         sizeMul: number;
         alphaMul: number;
+        wave: number;
       }[] = new Array(nodes.length);
 
       for (let i = 0; i < nodes.length; i++) {
@@ -270,6 +351,8 @@ export function NeuralSphere({
         n.ox += (tx - n.ox) * ease;
         n.oy += (ty - n.oy) * ease;
 
+        const waveK = nodeStrike[i];
+
         proj[i] = {
           sx: baseSx + n.ox,
           sy: baseSy + n.oy,
@@ -277,6 +360,7 @@ export function NeuralSphere({
           lift,
           sizeMul: n.sizeMul,
           alphaMul: n.alphaMul,
+          wave: waveK,
         };
       }
 
@@ -290,7 +374,8 @@ export function NeuralSphere({
         const b = proj[e.b];
         const meanZ = (a.depth + b.depth) / 2;
         const t = (meanZ + 1) / 2;
-        const alpha = 0.04 + t * 0.16 + live.edgeAlphaBoost;
+        const meanWave = (a.wave + b.wave) / 2;
+        const alpha = 0.04 + t * 0.16 + live.edgeAlphaBoost + meanWave * 0.7;
         ctx.strokeStyle = `rgba(${inkR}, ${inkG}, ${inkB}, ${alpha})`;
         ctx.beginPath();
         ctx.moveTo(a.sx, a.sy);
@@ -298,14 +383,38 @@ export function NeuralSphere({
         ctx.stroke();
       }
 
+      // Draw the lightning bolt itself: segments along the chain, brightness
+      // following the leading flash so the arc forms then fades.
+      if (strikeT >= 0 && strikeChain.length > 1) {
+        ctx.lineWidth = size === "sm" ? 0.6 : size === "md" ? 0.8 : 1.1;
+        for (let k = 0; k < strikeChain.length - 1; k++) {
+          const a = proj[strikeChain[k]];
+          const b = proj[strikeChain[k + 1]];
+          const sa = nodeStrike[strikeChain[k]];
+          const sb = nodeStrike[strikeChain[k + 1]];
+          const segEnv = Math.max(sa, sb);
+          if (segEnv < 0.02) continue;
+          ctx.strokeStyle = `rgba(${inkR}, ${inkG}, ${inkB}, ${Math.min(0.85, segEnv * 0.95)})`;
+          ctx.beginPath();
+          ctx.moveTo(a.sx, a.sy);
+          ctx.lineTo(b.sx, b.sy);
+          ctx.stroke();
+        }
+      }
+
       const order = proj
         .map((p, i) => ({ p, i }))
         .sort((a, b) => a.p.depth - b.p.depth);
       ctx.fillStyle = `rgba(${inkR}, ${inkG}, ${inkB}, 1)`;
       const sizeScale = size === "sm" ? 0.55 : size === "md" ? 0.7 : size === "lg" ? 0.95 : 1;
+      // Cap the largest nodes in the small variant so they don't dominate the
+      // tiny canvas. fibonacciSphere skews sizeMul up to ~2.25; clamp to 1.3
+      // for "sm" so the biggest particles read as accents, not blobs.
+      const maxSizeMul = size === "sm" ? 0.95 : size === "md" ? 1.1 : size === "lg" ? 1.25 : Infinity;
       for (const { p } of order) {
         const t = (p.depth + 1) / 2;
-        const r = ((0.7 + t * 1.6) * p.sizeMul + p.lift * 1.6 + pulseT * 0.6) * sizeScale;
+        const sm = Math.min(p.sizeMul, maxSizeMul);
+        const r = ((0.7 + t * 1.6) * sm + p.lift * 1.6 + pulseT * 0.6 + p.wave * 3.2) * sizeScale;
         ctx.beginPath();
         ctx.arc(p.sx, p.sy, r, 0, Math.PI * 2);
         ctx.fill();

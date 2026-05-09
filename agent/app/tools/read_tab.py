@@ -155,7 +155,7 @@ def _read_tab_sync(project_id: str, tab: str, limit: int) -> dict[str, Any]:
             sb.table("attachments")
             .select(
                 "id,filename,display_name,document_type,document_status,"
-                "linked_requirement_label,uploaded_at"
+                "rfi_item_id,uploaded_at"
             )
             .eq("project_id", project_id)
             .order("uploaded_at", desc=True)

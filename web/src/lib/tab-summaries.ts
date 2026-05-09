@@ -16,8 +16,7 @@ export type TabSlug =
   | "rfis"
   | "ccc"
   | "application-prep"
-  | "documents"
-  | "risk";
+  | "documents";
 
 export interface TabSummary {
   intent: "calm" | "active" | "alert";
@@ -155,8 +154,6 @@ export async function loadTabSummary(
         return { intent: "calm", headline: `${count ?? 0} document${count === 1 ? "" : "s"}` };
       }
 
-      // Tabs without a dedicated table yet.
-      case "risk":
       default:
         return EMPTY;
     }

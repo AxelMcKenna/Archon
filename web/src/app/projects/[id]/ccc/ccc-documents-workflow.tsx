@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { CccDocumentStatus } from "@/lib/ccc";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
@@ -82,19 +81,11 @@ export function CccDocumentsWorkflow({
 
   return (
     <section className="bg-surface-raised rounded-lg border border-ink-200 p-5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-semibold">CCC Documents</h2>
-          <p className="mt-1 text-sm text-ink-600">
-            Track Code Compliance Certificate document requirements against uploaded project files.
-          </p>
-        </div>
-        <Link
-          href={`/projects/${projectId}/documents`}
-          className="rounded-lg border border-ink-200 px-3 py-2 text-sm text-ink-700 hover:bg-ink-50"
-        >
-          Open Documents
-        </Link>
+      <div>
+        <h2 className="text-xl font-semibold">CCC Documents</h2>
+        <p className="mt-1 text-sm text-ink-600">
+          Track Code Compliance Certificate document requirements against uploaded project files.
+        </p>
       </div>
       {uploadError && (
         <p className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">

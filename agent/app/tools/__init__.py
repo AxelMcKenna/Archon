@@ -18,6 +18,7 @@ from app.tools.draft_rfi_response import (
     draft_rfi_response_execute,
     draft_rfi_response_schema,
 )
+from app.tools.get_forecast import get_forecast_execute, get_forecast_schema
 from app.tools.get_plan_flags import get_plan_flags_execute, get_plan_flags_schema
 from app.tools.get_project_workflow import (
     get_project_workflow_execute,
@@ -42,6 +43,10 @@ TOOLS: dict[str, dict[str, Any]] = {
     "get_project_workflow": {
         "schema": get_project_workflow_schema(),
         "execute": get_project_workflow_execute,
+    },
+    "get_forecast": {
+        "schema": get_forecast_schema(),
+        "execute": get_forecast_execute,
     },
     "get_rfi_letter": {
         "schema": get_rfi_letter_schema(),

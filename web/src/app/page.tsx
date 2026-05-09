@@ -56,7 +56,7 @@ export default function Home() {
           {/* Right column — sphere, centered against text */}
           <div className="relative col-span-12 md:col-span-5 lg:col-span-6 mt-12 md:mt-0 flex items-center justify-center">
             <div className="relative w-full md:-mr-6 lg:-mr-12">
-              <NeuralSphere className="h-[400px] w-full md:h-[500px] lg:h-[580px]" />
+              <NeuralSphere intent="thinking" className="h-[400px] w-full md:h-[500px] lg:h-[580px]" />
             </div>
           </div>
         </div>

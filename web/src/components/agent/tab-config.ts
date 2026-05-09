@@ -1,5 +1,14 @@
 /**
  * Per-tab agent configuration: opener question and suggestion chips.
+ *
+ * Each suggestion is grounded in the actual tool the agent will invoke:
+ *   - get_project_workflow → cross-domain status (RFIs, docs, plans, inspections)
+ *   - get_forecast → cost / duration / risk dimensions
+ *   - read_tab → per-tab list reads
+ *   - get_plan_flags → full flag list with severity/category/page-refs
+ *   - get_rfi_letter → letter contents
+ *   - classify_rfi_letter / draft_rfi_response → AI ops on RFI items
+ *
  * Hardcoded for predictability + zero latency on hover.
  */
 
@@ -12,64 +21,63 @@ export interface TabAgentConfig {
 
 export const TAB_AGENT_CONFIG: Record<TabSlug, TabAgentConfig> = {
   overview: {
-    defaultOpener: "Give me a one-paragraph status of this project.",
+    defaultOpener:
+      "Give me a cross-domain snapshot — RFIs, documents, plan flags, inspections, plus the consent forecast.",
     suggestions: [
-      "What's blocking lodgement?",
-      "What should I do next?",
-      "How's the overall health of this project?",
+      "What's outstanding right now across RFIs, documents, plan flags, and inspections?",
+      "Walk me through the forecast — total cost, P50/P90 timeline, and the highest risk dimension",
+      "What's the latest activity — most recent RFI, document, plan, and inspection?",
     ],
   },
   drawings: {
-    defaultOpener: "Walk me through the flags on the latest plan upload.",
+    defaultOpener: "Walk me through the latest plan upload and the flags on it.",
     suggestions: [
-      "Show me only the high-severity flags",
-      "Which flags relate to fire safety?",
-      "What's the most recent plan analysis result?",
+      "List the must-resolve flags from the latest plan with page refs and quotes",
+      "Group the latest plan's flags by category (fire, structural, accessibility)",
+      "Compare must-resolve flag counts across my last few plan uploads",
     ],
   },
   inspections: {
-    defaultOpener: "What's the inspection status?",
+    defaultOpener:
+      "Summarize my inspection schedule — what's done, what's next, what's overdue.",
     suggestions: [
-      "What's overdue?",
-      "What's the next inspection due?",
-      "Which inspections still need bookings?",
+      "Which inspections are overdue based on due_date?",
+      "What's the next pending inspection and is it booked?",
+      "Which inspections still don't have a booking date?",
     ],
   },
   rfis: {
-    defaultOpener: "Summarize all open RFIs and their deadlines.",
+    defaultOpener: "Summarize all RFI letters and their response deadlines.",
     suggestions: [
-      "Which items need a draft response?",
-      "Anything past its response deadline?",
-      "Which letter is most urgent?",
+      "Open the most recent letter, classify the items, and flag the most urgent",
+      "Which letters are still open and how soon are the deadlines?",
+      "Draft a response for the most urgent open item",
     ],
   },
   ccc: {
-    defaultOpener: "What's blocking CCC sign-off?",
+    defaultOpener:
+      "List the CCC certificates I've uploaded and their review status.",
     suggestions: [
-      "What certificates am I missing?",
-      "List the documents I've already uploaded",
+      "Which CCC certificates are still pending review?",
+      "What's the most recent CCC certificate uploaded?",
     ],
   },
   "application-prep": {
-    defaultOpener: "What documents do I still need before lodgement?",
+    defaultOpener:
+      "Summarize the documents I've uploaded for lodgement and their review status.",
     suggestions: [
-      "Which documents are pending review?",
-      "Which are approved?",
-      "What's the most common missing item for my project type?",
+      "Which uploaded documents are pending review?",
+      "Break down what I've uploaded by document_type",
+      "What did I upload most recently, and what was it linked to?",
     ],
   },
   documents: {
-    defaultOpener: "Give me an overview of all uploaded documents.",
+    defaultOpener:
+      "Give me an overview of all uploaded attachments — counts by status and document type.",
     suggestions: [
-      "Show me unapproved documents",
-      "Which were uploaded most recently?",
-    ],
-  },
-  risk: {
-    defaultOpener: "Compute and explain my pre-lodgement risk score.",
-    suggestions: [
-      "How can I lower my risk?",
-      "What's my biggest risk factor?",
+      "Show me documents that aren't approved yet",
+      "Break attachments down by document_type",
+      "What were the last few documents uploaded?",
     ],
   },
 };
