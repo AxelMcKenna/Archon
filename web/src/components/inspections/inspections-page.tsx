@@ -3,7 +3,7 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { DragEvent } from "react";
 import type { InspectionSchedule } from "@/lib/inspections";
 import {
@@ -24,6 +24,7 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
   const { inspections, stats, addManualInspection, reorderInspection, deleteInspection } =
     useInspections(projectId, schedule);
   const [draggedInspectionId, setDraggedInspectionId] = useState<string | null>(null);
+  const suppressCardClickRef = useRef(false);
   const currentInspectionIndex = getCurrentInspectionIndex(inspections);
   const nextInspection = inspections[currentInspectionIndex];
 
@@ -33,9 +34,24 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
   }
 
   function handleDragStart(event: DragEvent<HTMLElement>, inspection: InspectionRecord) {
+    const cardBounds = event.currentTarget.getBoundingClientRect();
+
+    suppressCardClickRef.current = true;
     setDraggedInspectionId(inspection.id);
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", inspection.id);
+    event.dataTransfer.setDragImage(
+      event.currentTarget,
+      event.clientX - cardBounds.left,
+      event.clientY - cardBounds.top,
+    );
+  }
+
+  function handleDragEnd() {
+    setDraggedInspectionId(null);
+    window.setTimeout(() => {
+      suppressCardClickRef.current = false;
+    }, 150);
   }
 
   function handleDragOver(event: DragEvent<HTMLElement>) {
@@ -175,54 +191,82 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
                 key={inspection.id}
                 id={getInspectionCardId(inspection.id)}
                 draggable
+                onClick={(event) => {
+                  if (suppressCardClickRef.current) return;
+
+                  const target = event.target as HTMLElement;
+                  if (target.closest("a, button")) return;
+
+                  router.push(href);
+                }}
                 onDragStart={(event) => handleDragStart(event, inspection)}
-                onDragEnd={() => setDraggedInspectionId(null)}
+                onDragEnd={handleDragEnd}
                 onDragOver={handleDragOver}
                 onDrop={(event) => handleDrop(event, index)}
                 className={[
-                  "group relative overflow-hidden rounded-2xl border bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-ink-700/20 hover:shadow-md",
+                  "group relative cursor-pointer overflow-hidden rounded-2xl border p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-ink-700/20 hover:shadow-md active:cursor-grabbing",
+                  isLocked ? "bg-slate-50" : "bg-white",
                   isCurrent ? "border-accent ring-2 ring-accent/20" : "border-ink-700/10",
-                  "cursor-grab active:cursor-grabbing",
                   isDragging ? "opacity-60" : "",
                 ].filter(Boolean).join(" ")}
               >
-                {isLocked && <div className="pointer-events-none absolute inset-0 bg-slate-200/30" />}
-                <div className="relative flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                  <div className="space-y-3">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <Link
-                        href={href}
-                        className="text-lg font-semibold text-ink-900 transition-colors hover:text-accent"
-                      >
-                        {inspection.title}
-                      </Link>
-                      <StatusBadge status={inspection.status} />
-                      {isCurrent && (
-                        <span className="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent ring-1 ring-accent/20">
-                          Current
+                <div className="relative flex flex-col gap-4 lg:flex-row lg:items-stretch lg:justify-between">
+                  <Link
+                    href={href}
+                    draggable={false}
+                    onClick={(event) => {
+                      if (!suppressCardClickRef.current) return;
+
+                      event.preventDefault();
+                    }}
+                    className="flex min-w-0 flex-1 flex-col gap-4 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 lg:flex-row lg:items-start lg:justify-between"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span
+                          className={[
+                            "text-lg font-semibold transition-colors group-hover:text-accent",
+                            isLocked ? "text-slate-500" : "text-ink-900",
+                          ].filter(Boolean).join(" ")}
+                        >
+                          {inspection.title}
                         </span>
-                      )}
-                      {isResolved && (
-                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
-                          ✓ Done
+                        <StatusBadge status={inspection.status} />
+                        {isCurrent && (
+                          <span className="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent ring-1 ring-accent/20">
+                            Current
+                          </span>
+                        )}
+                        {isResolved && (
+                          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
+                            ✓ Done
+                          </span>
+                        )}
+                        <span
+                          className={[
+                            "rounded-full px-2.5 py-1 text-xs font-medium",
+                            isLocked ? "bg-slate-100 text-slate-500" : "bg-ink-50 text-ink-500",
+                          ].filter(Boolean).join(" ")}
+                        >
+                          {inspection.category}
                         </span>
-                      )}
-                      {isLocked && (
-                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 ring-1 ring-slate-200">
-                          Locked
-                        </span>
-                      )}
-                      <span className="rounded-full bg-ink-50 px-2.5 py-1 text-xs font-medium text-ink-500">
-                        {inspection.category}
-                      </span>
+                      </div>
+                      <p className={["max-w-3xl text-sm", isLocked ? "text-slate-500" : "text-ink-600"].join(" ")}>
+                        {inspection.timing}
+                      </p>
                     </div>
-                    <p className="max-w-3xl text-sm text-ink-600">{inspection.timing}</p>
+                    <InspectionSummary inspection={inspection} isLocked={isLocked} />
+                  </Link>
+                  <div className="flex items-center gap-3 lg:pl-1">
+                    <button
+                      type="button"
+                      draggable={false}
+                      onClick={() => deleteInspection(inspection.id)}
+                      className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50"
+                    >
+                      Delete
+                    </button>
                   </div>
-                  <InspectionSummary
-                    inspection={inspection}
-                    isLocked={isLocked}
-                    onDelete={() => deleteInspection(inspection.id)}
-                  />
                 </div>
               </article>
             );
@@ -236,25 +280,20 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
 function InspectionSummary({
   inspection,
   isLocked,
-  onDelete,
 }: {
   inspection: InspectionRecord;
   isLocked: boolean;
-  onDelete: () => void;
 }) {
   return (
-    <div className="flex min-w-56 flex-col items-start gap-3 rounded-xl bg-ink-50 px-4 py-3 text-sm text-ink-500">
-      <span className="font-medium text-ink-900">
+    <div
+      className={[
+        "flex min-w-56 flex-col items-start gap-3 rounded-xl px-4 py-3 text-sm",
+        isLocked ? "bg-slate-100 text-slate-500" : "bg-ink-50 text-ink-500",
+      ].filter(Boolean).join(" ")}
+    >
+      <span className={["font-medium", isLocked ? "text-slate-600" : "text-ink-900"].join(" ")}>
         {inspection.dueDate ? `Due ${formatDate(inspection.dueDate)}` : "No due date"}
       </span>
-      {isLocked && <span className="text-xs text-ink-500/80">Complete current inspection first</span>}
-      <button
-        type="button"
-        onClick={onDelete}
-        className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50"
-      >
-        Delete
-      </button>
     </div>
   );
 }
