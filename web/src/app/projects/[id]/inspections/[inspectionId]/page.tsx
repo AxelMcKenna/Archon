@@ -14,7 +14,21 @@ export default async function ProjectInspectionDetailRoute({
   const supabase = await getSupabaseServer();
   const { data: project } = await supabase
     .from("projects")
-    .select("id, address, project_type, description")
+    .select(`
+      id,
+      address,
+      project_type,
+      description,
+      estimated_floor_area_m2,
+      estimated_construction_value_nzd,
+      involves_structural_work,
+      involves_earthworks,
+      existing_structure_demolished,
+      new_road_access,
+      service_connection_water,
+      service_connection_wastewater,
+      service_connection_stormwater
+    `)
     .eq("id", id)
     .single();
 

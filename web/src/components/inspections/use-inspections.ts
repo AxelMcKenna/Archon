@@ -9,7 +9,6 @@ import {
   createManualInspection,
   createRescheduledInspection,
   getInspectionStats,
-  isInspectionResolved,
   shouldCreateRescheduledInspection,
 } from "./model";
 
@@ -59,8 +58,8 @@ export function useInspections(projectId: string, schedule: InspectionSchedule) 
     writeToStorage(getStorageKey(projectId), nextRecords);
   }
 
-  function addManualInspection() {
-    const manualInspection = createManualInspection(inspections);
+  function addManualInspection(inspectionTypeId?: string) {
+    const manualInspection = createManualInspection(inspections, inspectionTypeId);
     const nextRecords = {
       ...savedRecords,
       [manualInspection.id]: manualInspection,
@@ -72,9 +71,9 @@ export function useInspections(projectId: string, schedule: InspectionSchedule) 
     return manualInspection;
   }
 
-  function reorderManualInspection(inspectionId: string, targetIndex: number) {
+  function reorderInspection(inspectionId: string, targetIndex: number) {
     const dragged = inspections.find((inspection) => inspection.id === inspectionId);
-    if (!dragged?.manual || isInspectionResolved(dragged)) return;
+    if (!dragged) return;
 
     const currentIndex = inspections.findIndex((inspection) => inspection.id === inspectionId);
     const remaining = inspections.filter((inspection) => inspection.id !== inspectionId);
@@ -86,23 +85,34 @@ export function useInspections(projectId: string, schedule: InspectionSchedule) 
       ...remaining.slice(nextIndex),
     ];
 
-    const manualSortOrders = getManualSortOrders(orderedInspections);
     const nextRecords = { ...savedRecords };
-    let hasChanges = false;
+    const now = new Date().toISOString();
 
-    for (const [id, sortOrder] of Object.entries(manualSortOrders)) {
-      const record = nextRecords[id] ?? inspections.find((inspection) => inspection.id === id);
-      if (!record?.manual || record.sortOrder === sortOrder) continue;
-
-      nextRecords[id] = {
+    orderedInspections.forEach((record, index) => {
+      const sortOrder = (index + 1) * 1000;
+      nextRecords[record.id] = {
         ...record,
         sortOrder,
-        updatedAt: new Date().toISOString(),
+        updatedAt: record.sortOrder === sortOrder ? record.updatedAt : now,
       };
-      hasChanges = true;
-    }
+    });
 
-    if (!hasChanges) return;
+    setSavedRecords(nextRecords);
+    writeToStorage(getStorageKey(projectId), nextRecords);
+  }
+
+  function deleteInspection(inspectionId: string) {
+    const current = inspections.find((inspection) => inspection.id === inspectionId);
+    if (!current) return;
+
+    const nextRecords = {
+      ...savedRecords,
+      [inspectionId]: {
+        ...current,
+        deleted: true,
+        updatedAt: new Date().toISOString(),
+      },
+    };
 
     setSavedRecords(nextRecords);
     writeToStorage(getStorageKey(projectId), nextRecords);
@@ -114,53 +124,9 @@ export function useInspections(projectId: string, schedule: InspectionSchedule) 
     hasHydrated,
     updateInspection,
     addManualInspection,
-    reorderManualInspection,
+    reorderInspection,
+    deleteInspection,
   };
-}
-
-function getManualSortOrders(records: InspectionRecord[]) {
-  const orders: Record<string, number> = {};
-  let index = 0;
-
-  while (index < records.length) {
-    const record = records[index];
-    if (!record.manual) {
-      index += 1;
-      continue;
-    }
-
-    const startIndex = index;
-    while (index < records.length && records[index].manual) index += 1;
-
-    const manualRun = records.slice(startIndex, index);
-    const previousAnchor = records.slice(0, startIndex).findLast((item) => !item.manual);
-    const nextAnchor = records.slice(index).find((item) => !item.manual);
-    const previousOrder = previousAnchor?.sortOrder;
-    const nextOrder = nextAnchor?.sortOrder;
-
-    if (previousOrder !== undefined && nextOrder !== undefined) {
-      const step = (nextOrder - previousOrder) / (manualRun.length + 1);
-      manualRun.forEach((manualRecord, runIndex) => {
-        orders[manualRecord.id] = previousOrder + step * (runIndex + 1);
-      });
-      continue;
-    }
-
-    if (nextOrder !== undefined) {
-      const step = 1000 / (manualRun.length + 1);
-      manualRun.forEach((manualRecord, runIndex) => {
-        orders[manualRecord.id] = nextOrder - step * (manualRun.length - runIndex);
-      });
-      continue;
-    }
-
-    const baseOrder = previousOrder ?? 0;
-    manualRun.forEach((manualRecord, runIndex) => {
-      orders[manualRecord.id] = baseOrder + 1000 * (runIndex + 1);
-    });
-  }
-
-  return orders;
 }
 
 function mergeChecklistForRequirements(requirements: string[], checklist: Record<string, boolean>) {

@@ -21,7 +21,7 @@ interface InspectionsPageProps {
 
 export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
   const router = useRouter();
-  const { inspections, stats, addManualInspection, reorderManualInspection } =
+  const { inspections, stats, addManualInspection, reorderInspection, deleteInspection } =
     useInspections(projectId, schedule);
   const [draggedInspectionId, setDraggedInspectionId] = useState<string | null>(null);
   const currentInspectionIndex = getCurrentInspectionIndex(inspections);
@@ -32,25 +32,20 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
     router.push(`/projects/${projectId}/inspections/${inspection.id}`);
   }
 
-  function handleDragStart(event: DragEvent<HTMLAnchorElement>, inspection: InspectionRecord) {
-    if (!inspection.manual || isInspectionResolved(inspection)) {
-      event.preventDefault();
-      return;
-    }
-
+  function handleDragStart(event: DragEvent<HTMLElement>, inspection: InspectionRecord) {
     setDraggedInspectionId(inspection.id);
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", inspection.id);
   }
 
-  function handleDragOver(event: DragEvent<HTMLAnchorElement>) {
+  function handleDragOver(event: DragEvent<HTMLElement>) {
     if (!draggedInspectionId) return;
 
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
   }
 
-  function handleDrop(event: DragEvent<HTMLAnchorElement>, targetIndex: number) {
+  function handleDrop(event: DragEvent<HTMLElement>, targetIndex: number) {
     const draggedId = event.dataTransfer.getData("text/plain") || draggedInspectionId;
     if (!draggedId) return;
 
@@ -59,8 +54,17 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
     const shouldPlaceAfter = event.clientY > targetBounds.top + targetBounds.height / 2;
     const nextTargetIndex = targetIndex + (shouldPlaceAfter ? 1 : 0);
 
-    reorderManualInspection(draggedId, nextTargetIndex);
+    reorderInspection(draggedId, nextTargetIndex);
     setDraggedInspectionId(null);
+  }
+
+  function showCurrentInspection() {
+    if (!nextInspection) return;
+
+    document.getElementById(getInspectionCardId(nextInspection.id))?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
   }
 
   return (
@@ -85,15 +89,16 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
             onClick={handleAddManualInspection}
             className="inline-flex items-center justify-center rounded-xl border border-ink-700/10 bg-white px-4 py-2.5 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
           >
-            Add Manual Inspection
+            Add Inspection
           </button>
           {nextInspection && (
-            <Link
-              href={`/projects/${projectId}/inspections/${nextInspection.id}` as Route}
+            <button
+              type="button"
+              onClick={showCurrentInspection}
               className="inline-flex items-center justify-center rounded-xl bg-ink-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-ink-700"
             >
-              Open Current Inspection
-            </Link>
+              Show Current Inspection
+            </button>
           )}
         </div>
       </section>
@@ -134,7 +139,7 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
           <p className="mt-3 text-sm text-ink-600">
             {nextInspection
               ? `${nextInspection.title} is the next inspection to prepare. ${nextInspection.timing}.`
-              : "All generated inspections are marked as passed."}
+              : "All inspections are complete."}
           </p>
         </div>
       </section>
@@ -158,26 +163,26 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
 
         <div className="grid gap-4">
           {inspections.map((inspection) => {
-            const checkedCount = Object.values(inspection.checklist).filter(Boolean).length;
             const href = `/projects/${projectId}/inspections/${inspection.id}` as Route;
             const index = inspections.findIndex((item) => item.id === inspection.id);
             const isLocked = !inspection.manual && index > currentInspectionIndex;
             const isResolved = isInspectionResolved(inspection);
-            const canDrag = inspection.manual && !isResolved;
+            const isCurrent = inspection.id === nextInspection?.id;
             const isDragging = draggedInspectionId === inspection.id;
 
             return (
-              <Link
+              <article
                 key={inspection.id}
-                href={href}
-                draggable={canDrag}
+                id={getInspectionCardId(inspection.id)}
+                draggable
                 onDragStart={(event) => handleDragStart(event, inspection)}
                 onDragEnd={() => setDraggedInspectionId(null)}
                 onDragOver={handleDragOver}
                 onDrop={(event) => handleDrop(event, index)}
                 className={[
-                  "group relative overflow-hidden rounded-2xl border border-ink-700/10 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-ink-700/20 hover:shadow-md",
-                  canDrag ? "cursor-grab active:cursor-grabbing" : "",
+                  "group relative overflow-hidden rounded-2xl border bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-ink-700/20 hover:shadow-md",
+                  isCurrent ? "border-accent ring-2 ring-accent/20" : "border-ink-700/10",
+                  "cursor-grab active:cursor-grabbing",
                   isDragging ? "opacity-60" : "",
                 ].filter(Boolean).join(" ")}
               >
@@ -185,8 +190,18 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
                 <div className="relative flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-3">
-                      <h3 className="text-lg font-semibold text-ink-900">{inspection.title}</h3>
+                      <Link
+                        href={href}
+                        className="text-lg font-semibold text-ink-900 transition-colors hover:text-accent"
+                      >
+                        {inspection.title}
+                      </Link>
                       <StatusBadge status={inspection.status} />
+                      {isCurrent && (
+                        <span className="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent ring-1 ring-accent/20">
+                          Current
+                        </span>
+                      )}
                       {isResolved && (
                         <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
                           ✓ Done
@@ -202,24 +217,14 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
                       </span>
                     </div>
                     <p className="max-w-3xl text-sm text-ink-600">{inspection.timing}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {inspection.requirements.map((requirement) => (
-                        <span
-                          key={requirement}
-                          className="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent"
-                        >
-                          {requirement}
-                        </span>
-                      ))}
-                    </div>
                   </div>
                   <InspectionSummary
                     inspection={inspection}
-                    checkedCount={checkedCount}
                     isLocked={isLocked}
+                    onDelete={() => deleteInspection(inspection.id)}
                   />
                 </div>
-              </Link>
+              </article>
             );
           })}
         </div>
@@ -230,24 +235,26 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
 
 function InspectionSummary({
   inspection,
-  checkedCount,
   isLocked,
+  onDelete,
 }: {
   inspection: InspectionRecord;
-  checkedCount: number;
   isLocked: boolean;
+  onDelete: () => void;
 }) {
   return (
-    <div className="flex min-w-56 flex-col items-start gap-2 rounded-xl bg-ink-50 px-4 py-3 text-sm text-ink-500">
+    <div className="flex min-w-56 flex-col items-start gap-3 rounded-xl bg-ink-50 px-4 py-3 text-sm text-ink-500">
       <span className="font-medium text-ink-900">
         {inspection.dueDate ? `Due ${formatDate(inspection.dueDate)}` : "No due date"}
       </span>
-      <span>
-        {checkedCount}/{inspection.requirements.length} checklist items done
-      </span>
-      <span className="text-xs text-ink-500/80 group-hover:text-ink-500">
-        {isLocked ? "Complete current inspection first" : "View inspection details"}
-      </span>
+      {isLocked && <span className="text-xs text-ink-500/80">Complete current inspection first</span>}
+      <button
+        type="button"
+        onClick={onDelete}
+        className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50"
+      >
+        Delete
+      </button>
     </div>
   );
 }
@@ -286,4 +293,8 @@ function formatDate(value: string) {
     month: "short",
     year: "numeric",
   });
+}
+
+function getInspectionCardId(inspectionId: string) {
+  return `inspection-card-${inspectionId}`;
 }

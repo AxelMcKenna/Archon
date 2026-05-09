@@ -2,8 +2,14 @@
 
 import type { Route } from "next";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import type { InspectionSchedule } from "@/lib/inspections";
+import {
+  MANUAL_INSPECTION_TYPE_ID,
+  getInspectionTypeDefinition,
+  manualInspectionTypeOptions,
+  type InspectionSchedule,
+} from "@/lib/inspections";
 import { type EditableInspectionStatus, type InspectionPdf, getCurrentInspectionIndex } from "./model";
 import { StatusBadge } from "./inspections-page";
 import { useInspections } from "./use-inspections";
@@ -22,7 +28,8 @@ export function InspectionDetailPage({
   inspectionId,
   schedule,
 }: InspectionDetailPageProps) {
-  const { inspections, updateInspection } = useInspections(projectId, schedule);
+  const router = useRouter();
+  const { inspections, updateInspection, deleteInspection } = useInspections(projectId, schedule);
   const inspection = inspections.find((item) => item.id === inspectionId);
   const inspectionIndex = inspections.findIndex((item) => item.id === inspectionId);
   const currentInspectionIndex = getCurrentInspectionIndex(inspections);
@@ -80,6 +87,42 @@ export function InspectionDetailPage({
         ? "Inspection marked failed. A rescheduled follow-up has been added to the inspection list."
         : "Inspection status updated.",
     );
+  }
+
+  function updateInspectionType(inspectionTypeId: string) {
+    if (!inspection) return;
+
+    const inspectionType = getInspectionTypeDefinition(inspectionTypeId);
+    if (!inspectionType) {
+      save(
+        {
+          inspectionTypeId: MANUAL_INSPECTION_TYPE_ID,
+          category: "Manual",
+          timing: "User-added inspection",
+          requirements: ["Confirm inspection scope"],
+          checklist: { "Confirm inspection scope": false },
+        },
+        "Inspection type updated.",
+      );
+      return;
+    }
+
+    save(
+      {
+        inspectionTypeId: inspectionType.id,
+        title: inspectionType.title,
+        category: inspectionType.category,
+        timing: inspectionType.timing,
+        requirements: inspectionType.requirements,
+        checklist: Object.fromEntries(inspectionType.requirements.map((requirement) => [requirement, false])),
+      },
+      "Inspection type updated.",
+    );
+  }
+
+  function handleDeleteInspection() {
+    deleteInspection(inspectionId);
+    router.push(`/projects/${projectId}/inspections`);
   }
 
   async function uploadPdf(file: File | undefined) {
@@ -149,15 +192,32 @@ export function InspectionDetailPage({
             <h2 className="text-lg font-semibold text-ink-900">Inspection details</h2>
             <div className="mt-5 grid gap-4">
               {inspection.manual && (
-                <label className="block">
-                  <span className="text-sm font-medium text-ink-500">Inspection name</span>
-                  <input
-                    type="text"
-                    value={inspection.title}
-                    onChange={(event) => save({ title: event.target.value }, "Inspection name updated.")}
-                    className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
-                  />
-                </label>
+                <>
+                  <label className="block">
+                    <span className="text-sm font-medium text-ink-500">Inspection type</span>
+                    <select
+                      value={inspection.inspectionTypeId}
+                      onChange={(event) => updateInspectionType(event.target.value)}
+                      className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
+                    >
+                      {manualInspectionTypeOptions.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="block">
+                    <span className="text-sm font-medium text-ink-500">Inspection name</span>
+                    <input
+                      type="text"
+                      value={inspection.title}
+                      onChange={(event) => save({ title: event.target.value }, "Inspection name updated.")}
+                      className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
+                    />
+                  </label>
+                </>
               )}
 
               <label className="block">
@@ -321,6 +381,16 @@ export function InspectionDetailPage({
             </div>
           </section>
         </aside>
+      </section>
+
+      <section className="rounded-2xl border border-red-200 bg-red-50 p-5">
+        <button
+          type="button"
+          onClick={handleDeleteInspection}
+          className="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-700"
+        >
+          Delete Inspection
+        </button>
       </section>
     </div>
   );

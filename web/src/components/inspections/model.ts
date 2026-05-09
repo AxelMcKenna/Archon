@@ -1,4 +1,9 @@
-import type { InspectionSchedule, InspectionStage } from "@/lib/inspections";
+import {
+  MANUAL_INSPECTION_TYPE_ID,
+  getInspectionTypeDefinition,
+  type InspectionSchedule,
+  type InspectionStage,
+} from "@/lib/inspections";
 
 export type EditableInspectionStatus = "Not Conducted" | "Passed" | "Failed";
 
@@ -13,7 +18,9 @@ export interface InspectionPdf {
 export interface InspectionRecord {
   id: string;
   baseInspectionId: string;
+  inspectionTypeId: string;
   manual?: boolean;
+  deleted?: boolean;
   sortOrder?: number;
   title: string;
   category: string;
@@ -33,6 +40,8 @@ export interface InspectionRecord {
 
 export interface InspectionUpdate {
   title?: string;
+  inspectionTypeId?: string;
+  deleted?: boolean;
   category?: string;
   timing?: string;
   requirements?: string[];
@@ -52,7 +61,9 @@ export function buildInspectionRecords(
 ) {
   const generatedRecords = schedule.stages.flatMap((stage, index) => {
     const saved = savedRecords[stage.id];
-    const sortOrder = (index + 1) * 1000;
+    if (saved?.deleted) return [];
+
+    const sortOrder = saved?.sortOrder ?? (index + 1) * 1000;
     const record = saved
       ? mergeStageIntoRecord(stage, saved, sortOrder)
       : createRecordFromStage(stage, sortOrder);
@@ -62,9 +73,10 @@ export function buildInspectionRecords(
 
   const generatedIds = new Set(generatedRecords.map((record) => record.id));
   const manualRecords = Object.values(savedRecords).filter(
-    (record) => record.manual && !generatedIds.has(record.id),
+    (record) => record.manual && !record.deleted && !generatedIds.has(record.id),
   ).map((record, index) => ({
     ...record,
+    inspectionTypeId: record.inspectionTypeId ?? MANUAL_INSPECTION_TYPE_ID,
     bookedDate: record.bookedDate ?? "",
     status: normalizeInspectionStatus(record.status),
     pdfs: record.pdfs ?? [],
@@ -117,21 +129,27 @@ export function shouldCreateRescheduledInspection(
   return !Object.values(records).some((record) => record.rescheduledFrom === next.id);
 }
 
-export function createManualInspection(existingRecords: InspectionRecord[]): InspectionRecord {
+export function createManualInspection(
+  existingRecords: InspectionRecord[],
+  inspectionTypeId = MANUAL_INSPECTION_TYPE_ID,
+): InspectionRecord {
   const now = new Date().toISOString();
   const manualCount = existingRecords.filter((record) => record.manual).length + 1;
   const id = `manual-inspection-${Date.now()}`;
   const maxSortOrder = Math.max(0, ...existingRecords.map((record) => record.sortOrder ?? 0));
+  const inspectionType = getInspectionTypeDefinition(inspectionTypeId);
 
   return {
     id,
     baseInspectionId: id,
+    inspectionTypeId: inspectionType?.id ?? MANUAL_INSPECTION_TYPE_ID,
     manual: true,
+    deleted: false,
     sortOrder: maxSortOrder + 1000,
-    title: `Manual inspection ${manualCount}`,
-    category: "Manual",
-    timing: "User-added inspection",
-    requirements: ["Confirm inspection scope"],
+    title: inspectionType?.title ?? `Manual inspection ${manualCount}`,
+    category: inspectionType?.category ?? "Manual",
+    timing: inspectionType?.timing ?? "User-added inspection",
+    requirements: inspectionType?.requirements ?? ["Confirm inspection scope"],
     details: "",
     dueDate: "",
     bookedDate: "",
@@ -159,7 +177,9 @@ function createRecordFromStage(stage: InspectionStage, sortOrder: number): Inspe
   return {
     id: stage.id,
     baseInspectionId: stage.id,
+    inspectionTypeId: stage.inspectionTypeId,
     manual: false,
+    deleted: false,
     sortOrder,
     title: stage.title,
     category: stage.category,
@@ -185,6 +205,7 @@ function mergeStageIntoRecord(
   return {
     ...saved,
     sortOrder,
+    inspectionTypeId: stage.inspectionTypeId,
     title: stage.title,
     category: stage.category,
     timing: stage.timing,
@@ -205,8 +226,8 @@ function getChildInspections(
   parentSortOrder: number,
 ): InspectionRecord[] {
   return Object.values(records)
-    .filter((record) => record.rescheduledFrom === parentId)
-    .sort((left, right) => left.createdAt.localeCompare(right.createdAt))
+    .filter((record) => record.rescheduledFrom === parentId && !record.deleted)
+    .sort(compareInspectionRecords)
     .flatMap((record, index) => {
       const sortOrder = record.sortOrder ?? parentSortOrder + (index + 1) * 100;
       const child = {
