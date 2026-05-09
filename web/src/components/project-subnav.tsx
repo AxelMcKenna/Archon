@@ -28,6 +28,7 @@ export const projectTabs: ProjectTab[] = [
     slug: "inspections",
     alsoMatch: ["/ccc"],
   },
+  { name: "Settings", href: "/settings", slug: "overview" },
 ];
 
 function tabMatchesPath(tab: ProjectTab, pathname: string, projectId: string): boolean {

@@ -75,18 +75,15 @@ export function ProjectOwnerDetailsSettings({
     setPreviewError(null);
     setUploading(true);
     try {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-      if (userError || !user) throw new Error("You need to be signed in to upload ownership evidence.");
+      const { data: authData } = await supabase.auth.getUser();
+      const storageOwner = authData.user?.id ?? "single-user";
 
       if (ownershipEvidenceFile) {
         await removeOwnershipEvidenceFile(ownershipEvidenceFile, false);
       }
 
       const safeName = file.name.replace(/\s+/g, "_");
-      const storagePath = `${user.id}/${projectId}/owner-evidence-${Date.now()}-${safeName}`;
+      const storagePath = `${storageOwner}/${projectId}/owner-evidence-${Date.now()}-${safeName}`;
 
       const { error: storageError } = await supabase.storage
         .from("attachments")
