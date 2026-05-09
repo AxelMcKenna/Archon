@@ -41,14 +41,13 @@ cd supabase && supabase start
 
 See PRD for full scope.
 
-<<<<<<< HEAD
 ## Docs
 
 - [`docs/plan-overlay.md`](docs/plan-overlay.md) — pre-lodgement plan analyser, bbox grounding pipeline, overlay rendering, inline UI, known limitations.
-=======
+
 ## Shared scope
+
 - Councils:
   - Chch City
   - Selwyn
   - Waimakariri
->>>>>>> ccc

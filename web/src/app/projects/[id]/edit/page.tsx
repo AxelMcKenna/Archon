@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { ProjectForm } from "@/components/project-form";
 import { buildProjectFormValues } from "@/lib/project-details";
@@ -14,12 +14,6 @@ export default async function EditProjectPage({
 }) {
   const { id } = await params;
   const supabase = await getSupabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    redirect("/auth/sign-in");
-  }
 
   const { data: project, error } = await getProjectById(
     supabase,

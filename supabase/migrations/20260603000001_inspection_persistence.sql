@@ -56,6 +56,9 @@ create table if not exists public.project_inspection_pdfs (
 create index if not exists project_inspections_project_sort_idx
   on public.project_inspections(project_id, sort_order);
 
+create index if not exists project_inspections_rescheduled_from_idx
+  on public.project_inspections(project_id, rescheduled_from);
+
 create index if not exists project_inspection_checklist_items_inspection_idx
   on public.project_inspection_checklist_items(project_id, inspection_id, sort_order);
 
