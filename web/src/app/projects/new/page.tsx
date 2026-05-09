@@ -1,6 +1,4 @@
-import {
-  createDefaultProjectDetails,
-} from "@/lib/project-details";
+import { createDefaultProjectDetails } from "@/lib/project-details";
 import { ProjectForm } from "@/components/project-form";
 import { createProject } from "../actions";
 

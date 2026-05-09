@@ -90,9 +90,8 @@ const CCC_DOCUMENT_REQUIREMENTS: CccDocumentRequirement[] = [
   {
     key: "electrical_coc",
     label: "Electrical Code of Compliance",
-    requirementType: "if_applicable",
-    helperText:
-      "This document is only required if the related work was completed as part of the project.",
+    requirementType: "required",
+    helperText: "Upload the Electrical Code of Compliance for completed electrical work.",
     validationMessage: "Please upload the Electrical Code of Compliance.",
     keywords: ["electrical code of compliance", "electrical coc", "electrical certificate"],
     supportsMultiple: true,

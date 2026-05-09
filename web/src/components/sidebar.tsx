@@ -7,6 +7,10 @@ import { usePathname } from "next/navigation";
 const mainTabs = [
   { name: "Dashboard", href: "/dashboard" as Route },
   { name: "Projects", href: "/projects" as Route },
+  { name: "Workflow", href: "/workflow" as Route },
+  { name: "Documents", href: "/documents" as Route },
+  { name: "Plans", href: "/plans" as Route },
+  { name: "RFI", href: "/rfi" as Route },
   { name: "Settings", href: "/settings" as Route },
   { name: "Help", href: "/help" as Route },
 ];

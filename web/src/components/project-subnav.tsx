@@ -13,7 +13,8 @@ const projectTabs = [
   { name: "Forecast", href: "/forecast" },
   { name: "Project Application", href: "/project-application" },
   { name: "Inspections", href: "/inspections" },
-  { name: "C.C.C", href: "/ccc" },
+  { name: "Documents", href: "/documents" },
+  { name: "CCC", href: "/ccc" },
 ];
 
 export function ProjectSubnav({ projectId }: ProjectSubnavProps) {

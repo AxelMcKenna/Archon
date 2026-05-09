@@ -36,18 +36,26 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-10 space-y-10">
-      <header>
-        <p className="text-sm text-ink-500">{bca?.name}</p>
-        <h1 className="text-2xl font-semibold">{project.address}</h1>
-        <p className="mt-2 text-sm text-ink-500">
-          {project.project_type} · status {project.status}
-        </p>
-        <div className="mt-4">
+      <header className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm text-ink-500">{bca?.name}</p>
+          <h1 className="text-2xl font-semibold">{project.address}</h1>
+          <p className="mt-2 text-sm text-ink-500">
+            {project.project_type} · status {project.status}
+          </p>
+        </div>
+        <div className="flex gap-2">
           <a
             href={`/projects/${id}/edit`}
             className="inline-flex items-center rounded-lg border border-ink-700/10 bg-white px-4 py-2 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
           >
             Edit project details
+          </a>
+          <a
+            href={`/projects/${id}/risk`}
+            className="inline-flex items-center rounded-lg border border-ink-700/10 bg-white px-4 py-2 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
+          >
+            Pre-lodgement risk check
           </a>
         </div>
       </header>
