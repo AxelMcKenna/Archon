@@ -14,14 +14,19 @@ COPY --from=ghcr.io/astral-sh/uv:0.11.12 /uv /usr/local/bin/uv
 
 WORKDIR /app
 
-COPY pyproject.toml uv.lock .python-version* ./
+# Build context must be the repo root so we can pull in `shared/` (used by
+# app/taxonomy.py via Path(__file__).parent.parent.parent / "shared").
+# Build:  docker build -t consentiq-api:latest -f api/Dockerfile .
+
+COPY api/pyproject.toml api/uv.lock api/.python-version* ./
 RUN uv sync --frozen --no-install-project --no-dev
 
-COPY app ./app
-COPY prompts ./prompts
-COPY rules ./rules
-COPY data ./data
-COPY scripts ./scripts
+COPY api/app ./app
+COPY api/prompts ./prompts
+COPY api/rules ./rules
+COPY api/data ./data
+COPY api/scripts ./scripts
+COPY shared /shared
 
 EXPOSE 8000
 

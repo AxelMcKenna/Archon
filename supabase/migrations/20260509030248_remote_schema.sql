@@ -257,17 +257,7 @@ CREATE TABLE IF NOT EXISTS "public"."projects" (
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "city" "text",
-    "postalcode" "text",
-    "estimated_floor_area_m2" numeric(10,2),
-    "estimated_construction_value_nzd" numeric(12,2),
-    "involves_structural_work" boolean DEFAULT false NOT NULL,
-    "involves_earthworks" boolean DEFAULT false NOT NULL,
-    "existing_structure_demolished" boolean DEFAULT false NOT NULL,
-    "new_road_access" boolean DEFAULT false NOT NULL,
-    "service_connection_water" boolean DEFAULT false NOT NULL,
-    "service_connection_wastewater" boolean DEFAULT false NOT NULL,
-    "service_connection_stormwater" boolean DEFAULT false NOT NULL,
-    "project_details" "jsonb"
+    "postalcode" "text"
 );
 
 
@@ -1016,5 +1006,6 @@ with check ((bucket_id = 'plans'::text));
   to anon, authenticated
 using ((bucket_id = 'rfi-uploads'::text))
 with check ((bucket_id = 'rfi-uploads'::text));
+
 
 

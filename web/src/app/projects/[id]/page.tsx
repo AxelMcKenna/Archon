@@ -1,170 +1,97 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { taxonomy } from "@consentiq/shared";
-import { deleteProject } from "./actions";
-import { ProjectDeleteButton } from "@/components/project-delete-button";
-import { ProjectDocumentsSection } from "@/components/project-documents-section";
-import {
-  buildProjectFormValues,
-  normalizeProjectDetails,
-} from "@/lib/project-details";
-import { getProjectById } from "@/lib/projects";
+import { ForecastingClient } from "./forecasting-client";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProjectOverview({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await getSupabaseServer();
-  const { data: project, error } = await getProjectById(supabase, id);
-  if (!project) {
-    if (error) {
-      throw error;
-    }
-    notFound();
-  }
+  const { data: project } = await supabase.from("projects").select("*").eq("id", id).single();
+  if (!project) notFound();
 
-  const { data: letters } = await supabase
-    .from("rfi_letters")
-    .select("id, rfi_number, issue_date, response_deadline, status, created_at")
-    .eq("project_id", id)
-    .order("created_at", { ascending: false });
+  const [
+    { count: drawingCount },
+    { count: cadCount },
+    { count: letterCount },
+    { data: assessmentRow },
+  ] = await Promise.all([
+    supabase
+      .from("plan_uploads")
+      .select("*", { count: "exact", head: true })
+      .eq("project_id", id),
+    supabase
+      .from("cad_uploads")
+      .select("*", { count: "exact", head: true })
+      .eq("project_id", id),
+    supabase
+      .from("rfi_letters")
+      .select("*", { count: "exact", head: true })
+      .eq("project_id", id),
+    supabase
+      .from("consent_assessments")
+      .select("forecast_context")
+      .eq("project_id", id)
+      .maybeSingle(),
+  ]);
+  const forecastPayload =
+    (assessmentRow as { forecast_context?: Record<string, unknown> | null } | null)
+      ?.forecast_context ?? null;
 
   const bca = taxonomy.bcas.find((b) => b.id === project.bca);
-  const deleteProjectAction = deleteProject.bind(null, id);
-  const projectFormValues = buildProjectFormValues(project);
-  const projectDetails = normalizeProjectDetails(project.project_details, project.project_type);
+  const drawingsTotal = (drawingCount ?? 0) + (cadCount ?? 0);
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10 space-y-10">
-      <header className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm text-ink-500">{bca?.name}</p>
-          <h1 className="text-2xl font-semibold">{project.address}</h1>
-          <p className="mt-2 text-sm text-ink-500">
-            {project.project_type} · status {project.status}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <a
-            href={`/projects/${id}/edit`}
-            className="inline-flex items-center rounded-lg border border-ink-700/10 bg-white px-4 py-2 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
-          >
-            Edit project details
-          </a>
-          <a
-            href={`/projects/${id}/risk`}
-            className="inline-flex items-center rounded-lg border border-ink-700/10 bg-white px-4 py-2 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
-          >
-            Pre-lodgement risk check
-          </a>
-        </div>
+    <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
+      <header className="space-y-3">
+        <p className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-ink-500">
+          <span className="inline-block h-1 w-1 rounded-full bg-accent" />
+          {bca?.name ?? "Project"}
+        </p>
+        <h1 className="font-display uppercase font-medium leading-[0.95] tracking-[0.02em] text-[36px] sm:text-[44px] text-ink-900">
+          {project.address}
+        </h1>
+        <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
+          {project.project_type} · status <span className="text-accent">{project.status}</span>
+        </p>
       </header>
 
-      <section className="rounded-2xl border border-ink-700/10 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-ink-900">Project details</h2>
-            <p className="mt-1 text-sm text-ink-500">
-              Stored project metadata used by Consent Assessment and downstream workflows.
-            </p>
-          </div>
-          <span className="rounded-full bg-ink-50 px-3 py-1 text-sm font-medium text-ink-700">
-            {projectFormValues.projectType.replace(/_/g, " ")}
-          </span>
-        </div>
-
-        <dl className="mt-5 grid gap-4 text-sm md:grid-cols-2">
-          <div>
-            <dt className="text-ink-500">Estimated floor area</dt>
-            <dd className="font-medium text-ink-900">
-              {projectDetails.estimatedFloorAreaM2 ? `${projectDetails.estimatedFloorAreaM2} m²` : "Not set"}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-ink-500">Estimated construction value</dt>
-            <dd className="font-medium text-ink-900">
-              {projectDetails.estimatedConstructionValueNZD
-                ? `$${projectDetails.estimatedConstructionValueNZD.toLocaleString("en-NZ")}`
-                : "Not set"}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-ink-500">Flags</dt>
-            <dd className="font-medium text-ink-900">
-              {formatFlags([
-                projectDetails.involvesStructuralWork && "Structural work",
-                projectDetails.involvesEarthworks && "Earthworks",
-                projectDetails.existingStructureDemolished && "Demolition",
-                projectDetails.newRoadAccess && "New road access",
-              ])}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-ink-500">New service connections</dt>
-            <dd className="font-medium text-ink-900">
-              {formatFlags([
-                projectDetails.newServiceConnections.water && "Water",
-                projectDetails.newServiceConnections.wastewater && "Wastewater",
-                projectDetails.newServiceConnections.stormwater && "Stormwater",
-              ])}
-            </dd>
-          </div>
-        </dl>
-      </section>
-
-      <section className="rounded-2xl border border-ink-700/10 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-ink-900">Project activity</h2>
-            <p className="mt-1 text-sm text-ink-500">
-              Recent RFI activity and shortcuts into the current consent workflow.
-            </p>
-          </div>
-          <a
-            href={`/projects/${id}/project-application`}
-            className="inline-flex items-center rounded-lg border border-ink-700/10 bg-white px-4 py-2 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
-          >
-            Open Project Application
-          </a>
-        </div>
-
-        {!letters?.length ? (
-          <p className="mt-5 text-sm text-ink-500">No RFI letters recorded yet.</p>
-        ) : (
-          <ul className="mt-5 divide-y divide-ink-700/10">
-            {letters.slice(0, 5).map((l) => (
-              <li key={l.id} className="flex justify-between py-3 text-sm">
-                <a href={`/projects/${id}/project-application`} className="hover:underline">
-                  RFI {l.rfi_number ?? "?"} — {l.issue_date ?? "(no date)"}
-                </a>
-                <span className="text-ink-500">{l.status}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <ProjectDocumentsSection
-        projectId={id}
-        address={project.address}
-        projectDetails={projectDetails}
-      />
-      <section className="border-t border-ink-700/10 pt-8">
-        <div className="rounded-2xl border border-red-200 bg-red-50/60 p-5">
-          <h2 className="text-lg font-semibold text-red-900">Danger zone</h2>
-          <p className="mt-2 text-sm text-red-800/80">
-            Deleting a project permanently removes the project and its associated consent data.
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Link
+          href={`/projects/${id}/drawings`}
+          className="group relative block overflow-hidden rounded-md bg-surface-raised p-6 shadow-depth transition-shadow duration-200 hover:shadow-depth-hover cursor-pointer"
+        >
+          <span className="absolute inset-x-0 top-0 h-[2px] bg-accent" />
+          <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">Drawings</p>
+          <p className="mt-4 text-[32px] leading-none font-semibold tracking-[-0.03em] tabular-nums text-ink-900">{drawingsTotal}</p>
+          <p className="mt-2 text-[11px] tracking-tight text-ink-500">
+            {drawingCount ?? 0} PDF · {cadCount ?? 0} DXF
           </p>
-          <div className="mt-5">
-            <ProjectDeleteButton onDelete={deleteProjectAction} />
-          </div>
-        </div>
+        </Link>
+        <Link
+          href={`/projects/${id}/rfis`}
+          className="group relative block overflow-hidden rounded-md bg-surface-raised p-6 shadow-depth transition-shadow duration-200 hover:shadow-depth-hover cursor-pointer"
+        >
+          <span className="absolute inset-x-0 top-0 h-[2px] bg-accent" />
+          <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">RFI letters</p>
+          <p className="mt-4 text-[32px] leading-none font-semibold tracking-[-0.03em] tabular-nums text-ink-900">{letterCount ?? 0}</p>
+          <p className="mt-2 text-[11px] tracking-tight text-ink-500">
+            {(letterCount ?? 0) > 0 ? "open the Council tab to respond" : "no RFIs received yet"}
+          </p>
+        </Link>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
+          Consent forecast
+        </h2>
+        <ForecastingClient
+          projectId={project.id}
+          initialPayload={forecastPayload}
+        />
       </section>
     </div>
   );
-}
-
-function formatFlags(values: Array<string | false>) {
-  const labels = values.filter((value): value is string => Boolean(value));
-  return labels.length > 0 ? labels.join(", ") : "None selected";
 }

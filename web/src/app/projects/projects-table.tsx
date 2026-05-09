@@ -92,7 +92,7 @@ export function ProjectsTable({ rows }: { rows: Row[] }) {
               <td>{p.bca_name}</td>
               <td>{p.project_type}</td>
               <td>
-                <span className={`inline-block rounded px-2 py-0.5 text-xs ${STATUS_STYLE[p.status] ?? "bg-ink-700/10"}`}>
+                <span className={`inline-block rounded-sm px-2 py-0.5 text-xs ${STATUS_STYLE[p.status] ?? "bg-ink-700/10"}`}>
                   {p.status}
                 </span>
               </td>
@@ -126,7 +126,7 @@ function Filter({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded border border-ink-700/15 px-2 py-1 text-ink-900"
+        className="rounded-sm border border-ink-700/15 px-2 py-1 text-ink-900"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>{o.label}</option>

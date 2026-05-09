@@ -6,6 +6,8 @@ interface Suggestion {
   display_name: string;
 }
 
+const ADDRESS_AUTOCOMPLETE_DEBOUNCE_MS = 80;
+
 export function AddressAutocompleteInput({
   name,
   required,
@@ -49,7 +51,7 @@ export function AddressAutocompleteInput({
       } finally {
         if (requestId === requestIdRef.current) setIsLoading(false);
       }
-    }, 250);
+    }, ADDRESS_AUTOCOMPLETE_DEBOUNCE_MS);
 
     return () => clearTimeout(timeout);
   }, [value]);
@@ -65,11 +67,11 @@ export function AddressAutocompleteInput({
         onFocus={() => setIsOpen(suggestions.length > 0)}
         placeholder="Start typing an address in Canterbury"
         autoComplete="off"
-        className="w-full rounded border border-ink-700/20 px-3 py-2"
+        className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
       />
       {isLoading && <span className="absolute right-3 top-2.5 text-xs text-ink-500">Searching…</span>}
       {isOpen && (
-        <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded border border-ink-700/20 bg-white py-1 text-sm shadow">
+        <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-md bg-surface-elevated py-1 text-sm shadow-elevated">
           {suggestions.map((suggestion) => (
             <li key={suggestion.display_name}>
               <button

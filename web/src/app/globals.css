@@ -7,4 +7,62 @@
 }
 
 html, body { height: 100%; }
-body { @apply bg-white text-ink-900 font-sans antialiased; }
+body {
+  @apply bg-surface-canvas text-ink-900 font-sans antialiased;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "cv11";
+}
+
+/* Tabular numerics by default in data-heavy contexts */
+table, .data, [data-num] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hairline divider with engraved highlight */
+.hairline {
+  box-shadow: 0 1px 0 rgba(8, 9, 11, 0.06), 0 2px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Tabular numerals for any data-heavy element */
+.nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* AI activity */
+@keyframes ai-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+@keyframes ai-dot {
+  0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-1px); }
+}
+@keyframes ai-glow {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+.ai-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.18),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: ai-shimmer 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+.ai-dots > span {
+  display: inline-block;
+  animation: ai-dot 1.2s ease-in-out infinite;
+}
+.ai-dots > span:nth-child(2) { animation-delay: 0.15s; }
+.ai-dots > span:nth-child(3) { animation-delay: 0.3s; }
+.ai-glow {
+  animation: ai-glow 1.6s ease-in-out infinite;
+}

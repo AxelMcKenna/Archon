@@ -41,7 +41,7 @@ export default async function ReconciliationAdmin() {
               <tr key={row.id} className="border-b border-ink-700/5 align-top">
                 <td className="py-2 text-ink-500">{new Date(row.created_at).toLocaleString()}</td>
                 <td>
-                  <span className={`inline-block rounded px-2 py-0.5 text-xs ${STATE_COLORS[row.state] ?? ""}`}>
+                  <span className={`inline-block rounded-sm px-2 py-0.5 text-xs ${STATE_COLORS[row.state] ?? ""}`}>
                     {row.state}
                   </span>
                 </td>

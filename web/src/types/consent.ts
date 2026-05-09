@@ -21,6 +21,7 @@ export interface ProjectDetails {
   involvesStructuralWork: boolean;
   involvesEarthworks: boolean;
   existingStructureDemolished: boolean;
+  yearOfConstruction: number | null;
   newRoadAccess: boolean;
   newServiceConnections: ServiceConnections;
   buildingConsentNumbers?: string;

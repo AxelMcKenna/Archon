@@ -179,7 +179,7 @@ function Collapsible({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <section className="rounded-lg border border-ink-200 bg-white">
+    <section className="rounded-lg border border-ink-200 bg-surface-raised">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -1261,7 +1261,7 @@ function LbpMemorandaInlineSection({
       </button>
       <p className="text-xs text-ink-600">Upload one memoranda per LBP</p>
 
-      <div className="max-h-80 overflow-auto rounded-md border border-ink-100 bg-white">
+      <div className="max-h-80 overflow-auto rounded-md border border-ink-100 bg-surface-raised">
         {files.length === 0 ? (
           <div className="px-3 py-4 text-xs text-ink-500">No files uploaded yet.</div>
         ) : (
@@ -1323,7 +1323,7 @@ function LbpMemorandaInlineSection({
 }
 
 const modernSelectClassName =
-  "w-full min-w-0 appearance-none rounded border border-ink-200 bg-white px-2.5 py-2 pr-8 text-xs leading-tight";
+  "w-full min-w-0 appearance-none rounded border border-ink-200 bg-surface-raised px-2.5 py-2 pr-8 text-xs leading-tight";
 const modernSelectArrowStyle = {
   backgroundImage:
     "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='%2364748b' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")",
@@ -1369,7 +1369,7 @@ function Form6AInlineTable({
 
   return (
     <div className="space-y-3 text-xs">
-      <div className="rounded border border-ink-100 bg-white p-3">
+      <div className="rounded border border-ink-100 bg-surface-raised p-3">
         <label className="block text-xs font-medium text-ink-800">Completion date</label>
         <p className="mt-1 text-xs text-ink-600">
           All building work to be carried out under the building consent specified on this form was completed on:
@@ -1384,7 +1384,7 @@ function Form6AInlineTable({
       <button
         type="button"
         onClick={() => setLbpOpen((v) => !v)}
-        className="flex w-full items-center justify-between rounded border border-ink-200 bg-white px-3 py-2 text-left"
+        className="flex w-full items-center justify-between rounded border border-ink-200 bg-surface-raised px-3 py-2 text-left"
       >
         <span className="text-sm font-medium text-ink-900">Licensed Building Practitioners</span>
         <div className="flex items-center gap-3">
@@ -1461,7 +1461,7 @@ function Form6AInlineTable({
       <button
         type="button"
         onClick={() => setPersonnelOpen((v) => !v)}
-        className="flex w-full items-center justify-between rounded border border-ink-200 bg-white px-3 py-2 text-left"
+        className="flex w-full items-center justify-between rounded border border-ink-200 bg-surface-raised px-3 py-2 text-left"
       >
         <span className="text-sm font-medium text-ink-900">Other Personnel</span>
         <div className="flex items-center gap-3">
@@ -1570,7 +1570,7 @@ function SpecifiedSystemsInlineSection({
       </label>
       <div
         className={`rounded border border-ink-100 p-3 ${
-          noSpecifiedSystems ? "bg-slate-50 text-slate-500" : "bg-white text-ink-900"
+          noSpecifiedSystems ? "bg-slate-50 text-slate-500" : "bg-surface-raised text-ink-900"
         }`}
       >
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2">

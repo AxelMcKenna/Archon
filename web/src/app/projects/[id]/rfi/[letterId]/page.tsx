@@ -1,10 +1,98 @@
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { getSupabaseServer } from "@/lib/supabase/server";
+import { LetterReview } from "./letter-review";
 
-export default async function ProjectRfiDetailRedirect({
+export const dynamic = "force-dynamic";
+
+export default async function LetterPage({
   params,
 }: {
   params: Promise<{ id: string; letterId: string }>;
 }) {
-  const { id } = await params;
-  redirect(`/projects/${id}/project-application`);
+  const { id: projectId, letterId } = await params;
+  const supabase = await getSupabaseServer();
+
+  const { data: letter } = await supabase
+    .from("rfi_letters")
+    .select("*")
+    .eq("id", letterId)
+    .single();
+  if (!letter) notFound();
+
+  const { data: items } = await supabase
+    .from("rfi_items")
+    .select("*")
+    .eq("rfi_letter_id", letterId)
+    .order("ordering");
+
+  const itemIds = (items ?? []).map((i) => i.id);
+  const { data: log } = itemIds.length
+    ? await supabase
+        .from("reconciliation_log")
+        .select("*")
+        .in("rfi_item_id", itemIds)
+    : { data: [] };
+  const logByItem = new Map((log ?? []).map((l) => [l.rfi_item_id, l]));
+
+  const { data: drafts } = itemIds.length
+    ? await supabase.from("responses").select("*").in("rfi_item_id", itemIds)
+    : { data: [] };
+  const draftByItem = new Map((drafts ?? []).map((d) => [d.rfi_item_id, d]));
+
+  const { data: atts } = itemIds.length
+    ? await supabase.from("attachments").select("*").in("rfi_item_id", itemIds)
+    : { data: [] };
+  const attsByItem = new Map<string, typeof atts>();
+  for (const a of atts ?? []) {
+    const list = attsByItem.get(a.rfi_item_id) ?? [];
+    list.push(a);
+    attsByItem.set(a.rfi_item_id, list);
+  }
+
+  const { data: ev } = itemIds.length
+    ? await supabase
+        .from("rfi_item_plan_evidence")
+        .select(
+          "rfi_item_id, source, confidence, rationale, evidence, " +
+            "flag_index, plan_upload_id, cad_upload_id",
+        )
+        .in("rfi_item_id", itemIds)
+    : { data: [] };
+  const evByItem = new Map(
+    ((ev ?? []) as unknown as Array<{ rfi_item_id: string }>).map((e) => [
+      e.rfi_item_id,
+      e,
+    ]),
+  );
+
+  return (
+    <div className="max-w-6xl mx-auto px-6 py-10">
+      <div className="mb-6">
+        <a href={`/projects/${projectId}`} className="text-sm text-ink-500 hover:text-ink-900">
+          ← back to project
+        </a>
+        <h1 className="text-2xl font-semibold mt-2">
+          RFI {letter.rfi_number ?? "?"}
+          {letter.issue_date ? ` — ${letter.issue_date}` : ""}
+        </h1>
+        <p className="text-sm text-ink-500 mt-1">
+          extracted via{" "}
+          <span className="font-mono">
+            {(letter.extraction_metadata as { extractor?: string })?.extractor}
+          </span>{" "}
+          · {(items ?? []).length} items
+        </p>
+      </div>
+      <LetterReview
+        letterId={letterId}
+        items={(items ?? []).map((i) => ({
+          ...i,
+          reconciliation: logByItem.get(i.id) ?? null,
+          response: draftByItem.get(i.id) ?? null,
+          attachments: attsByItem.get(i.id) ?? [],
+          plan_evidence: evByItem.get(i.id) ?? null,
+        }))}
+      />
+    </div>
+  );
 }

@@ -32,7 +32,7 @@ def _load_item_context(db: Client, item_id: str) -> dict[str, Any]:
         .select(
             "id, raw_text, item_id, "
             "rfi_letters!inner("
-            "  id, rfi_number, application_ref, "
+            "  id, rfi_number, plan_upload_id, cad_upload_id, "
             "  projects!inner(bca, project_type, description, application_ref)"
             ")"
         )
@@ -52,7 +52,55 @@ def _load_item_context(db: Client, item_id: str) -> dict[str, Any]:
         .maybe_single()
         .execute()
     )
-    return {"item": res, "final": final_class.data if final_class else None}
+
+    # Stage A grounding output, if it ran. Drafter uses this to choose
+    # between FLAG-MATCHED and NO MATCH branches.
+    evidence_row = (
+        db.table("rfi_item_plan_evidence")
+        .select("source, plan_upload_id, cad_upload_id, flag_index, evidence, confidence, rationale")
+        .eq("rfi_item_id", item_id)
+        .maybe_single()
+        .execute()
+    )
+    evidence = evidence_row.data if evidence_row else None
+
+    # Look up the plan filename + format so the drafter can name the file
+    # in the response (e.g. "see floorplan-pro.dxf, hallway adjacent to
+    # bedroom 2"). Only fetched when there's a flag match — a NO MATCH
+    # draft never references the plan.
+    plan_filename: str | None = None
+    plan_format: str | None = None
+    if evidence and evidence.get("source") == "flag":
+        if evidence.get("plan_upload_id"):
+            r = (
+                db.table("plan_uploads")
+                .select("filename")
+                .eq("id", evidence["plan_upload_id"])
+                .maybe_single()
+                .execute()
+            )
+            if r and r.data:
+                plan_filename = r.data["filename"]
+                plan_format = "pdf"
+        elif evidence.get("cad_upload_id"):
+            r = (
+                db.table("cad_uploads")
+                .select("filename")
+                .eq("id", evidence["cad_upload_id"])
+                .maybe_single()
+                .execute()
+            )
+            if r and r.data:
+                plan_filename = r.data["filename"]
+                plan_format = "dxf"
+
+    return {
+        "item": res,
+        "final": final_class.data if final_class else None,
+        "evidence": evidence,
+        "plan_filename": plan_filename,
+        "plan_format": plan_format,
+    }
 
 
 @router.post("/{item_id}")
@@ -69,17 +117,24 @@ async def generate_draft(
     project = letter["projects"]
     final = ctx["final"]
 
+    plan_evidence: dict[str, Any] | None = None
+    if ctx["evidence"]:
+        plan_evidence = dict(ctx["evidence"])
+        plan_evidence["plan_filename"] = ctx["plan_filename"]
+        plan_evidence["plan_format"] = ctx["plan_format"]
+
     draft_text, prompt_version, _metrics = draft_response(
         bca=project["bca"],
         project_type=project["project_type"],
         project_description=project.get("description") or "",
-        application_ref=letter.get("application_ref") or project.get("application_ref"),
+        application_ref=project.get("application_ref"),
         rfi_number=letter.get("rfi_number"),
         item_text=item["raw_text"],
         category=final["primary_category"],
         severity=final["severity"],
         reasoning=final.get("reasoning") or "",
         acceptable_solution=acceptable_solution_for(final["primary_category"]),
+        plan_evidence=plan_evidence,
     )
 
     row = upsert_response(

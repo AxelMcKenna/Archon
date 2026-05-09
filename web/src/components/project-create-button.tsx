@@ -21,7 +21,7 @@ export function ProjectCreateButton({
       onClick={() => {
         lockedRef.current = true;
       }}
-      className="rounded-lg bg-ink-900 px-5 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+      className="rounded-sm bg-ink-900 px-5 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
     >
       {pending ? pendingLabel : idleLabel}
     </button>

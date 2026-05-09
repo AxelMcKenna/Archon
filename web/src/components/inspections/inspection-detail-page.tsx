@@ -24,6 +24,10 @@ interface InspectionDetailPageProps {
 const statuses: EditableInspectionStatus[] = ["Passed", "Failed", "Not Conducted"];
 const MAX_PDF_SIZE_BYTES = 2 * 1024 * 1024;
 
+const inputClass =
+  "mt-2 w-full rounded-md bg-surface-sunken px-3.5 py-2.5 text-[13px] text-ink-900 outline-none shadow-inset transition placeholder:text-ink-400 focus:ring-2 focus:ring-brand-500/30 focus:bg-surface-elevated disabled:cursor-not-allowed disabled:opacity-60";
+const labelClass = "block text-[11px] uppercase tracking-[0.22em] text-ink-500";
+
 export function InspectionDetailPage({
   projectId,
   inspectionId,
@@ -46,9 +50,9 @@ export function InspectionDetailPage({
 
   if (!inspection) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-4xl mx-auto px-8 py-10 space-y-6">
         <BackLink projectId={projectId} />
-        <section className="rounded-2xl border border-ink-700/10 bg-white p-8 shadow-sm">
+        <section className="rounded-md bg-surface-raised p-6 shadow-depth">
           <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
             Inspection not available
           </h1>
@@ -163,45 +167,49 @@ export function InspectionDetailPage({
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+    <div className="max-w-5xl mx-auto px-8 py-8 space-y-6">
       <BackLink projectId={projectId} />
 
-      <section className="rounded-2xl border border-ink-700/10 bg-white p-8 shadow-sm">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-[0.18em] text-ink-500">
+      <section className="relative overflow-hidden rounded-md bg-surface-raised p-5 shadow-depth">
+        <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-accent" />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-2">
+            <p className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-ink-500">
+              <span className="inline-block h-1 w-1 rounded-full bg-accent" />
               Inspection
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink-900">
-              {inspection.title}
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-ink-600">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="font-display uppercase font-medium leading-[0.95] tracking-[0.02em] text-[24px] sm:text-[30px] text-ink-900">
+                {inspection.title}
+              </h1>
+              <StatusBadge status={inspection.status} />
+            </div>
+            <p className="max-w-2xl text-sm leading-relaxed text-ink-600">
               {inspection.timing}
             </p>
           </div>
-          <StatusBadge status={inspection.status} />
         </div>
       </section>
 
       {flashMessage && (
-        <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+        <section className="rounded-md bg-emerald-50 px-4 py-3 text-sm text-emerald-800 ring-1 ring-emerald-200 shadow-depth">
           {flashMessage}
         </section>
       )}
 
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr),minmax(18rem,0.9fr)]">
-        <div className="space-y-6">
-          <section className="rounded-2xl border border-ink-700/10 bg-white p-8 shadow-sm">
-            <h2 className="text-lg font-semibold text-ink-900">Inspection details</h2>
-            <div className="mt-5 grid gap-4">
+      <section className="grid gap-5 lg:grid-cols-[minmax(0,1.35fr),minmax(18rem,0.9fr)]">
+        <div className="space-y-5">
+          <section className="rounded-md bg-surface-raised p-5 shadow-depth">
+            <h2 className="text-base font-semibold tracking-tight text-ink-900">Inspection details</h2>
+            <div className="mt-4 grid gap-4">
               {inspection.manual && (
                 <>
                   <label className="block">
-                    <span className="text-sm font-medium text-ink-500">Inspection type</span>
-                  <select
+                    <span className={labelClass}>Inspection type</span>
+                    <select
                       value={inspection.inspectionTypeId}
                       onChange={(event) => updateInspectionType(event.target.value)}
-                      className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
+                      className={inputClass}
                     >
                       {manualInspectionTypeOptions.map((option) => (
                         <option key={option.id} value={option.id}>
@@ -212,128 +220,126 @@ export function InspectionDetailPage({
                   </label>
 
                   <label className="block">
-                    <span className="text-sm font-medium text-ink-500">Inspection name</span>
+                    <span className={labelClass}>Inspection name</span>
                     <input
                       type="text"
                       value={inspection.title}
                       onChange={(event) => void save({ title: event.target.value }, "Inspection name updated.")}
-                      className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
+                      className={inputClass}
                     />
                   </label>
                 </>
               )}
 
-              <label className="block">
-                <span className="text-sm font-medium text-ink-500">Due date</span>
-                <input
-                  type="date"
-                  value={inspection.dueDate}
-                  onChange={(event) => void save({ dueDate: event.target.value }, "Due date updated.")}
-                  className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
-                />
-              </label>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className={labelClass}>Due date</span>
+                  <input
+                    type="date"
+                    value={inspection.dueDate}
+                    onChange={(event) => void save({ dueDate: event.target.value }, "Due date updated.")}
+                    className={inputClass}
+                  />
+                </label>
+
+                <label className="block">
+                  <span className={labelClass}>Booked date</span>
+                  <input
+                    type="date"
+                    value={inspection.bookedDate}
+                    onChange={(event) => void save({ bookedDate: event.target.value }, "Booked date updated.")}
+                    className={inputClass}
+                  />
+                </label>
+              </div>
 
               <label className="block">
-                <span className="text-sm font-medium text-ink-500">Booked date</span>
-                <input
-                  type="date"
-                  value={inspection.bookedDate}
-                  onChange={(event) => void save({ bookedDate: event.target.value }, "Booked date updated.")}
-                  className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
-                />
-              </label>
-
-              <label className="block">
-                <span className="text-sm font-medium text-ink-500">Booking and site details</span>
+                <span className={labelClass}>Booking and site details</span>
                 <textarea
                   value={inspection.details}
                   onChange={(event) => void save({ details: event.target.value }, "Inspection details updated.")}
                   rows={5}
-                  className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
+                  className={inputClass}
                   placeholder="Add booking reference, inspector name, site contact, access notes, or preparation details."
                 />
               </label>
             </div>
           </section>
 
-          <section className="rounded-2xl border border-ink-700/10 bg-white p-8 shadow-sm">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold text-ink-900">Readiness checklist</h2>
-                <p className="mt-1 text-sm text-ink-500">
-                  {checkedCount}/{inspection.requirements.length} items marked ready.
-                </p>
-              </div>
+          <section className="rounded-md bg-surface-raised p-5 shadow-depth">
+            <div className="flex items-baseline justify-between gap-4">
+              <h2 className="text-base font-semibold tracking-tight text-ink-900">Readiness checklist</h2>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-ink-500">
+                <span className="tabular-nums text-ink-900 font-semibold">{checkedCount}</span>
+                <span> / {inspection.requirements.length} ready</span>
+              </p>
             </div>
 
-            <div className="mt-5 space-y-3">
+            <div className="mt-4 space-y-1.5">
               {inspection.requirements.map((requirement) => (
                 <label
                   key={requirement}
-                  className="flex items-start gap-3 rounded-xl border border-ink-700/10 bg-ink-50 px-4 py-3 text-sm"
+                  className="flex items-start gap-3 rounded-md bg-ink-50 ring-1 ring-ink-200/70 px-3.5 py-2 text-sm transition hover:bg-ink-100/80 cursor-pointer"
                 >
                   <input
                     type="checkbox"
                     checked={Boolean(inspection.checklist[requirement])}
                     onChange={(event) => updateChecklist(requirement, event.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-ink-700/30"
+                    className="mt-0.5 h-4 w-4 rounded border-ink-700/30 accent-ink-900"
                   />
-                  <span className="text-ink-700">{requirement}</span>
+                  <span className="text-ink-700 leading-relaxed">{requirement}</span>
                 </label>
               ))}
             </div>
           </section>
         </div>
 
-        <aside className="space-y-6">
-          <section className="rounded-2xl border border-ink-700/10 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-ink-900">Result</h2>
-            <p className="mt-2 text-sm text-ink-500">
-              Mark the outcome after the BCO inspection. Failed inspections create a follow-up.
-            </p>
-            {(inspection.status === "Passed" || inspection.status === "Failed") && (
-              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
-                ✓ Inspection result recorded
-              </div>
-            )}
+        <aside className="space-y-5">
+          <section className="rounded-md bg-surface-raised p-5 shadow-depth">
+            <h2 className="text-base font-semibold tracking-tight text-ink-900">Result</h2>
             {isResultLocked && (
-              <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                This inspection is locked until the current inspection is passed or failed.
+              <div className="mt-3 rounded-md bg-amber-50 ring-1 ring-amber-200 px-3 py-2 text-[12px] text-amber-800">
+                Locked until the current inspection is passed or failed.
               </div>
             )}
 
-            <div className="mt-5 grid gap-2">
-              {statuses.map((status) => (
-                <button
-                  key={status}
-                  type="button"
-                  disabled={isResultLocked}
-                  onClick={() => updateStatus(status)}
-                  className={`rounded-xl border px-4 py-3 text-left text-sm font-medium transition-colors ${
-                    inspection.status === status
-                      ? "border-ink-900 bg-ink-900 text-white"
-                      : "border-ink-700/10 bg-white text-ink-700 hover:bg-ink-50"
-                  } ${isResultLocked ? "cursor-not-allowed opacity-50 hover:bg-white" : ""}`}
-                >
-                  {status}
-                </button>
-              ))}
+            <div className="mt-4 grid grid-cols-3 gap-2">
+              {statuses.map((status) => {
+                const isActive = inspection.status === status;
+                return (
+                  <button
+                    key={status}
+                    type="button"
+                    disabled={isResultLocked}
+                    onClick={() => updateStatus(status)}
+                    className={[
+                      "rounded-md px-2 py-2 text-center text-[12px] font-medium transition shadow-depth cursor-pointer",
+                      isActive
+                        ? "bg-ink-900 text-white hover:shadow-depth-hover"
+                        : "bg-surface-raised text-ink-700 ring-1 ring-ink-200/70 hover:bg-ink-50",
+                      isResultLocked ? "cursor-not-allowed opacity-50 hover:shadow-depth" : "",
+                    ].filter(Boolean).join(" ")}
+                  >
+                    {status === "Not Conducted" ? "Not Done" : status}
+                  </button>
+                );
+              })}
             </div>
 
-            <label className="mt-5 block">
-              <span className="text-sm font-medium text-ink-500">Pass/fail notes</span>
+            <label className="mt-4 block">
+              <span className={labelClass}>Pass/fail notes</span>
               <textarea
                 value={inspection.resultNotes}
                 disabled={isResultLocked}
                 onChange={(event) => void save({ resultNotes: event.target.value }, "Result notes updated.")}
-                rows={5}
-                className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-ink-50 disabled:text-ink-500"
+                rows={4}
+                className={inputClass}
                 placeholder="Record BCO comments, failed items, remedial work required, or pass evidence."
               />
             </label>
 
-            <div className="mt-6 border-t border-ink-700/10 pt-5">
-              <h3 className="text-sm font-semibold text-ink-900">Returned inspection PDF</h3>
+            <div className="mt-5 border-t border-ink-200/70 pt-4">
+              <h3 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">Returned inspection PDF</h3>
               <label className="mt-3 block">
                 <span className="sr-only">Upload returned inspection PDF</span>
                 <input
@@ -344,10 +350,10 @@ export function InspectionDetailPage({
                     void uploadPdf(event.target.files?.[0]);
                     event.currentTarget.value = "";
                   }}
-                  className="block w-full text-sm text-ink-600 file:mr-4 file:rounded-lg file:border-0 file:bg-ink-900 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  className="block w-full text-[13px] text-ink-600 file:mr-4 file:rounded-md file:border-0 file:bg-ink-900 file:px-3 file:py-2 file:text-[13px] file:font-medium file:text-white file:cursor-pointer hover:file:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-50"
                 />
               </label>
-              <p className="mt-2 text-xs text-ink-500">
+              <p className="mt-2 text-[11px] text-ink-500">
                 PDF only. Maximum file size {formatFileSize(MAX_PDF_SIZE_BYTES)}.
               </p>
 
@@ -355,7 +361,7 @@ export function InspectionDetailPage({
                 {inspection.pdfs.map((pdf) => (
                   <div
                     key={pdf.id}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-ink-700/10 bg-ink-50 px-3 py-2 text-sm"
+                    className="flex items-center justify-between gap-3 rounded-md bg-ink-50 ring-1 ring-ink-200/70 px-3 py-2 text-[13px]"
                   >
                     <a
                       href={pdf.dataUrl}
@@ -365,12 +371,12 @@ export function InspectionDetailPage({
                     >
                       {pdf.name}
                     </a>
-                    <div className="flex shrink-0 items-center gap-3 text-xs text-ink-500">
-                      <span>{formatFileSize(pdf.size)}</span>
+                    <div className="flex shrink-0 items-center gap-3 text-[11px] text-ink-500">
+                      <span className="tabular-nums">{formatFileSize(pdf.size)}</span>
                       <button
                         type="button"
                         onClick={() => void removePdf(pdf.id)}
-                        className="font-medium text-red-600 hover:text-red-700"
+                        className="font-medium text-red-700 transition hover:text-red-800 cursor-pointer"
                       >
                         Remove
                       </button>
@@ -386,15 +392,15 @@ export function InspectionDetailPage({
         </aside>
       </section>
 
-      <section className="rounded-2xl border border-red-200 bg-red-50 p-5">
+      <div className="flex justify-end pt-2">
         <button
           type="button"
           onClick={handleDeleteInspection}
-          className="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-700"
+          className="text-[12px] font-medium text-red-700 transition hover:text-red-800 cursor-pointer"
         >
-          Delete Inspection
+          Delete inspection
         </button>
-      </section>
+      </div>
     </div>
   );
 }
@@ -403,9 +409,9 @@ function BackLink({ projectId }: { projectId: string }) {
   return (
     <Link
       href={`/projects/${projectId}/inspections` as Route}
-      className="text-sm font-medium text-ink-500 transition-colors hover:text-ink-900"
+      className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.22em] text-ink-500 transition-colors hover:text-ink-900"
     >
-      Back to Inspections
+      <span aria-hidden>←</span> Back to Inspections
     </Link>
   );
 }

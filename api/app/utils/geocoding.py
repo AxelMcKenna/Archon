@@ -6,6 +6,7 @@ Note: Nominatim requires a proper User-Agent header and respects rate limiting.
 
 import httpx
 import asyncio
+import time
 from typing import Optional
 import logging
 import os
@@ -21,6 +22,11 @@ ALLOWED_TERRITORIAL_AUTHORITIES = {
 }
 logger = logging.getLogger(__name__)
 GEOAPIFY_AUTOCOMPLETE_URL = "https://api.geoapify.com/v1/geocode/autocomplete"
+
+# Shared in-process Nominatim cooldown — once 429'd, fail fast for N seconds
+# instead of stalling every keystroke / checklist click.
+_NOMINATIM_BLOCKED_UNTIL: float = 0.0
+_NOMINATIM_BLOCK_SECONDS: float = 300.0
 
 
 async def geocode_address(address: str, city: str = "", postalcode: str = "") -> Optional[dict]:
@@ -64,21 +70,29 @@ async def geocode_address(address: str, city: str = "", postalcode: str = "") ->
         "limit": 1,
     }
     
+    global _NOMINATIM_BLOCKED_UNTIL
+    if time.monotonic() < _NOMINATIM_BLOCKED_UNTIL:
+        logger.info("geocode_address provider=nominatim cooldown_active address=%r", address)
+        return None
+
     try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
+        async with httpx.AsyncClient(timeout=4.0) as client:
             response = await client.get(NOMINATIM_URL, params=free_text_params, headers=headers)
-            
-            # Handle 429 (rate limit) with backoff
+
             if response.status_code == 429:
-                await asyncio.sleep(1)
-                return await geocode_address(address, city, postalcode)  # Retry once
-            
-            # Handle other errors more gracefully
+                _NOMINATIM_BLOCKED_UNTIL = time.monotonic() + _NOMINATIM_BLOCK_SECONDS
+                logger.warning(
+                    "geocode_address provider=nominatim rate_limited address=%r — cooldown %ss",
+                    address,
+                    _NOMINATIM_BLOCK_SECONDS,
+                )
+                return None
+
             if response.status_code != 200:
                 raise Exception(
                     f"Nominatim error {response.status_code}: {response.text}"
                 )
-            
+
             data = response.json()
             if not data and (city or postalcode):
                 structured_response = await client.get(
@@ -86,6 +100,9 @@ async def geocode_address(address: str, city: str = "", postalcode: str = "") ->
                     params=structured_params,
                     headers=headers,
                 )
+                if structured_response.status_code == 429:
+                    _NOMINATIM_BLOCKED_UNTIL = time.monotonic() + _NOMINATIM_BLOCK_SECONDS
+                    return None
                 if structured_response.status_code != 200:
                     raise Exception(
                         f"Nominatim error {structured_response.status_code}: {structured_response.text}"
@@ -139,6 +156,13 @@ async def suggest_addresses(query: str, limit: int = 6) -> list[dict]:
             effective_limit,
         )
 
+    # Honour cooldown set by a previous 429 — fail fast instead of stalling
+    # the UI for every subsequent keystroke.
+    global _NOMINATIM_BLOCKED_UNTIL
+    if time.monotonic() < _NOMINATIM_BLOCKED_UNTIL:
+        logger.info("address suggest provider=nominatim cooldown_active q=%r", query)
+        return []
+
     headers = {
         "User-Agent": "ConsentIQ/1.0 (https://consentiq.nz)",
     }
@@ -153,27 +177,29 @@ async def suggest_addresses(query: str, limit: int = 6) -> list[dict]:
     }
 
     try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            responses = [await client.get(NOMINATIM_URL, params=params, headers=headers)]
-            spaced_query = " ".join(part for part in query.replace(",", " ").split() if part)
-            if spaced_query != query:
-                alt_params = dict(params)
-                alt_params["q"] = spaced_query
-                responses.append(await client.get(NOMINATIM_URL, params=alt_params, headers=headers))
-            if any(resp.status_code == 429 for resp in responses):
-                await asyncio.sleep(1)
-                return await suggest_addresses(query, limit)
-            if any(resp.status_code != 200 for resp in responses):
+        # Tight timeout — autocomplete must feel instant, not "wait 15s for
+        # a hint." If upstream is sluggish, return nothing and let the user
+        # finish typing.
+        async with httpx.AsyncClient(timeout=4.0) as client:
+            response = await client.get(NOMINATIM_URL, params=params, headers=headers)
+            if response.status_code == 429:
+                _NOMINATIM_BLOCKED_UNTIL = time.monotonic() + _NOMINATIM_BLOCK_SECONDS
+                logger.warning(
+                    "address suggest provider=nominatim rate_limited q=%r — cooldown %ss",
+                    query,
+                    _NOMINATIM_BLOCK_SECONDS,
+                )
+                return []
+            if response.status_code != 200:
                 return []
 
             combined: list[dict] = []
             seen_names: set[str] = set()
-            for response in responses:
-                for item in response.json():
-                    display_name = item.get("display_name")
-                    if display_name and display_name not in seen_names:
-                        seen_names.add(display_name)
-                        combined.append(item)
+            for item in response.json():
+                display_name = item.get("display_name")
+                if display_name and display_name not in seen_names:
+                    seen_names.add(display_name)
+                    combined.append(item)
 
             results: list[dict] = []
             for item in combined:

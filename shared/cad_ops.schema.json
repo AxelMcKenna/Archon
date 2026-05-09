@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "CAD proposed change ops",
+  "description": "Fixed verb list. Anything outside this list is rejected at parse time.",
+  "definitions": {
+    "Op": {
+      "oneOf": [
+        { "$ref": "#/definitions/MoveEntity" },
+        { "$ref": "#/definitions/OffsetPolyline" },
+        { "$ref": "#/definitions/ResizeBlock" },
+        { "$ref": "#/definitions/AddDimension" },
+        { "$ref": "#/definitions/AddTextNote" },
+        { "$ref": "#/definitions/ChangeLayer" },
+        { "$ref": "#/definitions/PlaceSymbol" }
+      ]
+    },
+    "MoveEntity": {
+      "type": "object",
+      "required": ["op", "handle", "dx", "dy"],
+      "properties": {
+        "op": { "const": "move_entity" },
+        "handle": { "type": "string" },
+        "dx": { "type": "number", "description": "delta in model units (typically mm)" },
+        "dy": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "OffsetPolyline": {
+      "type": "object",
+      "required": ["op", "handle", "distance"],
+      "properties": {
+        "op": { "const": "offset_polyline" },
+        "handle": { "type": "string" },
+        "distance": { "type": "number" },
+        "side": { "type": "string", "enum": ["left", "right"] }
+      },
+      "additionalProperties": false
+    },
+    "ResizeBlock": {
+      "type": "object",
+      "required": ["op", "handle"],
+      "properties": {
+        "op": { "const": "resize_block" },
+        "handle": { "type": "string" },
+        "scale_x": { "type": "number", "exclusiveMinimum": 0 },
+        "scale_y": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "AddDimension": {
+      "type": "object",
+      "required": ["op", "from_handle", "to_handle"],
+      "properties": {
+        "op": { "const": "add_dimension" },
+        "from_handle": { "type": "string" },
+        "to_handle": { "type": "string" },
+        "offset": { "type": "number", "default": 100 }
+      },
+      "additionalProperties": false
+    },
+    "AddTextNote": {
+      "type": "object",
+      "required": ["op", "anchor_handle", "text"],
+      "properties": {
+        "op": { "const": "add_text_note" },
+        "anchor_handle": { "type": "string" },
+        "text": { "type": "string", "maxLength": 200 },
+        "dx": { "type": "number", "default": 0 },
+        "dy": { "type": "number", "default": 0 },
+        "height": { "type": "number", "default": 100 }
+      },
+      "additionalProperties": false
+    },
+    "ChangeLayer": {
+      "type": "object",
+      "required": ["op", "handle", "layer"],
+      "properties": {
+        "op": { "const": "change_layer" },
+        "handle": { "type": "string" },
+        "layer": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "PlaceSymbol": {
+      "type": "object",
+      "required": ["op", "symbol"],
+      "properties": {
+        "op": { "const": "place_symbol" },
+        "symbol": {
+          "type": "string",
+          "enum": [
+            "smoke_alarm", "heat_detector", "sprinkler",
+            "fire_extinguisher", "emergency_light", "exit_sign",
+            "gpo", "gpo_double", "light_fitting", "light_switch",
+            "data_outlet", "tv_outlet",
+            "toilet", "basin", "shower", "bath", "kitchen_sink",
+            "hot_water_cylinder",
+            "mechanical_extract", "thermostat",
+            "accessible"
+          ]
+        },
+        "anchor_handle": { "type": "string" },
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "label": { "type": "string", "maxLength": 80 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "required": ["op"],
+  "$ref": "#/definitions/Op"
+}

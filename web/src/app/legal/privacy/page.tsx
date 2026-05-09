@@ -1,4 +1,4 @@
-export const metadata = { title: "Privacy — ConsentIQ" };
+export const metadata = { title: "Privacy — Atlas" };
 
 export default function PrivacyPage() {
   return (
