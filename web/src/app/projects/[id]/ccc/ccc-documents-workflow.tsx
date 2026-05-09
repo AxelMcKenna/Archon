@@ -90,7 +90,7 @@ export function CccDocumentsWorkflow({
           </p>
         </div>
         <Link
-          href={`/projects/${projectId}/documents`}
+          href={`/projects/${projectId}/drawings`}
           className="rounded-lg border border-ink-200 px-3 py-2 text-sm text-ink-700 hover:bg-ink-50"
         >
           Open Documents
