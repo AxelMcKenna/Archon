@@ -8,12 +8,14 @@ from __future__ import annotations
 
 import io
 import re
+import time
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 import pdfplumber
 
 from app.extractors.entities import extract_entities
+from app.extractors.metrics import Metrics
 from app.models import CanonicalRfi, ExtractionMeta, RfiItem, RfiLetter
 
 EXTRACTOR_VERSION = "1.0.0"
@@ -67,10 +69,11 @@ def extract_native_pdf(
     project_id: UUID,
     bca: str,
     rfi_id: UUID | None = None,
-) -> CanonicalRfi:
+) -> tuple[CanonicalRfi, Metrics]:
     """Extract a native digital PDF into a canonical RFI letter."""
     rfi_id = rfi_id or uuid4()
     warnings: list[str] = []
+    t0 = time.monotonic()
 
     with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
         full_text_parts: list[tuple[int, str]] = []
@@ -97,7 +100,7 @@ def extract_native_pdf(
             )
         )
 
-    return CanonicalRfi(
+    canonical = CanonicalRfi(
         rfi_letter=RfiLetter(
             rfi_id=rfi_id,
             project_id=project_id,
@@ -111,3 +114,5 @@ def extract_native_pdf(
             items=items,
         )
     )
+    metrics = Metrics(processing_ms=int((time.monotonic() - t0) * 1000))
+    return canonical, metrics

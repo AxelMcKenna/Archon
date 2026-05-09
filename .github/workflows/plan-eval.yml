@@ -1,0 +1,93 @@
+# Plan flagger regression eval.
+#
+# Advisory mode: runs the eval suite on PRs that touch the analyser code
+# or prompts and posts the metrics as a PR comment. Does NOT block merge
+# while the eval set is synthetic. Flip EVAL_BLOCKING to "1" once ≥20
+# real labelled plans land in eval/plan-flagger/real/.
+
+name: plan-eval
+
+on:
+  pull_request:
+    paths:
+      - "api/prompts/plan_analyser_*.md"
+      - "api/prompts/plan_verification_*.md"
+      - "api/app/plan_analyzer.py"
+      - "api/app/extractors/plan_text.py"
+      - "api/app/extractors/doc_rules.py"
+      - "eval/plan-flagger/**"
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    env:
+      EVAL_BLOCKING: "0"
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install api deps
+        working-directory: api
+        run: uv sync --frozen --no-dev
+
+      - name: Run regression eval
+        id: eval
+        working-directory: ${{ github.workspace }}
+        run: |
+          api/.venv/bin/python eval/plan-flagger/run.py --report-format=json > eval-report.json
+          cat eval-report.json
+
+      - name: Comment PR with metrics
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const r = JSON.parse(fs.readFileSync('eval-report.json', 'utf8'));
+            const s = r.summary;
+            const body = [
+              '### Plan flagger eval (advisory)',
+              '',
+              `- prompt (analysis): \`${r.prompt_version_analysis}\``,
+              `- prompt (verification): \`${r.prompt_version_verification}\``,
+              `- eval set: \`${r.eval_set_version}\` (${s.n_plans} plans)`,
+              '',
+              `**precision** ${s.precision_avg.toFixed(3)} · **recall** ${s.recall_avg.toFixed(3)} · **hallucination** ${s.hallucination_rate.toFixed(3)}`,
+              '',
+              '_Synthetic eval — advisory only. Does not block merge._',
+            ].join('\n');
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });
+
+      - name: Enforce thresholds (when blocking)
+        if: env.EVAL_BLOCKING == '1'
+        run: |
+          api/.venv/bin/python - <<'PY'
+          import json, sys
+          # Compare against a baseline committed at eval/plan-flagger/baseline.json.
+          # Block if precision/recall drop >5pp or hallucination rises >3pp.
+          try:
+              base = json.load(open('eval/plan-flagger/baseline.json'))
+          except FileNotFoundError:
+              print('no baseline.json — skipping gate')
+              sys.exit(0)
+          new = json.load(open('eval-report.json'))['summary']
+          old = base['summary']
+          if new['precision_avg'] < old['precision_avg'] - 0.05:
+              sys.exit(f"precision regressed: {old['precision_avg']:.3f} -> {new['precision_avg']:.3f}")
+          if new['recall_avg'] < old['recall_avg'] - 0.05:
+              sys.exit(f"recall regressed: {old['recall_avg']:.3f} -> {new['recall_avg']:.3f}")
+          if new['hallucination_rate'] > old['hallucination_rate'] + 0.03:
+              sys.exit(f"hallucination rose: {old['hallucination_rate']:.3f} -> {new['hallucination_rate']:.3f}")
+          PY

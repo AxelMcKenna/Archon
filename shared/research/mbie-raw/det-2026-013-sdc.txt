@@ -1,0 +1,251 @@
+Determination 2026/013
+The compliance of part of a pool barrier with Building
+Code Clause F9
+46 Bridgehampton Drive, Prebbleton, Christchurch
+Summary
+This determination considers whether part of a proposed pool barrier complies with
+Building Code Clause F9 - Means of restricting access to residential pools. The part of
+the barrier being considered is the 1800mm high timber boundary fence and its
+junctions with 1200mm high internal glass fencing.
+
+Figure 1: Digital rendering showing the proposed barrier design
+
+Reference 4075
+
+Determination 2026/013
+
+In this determination, unless otherwise stated, references to “sections” are to sections of
+the Building Act 2004 (“the Act”) and references to “clauses” are to clauses in Schedule 1
+(“the Building Code”) of the Building Regulations 1992.
+The Act and the Building Code are available at www.legislation.govt.nz. Information about
+the legislation, as well as past determinations, compliance documents (eg Acceptable
+Solutions) and guidance issued by the Ministry, is available at www.building.govt.nz.
+
+1. The matter to be determined
+1.1. This is a determination made under due authorisation by me, Peta Hird, for
+and on behalf of the Chief Executive of the Ministry of Business, Innovation
+and Employment (“the Ministry”).1
+1.2. The parties to the determination are:
+1.2.1. D and S Kennedy, the owners of the property (“the owners”), who applied
+for the determination
+1.2.2. Selwyn District Council (“the authority”), carrying out its duties as a
+territorial authority or building consent authority.
+1.3. The matter to be determined, under section 177(1)(a), is whether part of a
+proposed pool barrier complies with Building Code Clause F9 Means of restricting
+access to residential pools. The part of the barrier being considered is the 1800mm
+high boundary fence and its junctions with 1200mm high internal fencing.
+
+2. Background and building work
+2.1. The owners are building a new house and pool on their property. In or around
+December 2025, the owners applied for a building consent (BC252754) for a
+residential pool barrier.
+2.2. The pool barrier proposed in the building consent application consists of a 1200mm
+high glass barrier on three sides, and an 1800mm high timber boundary fence on
+the fourth side (see Figure 1). The glass barrier is 12mm wide. The boundary fence
+has palings on the inside (pool side) of the fence, and posts and horizontal rails on
+the outside. The horizontal rails are spaced 830mm apart2.
+2.3. On 23 December 2025, the authority sent an information request to the owners
+because it considered the pool barrier design did not comply with clause F9 due to
+the junctions between the boundary and internal fences. Correspondence between
+the parties followed, with the authority maintaining its view that the proposed pool
+
+1
+
+The Building Act 2004, section 185(1)(a) provides the Chief Executive of the Ministry with the power to
+make determinations.
+2
+The spacing of the horizontal rails was not included in the building consent application. However, the
+owners confirmed on 9 February 2026 the rails are spaced 830mm apart.
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+2
+
+07 April 2026
+
+Reference 4075
+
+Determination 2026/013
+
+barrier where the internal fencing and boundary fence intersects did not comply
+with clause F9.3.3 in relation to access from the adjacent property and the top of
+the internal fence being a projection that would assist a child negotiating the
+barrier.
+
+3. Submissions
+The owners
+3.1. The owners submit that the junctions between the 1800mm high boundary fence
+and 1200mm internal fencing do not comply with Acceptable Solution F9/AS13, and
+must be considered as an alternative solution. They considered Determination
+2021/009 concerned similar junctions between internal and boundary fencing, and
+in that determination the junctions complied as an alternative solution.4
+3.2. In response to an information request from the Ministry about the boundary fence
+construction, the owners noted “As 900 mm between the top of the boundary
+fence and the top of the middle rail is not achieved, a fillet will be fixed to the
+middle rail to eliminate any potential toe or finger hold”.
+
+The authority
+3.3. The authority considers the owners’ proposal does not demonstrate compliance
+with clause F9.3.3. In correspondence with the owners, the authority stated:
+The functional requirement of F9 is to restrict access and prevent unsupervised
+entry by children under five years of age. In particular, Performance Requirement
+F9.3.3 requires that barriers surrounding a pool do not have permanent objects or
+projections on the outside that could assist children in climbing over.
+In this instance, the boundary fence forms part of the pool barrier. The owner
+cannot control what happens on the other side of the fence. To prevent a child
+climbing down from the top of the boundary fence into the pool area, a 900 mm
+climb-free zone is required. As the current distance between the boundary fence
+and the pool fence is only 600 mm, there is concern that a child could potentially
+use the pool fence to gain access to the pool area.
+
+3.4. The authority considered there was insufficient information about the boundary
+fence construction in the building consent application, as evidence was not
+provided about the spacing of the rails, the presence or absence of projections
+within 1200mm, and the absence of permanent objects that may assist climbing.
+3
+4
+
+Acceptable Solution F9/AS1 Residential pool barriers (first edition, effective from 27 April 2017).
+Determination 2021/009 Regarding the compliance of a new section of pool barrier (24 May 2021). The
+determination found that the internal fencing constituted projections, noting there were rails that would
+provide hand and foot holds for a child negotiating the barrier. However, because there were no features
+on the neighbour’s side of the boundary fence that would assist a child in negotiating the barrier and the
+area immediately adjacent the boundary fence was also an immediate pool area, the determination
+concluded the boundary fence complied with clause F9.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+3
+
+07 April 2026
+
+Reference 4075
+
+Determination 2026/013
+
+3.5. The authority submits there are distinctions between the current application and
+Determination 2021/009, in which timber fillets had been installed to the outside
+face of the boundary fence to reduce climbing risk. In that determination the
+neighbouring side of the barrier was also an immediate pool area, which reduced
+the risk of unsupervised children attempting to climb from that side.
+
+4. Discussion
+4.1. Section 17 provides that all building work must comply with the Building Code to
+the extent required the Act. Section 162C(1) also states that every residential pool
+that is filled or partly filled with must have physical barriers that restrict access to
+the pool by unsupervised children under 5 years of age.
+4.2. As this is a new pool barrier, it must comply with the requirements of Clause F9 of
+the Building Code that is currently in force, either through Acceptable Solution
+F9/AS1 or as an alternative solution.
+
+Compliance with F9/AS1
+4.3. Where a pool barrier is located on a property boundary, F9/AS1 paragraph 2.2.1(d)
+requires a “a 900mm high zone on the pool side” that is constructed in manner the
+restricts climbing by children. This zone must begin within 150mm from the top of
+the barrier and extend downward for at least 900mm. Paragraph 2.2.1(d)
+incorporates the general requirements in paragraphs 2.1.3 and 2.1.7 to explain how
+the zone must be constructed. Paragraph 2.1.7 requires there to be no “horizontal
+projection[s] from the face of the pool barrier greater than 10 mm unless they are
+at least 900 mm apart vertically”.5
+4.4. In this case, the junctions where the glass barrier abuts the timber boundary fence
+are 600mm below the top of the boundary fence. This creates horizontal
+projections which are greater than 10mm and within the 900mm “non-climbable
+zone”. As such, the proposed barrier does not comply with F9/AS1 paragraph
+2.2.1(d), specifically the requirement for a non-climbable zone to be constructed as
+specified in paragraph 2.1.7.
+
+Compliance as an alternative solution
+4.5. The Building Code is performance-based and allows for the use of different
+methods to achieve compliance. In considering the pool barrier as an alternative
+solution, I must be satisfied that it meets the performance criteria of clause F9. The
+relevant performance criteria for the purpose of this determination are:
+
+5
+
+The application of this criteria to the pool side of the barrier is discussed in Determination 2021/009
+Regarding the compliance of a new section of pool barrier (24 May 2021) at [6.14] – [6.19].
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+4
+
+07 April 2026
+
+Reference 4075
+
+Determination 2026/013
+F9.3.1 Residential pools must have or be provided with physical barriers that
+restrict access to the pool or the immediate pool area by unsupervised young
+children (ie, under 5 years of age).
+F9.3.3 A barrier surrounding a pool must have no permanent objects or
+projections on the outside that could assist children in negotiating the barrier.
+…
+
+4.6. Owners of residential pools cannot control what occurs on an adjacent property, for
+example, an owner cannot prevent the owner of the neighbouring property from
+placing structures or objects close to the barrier that would make it easier for
+children to climb to the top of the barrier. The criteria in paragraph 2.2.1 of F9/AS1
+address this risk by requiring that barriers on a property boundary:
+4.6.1. are at least 1800mm high (measured on the pool side), and therefore a
+greater barrier for a child to navigate
+4.6.2. are far enough away from the water’s edge (1000mm), making it less
+tempting for a child to jump if they navigate their way to the top
+4.6.3. have a 900mm “non-climbable zone” (as discussed at paragraph 4.3), which
+makes it harder for a child to climb down the pool side.
+4.7. Regarding the outside of the boundary fence, the owners state that a fillet will be
+fixed to the middle horizontal rail which increases the vertical distance between
+potential toe or finger holds from 830 mm to 1650 mm. However, given that the
+owners are not necessarily able to do this work on the neighbour’s property, I have
+not taken this into account in considering the compliance of the barrier.
+4.8. I also note that none of the provided plans include a dimension for the distance
+between the boundary fence and the water’s edge. However, the parties have not
+raised this as an issue, so I have not considered this further.
+4.9. The boundary fence is 1800mm high and the inside surface of the boundary fence is
+a vertical face with no hand or foot holds. Although the junctions with the 1200mm
+high internal barrier create a projection 600mm below the top of the boundary
+fence, the internal barrier is narrow at 12mm6 and made of glass, which I consider is
+not an inviting hand or foot hold for a child attempting to negotiate the inside of
+the barrier.
+4.10. There are no other hand or footholds either on the face of the boundary fence or
+nearby where the internal fence meets the boundary fence to assist a child in
+climbing down. In my opinion, it would be very difficult for a child to use the top
+surface of the glass fence as the only hand or foot hold to climb down into the
+immediate pool area. Given the construction, in combination with the height of the
+boundary fence and the lack of hand or foot holds on its inside surface, I am of the
+6
+
+With bevelled edges the flat surface is likely to be approx. 10mm.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+5
+
+07 April 2026
+
+Reference 4075
+
+Determination 2026/013
+
+view the proposed barrier will restrict children from climbing down into the pool
+area.
+4.11. I am satisfied the proposed barrier will restrict access to the pool area by
+unsupervised young children and meets performance requirements F9.3.1 and
+F9.3.3 as an alternative solution.
+
+5. Decision
+5.1. In accordance with section 188 of the Building Act 2004, I determine the part of the
+proposed barrier, consisting of the 1800mm high timber boundary fence and its
+junctions with the 1200mm high internal glass fencing, complies with clause F9.
+
+Signed for and on behalf of the Chief Executive of the Ministry of Business, Innovation
+and Employment on 07 April 2026.
+
+Peta Hird
+Lead Determinations Specialist
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+6
+
+07 April 2026
+
+

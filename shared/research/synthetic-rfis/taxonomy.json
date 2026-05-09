@@ -1,0 +1,135 @@
+{
+  "version": "0.1.0",
+  "generated": "2026-05-08",
+  "sources": [
+    "CCC Avoiding RFIs page",
+    "SDC Specific Approvals + Requirements For All Applications",
+    "WDC Let's Get it Right guide + 7 fact sheets",
+    "MBIE BCA Performance Monitoring (year ended June 2025)",
+    "MBIE Determinations 2024–2026 (Canterbury BCAs)"
+  ],
+  "stages": {
+    "vetting": "Pre-acceptance s45 completeness check. SDC: clock-resetting RFI. CCC/WDC: outright rejection on incomplete.",
+    "assessment": "Building Consent Officer technical assessment. Suspends 20-day clock.",
+    "validation": "Senior Building Officer QA gate (WDC Step 6). May produce additional RFIs.",
+    "cca_audit": "Code Compliance Certificate auditor review post-final-inspection (WDC Step 17). Distinct RFI surface.",
+    "engineering_acceptance": "Parallel Development Engineering process at SDC for urban multi-unit; separate clock + RFIs."
+  },
+  "categories": {
+    "weather_tightness": {
+      "code_clauses": ["E2"],
+      "common_subcategories": ["e2_compliance_not_demonstrated", "alternative_solution_not_identified", "design_features_report_missing", "wind_zone_documentation"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "structural": {
+      "code_clauses": ["B1"],
+      "common_subcategories": ["specific_engineering_design_documentation", "ps1_missing", "ps4_construction_monitoring_unconfirmed", "secondary_structural_elements", "barrier_design_sed", "geotech_foundation_coordination", "bracing_calculations", "buildable_truss_layout"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "fire": {
+      "code_clauses": ["C", "F6"],
+      "common_subcategories": ["fire_engineering_brief_documentation", "cvm2_documentation", "construction_monitoring", "emergency_lighting_design", "fenz_referral_required", "fire_rating_change_of_use", "alternative_solution_e2_fire_interaction"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "h1_energy": {
+      "code_clauses": ["H1"],
+      "common_subcategories": ["envelope_thermal_resistance", "modelling_method_report", "h1_3_5_lighting_efficiency", "schedule_method_calculations"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "plumbing": {
+      "code_clauses": ["G1", "G12", "G13"],
+      "common_subcategories": ["sanitary_facilities_numbers", "g1_as1_user_groups", "backflow_prevention", "plumbing_schematic", "energy_work_certificate_plumbing"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "drainage": {
+      "code_clauses": ["G13", "E1"],
+      "common_subcategories": ["wastewater_outfall_change", "stormwater_outfall_change", "as_built_drainage_plan", "underfloor_drainage_inspection", "septic_tank_design_ecan_approval", "septic_capacity_for_additions"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "geotech": {
+      "code_clauses": ["B1"],
+      "common_subcategories": ["geotech_report_missing", "tc3_specific_engineering_foundation", "tc2_shallow_soil_test", "liquefaction_zone", "ground_bearing_testing", "scala_penetrometer", "site_investigation_report"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "accessibility": {
+      "code_clauses": ["D1"],
+      "common_subcategories": ["accessible_route_detail", "footpath_gradient", "wheelchair_parking_placement", "isolated_steps", "principal_access_route"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "ventilation": {
+      "code_clauses": ["G4"],
+      "common_subcategories": ["mechanical_ventilation_drawings", "natural_ventilation_inappropriate", "g4_3_3_contaminants"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "specified_systems": {
+      "code_clauses": [],
+      "common_subcategories": ["compliance_schedule", "inspection_maintenance_reporting_procedures", "performance_standards", "specified_systems_form_missing"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "producer_statements": {
+      "code_clauses": [],
+      "common_subcategories": ["ps1_design_missing", "ps2_design_review_missing", "ps3_construction_missing", "ps4_construction_review_missing", "ps_scope_outside_practice_area", "ps_author_not_registered"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "planning": {
+      "code_clauses": [],
+      "common_subcategories": ["resource_consent_required_s37", "district_plan_compliance", "regional_plan_compliance", "land_use_consent_pending", "heritage_nz_referral"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "product_assurance": {
+      "code_clauses": [],
+      "common_subcategories": ["proprietary_product_documentation", "branz_appraisal_missing", "codemark_certificate_missing", "test_results_to_standard", "alternative_cladding_documentation"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "site_levels": {
+      "code_clauses": ["E1"],
+      "common_subcategories": ["floor_level_datum_christchurch_drainage", "floor_level_freeboard_rural", "flood_management_area_levels", "blc_required", "survey_benchmark_reference", "nzvd2016_lvd1937_datum"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "other_authorities": {
+      "code_clauses": [],
+      "common_subcategories": ["water_capacity_approval", "wastewater_capacity_approval", "stormwater_outfall_approval", "trade_waste_approval", "asset_protection_approval", "ecan_approval_septic", "ecan_approval_air_emission", "mpi_approval"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "cross_referrals": {
+      "code_clauses": [],
+      "common_subcategories": ["fenz_referral_10_day", "heritage_nz_5_day", "professional_opinion_calculations", "mbie_warning_or_ban_product"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "owner_details": {
+      "code_clauses": [],
+      "common_subcategories": ["owner_contact_missing", "agent_only_contact_provided", "ownership_evidence_missing", "title_record_missing"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "document_quality": {
+      "code_clauses": [],
+      "common_subcategories": ["essential_items_missing", "checksheet_not_submitted", "incorrect_upload_order", "non_searchable_pdf", "scale_not_a3_compliant", "no_revision_clouds_on_changes", "missing_transmittal_cover"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "engineering_acceptance": {
+      "code_clauses": [],
+      "common_subcategories": ["lawful_outfall_not_confirmed", "service_layout_requirements", "multi_unit_engineering_acceptance_pending", "ecop_compliance_not_demonstrated"],
+      "councils": ["SDC"]
+    },
+    "change_of_use": {
+      "code_clauses": [],
+      "common_subcategories": ["change_of_use_notice_missing", "containers_garages_for_habitation", "household_unit_creation", "as_nearly_as_reasonably_practicable_compliance"],
+      "councils": ["CCC", "SDC", "WDC"]
+    },
+    "design_coordination": {
+      "code_clauses": [],
+      "common_subcategories": ["arch_structure_uncoordinated", "arch_fire_uncoordinated", "arch_civil_uncoordinated", "arch_hvac_uncoordinated", "consultant_design_inconsistent"],
+      "councils": ["CCC"]
+    },
+    "rural_servicing": {
+      "code_clauses": [],
+      "common_subcategories": ["effluent_field_design_fencing", "potable_water_test_chemical_microbiological", "stormwater_swale_pond_design", "secondary_flow_path_water_runoff", "freeboard_floor_level"],
+      "councils": ["WDC", "SDC"]
+    },
+    "pool_barriers": {
+      "code_clauses": ["F9"],
+      "common_subcategories": ["non_climbable_zone_900mm", "boundary_fence_junction_projections", "10mm_horizontal_projection_rule", "pool_fence_distance_to_water_1000mm", "alternative_solution_documentation"],
+      "councils": ["CCC", "SDC", "WDC"]
+    }
+  }
+}

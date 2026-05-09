@@ -1,0 +1,14 @@
+{
+  "plan_id": "synthetic-bracing-incomplete",
+  "bca": "ccc",
+  "project_type": "extension",
+  "ground_truth_flags": [
+    {
+      "category": "building_code:B1",
+      "severity": "must_resolve",
+      "page": 2,
+      "area_hint": "bracing",
+      "rationale": "Achieved BUs column missing."
+    }
+  ]
+}

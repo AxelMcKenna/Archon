@@ -1,0 +1,14 @@
+{
+  "plan_id": "synthetic-missing-sheet",
+  "bca": "ccc",
+  "project_type": "accessory",
+  "ground_truth_flags": [
+    {
+      "category": "documentation:missing_sheets",
+      "severity": "must_resolve",
+      "page": 1,
+      "area_hint": "S1.01",
+      "rationale": "Register lists S1.01 but it's absent from the upload."
+    }
+  ]
+}

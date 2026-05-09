@@ -1,0 +1,1135 @@
+Building Consent System: Performance Monitoring
+year ended June 2025
+
+BACKGROUND
+MBIE has been monitoring the performance of the consent system This report provides an annualised view of information for the
+By establishing regular performance monitoring, we aim to
+since the first quarter of 2024 in terms of Building Consent
+year ended June 2025 on Building Consent and Code Compliance
+improve the monitoring of the building consent system , thereby
+Authorities (BCAs) compliance with statutory timeframes.
+Certificate (CCC) statutory timeframes. The data shown here are as enhancing our operational and system efficiency.
+reported by BCAs.
+Figure1: Median number of days for
+processing all applications
+
+OVERALL STATUTORY TIMEFRAMES
+Overall Timeframes – all applications
+
+Building Consent and Code Compliance Certificates
+
+The overall timeframe results include all application data (ie building consent
+applications, amendments, and code of compliance certificates).
+
+For the year ended June 2025, a total of 73,213 applications for Building
+Consents, and 66,8662 applications for Code Compliance Certificates were
+processed.
+
+For the year ended June 2025:
+
+Throughout the financial year, the percentage of Building Consent applications
+meeting the statutory timeframes showed consistent improvement. Figures
+started from 91.9 per cent in Q3 2024 and rising to 93.9 per cent in Q2 2025,
+with an annual average of 92.5 per cent.
+
+• A total of 143,022 applications were processed.
+• The overall median time to process these applications was nine working days.
+• 93.9 per cent of all applications (building consents, amendments, and code
+compliance certificates) were processed within the statutory timeframes.
+• All 66 BCAs (excluding regional authorities due to low number of applications)
+had a median processing time for applications below the statutory
+timeframes. Times ranged from 1 to 16 working days.
+• A total of 101 MultiProof applications were processed, with Consentium
+processing over half of those applications (56.4 per cent).
+Table 1: Overall statutory timeframes
+
+In terms of median days to process an application, Building Consent applications
+decreased slightly from 13.3 working days in Q2 2024 to 12.6 working days in Q1
+and Q2 2025 respectively. Meanwhile, the median days to process Code
+Compliance Certificates applications remained constant at 4.0 working days
+across all four quarters.
+Table 2: Overall statutory timeframes by application type
+
+2024 Q3 2024 Q4 2025 Q1 2025 Q2
+Total number of applications
+processed1
+
+Code Compliance Certificates consistently performed well within the statutory
+timeframes, improving from 94.3 per cent in Q3 2024 to 96.7 per cent in Q2
+2025.
+
+40,536
+
+36,423
+
+32,456
+
+Overall median processing time
+(in working days)
+
+9.0
+
+10.0
+
+8.0
+
+Percentage of all application
+processed within the statutory
+timeframes
+
+93.0%
+
+93.3%
+
+94.6%
+
+33,607 143,022
+9.0
+95.0%
+
+2024 Q3
+
+2024 Q4
+
+2025 Q1
+
+2025 Q2
+
+Annual
+
+Percentage of Building Consent
+applications meeting the
+statutory timeframes
+
+91.9%
+
+91.2%
+
+92.7%
+
+93.9%
+
+92.5%
+
+Percentage of Code Compliance
+Certificates processed within the
+statutory timeframes
+
+94.3%
+
+95.6%
+
+96.8%
+
+96.7%
+
+95.7%
+
+Median time to process a
+Building Consent application
+(working days)
+
+13.3
+
+14.5
+
+12.6
+
+12.6
+
+13.0
+
+Median time to process a Code
+Compliance Certificate
+(working days)
+
+4.3
+
+4.0
+
+4.0
+
+4.0
+
+4.0
+
+Annual
+
+9.0
+93.9%
+
+Across all four quarters, the percentage of applications processed within the
+statutory timeframes has improved progressively from 93.0 per cent in Q3 2024
+to 95.0 per cent in Q2 2025.
+Median processing time varied slightly across quarters, peaking at 10.0 days in
+Q4 2024 and averaging 9.0 days for the year – all four quarters were below the
+statutory timeframes.
+
+1.
+2.
+
+A slight adjustment to the methodology since the 2024 annual report has resulted in a small
+increase in the number of applications reported in this release.
+This figure excludes a total of 4,270 CCC applications across BCAS, in which BCAs indicated an
+CCC application decision is made under Section93(2)(b)(i) of the Building Act 2004.
+
+Building Consent System: Performance Monitoring
+year ended June 2025
+
+TIMEFRAMES – Application Type
+
+TIMEFRAMES – Building Categories
+
+During the year ended June 2025, a total of 73,213 applications for Building Consents (including
+amendments) were processed, comprising 60,383 residential and 12,448 commercial
+applications. Residential applications had a shorter median processing time than commercial
+applications (13.0 and 15.8 working days respectively).
+
+The median time to process all applications (building consent applications, amendments,
+and code compliance certificates) was eight days for residential buildings, and 13.0 days
+for commercial buildings.
+
+For Code Compliance Certificates (CCC), a total of 66,866 applications were processed,
+including 55,788 residential and 9,659 commercial applications. The median processing for
+residential CCCs was 4.0 working days, significantly shorter than the 8.0 working days for
+commercial applications.
+The percentage of applications meeting the statutory timeframes was consistently lower for
+commercial applications, compared with residential. Building Consents showed a 7.4
+percentage point gap (86.3 per cent vs 93.7 per cent), and Code Compliance Certificates an 8.1
+point gap (88.8 per cent vs 96.9 per cent).
+
+Table 3: Median days to process applications for Building Consent and Code Compliance Certificates
+
+95.2 per cent of residential applications and 87.2 per cent of commercial applications
+were processed within the statutory timeframes.
+Note that most of the applications processed (83.7 per cent) were for residential
+buildings.
+
+Table 4: Median days to process applications by building categories
+
+Percentage of
+applications within the
+statutory timeframes
+
+R1
+R2
+R3
+All
+
+64,630
+28,105
+24,357
+117,092
+
+7.0
+9.5
+11.0
+8.0
+
+96.8%
+94.9%
+91.6%
+95.2%
+
+C1
+C2
+C3
+All
+
+14,222
+5,479
+3,179
+22,880
+
+12.3
+14.0
+15.2
+13.0
+
+89.7%
+85.0%
+79.8%
+87.2%
+
+Residential
+
+Percentage of
+Median processing time applications within the
+Number of applications
+(Working days) statutory timeframes
+Building Consent
+Residential
+Commercial
+All
+Code Compliance Certificates
+Residential
+Commercial
+All
+
+Number of applications
+
+Median processing time
+(Working days)
+
+60,383
+12,448
+73,213
+
+13.0
+15.8
+13.0
+
+93.7%
+86.3%
+92.5%
+
+55,788
+9,659
+66,866
+
+4.0
+8.0
+4.0
+
+96.9%
+88.8%
+95.7%
+
+Commercial
+
+Building Consent System: Performance Monitoring
+year ended June 2025
+
+Estimated Request For Information (RFI) Timeframe
+After receiving an application, if essential information is missing, a BCA can formally make a Request
+for Further Information (RFI) from the applicant. All processing work ceases, and the statutory time
+clock stops until the BCA receives a complete response that enables them to make a decision.
+Data between July 2024 and June 2025 shows that an estimated 64.6 per cent of applications
+required RFIs. Among those applications that had an RFI (see Table 5), the median time it took
+applicants to respond to RFIs was 11.0 working days. In Tables 5 and 6, applicant response times are
+called ‘RFI’ days.
+Applications required RFIs take longer to process. The median processing time for applications with
+an RFI is 11.0 working days, more than a double that of applications without an RFI (five working
+days).
+
+Across all application types, 97.8 per cent of applications that did not require RFIs processed within
+the statutory timeframes, compared to 92.0 per cent of applications that required RFIs.
+
+Further analysis suggests that applications with higher building complexity categories are likely to
+have RFIs, spend longer responding in the RFI stage, and take longer overall to progress.
+Complex design (R3) applications had a significantly higher percentage of RFIs (77.8 per cent)
+compared to simpler design (R1) applications (52.9 per cent).
+Median RFI response days for R3 were more than double to those of R1 (16 workings days
+compared to 7 working days), contributing to longer overall RFI response times.
+Median processing days for R3 were 11 days, 4 days longer than R1, again indicating applications
+with higher complexity take longer overall to progress.
+In contrast, commercial applications generally have higher percentage of RFIs, above 70 per cent,
+and take longer time to process than residential applications. However, building complexity tends
+to have a greater impact on processing times for residential applications.
+
+Table 6. Median RFI days and processing days by building categories
+
+Table 5. Median RFI days and processing days by application type
+
+Number of
+applications
+
+Percentage of
+applications within
+the statutory
+timeframes
+
+Median RFI
+days
+
+Median Processing
+days
+
+52,137
+21,044
+
+90.1%
+98.3%
+
+10.0
+0.0
+
+15.0
+9.0
+
+36,430
+28,302
+
+94.8%
+97.8%
+
+13.0
+0.0
+
+5.0
+2.0
+
+90,980
+49,875
+
+92.0%
+97.8%
+
+11.0
+0.0
+
+11.0
+5.0
+
+Building Consent
+
+Median Processing
+Median
+days (including
+RFI days applications without
+RFIs)
+
+Number of
+applications required
+RFIs
+
+Percentage of
+applications required
+RFIs
+
+R1
+R2
+R3
+
+34,178
+18,830
+18,954
+
+52.9%
+67.0%
+77.8%
+
+7.0
+9.0
+16.0
+
+7.0
+9.5
+11.0
+
+C1
+C2
+C3
+
+10,291
+4,229
+2,473
+
+72.4%
+77.2%
+77.8%
+
+17.8
+22.0
+21.0
+
+12.3
+14.0
+15.2
+
+Residential
+With RFI
+No RFI
+
+Code Compliance Certificates
+With RFI
+No RFI
+All applications
+
+With RFI
+No RFI
+
+Commercial
+
+Building Consent System: Performance Monitoring
+year ended June 2025
+
+APPENDIX
+Appendix 1. Overall timeframes by BCAs (year ended June 2025)
+North Island
+
+South Island
+
+BCA
+Far North
+Whangārei
+Kaipara
+Auckland
+Thames-Coromandel
+Hauraki
+Waikato
+Matamata-Piako
+Hamilton City
+Waipa
+Ōtorohanga
+South Waikato
+Waitomo
+Taupō
+Western Bay of Plenty
+Tauranga City
+Rotorua Lakes
+Whakatāne
+Kawerau
+Ōpōtiki
+Gisborne
+Wairoa
+Hastings
+Napier City
+Central Hawke's Bay
+New Plymouth
+Stratford
+South Taranaki
+Ruapehu
+Whanganui
+Rangitikei
+Manawatu
+Palmerston North City
+Tararua
+Horowhenua
+Kāpiti Coast
+Porirua City
+Upper Hutt City
+Hutt City
+Wellington City
+Masterton
+Carterton
+South Wairarapa
+Tasman
+Nelson City
+Marlborough
+Buller
+Grey
+Westland
+Kaikōura
+Hurunui
+Waimakariri
+Christchurch City
+Selwyn
+Ashburton
+Timaru
+Mackenzie
+Waimate
+Waitaki
+Central Otago
+Dunedin City
+Clutha
+Southland
+Gore
+Queenstown Lakes
+Invercargill City
+Waikato Regional Council
+Environment Canterbury
+Consentium
+
+Note: Values suppressed due to data availability, quality or uncertainty.
+
+Count
+2,024
+2,256
+1,247
+33,690
+1,967
+767
+2,751
+1,296
+3,009
+2,928
+188
+556
+298
+1,799
+629
+3,503
+1,777
+945
+100
+231
+1,786
+298
+2,539
+1,973
+648
+2,549
+313
+778
+398
+1,348
+455
+1,545
+1,904
+466
+1,193
+1,621
+1,302
+1,078
+2,188
+5,988
+1,124
+489
+745
+2,394
+1,455
+2,422
+388
+750
+509
+236
+1,076
+2,841
+9,960
+4,624
+1,607
+2,172
+401
+237
+962
+1,478
+3,933
+535
+1,304
+545
+3,259
+1,981
+13
+7
+3,244
+
+Median processing days
+8.0
+8.0
+1.0
+11.0
+8.0
+6.0
+11.0
+11.0
+16.0
+4.0
+9.0
+6.0
+6.0
+10.0
+12.0
+9.0
+11.0
+4.0
+2.0
+10.0
+6.0
+8.5
+7.0
+1.0
+2.0
+11.0
+4.0
+12.0
+4.0
+6.0
+6.0
+4.0
+7.0
+8.0
+14.0
+5.0
+10.0
+15.0
+13.0
+11.7
+13.0
+1.0
+8.0
+4.0
+10.0
+9.0
+3.0
+6.0
+7.0
+5.0
+10.0
+7.0
+10.0
+4.0
+11.0
+5.0
+3.0
+8.0
+7.0
+11.0
+15.0
+9.0
+11.0
+7.0
+10.0
+6.0
+17.0
+17.0
+2.0
+
+Pass rate
+99.9%
+92.7%
+96.5%
+89.9%
+98.9%
+95.0%
+95.4%
+96.1%
+99.3%
+98.7%
+97.9%
+98.2%
+98.3%
+97.7%
+98.1%
+90.0%
+96.3%
+91.5%
+100.0%
+94.8%
+95.2%
+95.6%
+93.5%
+91.7%
+93.4%
+96.0%
+98.1%
+80.2%
+98.2%
+98.9%
+99.6%
+97.6%
+92.2%
+98.5%
+93.9%
+98.5%
+98.7%
+91.5%
+87.8%
+82.8%
+96.3%
+99.4%
+97.4%
+99.6%
+97.9%
+92.4%
+98.2%
+94.3%
+99.0%
+100.0%
+99.0%
+98.2%
+94.4%
+96.8%
+97.9%
+98.5%
+97.0%
+98.7%
+99.5%
+91.2%
+96.2%
+89.9%
+95.2%
+93.6%
+97.6%
+98.1%
+92.3%
+100.0%
+99.3%
+
+Median estimated RFI days Percentage of applications with RFIs
+8.0
+40.8%
+6.0
+54.3%
+8.0
+42.1%
+17.0
+81.6%
+10.0
+43.5%
+8.0
+49.5%
+15.0
+55.9%
+6.0
+65.0%
+15.0
+70.2%
+4.0
+56.1%
+7.0
+25.5%
+2.0
+51.8%
+6.5
+43.6%
+8.0
+59.3%
+7.0
+82.5%
+8.0
+67.7%
+12.0
+54.6%
+10.0
+60.7%
+22.0
+23.0%
+34.0
+81.8%
+13.0
+34.0%
+8.0
+59.4%
+----7.0
+37.5%
+8.5
+33.3%
+13.0
+66.4%
+13.5
+51.1%
+9.0
+73.1%
+9.0
+23.6%
+4.0
+75.3%
+9.0
+34.7%
+5.0
+55.0%
+4.0
+48.7%
+21.0
+55.8%
+10.0
+56.2%
+10.0
+54.7%
+10.0
+69.3%
+11.0
+62.4%
+10.0
+62.8%
+9.2
+78.8%
+7.0
+41.7%
+5.0
+22.1%
+11.0
+52.8%
+3.0
+89.9%
+10.0
+55.6%
+7.0
+62.3%
+6.0
+42.8%
+4.0
+67.7%
+17.0
+70.7%
+17.0
+44.1%
+9.0
+68.1%
+5.0
+75.7%
+10.0
+50.2%
+6.0
+56.2%
+11.0
+52.5%
+10.0
+44.4%
+15.0
+57.9%
+7.5
+22.8%
+35.0
+68.5%
+10.0
+47.2%
+11.0
+36.6%
+6.0
+46.4%
+8.0
+53.7%
+16.0
+49.0%
+6.0
+71.2%
+7.0
+47.5%
+0.0
+0.0%
+36.0
+100.0%
+19.0
+71.8%
+
+Percentage of R3
+4.6%
+8.4%
+6.2%
+29.3%
+43.7%
+7.4%
+5.7%
+3.7%
+22.2%
+8.7%
+0.0%
+1.4%
+0.0%
+8.1%
+13.8%
+23.8%
+12.3%
+5.8%
+1.0%
+6.5%
+0.7%
+4.0%
+6.5%
+9.4%
+0.6%
+6.7%
+2.6%
+1.9%
+0.3%
+4.8%
+2.6%
+3.2%
+8.1%
+0.4%
+7.1%
+8.0%
+14.5%
+26.5%
+20.3%
+13.0%
+5.4%
+3.1%
+7.7%
+22.8%
+13.1%
+5.2%
+2.3%
+7.6%
+4.9%
+7.6%
+3.6%
+8.5%
+25.2%
+15.6%
+4.9%
+4.1%
+13.0%
+1.3%
+3.8%
+8.9%
+8.8%
+1.9%
+3.7%
+4.8%
+35.3%
+2.8%
+0.0%
+0.0%
+40.3%
+
+Percentage of C3
+0.6%
+1.1%
+0.3%
+3.2%
+0.9%
+0.0%
+0.1%
+0.3%
+5.3%
+0.3%
+2.7%
+0.0%
+0.0%
+2.4%
+0.2%
+3.2%
+0.9%
+0.1%
+0.0%
+0.0%
+0.1%
+0.0%
+1.2%
+2.4%
+0.3%
+1.1%
+1.3%
+0.0%
+0.5%
+1.2%
+0.4%
+0.3%
+3.5%
+0.2%
+0.3%
+0.3%
+0.0%
+1.1%
+1.7%
+13.4%
+0.9%
+0.0%
+0.3%
+0.3%
+1.6%
+0.3%
+0.0%
+1.3%
+0.2%
+0.0%
+0.1%
+0.5%
+2.3%
+0.5%
+0.3%
+0.9%
+0.2%
+0.0%
+0.1%
+0.0%
+4.7%
+0.0%
+0.6%
+0.6%
+1.3%
+2.0%
+0.0%
+0.0%
+0.2%
+
+Building Consent System: Performance Monitoring
+year ended June 2025
+
+DEFINITIONS AND CAVEATS
+Building
+Code Compliance Certificate (CCC)
+A building is a temporary or permanent movable or immovable
+structure under section 8 of the Building Act 2004.
+
+Building types
+The building types are based on the National BCA competency
+assessment system levels
+• Residential buildings (R) include standalone houses, apartments,
+townhouses, units, domestic outbuildings, and other dwellings.
+• Commercial buildings (C) include hotels, motels, boarding houses,
+prisons, hospitals, nursing homes, other health buildings,
+education buildings, social, cultural and religious buildings,
+commercial buildings, factories, industrial and storage buildings,
+and farming buildings.
+
+Statutory timeframe
+A code compliance certificate is a formal statement issued under
+section 95 of the Building Act 2004, It states that building work
+carried out under a building consent complies with that building
+consent.
+
+Data Quality
+The results presented in this publication may differ from those
+published by the BCAs. This variance can be attributed to a range of
+data quality issues that we’ve encountered during our analysis. These
+issues include, but are not limited to, inconsistencies in classification
+and data gaps. As a result, figures from this publication should be
+considered with an understanding of these potential discrepancies.
+
+Building Consent
+
+Median number of days
+
+A building consent is a formal document permitting the construction,
+alteration, demolition or removal of a building. We have included
+amendments in the reporting.
+
+The median is the middle value of the durations when they are
+arranged in ascending order. If the dataset contains an odd number
+of observations, the median is the middle number. If the dataset
+contains an even number of observations, the median is the average
+of the two middle numbers.
+
+Building Consent Authorities (BCAs)
+Building Consent Authorities are responsible for checking that an
+application for a building consent complies with the Building Code
+and that building work has been carried out in accordance with the
+building consent for that work. They are also responsible for issuing
+building consents and code compliance certificates.
+BCAs are usually local and district councils. They can also be regional
+councils (for dams), and private organisations (eg Consentium).
+
+We have chosen to use the median number of days in our reporting
+as it is less sensitive to outliers. This also allows for a more consistent
+approach in comparing BCAs of different sizes.
+
+BCAs have a statutory obligation to process a building consent or a
+code compliance certificate application within 20 working days of
+receipt, and 10 working days for a MultiProof application. This
+timeframe applies to all consents, regardless of their type or
+complexity. If the BCA requires additional information to process the
+consent, they may issue a request for further information (RFI). This
+issuing of an RFI ‘stops the clock’ until the requested information is
+supplied by the applicant.
+
+Request for Information (RFI)
+An RFI is a formal request by a BCA for essential information missing
+from an application. All processing work ceases and the statutory
+time clock stops until the BCA receives a complete response that
+enables them to make a decision. The median RFIs days are the
+median number of days it took applicants to respond to an RFI.
+
+Building categories
+The building categories are complexity based, ranging from simple
+low risk buildings in categories 1 to complex multi-story commercial
+in categories 3. There are six building categories – R1, R1 and R3 for
+residential buildings and C1, C2 and C3 for commercial buildings.
+
+Section 93(2)(b)(i) of the Building Act 2004
+Regional authorities
+We have excluded Waikato Regional Council and Environment
+Canterbury Regional Council from the breakdown of Application
+Types and Building Categories due to the low number of applications.
+
+As per section 93(2)(b)(i) of the Building Act 2004, Building Consent
+Authorities are required to make a decision on whether to issue a
+code compliance certificate two years after the date a building
+consent is granted. Where the BCA indicates an application decision is
+made under section93(2)(b)(i) of the Building Act 2004, such
+application is excluded from the analysis.
+
+-
+
+Disclaimer
+This document is a guide only. It should not be used as a substitute for legislation or legal advice. The Ministry of Business, Innovation and Employment is not responsible for the results of any actions
+taken on the basis of information in this document, or for any errors or omissions. While care has been used in processing, analysing, and extracting information, MBIE gives no warranty that the
+information supplied is free from error. We shall not be liable for any loss suffered through the use, directly or indirectly, of any information, product, or service.
+Quality of statistical data:
+While care has been used in processing, analysing, and extracting information, MBIE gives no warranty that the information supplied is free from error. We shall not be liable for any loss suffered through
+the use, directly or indirectly, of any information, product, or service.
+
+

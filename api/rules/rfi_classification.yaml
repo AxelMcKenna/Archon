@@ -1,9 +1,17 @@
 # ConsentIQ RFI classification rules
 # Versioned. Changes must pass /api/tests/rules_regression.yaml before merge.
 
-version: "1.0.0"
+version: "1.1.0"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 1.1.0 additions: 30 new Canterbury-specific rules grounded in CCC Avoiding-RFI
+# page, SDC Specific-Approvals + Requirements, WDC fact sheets, MBIE Determinations
+# 2026/008 + 2026/013, MBIE BCA performance monitoring (Jun 2025).
+# All v1.0 rules preserved unchanged for regression compatibility.
+# ─────────────────────────────────────────────────────────────────────────────
 
 rules:
+  # ─── v1.0 (unchanged) ──────────────────────────────────────────────────────
   - id: ps1-mention
     description: "Item references PS1 producer statement"
     matcher:
@@ -70,7 +78,7 @@ rules:
     matcher:
       type: regex
       field: raw_text
-      pattern: "(?i)\\b(weathertight|weather-tight|cladding|flashing|junction|head\\s+and\\s+sill)\\b"
+      pattern: "(?i)\\b(weathertight|weather-tight|cladding|flashing|junction|head\\s+and\\s+sill|drained\\s+and\\s+ventilated\\s+cavity|cavity\\s+batten)\\b"
     category: building_code:E2
     confidence: medium
     severity_default: must_resolve
@@ -161,6 +169,18 @@ rules:
     hard_assertion: false
     version_introduced: "1.0.0"
 
+  - id: wet-area-e3
+    description: "Item mentions wet-area waterproofing (E3 proxy)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(wet\\s+area|waterproofing|shower\\s+lining|tanking|en[- ]?suite)\\b"
+    category: building_code:E3
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.0.0"
+
   - id: insulation-h1
     description: "Item mentions insulation / energy efficiency (H1)"
     matcher:
@@ -208,3 +228,670 @@ rules:
     severity_default: must_resolve
     hard_assertion: false
     version_introduced: "1.0.0"
+
+  # ─── v1.1.0 additions ──────────────────────────────────────────────────────
+
+  # Producer-statement sub-types (parallel to v1.0 generic rules — multiple hits expected)
+  - id: ps1-specific
+    description: "PS1 design — emit specific PS1 sub-category"
+    matcher:
+      type: entity
+      field: extracted.document_references
+      contains: PS1
+    category: documentation:producer_statements:ps1
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  - id: ps3-specific
+    description: "PS3 construction — emit specific PS3 sub-category"
+    matcher:
+      type: entity
+      field: extracted.document_references
+      contains: PS3
+    category: documentation:producer_statements:ps3
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  - id: ps4-specific
+    description: "PS4 construction monitoring — emit specific PS4 sub-category"
+    matcher:
+      type: entity
+      field: extracted.document_references
+      contains: PS4
+    category: documentation:producer_statements:ps4
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  - id: ps4-construction-monitoring
+    description: "Item discusses construction monitoring schedule (PS4 trigger)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)(construction\\s+monitoring|schedule\\s+of\\s+construction\\s+monitoring|monitoring\\s+schedule)"
+    category: documentation:producer_statements:ps4
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  # Canterbury TC zones / geotech (B1:geotech)
+  - id: tc-zone
+    description: "Mentions Canterbury Technical Category (TC1/TC2/TC3)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\bTC[123]\\b"
+    category: building_code:B1:geotech
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+    example_match: "The site is in Technical Category 3 (TC3) per the MBIE Canterbury foundation guidance."
+
+  - id: liquefaction
+    description: "Liquefaction / Canterbury rebuild geotech terminology"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(liquefaction|liquefiable|lateral\\s+spread)\\b"
+    category: building_code:B1:geotech
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: geotech-report
+    description: "Geotechnical / shallow soil investigation report"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(geotechnical\\s+(?:report|investigation)|shallow\\s+soil\\s+investigation|scala\\s+penetrometer|ground\\s+bearing)\\b"
+    category: building_code:B1:geotech
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: foundation-geotech-coordination
+    description: "Foundation design coordination with geotech (CCC RFI pattern)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)foundation\\s+design.{0,40}(coordinated|comply|consistent|aligned).{0,40}geotech"
+    category: building_code:B1:geotech
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+    notes: "CCC's most-cited residential RFI; geotech engineer must confirm in writing."
+
+  # F9 pool barriers (split from generic F)
+  - id: clause-f9
+    description: "Building Code clause F9 — pool barriers"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\bF9\\b"
+    category: building_code:F9
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: f9-as1
+    description: "F9/AS1 acceptable solution reference"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)F9/AS1"
+    category: building_code:F9
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: pool-barrier-non-climbable
+    description: "Pool barrier non-climbable zone (F9 keyword)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)(non[- ]?climbable\\s+zone|pool\\s+barrier|pool\\s+fenc(e|ing)|child.{0,15}climb)"
+    category: building_code:F9
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+    notes: "Source: MBIE Determination 2026/013 (SDC) — verbatim RFI pattern."
+
+  # G clause splits
+  - id: g1-sanitary
+    description: "G1 sanitary facilities / toilet calculator"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(sanitary\\s+facilit|G1/AS1|toilet\\s+calculator|number\\s+of\\s+(?:toilets|pans|basins|urinals))\\b"
+    category: building_code:G1
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: g4-mechanical-ventilation
+    description: "G4 mechanical ventilation drawings/specs"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(mechanical\\s+ventilation|G4(?:/AS|\\.)|G4\\.3\\.3)\\b"
+    category: building_code:G4
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: g12-water-supply
+    description: "G12 water supply / backflow prevention"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(backflow\\s+prevent|potable\\s+water|water\\s+supply|G12(?:/AS)?|hot\\s+water\\s+cylinder|safe\\s+tray)\\b"
+    category: building_code:G12
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  - id: g13-foul-water
+    description: "G13 foul water / septic / sewer connection"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(foul\\s+water|septic\\s+tank|effluent\\s+(?:field|disposal)|sewer\\s+connection|drainlayer|G13(?:/AS)?)\\b"
+    category: building_code:G13
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  # H1 sub-types
+  - id: h1-envelope-300m2
+    description: "H1 envelope thermal resistance for buildings >300m²"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)(thermal\\s+resistance|envelope.{0,30}insulation|modelling\\s+method|schedule\\s+method).{0,80}(300\\s*m|>300)?"
+    category: building_code:H1:envelope
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  - id: h1-3-5-lighting
+    description: "H1.3.5 artificial lighting energy efficiency"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)(H1\\.3\\.5|NZS\\s*4243|artificial\\s+lighting.{0,30}(efficien|calculation))"
+    category: building_code:H1:lighting
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  # D1 accessibility
+  - id: d1-accessible-route
+    description: "D1 accessible route / D1.3.3 isolated steps"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(accessible\\s+route|D1/AS1|D1\\.3\\.3|isolated\\s+step|wheelchair\\s+(?:access|park)|principal\\s+access)\\b"
+    category: building_code:D1
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  # Site levels — Canterbury-specific datums
+  - id: christchurch-drainage-datum
+    description: "Christchurch Drainage Datum (CCC flood-prone areas)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)christchurch\\s+drainage\\s+datum"
+    category: documentation:plans:site_levels
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: nz-vertical-datum
+    description: "NZVD2016 / LVD1937 vertical datum (WDC BLC)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(NZVD\\s*2016|LVD\\s*1937|Lyttelton\\s+Vertical\\s+Datum)\\b"
+    category: documentation:plans:site_levels
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: building-location-certificate
+    description: "Building Location Certificate (BLC) / Setout Certificate"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(building\\s+location\\s+certificate|BLC\\b|setout\\s+certificate|registered\\s+professional\\s+surveyor|licensed\\s+cadastral\\s+surveyor)\\b"
+    category: documentation:plans:site_levels
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: flood-assessment-certificate
+    description: "SDC Flooding Assessment Certificate (FAC) / ECan flood report"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(flooding?\\s+assessment\\s+certificate|\\bFAC\\b|ECan\\s+flood|flood\\s+management\\s+area|plains\\s+flood\\s+management\\s+overlay)\\b"
+    category: documentation:plans:site_levels
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: floor-level-freeboard
+    description: "Finished Floor Level (FFL) / freeboard"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(finished\\s+floor\\s+level|\\bFFL\\b|freeboard)\\b"
+    category: documentation:plans:site_levels
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  # Vetting / process — SDC s45 + AlphaOne
+  - id: vetting-s45
+    description: "Section 45 vetting / completeness check"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)(section\\s+45|\\bs\\.?\\s?45\\b|vetting\\s+request|completeness\\s+check)"
+    category: process:vetting_s45
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: alphaone-email-pattern
+    description: "SDC AlphaOne consent email pattern (21XXXX@sdc.abcs.co.nz)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b21\\d{4}@sdc\\.abcs\\.co\\.nz\\b"
+    category: process:vetting_s45
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+    notes: "Strong signal that the RFI source is Selwyn District Council via AlphaOne."
+
+  # SDC Engineering Acceptance (parallel DE process)
+  - id: engineering-acceptance
+    description: "SDC Development Engineering Acceptance (parallel process)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(engineering\\s+acceptance|development\\s+engineer(?:ing)?\\s+team|ECOP\\b|lawful\\s+outfall|service\\s+layout\\s+requirements)\\b"
+    category: process:engineering_acceptance
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: multi-unit-residential
+    description: "Multi-unit residential development trigger (SDC EA)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(multi[- ]unit\\s+(?:residential|commercial|industrial)|medium[- ]density\\s+housing|MRZ\\b)\\b"
+    category: process:engineering_acceptance
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  # Cross-referrals
+  - id: fenz-referral
+    description: "FENZ Fire Engineering Unit referral (s46)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(FENZ|fire\\s+and\\s+emergency|fire\\s+engineering\\s+unit|FEU\\b|section\\s+46)\\b"
+    category: process:cross_referrals
+    confidence: high
+    severity_default: nice_to_have
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: heritage-nz
+    description: "Heritage NZ / Rārangi Kōrero referral"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(heritage\\s+(?:new\\s+zealand|nz)|R(?:ā|a)rangi\\s+K(?:ō|o)rero|wāhi\\s+tapu|wahi\\s+tapu)\\b"
+    category: process:cross_referrals
+    confidence: high
+    severity_default: nice_to_have
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: mbie-warning-ban
+    description: "MBIE warning or ban on a product/method"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(MBIE\\s+(?:warning|ban)|product\\s+ban|method\\s+ban)\\b"
+    category: process:cross_referrals
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  # Other-authority approvals (CCC + ECan + MPI)
+  - id: ccc-utility-approval
+    description: "CCC network utility / asset / trade-waste approval email"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(WaterCapacity|WastewaterCapacity|Stormwater\\.Approvals|asset\\.protection|tradewaste)@ccc\\.govt\\.nz\\b"
+    category: process:other_authorities
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: ecan-approval
+    description: "Environment Canterbury (ECan) approval requirement"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(ECan|environment\\s+canterbury)\\b.{0,40}\\b(approval|consent|permit)\\b"
+    category: process:other_authorities
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: mpi-approval
+    description: "MPI / Food & Health approvals"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(Ministry\\s+for\\s+Primary\\s+Industries|\\bMPI\\b|food\\s+and\\s+health)\\b"
+    category: process:other_authorities
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  # Change of use / unconsented work
+  - id: section-40-contravention
+    description: "Section 40 contravention (building work without consent)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)(section\\s+40|\\bs\\.?\\s?40\\b|notice\\s+to\\s+fix|\\bNTF\\b|unconsented\\s+building\\s+work|carried\\s+out\\s+without\\s+(?:building\\s+)?consent)"
+    category: process:change_of_use
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+    notes: "Source: MBIE Determination 2026/008 (CCC NTF for sleepout)."
+
+  - id: schedule-1-exemption
+    description: "Schedule 1 exemption (often disputed for sleepouts/decks)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)(schedule\\s+1|exemption\\s+3B|clause\\s+3B|not\\s+more\\s+than\\s+1\\s+storey)"
+    category: process:change_of_use
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  - id: change-of-use-notice
+    description: "Change of use notice required (Building Act)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(change\\s+of\\s+use|change\\s+the\\s+use\\s+of\\s+(?:a|the)\\s+building|household\\s+unit|nearly\\s+as\\s+(?:is\\s+)?reasonably\\s+practicable|ANARP)\\b"
+    category: process:change_of_use
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  # Certificate of Acceptance
+  - id: certificate-of-acceptance
+    description: "Certificate of Acceptance (Form 8 / s96)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(certificate\\s+of\\s+acceptance|\\bCOA\\b|section\\s+96|\\bs\\.?\\s?96\\b|Form\\s+8)\\b"
+    category: process:certificate_of_acceptance
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  # Planning / s37 resource consent
+  - id: section-37-notice
+    description: "Section 37 notice — Resource Consent required"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)(section\\s+37|\\bs\\.?\\s?37\\b|resource\\s+consent|district\\s+plan|regional\\s+plan)"
+    category: process:planning_resource_consent
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  # Product assurance
+  - id: branz-appraisal
+    description: "BRANZ appraisal reference"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\bBRANZ\\s+(?:appraisal|MAP)\\b"
+    category: documentation:product_assurance
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: codemark-certificate
+    description: "CodeMark certificate of conformity"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(CodeMark|certificate\\s+of\\s+conformity)\\b"
+    category: documentation:product_assurance
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  # Specified systems
+  - id: specified-systems
+    description: "Specified systems / Compliance Schedule"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(specified\\s+system|compliance\\s+schedule|inspection,?\\s+maintenance,?\\s+(?:and|&)\\s+reporting|IM&R)\\b"
+    category: documentation:specified_systems
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  # Owner details (vetting RFIs)
+  - id: owner-details-missing
+    description: "Owner contact details missing (vetting RFI)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)owner\\s+(?:contact\\s+)?details?.{0,30}(?:missing|provided|required|incomplete)"
+    category: documentation:owner_details
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  # Rural servicing (WDC heavy)
+  - id: rural-effluent-field
+    description: "Rural effluent field design / fencing"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)effluent\\s+(?:field|disposal).{0,30}(?:design|fenc|capacity)"
+    category: process:rural_servicing
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: rural-potable-water
+    description: "Rural potable water test (chem + microbiological)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)(potable\\s+water\\s+test|microbiological\\s+test|chemical\\s+(?:and|&)\\s+microbiological|drinking\\s+water\\s+standards)"
+    category: process:rural_servicing
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: rural-secondary-flow-path
+    description: "Secondary flow path for water run-off (rural earthworks)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)secondary\\s+flow\\s+path"
+    category: process:rural_servicing
+    confidence: high
+    severity_default: nice_to_have
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  # Design coordination (CCC commercial)
+  - id: design-coordination
+    description: "Cross-discipline design coordination issues"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)(coordinat\\w+\\s+between|lack\\s+of\\s+coordination|consultant\\s+drawings\\s+(?:are\\s+)?(?:not\\s+)?(?:coordinated|aligned|consistent))"
+    category: documentation:plans:design_coordination
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  # Pre-application checksheet (CCC B-062 / B-063, SDC Form 2R / 2CI)
+  - id: precheck-sheet
+    description: "Pre-application check sheet missing"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(B-?06[123]|Form\\s+2(?:R|CI|H|RB)|application\\s+check\\s*sheet)\\b"
+    category: documentation:other
+    confidence: medium
+    severity_default: nice_to_have
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  # Fire engineering specifics (C/VM2, FEB, intended use)
+  - id: fire-engineering-brief
+    description: "Fire Engineering Brief (FEB) / C/VM2 / fire engineer documentation"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(fire\\s+engineering\\s+brief|\\bFEB\\b|C/VM2|fire\\s+engineer\\b|emergency\\s+lighting\\s+design)\\b"
+    category: building_code:C
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.1.0"
+
+  - id: intended-use-a1
+    description: "Intended use of the building (Building Code A1 classified uses)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\bintended\\s+use(?:\\(s\\))?\\s+of\\s+the\\s+building\\b|\\bclassified\\s+uses?\\b|\\bclause\\s+A1\\b"
+    category: documentation:other
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  # WDC stage-specific
+  - id: validation-stage
+    description: "WDC Senior BO validation QA stage RFI"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(validation|senior\\s+building\\s+officer|QA\\s+(?:gate|review|check))\\b"
+    category: documentation:other
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  - id: cca-auditor-stage
+    description: "WDC Code Compliance Certificate Auditor stage RFI"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(code\\s+compliance\\s+(?:certificate\\s+)?auditor|CCC\\s+audit(?:or)?|final\\s+inspection.{0,30}(?:audit|review))\\b"
+    category: documentation:other
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  # SDC RFI response format requirements
+  - id: sdc-response-format
+    description: "SDC RFI response format requirements (transmittal, revision clouds, A3)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(document\\s+transmittal|revision\\s+cloud|version\\s+numbering|searchable\\s+PDF|A3\\s+(?:max|maximum|size))\\b"
+    category: documentation:other
+    confidence: medium
+    severity_default: nice_to_have
+    hard_assertion: false
+    version_introduced: "1.1.0"
+
+  # Pool barrier dimensional rule (catches the second SDC determination RFI)
+  - id: pool-barrier-dimensions
+    description: "Pool barrier rail spacing / projection rules (F9 dimensional)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(rail\\s+spacing|horizontal\\s+projection|boundary\\s+fence\\s+construction|1200\\s*mm.*projection|projection.*greater\\s+than\\s+10\\s*mm)\\b"
+    category: building_code:F9
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.1.0"

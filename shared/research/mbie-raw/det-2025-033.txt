@@ -1,0 +1,507 @@
+Determination 2025/033
+An authority’s decision to issue a notice to fix for the
+construction of roof flashings and external wall cladding
+17C Esplanade, Warrington, Waikouaiti
+Summary
+This determination considers an authority’s decision to issue a notice to fix regarding
+building work carried to construct ‘roof flashings and wall cladding systems’ at a new
+two-storey detached dwelling. The determination considers the form and content of
+the notice to fix including the specified persons to whom it was issued, the particulars
+of contravention or non-compliance, and the associated remedy.
+
+Reference 3809
+
+Determination 2025/033
+
+The legislation discussed in this determination is contained in Appendix A. In this
+determination, unless otherwise stated, references to “sections” are to sections of the
+Building Act 2004 (“the Act”) and references to “clauses” are to clauses in Schedule 1
+(“the Building Code”) of the Building Regulations 1992.
+The Act and the Building Code are available at www.legislation.govt.nz. Information about
+the legislation, as well as past determinations, compliance documents (eg, Acceptable
+Solutions) and guidance issued by the Ministry, is available at www.building.govt.nz.
+
+1. The matter to be determined
+1.1. This is a determination made under due authorisation by me, Andrew Eames,
+Principal Advisor Determinations, for and on behalf of the Chief Executive of the
+Ministry of Business, Innovation and Employment (“the Ministry”).1
+1.2. The parties to the determination are:
+1.2.1. K Te Maiharoa, the owner of the property who applied for this
+determination and was a recipient of the notice to fix (“the owner”)
+1.2.2. Dunedin City Council, carrying out its duties as a building consent authority
+or territorial authority (“the authority”)
+1.2.3. Latitude Homes Otago and Southland, a recipient of the notice to fix (“the
+builder”)2
+1.2.4. D Johnson, a recipient of the notice to fix and licenced building practitioner
+concerned with the relevant building work (“the first LBP”)
+1.2.5. S Ruthven, Core Building Solutions Limited, a recipient of the notice to fix
+and licenced building practitioner concerned with the relevant building work
+(“the second LBP”).
+1.3. This determination arises from a decision by the authority to issue a notice to fix
+NTF-2024-2573 regarding building work carried to construct a new detached twostorey dwelling, specifically, ‘roof flashings and wall cladding systems’ that were not
+constructed in accordance with the building consent4 and the manufacturer’s
+specifications, and do not comply with Clause E2 External Moisture.
+1.4. The matter to be determined, under section 177(1)(b) and (2)(f), is the authority’s
+decision to issue notice to fix NTF-2024-257.
+1
+
+The Building Act 2004, section 185(1)(a) provides the Chief Executive of the Ministry with the power to
+make determinations.
+2
+In this case, I note Latitude Homes Otago and Southland is the trading name of Anchorage Construction
+Limited.
+3
+Dated 26 August 2024.
+4
+Number ABA-2021-1974.
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+2
+
+17 July 2025
+
+Reference 3809
+
+Determination 2025/033
+
+1.5. In deciding this matter, I will consider the form and content of the notice to fix,
+specifically, the specified persons to whom the notice was issued, the particulars of
+contravention or non-compliance, and the associated remedy. I have also taken into
+consideration the information contained in a covering letter accompanying the
+notice to fix that was issued by the authority at the same time.
+
+Issues outside this determination
+1.6. The compliance of the building work with the Building Code.
+1.7. Any contractual or financial arrangements between the parties or liabilities
+associated.
+1.8. Any matters arising from other legislation including the Resource Management Act
+1991, or any District Plan requirements.
+1.9. Any additional items noted by the owner but not included in the specific notice to
+fix that is subject of this determination (eg issues with some windows, the building
+foundation, some structural steelwork, and re-painting of the whole dwelling).
+
+2. The building work
+2.1. The building work is the construction of a new two-storey detached dwelling which
+includes an attached single garage and kitchen along part of the south-west
+elevation of the building. Refer to figure 1.5
+2.2. The external wall cladding to the north-west and south-east gable end walls is
+vertical rusticated profile fibre-cement weatherboards over a 20mm wide drained
+cavity. The north-east and south-west elevations incorporate horizontal bevel-back
+fibre-cement weatherboards over a 20mm wide drained cavity. The external wall
+cladding flashings and junction details are provided on several building consent
+plans titled “Cladding Details”6 and referred to in the building consent
+specifications7, along with copies of the manufacturer’s specifications8 (these
+include information on the installation of the two types of wall cladding). The door
+and window joinery are double glazed aluminium.
+2.3. The roof cladding is trapezoidal profiled metal on a roof pitch of 25 degrees. The
+roof flashings are detailed on building consent plan “Roof details”9, and referred to
+
+5
+
+Figure 1 has been reproduced from photographs included in a draft report from a building surveyor
+engaged by the owner; the report is dated 21 December 2023.
+6
+Plan numbers A603 to A608 inclusive, all are revision A, dated 13 August 2021.
+7
+Section 4231HL ‘…cladding’ of the specifications.
+8
+Dated May 2020 and July 2018.
+9
+Plan number A602, revision A, dated 13 August 2021.
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+3
+
+17 July 2025
+
+Reference 3809
+
+Determination 2025/033
+
+in the building consent specifications10, along with a copy on an installation
+manual11 provided by the manufacturer of the external wall cladding.
+
+3. Background
+3.1. On 23 August 2021, the owner applied for a building consent to ‘Erect [a] two storey
+dwelling with attached garage…’. The stated means of compliance with the Building
+Code for Clause E2 External Moisture was Acceptable Solution E2/AS1.12
+3.2. On 26 October 2021, the authority granted and issued building consent ABA-20211974.
+3.3. Building work commenced around January 2022. The authority conducted several
+inspections during construction some of which identified issues with the installation
+of the roof flashings and external wall cladding.13 However, it is the ‘building
+completion’ inspections on 8 December 2022 and 6 July 2023 that provide a record
+of the reported issues, with the latter inspection concluding, ‘Based on the above
+the [authority] will be issuing a Notice to Fix’.
+3.4. On or about 28 June 2023, a representative from the manufacturer of the external
+wall cladding inspected the building and recorded seven issues where the as-built
+construction that did not ‘appear to comply with the relevant manual’, and noted ‘a
+number of roof flashings [were] not correctly formed over’ the weatherboards.14
+3.5. On 24 July 2024, the authority sent an email to the owner detailing six issues with
+the roofing and 15 issues with the wall cladding that required to rectified.
+3.6. On 26 August 2024, the authority issued Notice to Fix NTF-2024-257; it stated:
+Particulars of contravention or non-compliance:
+Non-compliance with section 40 of the Building Act 2004, in that the following
+building work was not carried out in accordance with the building consent:
+Roof flashings and wall cladding systems were not installed as per the approved
+building consent ABA-2021-1974 and the manufacturer’s specifications and does
+not comply with E2 (External Moisture) of the New Zealand Building Code.
+To remedy the contravention or non-compliance you must:
+Install the roof flashings and wall cladding systems as per the approved building
+consent ABA-2021-1974 and manufacturer’s specifications.
+
+10
+
+Section 4310 ‘Roofing’ of the specifications.
+Dated August 2017 titled ‘Eaves [and] Soffits’.
+12
+Acceptable Solution E2/AS1, third edition, amendment 10, effective on 5 November 2020.
+13
+During inspections conducted between April 2022 and December 2022.
+14
+This was further supported by an email from the manufacturer to the builder, dated 12 July 2023.
+11
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+4
+
+17 July 2025
+
+Reference 3809
+
+Determination 2025/033
+
+3.7. Also on 26 August 2024, the authority emailed the owner, and the other parties, a
+list of six issues with the ‘roofing’ and 15 issues with the ‘cladding’ that required “to
+be rectified” to “comply with the…Building Code” (refer to Appendix A). The email
+also confirmed further inspections were to be arranged with the authority as the
+“areas are being rectified”.
+
+4. Submissions
+The owner
+4.1. The owner submits (in summary):
+4.1.1. They agree with the “Particulars of contravention or non-compliance” in the
+notice to fix regarding the roof flashings and external wall cladding.
+However, the feel the decision to the issue the notice to fix should be
+reversed and a previous version re-issued as an appropriate remedy was to
+remove and reinstall the roof and wall cladding systems.
+4.1.2. They do not believe they should have been included in the NTF as a
+specified person because they are “not a specified person who carried out
+the non-compliant work and cannot remedy the 26 August 2024 Notice to
+Fix…”.
+4.1.3. The building work does not comply with sections 17 and 40, including Clause
+E2 External Moisture.
+
+The authority
+4.2. The authority submits (in summary):
+4.2.1. When issuing the notice to fix it had relied “on information received from
+the claddings manufacturer” to support its decision.
+4.2.2. The owner was issued with the notice to fix under section 163 on the basis
+“it is impossible for anyone else to remedy the issues without the building
+owner’s involvement”.
+
+The builder
+4.3. The builder “remained consistent in its commitment to finishing the work necessary
+to gain compliance” and had sought permission from the owner to access the
+property accordingly.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+5
+
+17 July 2025
+
+Reference 3809
+
+Determination 2025/033
+
+The first LBP
+4.4. The first LBP referred to a decision by the Building Practitioners Board15, and
+confirmed he “was responsible for specific items of restricted building work” which
+were “still not complete”, but he had committed to returning to site to carry out or
+supervise “the remaining remedial work”, depending on access being made
+available by the owner.
+
+The second LBP
+4.5. The second LBP has not made a submission. Regardless, I note a decision by the
+Building Practitioners Board16 confirmed the second LBP was responsible for
+carrying out and supervising the installation of the wall cladding and associated
+flashings including some of the issues raised in the authority’s email dated 26
+August 2024 (refer to paragraph 3.7). It appears some building work has already
+been completed by the second LBP, but ‘further restricted building work was
+needed’. The second LBP ‘stated that he would be returning to carry out or
+supervise that work’.
+
+5. Discussion
+5.1. This determination is considering the authority’s decision to issue notice to fix NTF2024-257, specifically, as agreed with the applicant, the form and content of the
+notice including the specified persons to whom the notice was issued, the
+particulars of contravention or non-compliance, and the associated remedy.
+
+Legislation
+5.2. Notices to fix are governed by sections 163 to 168. Section 164(1)(a) provides for an
+authority to issue a notice to fix if it considers, on reasonable grounds, that a
+specified person is contravening or failing to comply with the Act or its regulations.
+5.3. Section 165 sets out the requirements for the form and content of a notice to fix.
+The prescribed form provides a space to insert the “particulars of contravention or
+non-compliance”.17 The courts and previous determinations have discussed the
+requirement that the recipient of a notice to fix be “fairly and fully informed” by the
+particulars in a notice, so they can address the identified issues.18
+
+15
+
+Dated 9 October 2024.
+Dated 9 October 2024.
+17
+Section 165(1)(a) requires a notice to fix be in the prescribed form ie Form 13 of the Building (Forms)
+Regulations 2004.
+18
+See Andrew Housing Ltd v Southland District Council [1996] 1 NZLR 589, which related to a ‘notice to
+rectify’ (the equivalent of a notice to fix in the predecessor to the Act, the Building Act 1991);
+Marlborough District Council v Bilsborough [2020] NZDC 9962 at [106]-[107]; and Determination 2024/029
+An authority’s decisions to issue a series of notices to fix (27 May 2024) at [4.2]-[4.3].
+16
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+6
+
+17 July 2025
+
+Reference 3809
+
+Determination 2025/033
+
+Form and content of the notice to fix
+Specified person
+5.4. Section 163 defines a ‘specified person’ to whom a notice can be issued19; this
+includes the owner of a building as well as a person carrying out or supervising the
+building work.
+5.5. In this case the notice to fix was issued by the authority to the owner, the builder,
+and first and second LBPs. I note the builder, as well as the first and second LBPs
+have not disputed their inclusion as recipients of the notice to fix; indeed, they have
+each committed to completing the necessary building work depending on access to
+the property being granted by the owner.
+5.6. The owner believes they should not have been included on the notice to fix.
+However, the owner is the person registered on the record of title for the property,
+obtained the building consent, and is responsible for ensuring the building work
+complies with the building consent.20 Therefore, the owner does meet the test of a
+specified person under s163(a), and it was appropriate for the authority to include
+the owner in the notice to fix.
+5.7. The builder carried out or supervised the building work on behalf of the owner,
+and/or engaged others to undertake the work on its behalf. This meets the test of a
+specified person under s163(b). However, the notice to fix refers to the trading
+name of the builder, and not its registered company name (ie a ‘person’ as defined
+in section 7). To comply with s163(b) it would have been more appropriate for the
+notice to refer to the registered company name followed by ‘…trading as…’. For this
+reason, the notice does not adequately meet the requirements of s163(b) for a
+specified person regarding the details of the builder.
+5.8. The first and second LBPs did carry out or supervise the building work that gave rise
+to the issue of the notice to fix and are responsible (in conjunction with the builder)
+for the remedial building work necessary to satisfy the requirements of the notice
+(including the list of items detailed in the authority’s email dated 26 August 2024;
+see Appendix A). The first and second LBPs meet the test of being specified persons
+for the purposes of section 163(b), and it was appropriate for the authority to
+include them in the notice to fix.
+
+19
+
+Section 164(1)(a) provides for an authority to issue a notice to fix if it considers, on reasonable grounds,
+that a ‘specified person’ is contravening or failing to comply with the Act or its regulations. Section
+164(2)(a) provides that a responsible authority must issue ‘to the specified person concerned’ a notice
+requiring the person to remedy the contravention or comply with the Act or the regulations.
+20
+Sections 3(b), 4(2)(q), and 14B(b). In this case the owner engaged the services of the builder to carry out
+and/or supervise the construction of the dwelling on her behalf, and regardless of any contractual
+arrangements, it does not absolve the owner’s responsibilities under the Act. However, it is not clear to
+me if the first and second LBPs were engaged directly by the owner, and/or indirectly by the builder, to
+carry out or supervise some of the building work.
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+7
+
+17 July 2025
+
+Reference 3809
+
+Determination 2025/033
+
+Particulars of contravention or non-compliance
+5.9. Form 13 provides some guidance on the sort of information to include as particulars
+of contravention or non-compliance; it states, ‘insert details of failure or error with
+reference to any relevant building consent’.
+5.10. In this case, the notice to fix alleges the owner and the other recipients of the
+notice have contravened section 40 on the basis the building work carried out to
+construct the ‘roof flashings and wall cladding systems’ was not in accordance with
+the building consent ABA-2021-1974 and the manufacturer’s specifications. The
+notice also referred to the building work not complying with Clause E2 External
+Moisture.
+5.11. Having considered the content of the notice to fix, I am of the view it lacked
+sufficient information to fairly and fully inform the recipients of the particulars of
+contravention or non-compliance for the following reasons:
+5.11.1. The notice infers a contravention or non-compliance with section 17, but
+this was not included in the particulars.
+5.11.2. The notice refers to non-compliance with clause E2, but it did not specify
+which performance clause(s) was relevant, or detail why it was considered
+the building work did not comply with the Building Code.
+5.11.3. The notice did not adequately describe which ‘roof flashings’ were noncompliant or how they did not comply with the building consent.
+5.11.4. The notice did not adequately describe which aspects of the ‘wall cladding
+systems’ were non-compliant or how they did not comply with the building
+consent.
+5.11.5. The notice provided a general reference to non-compliance with the
+building consent without providing further information that directs the
+recipients of the notice to relevant plans and specifications.
+5.11.6. The covering letter accompanying the notice refers to the ‘particulars of
+contravention or non-compliance of the new [notice to fix] remains the
+same in that during an inspection for building consent ABA-2021-1974’
+issues were identified with ‘the roof flashings and wall cladding systems’
+[my emphasis]. Records indicate the authority conducted several building
+inspections during the construction, and neither the notice nor the covering
+letter confirm which inspection the authority was referring to.
+5.12. I note the authority did send to the recipients of the notice to fix a separate email
+correspondence, which included a list of items the “authority requires to be
+rectified” regarding the “roofing” and “cladding” (refer to Appendix A).
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+8
+
+17 July 2025
+
+Reference 3809
+
+Determination 2025/033
+
+5.13. However, the list of items was not included in, appended to, or cross-referenced in
+the notice. In the same way the authority’s email correspondence did not refer to or
+cross-reference the notice to fix.
+5.14. For the purposes of assessing the form and content of the notice to fix, the
+requirements of section 165(1)(a) were not met as the recipients of the notice were
+not fairly or fully informed of the particulars on contravention or non-compliance.
+To remedy the contravention or non-compliance
+5.15. Form 13 provides some guidance on the sort of information to be included ‘to
+remedy the contravention or non-compliance’; it provides, ‘state any building work
+that must be carried out and whether a certificate of acceptance must be applied
+for’.
+5.16. In this case, the notice to fix directs the recipients to ‘install the roof flashings and
+wall cladding systems as per the approved building consent ABA-2021-1974 and
+manufacturer’s specifications’.
+5.17. Having considered the content of the notice to fix, I am of the view it lacked
+sufficient information to fairly and fully inform the recipients of the notice regarding
+the remedy:
+5.17.1. When read in association with the limited particulars of the contravention,
+the notice did not adequately describe which roof flashings were to be
+remedied in accordance with the building consent.
+5.17.2. When read in association with the limited particulars of the contravention,
+the notice did not adequately describe which aspects of the wall cladding
+systems were to be remedied in accordance with the building consent.
+5.17.3. The notice requires building work to be carried out, but it did not state the
+territorial authority is to be contacted when the work is completed (ie to
+comply with section 165(1)(e) and Form 13 ‘further particulars’).
+5.17.4. The notice does not state whether a certificate of acceptance must be
+applied for (ie to comply with section 165(1)(c) and Form 13).
+5.18. Notwithstanding the shortcomings in the content of the notice to fix regarding the
+remedy, I note the parties do not dispute the list of items to be rectified or
+completed as recorded in the authority’s email correspondence to the parties dated
+26 August 2024. I will therefore leave it for the parties to resolve those items.
+
+6. Conclusion
+6.1. Regarding the form and content of the notice to fix NTF-2024-257:
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+9
+
+17 July 2025
+
+Reference 3809
+
+Determination 2025/033
+
+6.1.1. The owner, the first and second LBPs are specified persons pursuant to
+section 163. However, the authority did not adequately describe the details
+of the builder.
+6.1.2. The notice did not fairly or fully inform the recipients of the particulars of
+contravention or non-compliance or include an appropriate remedy.
+
+7. Decision
+7.1. In accordance with section 188 of the Building Act 2004, I reverse the authority’s
+decision to issue notice to fix NTF-2024-257.
+
+Signed for and on behalf of the Chief Executive of the Ministry of Business, Innovation
+and Employment on 17 July 2025.
+
+Andrew Eames
+Principal Advisor Determinations
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+10
+
+17 July 2025
+
+Reference 3809
+
+Determination 2025/033
+
+APPENDIX A
+Summary of ‘roofing’ and ‘cladding’ issues21
+Roofing
+1. Eave flashing is to be installed on the lean-to roof as it is located in a very high wind
+zone.
+2. Socker flashing is required to laundry vent penetration through roofing iron.
+3. New barge flashings are to be installed at the east end once the metal barges have
+been extended to allow the cladding to run past.
+4. Apron flashing junction at the east end of the lean-to is insufficient, the weather
+board is too high, and the upstand is too low.
+5. Roofing iron overhangs on the lean are to be checked (50 mm minimum required).
+6. Apron flashing junction west end of lean-to is insufficient as…weather board internal
+corner is exposed and apron flashing junction is incorrectly installed.
+Cladding
+7. Head flashings are to be sealed to the top of the window and door, as required for a
+very high wind zone.
+8. Stop ends on head flashings have not been installed as per approved drawings or
+manufacturer specifications.
+9. Internal corner between main house and lean-to needs to be rectified.
+10. Bargeboards to be installed in the lean-to-roof area.
+11. Bargeboards to the main roof have been cutting into the cladding system and need to
+be extended to allow the cladding to run behind the barges.
+12. ……flashings are required for soffits to wall junctions.
+13. Soffit moulding was not installed; however, this was an optional component for the
+drawing owners to confirm if they wanted it installed or left off.
+
+21
+
+The list has been copied from the authority’s email to the parties dated 26 August 2024.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+11
+
+17 July 2025
+
+Reference 3809
+
+Determination 2025/033
+
+14. [Support] bar to be installed to large window in the master bedroom (the sill of the
+window is sagging). Window manufacture to assess the large window frame and
+decide on repair or replace.
+15. Gaps at bottom of windows should be closed off with cladding.
+16. [The weatherboard] has less than 10 mm of cover on windows and doors.
+17. It appears the…weather board has been fixed at the floor joist junction, where it’s
+meant to be unfixed as per figure 26 on the manufacturer’s specifications.
+18. The edges of the cladding are still to be sealed.
+19. Gaps under head flashings and penetrations are to be appropriately sealed.
+20. Items on the cladding report from [the weatherboard manufacturer] are to be
+addressed to the point that [the weatherboard manufacturer] will issue their
+warranty.
+21. Cladding system to be adequately re-sealed (painted) to meet the durability
+requirements.
+
+MINISTRY OF BUSINESS, INNOVATION & EMPLOYMENT
+
+12
+
+17 July 2025
+
+

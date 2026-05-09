@@ -1,7 +1,8 @@
-"""Claude AI classifier (FR-2.11 — FR-2.14).
+"""AI classifier (FR-2.11 — FR-2.14).
 
 - Loads versioned prompt template from /api/prompts/classifier_v1.md
-- Uses tool-use for structured JSON output
+- Uses tool-use for structured JSON output via the configured provider
+  (gemini or openrouter)
 - Caches by content hash (item raw_text + project context + prompt version)
 """
 
@@ -13,10 +14,10 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-import anthropic
-
 from app.config import get_settings
 from app.extractors.markdown import render_item
+from app.llm.gemini import call_gemini_tool
+from app.llm.openrouter import call_openrouter_tool
 from app.models import AiPrediction, RfiItem
 
 PROMPTS_DIR = Path(__file__).parent.parent.parent / "prompts"
@@ -88,7 +89,6 @@ def classify(
         return _AI_CACHE[key]
 
     settings = get_settings()
-    client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
 
     prompt = _fill(
         template,
@@ -98,18 +98,27 @@ def classify(
         item_markdown=render_item(item),
     )
 
-    response = client.messages.create(
-        model=settings.anthropic_model,
-        max_tokens=1024,
-        tools=[_TOOL_SCHEMA],
-        tool_choice={"type": "tool", "name": "record_classification"},
-        messages=[{"role": "user", "content": prompt}],
-    )
-
-    tool_use = next((b for b in response.content if b.type == "tool_use"), None)
-    if tool_use is None:
-        raise RuntimeError("AI classifier did not return tool use")
-    payload: dict[str, Any] = tool_use.input  # type: ignore[assignment]
+    if settings.classifier_provider == "openrouter":
+        result = call_openrouter_tool(
+            images=[],
+            prompt=prompt,
+            tool_name=_TOOL_SCHEMA["name"],
+            tool_description=_TOOL_SCHEMA["description"],
+            tool_parameters=_TOOL_SCHEMA["input_schema"],
+            max_output_tokens=1024,
+            model=settings.openrouter_model,
+        )
+    else:
+        result = call_gemini_tool(
+            images=[],
+            prompt=prompt,
+            tool_name=_TOOL_SCHEMA["name"],
+            tool_description=_TOOL_SCHEMA["description"],
+            tool_parameters=_TOOL_SCHEMA["input_schema"],
+            max_output_tokens=1024,
+            model=settings.gemini_model,
+        )
+    payload: dict[str, Any] = result.payload
 
     pred = AiPrediction(
         primary_category=payload["primary_category"],

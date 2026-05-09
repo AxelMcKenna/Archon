@@ -1,35 +1,171 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.2",
+  "version_notes": "1.2 (2026-06-01): added two documentation categories surfaced by deterministic PDF text-layer rules (missing_sheets, revision_mismatch) introduced with the v2 plan flagger. 1.1 (2026-05-08): added 22 sub-categories surfaced from CCC Avoiding RFIs, SDC Specific Approvals, WDC fact sheets, and 2 MBIE determinations. Existing 1.0 IDs preserved; new categories use namespaced IDs. Added stages, canterbury overlays, BCA-specific process facts. SDC portal corrected to AlphaOne (verified from SDC processing page).",
+
   "bcas": [
-    { "id": "ccc", "name": "Christchurch City Council", "portal": "AlphaOne", "naming_convention": "[appref]_RFI[n]_item[n]_[date].pdf", "lodgement_url": "https://online.ccc.govt.nz/" },
-    { "id": "selwyn", "name": "Selwyn District Council", "portal": "Objective Build", "naming_convention": "[appref]_[doc-description].pdf", "lodgement_url": "https://www.selwyn.govt.nz/" },
-    { "id": "waimakariri", "name": "Waimakariri District Council", "portal": "Objective Build", "naming_convention": "[appref]_[doc-description].pdf", "lodgement_url": "https://www.waimakariri.govt.nz/" }
+    {
+      "id": "ccc",
+      "name": "Christchurch City Council",
+      "portal": "Objective Build",
+      "portal_unverified": true,
+      "naming_convention": "[appref]_RFI[n]_item[n]_[date].pdf",
+      "lodgement_url": "https://online.ccc.govt.nz/",
+      "rfi_response_email_pattern": null,
+      "vetting_outcome": "reject_on_incomplete",
+      "has_validation_qa": false,
+      "has_cca_audit_rfi": true,
+      "has_engineering_acceptance": false,
+      "fac_threshold_m2": null,
+      "datums": ["Christchurch Drainage Datum"],
+      "published_avoiding_rfi_page": true,
+      "published_check_sheets": ["B-061 PIM", "B-062 Residential", "B-063 Commercial"],
+      "mbie_perf": {
+        "applications_jun_2025": 9960,
+        "median_processing_days": 10.0,
+        "pass_rate": 0.944,
+        "median_rfi_response_days": 6.0,
+        "rfi_rate": 0.562
+      }
+    },
+    {
+      "id": "selwyn",
+      "name": "Selwyn District Council",
+      "portal": "AlphaOne",
+      "portal_unverified": false,
+      "naming_convention": "[appref]_[doc-description].pdf",
+      "lodgement_url": "https://www.selwyn.govt.nz/",
+      "rfi_response_email_pattern": "21\\d{4}@sdc\\.abcs\\.co\\.nz",
+      "vetting_outcome": "rfi_resets_clock",
+      "has_validation_qa": false,
+      "has_cca_audit_rfi": false,
+      "has_engineering_acceptance": true,
+      "fac_threshold_m2": 25,
+      "datums": [],
+      "published_avoiding_rfi_page": false,
+      "published_check_sheets": ["Form 2R Residential", "Form 2CI Commercial/Industrial", "Form 2H Solid Fuel Heater", "Form 2RB Relocated Building"],
+      "rfi_response_format_rules": {
+        "channel": "AlphaOne email only",
+        "requires_revision_clouds": true,
+        "requires_version_numbering": true,
+        "requires_transmittal_cover": true,
+        "max_scale": "A3",
+        "non_compliant_response_deemed_incomplete": true
+      },
+      "engineering_acceptance": {
+        "trigger_zones": ["residential urban", "commercial mixed urban", "industrial urban"],
+        "trigger_conditions": ["multi-unit residential", "multi-unit commercial", "multi-unit industrial"],
+        "minor_residential_unit_exemption_from": "2025-04-07",
+        "exemption_does_not_apply_in": "MRZ",
+        "submission_emails": ["development.engineer@selwyn.govt.nz", "water.services@selwyn.govt.nz"],
+        "hourly_rates_nzd": {"de": 190, "senior_de_or_manager": 210, "tech_advisor": 150}
+      },
+      "mbie_perf": {
+        "applications_jun_2025": 4624,
+        "median_processing_days": 4.0,
+        "pass_rate": 0.968,
+        "median_rfi_response_days": 11.0,
+        "rfi_rate": 0.525
+      }
+    },
+    {
+      "id": "waimakariri",
+      "name": "Waimakariri District Council",
+      "portal": "Objective Build",
+      "portal_unverified": true,
+      "naming_convention": "[appref]_[doc-description].pdf",
+      "lodgement_url": "https://www.waimakariri.govt.nz/",
+      "rfi_response_email_pattern": null,
+      "vetting_outcome": "reject_on_incomplete",
+      "has_validation_qa": true,
+      "has_cca_audit_rfi": true,
+      "has_engineering_acceptance": false,
+      "fac_threshold_m2": null,
+      "datums": ["NZVD2016", "LVD1937"],
+      "published_avoiding_rfi_page": false,
+      "published_check_sheets": ["Form 6 CCC", "embedded in Let's Get it Right Guide v3"],
+      "rural_servicing_rules": {
+        "drinking_water_standard": "Drinking Water Standards for NZ 2005 (Revised 2018)",
+        "ccc_water_test_full_required_after_months": 18,
+        "rural_solid_fuel_threshold_ha": 2.0,
+        "ecan_dependency": ["effluent_disposal", "solid_fuel_heaters", "discharge_to_ground"]
+      },
+      "mbie_perf": {
+        "applications_jun_2025": 2841,
+        "median_processing_days": 7.0,
+        "pass_rate": 0.982,
+        "median_rfi_response_days": 10.0,
+        "rfi_rate": 0.502
+      }
+    }
   ],
+
+  "stages": [
+    {"id": "vetting", "label": "Vetting / pre-acceptance (s45)", "councils": ["ccc", "selwyn", "waimakariri"], "clock_behaviour": {"ccc": "rejection", "selwyn": "rfi_resets_clock", "waimakariri": "rejection"}},
+    {"id": "assessment", "label": "Building Consent Officer assessment", "councils": ["ccc", "selwyn", "waimakariri"], "clock_behaviour": "pause_on_rfi"},
+    {"id": "validation", "label": "Senior BO QA validation", "councils": ["waimakariri"], "clock_behaviour": "pause_on_rfi"},
+    {"id": "engineering_acceptance", "label": "Development Engineering parallel review", "councils": ["selwyn"], "clock_behaviour": "separate_clock"},
+    {"id": "cca_audit", "label": "CCC Auditor post-final-inspection review", "councils": ["ccc", "waimakariri"], "clock_behaviour": "pause_on_rfi"},
+    {"id": "post_consent", "label": "Notice to Fix / unconsented work", "councils": ["ccc", "selwyn", "waimakariri"], "clock_behaviour": "n/a"}
+  ],
+
   "project_types": [
     { "id": "new_dwelling", "label": "New dwelling" },
     { "id": "extension", "label": "Extension / addition" },
     { "id": "accessory", "label": "Accessory building (sleep-out / garage)" },
     { "id": "deck", "label": "Deck" }
   ],
+
   "categories": [
     { "id": "building_code:B1", "label": "B1 — Structure", "rfi_share": 0.315, "weight": 1.0 },
+    { "id": "building_code:B1:geotech", "label": "B1 — Geotech / foundations", "weight": 1.0, "introduced": "1.1", "notes": "Canterbury TC1/TC2/TC3 zoning, liquefaction, scala penetrometer, foundation/geotech coordination. Distinct remediation pattern (geotech engineer letter, SED foundation, PS1+PS4)." },
     { "id": "building_code:B2", "label": "B2 — Durability", "rfi_share": 0.05, "weight": 0.8 },
     { "id": "building_code:C", "label": "C — Protection from fire", "rfi_share": 0.05, "weight": 0.8 },
     { "id": "building_code:D", "label": "D — Access", "rfi_share": 0.02, "weight": 0.5 },
+    { "id": "building_code:D1", "label": "D1 — Access routes / accessibility", "weight": 0.7, "introduced": "1.1", "notes": "Accessible route detail, isolated steps (D1.3.3), wheelchair parking placement, footpath gradient — heavy commercial RFI surface at CCC." },
     { "id": "building_code:E1", "label": "E1 — Surface water", "rfi_share": 0.03, "weight": 0.7 },
     { "id": "building_code:E2", "label": "E2 — External moisture", "rfi_share": 0.22, "weight": 1.0 },
     { "id": "building_code:E3", "label": "E3 — Internal moisture", "rfi_share": 0.03, "weight": 0.6 },
     { "id": "building_code:F", "label": "F — Safety of users", "rfi_share": 0.03, "weight": 0.6 },
+    { "id": "building_code:F9", "label": "F9 — Pool barriers", "weight": 0.9, "introduced": "1.1", "notes": "Residential pool barriers, F9/AS1 paragraph 2.1.7 / 2.2.1(d), 900mm non-climbable zone, 10mm horizontal projection rule. Carved out from generic F because remediation is distinct (alternative-solution justification common). Real example: MBIE Determination 2026/013 (Selwyn)." },
     { "id": "building_code:G", "label": "G — Services & facilities", "rfi_share": 0.05, "weight": 0.7 },
+    { "id": "building_code:G1", "label": "G1 — Personal hygiene / sanitary facilities", "weight": 0.6, "introduced": "1.1", "notes": "G1/AS1 sanitary facility numbers, MBIE toilet calculator, user group justification." },
+    { "id": "building_code:G4", "label": "G4 — Ventilation", "weight": 0.6, "introduced": "1.1", "notes": "Mechanical ventilation drawings + PS1; G4.3.3 contaminant spaces requiring mech vent (cannot use G1/AS1 natural ventilation)." },
+    { "id": "building_code:G12", "label": "G12 — Water supplies", "weight": 0.6, "introduced": "1.1", "notes": "Backflow prevention, plumbing schematic, solar hot water." },
+    { "id": "building_code:G13", "label": "G13 — Foul water", "weight": 0.6, "introduced": "1.1", "notes": "Drainage, septic tanks (ECan approval), wastewater outfall, sewer connection." },
     { "id": "building_code:H1", "label": "H1 — Energy efficiency", "rfi_share": 0.05, "weight": 0.7 },
+    { "id": "building_code:H1:envelope", "label": "H1 — Envelope thermal resistance (>300m²)", "weight": 0.7, "introduced": "1.1", "notes": "Schedule method or modelling method report; consultant-prepared." },
+    { "id": "building_code:H1:lighting", "label": "H1.3.5 — Artificial lighting energy efficiency", "weight": 0.6, "introduced": "1.1", "notes": "NZS 4243.2:2007 schedule method calculations or electrical engineer PS1 covering H1.3.5." },
+
     { "id": "documentation:plans", "label": "Documentation — Plans", "weight": 0.6 },
+    { "id": "documentation:plans:site_levels", "label": "Plans — Site/floor levels & survey datum", "weight": 0.7, "introduced": "1.1", "notes": "Christchurch Drainage Datum, NZVD2016 / LVD1937, Building Location Certificate (BLC), FFL freeboard, FAC (SDC ≥25m²), benchmark references." },
+    { "id": "documentation:plans:design_coordination", "label": "Plans — Cross-discipline coordination", "weight": 0.6, "introduced": "1.1", "notes": "Architectural vs structural / fire / civil / HVAC inconsistency. Lead designer responsibility. CCC commercial RFI surface." },
     { "id": "documentation:specifications", "label": "Documentation — Specifications", "weight": 0.6 },
     { "id": "documentation:producer_statements", "label": "Documentation — Producer statements", "weight": 0.9 },
+    { "id": "documentation:producer_statements:ps1", "label": "PS1 — Design", "weight": 0.9, "introduced": "1.1" },
+    { "id": "documentation:producer_statements:ps2", "label": "PS2 — Design Review", "weight": 0.7, "introduced": "1.1" },
+    { "id": "documentation:producer_statements:ps3", "label": "PS3 — Construction", "weight": 0.8, "introduced": "1.1", "notes": "WDC publishes specific PS3 sub-types: wet area seal-tanking, septic & effluent disposal field, solid fuel burner installer." },
+    { "id": "documentation:producer_statements:ps4", "label": "PS4 — Construction Review (monitoring)", "weight": 0.9, "introduced": "1.1", "notes": "Construction monitoring schedule + PS4 confirmation. CCC-heavy RFI surface for SED." },
     { "id": "documentation:fees", "label": "Documentation — Fees", "weight": 0.5 },
     { "id": "documentation:lbp", "label": "Documentation — LBP", "weight": 0.7 },
-    { "id": "documentation:other", "label": "Documentation — Other", "weight": 0.4 }
+    { "id": "documentation:owner_details", "label": "Documentation — Owner details / vetting", "weight": 0.5, "introduced": "1.1", "notes": "SDC vetting RFI: applications not accepted until owner contact details complete." },
+    { "id": "documentation:product_assurance", "label": "Documentation — Product assurance (BRANZ / CodeMark)", "weight": 0.7, "introduced": "1.1", "notes": "BRANZ appraisal numbers, CodeMark certificate of conformity + conditions of use, alternative cladding documentation, MBIE warnings/bans." },
+    { "id": "documentation:specified_systems", "label": "Documentation — Specified systems & Compliance Schedule", "weight": 0.7, "introduced": "1.1", "notes": "Compliance Schedule, IM&R procedures, performance standards. SDC publishes a Specified Systems Information form + 1.7 MB guidance document." },
+    { "id": "documentation:missing_sheets", "label": "Documentation — Missing referenced sheets", "weight": 0.7, "introduced": "1.2", "notes": "Drawing register lists sheets that are not present in the upload. Detected deterministically from PDF text layer." },
+    { "id": "documentation:revision_mismatch", "label": "Documentation — Revision mismatch across sheets", "weight": 0.6, "introduced": "1.2", "notes": "Sheets in the same set carry inconsistent revision letters, indicating a revision sync issue. Detected deterministically from title-block text." },
+    { "id": "documentation:other", "label": "Documentation — Other", "weight": 0.4 },
+
+    { "id": "process:vetting_s45", "label": "Process — Vetting / s45 completeness", "weight": 0.6, "introduced": "1.1", "notes": "SDC: vetting RFI resets the 20-day clock. CCC/WDC: incomplete applications rejected outright. Distinct from technical assessment RFIs." },
+    { "id": "process:engineering_acceptance", "label": "Process — Development Engineering acceptance", "weight": 0.8, "introduced": "1.1", "notes": "SDC-only parallel process for urban multi-unit. Lawful outfall + service layout + ECOP compliance + CPEng/SQEP certification. Own 20-day clock + own RFI cycle. Hourly fees." },
+    { "id": "process:other_authorities", "label": "Process — Other-authority approvals", "weight": 0.7, "introduced": "1.1", "notes": "Network utility approvals (water capacity, wastewater capacity, stormwater outfall), trade waste, asset protection. CCC publishes 5+ specific email addresses for these." },
+    { "id": "process:cross_referrals", "label": "Process — Cross-agency referrals", "weight": 0.5, "introduced": "1.1", "notes": "FENZ Fire Engineering Unit (10 working days, s46), Heritage NZ (5 days notification). MBIE warnings & bans on products." },
+    { "id": "process:rural_servicing", "label": "Process — Rural site servicing", "weight": 0.7, "introduced": "1.1", "notes": "Effluent field design + fencing + ECan approval, potable water testing (chem+micro, 18-month rule), stormwater swales/ponds, freeboard, secondary flow path. WDC-heavy." },
+    { "id": "process:change_of_use", "label": "Process — Change of use / unconsented habitation", "weight": 0.8, "introduced": "1.1", "notes": "Owner notice + Council approval before commencement. Caravans/containers/garages becoming buildings. ANARP compliance for new household units. WDC-published. Real example: MBIE Determination 2026/008 (CCC NTF)." },
+    { "id": "process:certificate_of_acceptance", "label": "Process — Certificate of Acceptance (retrospective)", "weight": 0.7, "introduced": "1.1", "notes": "Form 8 / s96. Council not obliged to issue. Refusal recorded on LIM. Doesn't apply to Schedule 1 exempt work or pre-1992." },
+    { "id": "process:planning_resource_consent", "label": "Process — Planning / s37 resource consent", "weight": 0.8, "introduced": "1.1", "notes": "Building Act s37 notice; District/Regional Plan compliance materially affected; building consent processing suspended pending RC." }
   ],
+
   "severities": ["must_resolve", "nice_to_have"],
+
   "project_statuses": [
     "pre-lodgement",
     "lodged",
@@ -39,16 +175,57 @@
     "granted",
     "declined"
   ],
+
   "acceptable_solutions": {
     "B1": { "title": "Structure", "documents": ["B1/AS1", "B1/VM1", "B1/VM4"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/b-stability/b1-structure/" },
     "B2": { "title": "Durability", "documents": ["B2/AS1", "B2/VM1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/b-stability/b2-durability/" },
     "C":  { "title": "Protection from fire", "documents": ["C/AS1", "C/AS2", "C/VM2"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/c-protection-from-fire/" },
     "D":  { "title": "Access", "documents": ["D1/AS1", "D2/AS1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/d-access/" },
+    "D1": { "title": "Access routes", "documents": ["D1/AS1", "D1/VM1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/d-access/d1-access-routes/" },
     "E1": { "title": "Surface water", "documents": ["E1/AS1", "E1/VM1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/e-moisture/e1-surface-water/" },
     "E2": { "title": "External moisture", "documents": ["E2/AS1", "E2/VM1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/e-moisture/e2-external-moisture/" },
     "E3": { "title": "Internal moisture", "documents": ["E3/AS1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/e-moisture/e3-internal-moisture/" },
     "F":  { "title": "Safety of users", "documents": ["F2/AS1", "F4/AS1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/f-safety-of-users/" },
+    "F9": { "title": "Restricting access to residential pools", "documents": ["F9/AS1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/f-safety-of-users/f9-restricting-access-to-residential-pools/" },
     "G":  { "title": "Services and facilities", "documents": ["G12/AS1", "G13/AS1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/g-services-and-facilities/" },
+    "G1": { "title": "Personal hygiene", "documents": ["G1/AS1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/g-services-and-facilities/g1-personal-hygiene/" },
+    "G4": { "title": "Ventilation", "documents": ["G4/AS1", "G4/VM1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/g-services-and-facilities/g4-ventilation/" },
+    "G12": { "title": "Water supplies", "documents": ["G12/AS1", "G12/AS2", "G12/VM1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/g-services-and-facilities/g12-water-supplies/" },
+    "G13": { "title": "Foul water", "documents": ["G13/AS1", "G13/AS2", "G13/VM4"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/g-services-and-facilities/g13-foul-water/" },
     "H1": { "title": "Energy efficiency", "documents": ["H1/AS1", "H1/VM1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/h-energy-efficiency/h1-energy-efficiency/" }
+  },
+
+  "canterbury_overlays": {
+    "tc_zones": {
+      "tc1": "Standard residential green zone — minimal liquefaction; standard shallow geotech.",
+      "tc2": "Yellow zone — minor to moderate liquefaction; standard solutions for foundation repair/rebuild.",
+      "tc3": "Blue zone — moderate to significant liquefaction; requires site-specific geotechnical investigation and specific engineering foundation design tolerating ≥300mm global lateral displacement.",
+      "mbie_canterbury_guidance_url": "https://www.building.govt.nz/building-code-compliance/canterbury-rebuild/"
+    },
+    "ccc_specific": {
+      "datum": "Christchurch Drainage Datum required for site/floor levels in flood-prone areas.",
+      "flood_management_areas": "Identified via CCC floor-level map.",
+      "network_utility_approvals_required_for": ["new water supply", "increased wastewater outfall", "change to stormwater outfall"]
+    },
+    "selwyn_specific": {
+      "fac_required_for": "New principal buildings, new residential units, or alterations ≥25m² floor area.",
+      "ecan_flood_report_required_for": "Rural properties in the Plains Flood Management Overlay.",
+      "engineering_acceptance_required_for": "Multi-unit residential, commercial, or industrial in urban zones (with 7-Apr-2025 minor-residential-unit exemption except MRZ)."
+    },
+    "waimakariri_specific": {
+      "tc3_history": "Significant TC3 land plus former residential red zones in Kaiapoi, Pines Beach, Kairaki post-2010/2011 quakes.",
+      "validation_step": "Senior Building Officer QA gate (Step 6) — distinct RFI surface.",
+      "cca_audit_step": "CCC Auditor post-final-inspection review (Step 17) — distinct RFI surface."
+    }
+  },
+
+  "national_perf": {
+    "source": "MBIE Annual Building Consent System Performance Monitoring, year ended June 2025",
+    "applications_processed": 143022,
+    "median_processing_days_all": 9.0,
+    "pass_rate_overall": 0.939,
+    "rfi_rate_overall": 0.646,
+    "median_rfi_response_days": 11.0,
+    "rfi_rate_by_complexity": {"R1": 0.529, "R2": 0.670, "R3": 0.778, "C1": 0.724, "C2": 0.772, "C3": 0.778}
   }
 }
