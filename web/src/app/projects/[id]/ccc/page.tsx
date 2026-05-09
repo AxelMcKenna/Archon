@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { getCccViewModel } from "@/lib/ccc";
 import { CccValidationForm } from "./ccc-validation-form";
+import { CccDocumentsWorkflow } from "./ccc-documents-workflow";
 
 export const dynamic = "force-dynamic";
 
@@ -119,23 +120,6 @@ export default async function CCC({ params }: { params: Promise<{ id: string }> 
       </section>
 
       <section className="bg-white rounded-lg border border-ink-200 p-5">
-        <h2 className="text-xl font-semibold">Inspection Checklist</h2>
-        <ul className="mt-4 space-y-2">
-          {ccc.inspectionChecklist.map((inspection) => (
-            <li key={inspection.name} className="flex justify-between gap-4 text-sm">
-              <span>{inspection.name}</span>
-              <span className={`font-semibold ${checklistTone(inspection.status)}`}>
-                {checklistIcon(inspection.status)} {inspection.status}
-              </span>
-            </li>
-          ))}
-          {ccc.inspectionChecklist.length === 0 && (
-            <li className="text-sm text-ink-500">No inspection items extracted from consent notes.</li>
-          )}
-        </ul>
-      </section>
-
-      <section className="bg-white rounded-lg border border-ink-200 p-5">
         <h2 className="text-xl font-semibold">Document Checklist (Christchurch City Council)</h2>
         <ul className="mt-4 space-y-2">
           {[...ccc.requiredDocumentItems, ...ccc.conditionalDocumentItems].map((doc) => (
@@ -160,6 +144,12 @@ export default async function CCC({ params }: { params: Promise<{ id: string }> 
           ))}
         </ul>
       </section>
+
+      <CccDocumentsWorkflow
+        projectId={id}
+        requiredItems={ccc.requiredDocumentItems}
+        conditionalItems={ccc.conditionalDocumentItems}
+      />
 
       <CccValidationForm
         requiredItems={ccc.requiredDocumentItems}
