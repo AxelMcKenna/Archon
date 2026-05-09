@@ -66,7 +66,10 @@ async def address_to_checklist(query: AddressQuery) -> AddressChecklistResponse:
     if not geocoding_result:
         raise HTTPException(
             status_code=404,
-            detail=f"Could not geocode address: {query.address}. Try including suburb/city name (e.g., '100 Bealey Ave, Christchurch')."
+            detail=(
+                f"Could not geocode address within supported Canterbury councils (Christchurch, Selwyn, "
+                f"Waimakariri): {query.address}."
+            )
         )
     
     lat = geocoding_result["lat"]

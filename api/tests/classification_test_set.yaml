@@ -1,0 +1,123 @@
+# Labelled test set for classification accuracy (AC-2a/2b/2c).
+# Synthetic for MVP (real items pending OIA / partner architects).
+# Each item: raw_text + ground-truth primary category + severity.
+#
+# Distribution roughly mirrors BRANZ findings:
+#   B1 ~30%, E2 ~20%, docs ~25%, others ~25%.
+
+cases:
+  # ─── B1 — Structure ──────────────────────────────────────────────────
+  - id: b1-01
+    raw_text: "Provide structural calculations demonstrating compliance with Building Code clause B1 for the proposed first-floor framing."
+    expected: building_code:B1
+
+  - id: b1-02
+    raw_text: "Bracing design shall comply with NZS 3604:2011. Provide bracing line layout."
+    expected: building_code:B1
+
+  - id: b1-03
+    raw_text: "Foundation design for the proposed slab requires CPEng input given soil class E."
+    expected: building_code:B1
+
+  - id: b1-04
+    raw_text: "Confirm wind zone calculations and provide lateral load resistance details."
+    expected: building_code:B1
+
+  - id: b1-05
+    raw_text: "Steel beam to top of garage opening: provide manufacturer certification or PS1."
+    expected: building_code:B1
+
+  - id: b1-06
+    raw_text: "Seismic detailing for chimney attachment is missing — please provide."
+    expected: building_code:B1
+
+  # ─── E2 — External moisture ──────────────────────────────────────────
+  - id: e2-01
+    raw_text: "Show flashings to head, jamb and sill at all window penetrations. Refer E2/AS1."
+    expected: building_code:E2
+
+  - id: e2-02
+    raw_text: "Provide weathertightness details at the junction between cladding and roof."
+    expected: building_code:E2
+
+  - id: e2-03
+    raw_text: "Cladding fixings detail required for the proposed direct-fixed weatherboard."
+    expected: building_code:E2
+
+  - id: e2-04
+    raw_text: "Show drained and ventilated cavity to all external wall framing."
+    expected: building_code:E2
+
+  - id: e2-05
+    raw_text: "Head and sill flashing details for the patio doors are unclear — please amend."
+    expected: building_code:E2
+
+  # ─── Documentation ───────────────────────────────────────────────────
+  - id: ps1-01
+    raw_text: "Please provide PS1 from a Chartered Professional Engineer for the proposed retaining wall over 1.5m in height."
+    expected: documentation:producer_statements
+
+  - id: ps3-01
+    raw_text: "PS3 (Construction Review) will be required prior to CCC issue."
+    expected: documentation:producer_statements
+
+  - id: ps4-01
+    raw_text: "PS4 from the structural engineer is required upon completion of the steelwork."
+    expected: documentation:producer_statements
+
+  - id: lbp-01
+    raw_text: "Provide LBP details for the licensed building practitioner undertaking the restricted building work."
+    expected: documentation:lbp
+
+  - id: fee-01
+    raw_text: "Outstanding fee shortfall of $450.00 must be paid before processing continues."
+    expected: documentation:fees
+
+  - id: plans-01
+    raw_text: "Site plan does not show north arrow or scale bar. Please amend and resubmit."
+    expected: documentation:plans
+
+  - id: plans-02
+    raw_text: "Setback distance from the southern boundary not dimensioned on the site plan."
+    expected: documentation:plans
+
+  - id: spec-01
+    raw_text: "Material specifications are missing for the cladding system. Please provide product specs."
+    expected: documentation:specifications
+
+  # ─── G — Services & facilities ───────────────────────────────────────
+  - id: g-01
+    raw_text: "Provide a drainage layout including stormwater discharge point and sewer connection."
+    expected: building_code:G
+
+  - id: g-02
+    raw_text: "Plumbing details for the second bathroom are missing — please provide G12 compliance schedule."
+    expected: building_code:G
+
+  # ─── F — Safety of users ─────────────────────────────────────────────
+  - id: f-01
+    raw_text: "Balustrade height to deck must comply with safety glazing requirements per F4."
+    expected: building_code:F
+
+  - id: f-02
+    raw_text: "Provide barrier details for stairs over 1m drop including handrail at 900mm."
+    expected: building_code:F
+
+  # ─── H1 — Energy efficiency ──────────────────────────────────────────
+  - id: h1-01
+    raw_text: "Confirm wall insulation R-value meets H1 schedule method for climate zone 6."
+    expected: building_code:H1
+
+  - id: h1-02
+    raw_text: "Double glazing specification with low-e coating required for thermal performance."
+    expected: building_code:H1
+
+  # ─── C — Protection from fire ────────────────────────────────────────
+  - id: c-01
+    raw_text: "Provide fire-rated separation between attached garage and habitable spaces (60/60/60)."
+    expected: building_code:C
+
+  # ─── E3 — Internal moisture ──────────────────────────────────────────
+  - id: e3-01
+    raw_text: "Wet area waterproofing details required for the en-suite shower."
+    expected: building_code:E3

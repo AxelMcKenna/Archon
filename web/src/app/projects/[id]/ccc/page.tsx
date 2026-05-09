@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { getCccViewModel } from "@/lib/ccc";
+import { CccValidationForm } from "./ccc-validation-form";
 
 export const dynamic = "force-dynamic";
 
@@ -78,8 +79,8 @@ export default async function CCC({ params }: { params: Promise<{ id: string }> 
             : "Not ready to apply yet."}
         </p>
         <p className="mt-2 text-sm">
-          Inspections: {ccc.completedInspections}/{ccc.totalInspections} complete · Documents:{" "}
-          {ccc.completedDocuments}/{ccc.totalDocuments} uploaded
+          Inspections: {ccc.completedInspections}/{ccc.totalInspections} complete · Required documents:{" "}
+          {ccc.completedRequiredDocuments}/{ccc.totalRequiredDocuments} uploaded
         </p>
         {ccc.blockers.length > 0 && (
           <ul className="mt-3 space-y-1 text-sm">
@@ -109,8 +110,8 @@ export default async function CCC({ params }: { params: Promise<{ id: string }> 
           <div>
             <h3 className="text-sm font-semibold mb-2">Required Documentation</h3>
             <ul className="space-y-1 text-sm text-ink-700">
-              {ccc.requiredDocuments.map((item) => (
-                <li key={item}>• {item}</li>
+              {ccc.requiredDocumentItems.map((item) => (
+                <li key={item.key}>• {item.label}</li>
               ))}
             </ul>
           </div>
@@ -135,21 +136,36 @@ export default async function CCC({ params }: { params: Promise<{ id: string }> 
       </section>
 
       <section className="bg-white rounded-lg border border-ink-200 p-5">
-        <h2 className="text-xl font-semibold">Document Checklist</h2>
+        <h2 className="text-xl font-semibold">Document Checklist (Christchurch City Council)</h2>
         <ul className="mt-4 space-y-2">
-          {ccc.documentChecklist.map((doc) => (
-            <li key={doc.label} className="flex justify-between gap-4 text-sm">
-              <span>{doc.label}</span>
-              <span className={`font-semibold ${checklistTone(doc.status)}`}>
-                {checklistIcon(doc.status)}{" "}
-                {doc.status === "missing"
-                  ? `${doc.label} — not uploaded`
-                  : doc.matchedDocument ?? "uploaded"}
+          {[...ccc.requiredDocumentItems, ...ccc.conditionalDocumentItems].map((doc) => (
+            <li key={doc.key} className="flex justify-between gap-4 text-sm">
+              <span className="flex items-center gap-2">
+                {doc.label}
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs ${
+                    doc.requirementType === "required"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-amber-100 text-amber-800"
+                  }`}
+                >
+                  {doc.requirementType === "required" ? "Required" : "If Applicable"}
+                </span>
+              </span>
+              <span className={`font-semibold ${checklistTone(doc.status === "complete" ? "complete" : "missing")}`}>
+                {checklistIcon(doc.status === "complete" ? "complete" : "missing")}{" "}
+                {doc.status === "missing" ? `${doc.label} — not uploaded` : `${doc.matchedDocuments.length} uploaded`}
               </span>
             </li>
           ))}
         </ul>
       </section>
+
+      <CccValidationForm
+        requiredItems={ccc.requiredDocumentItems}
+        conditionalItems={ccc.conditionalDocumentItems}
+        inspectionBlockers={ccc.blockers.filter((blocker) => blocker.startsWith("Inspection incomplete:"))}
+      />
     </div>
   );
 }

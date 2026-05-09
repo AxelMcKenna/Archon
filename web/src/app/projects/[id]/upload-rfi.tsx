@@ -1,11 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { apiUpload } from "@/lib/api";
+
+type ExtractResponse = {
+  letter_id: string;
+  storage_path: string;
+  extractor: "pdfplumber" | "claude-vision";
+  items_count: number;
+  processing_ms: number;
+  cost_usd: number;
+};
 
 export function UploadRfi({ projectId, bca }: { projectId: string; bca: string }) {
+  const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<unknown>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function submit(e: React.FormEvent) {
@@ -13,17 +24,14 @@ export function UploadRfi({ projectId, bca }: { projectId: string; bca: string }
     if (!file) return;
     setBusy(true);
     setError(null);
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("project_id", projectId);
-    fd.append("bca", bca);
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/extract`,
-        { method: "POST", body: fd },
-      );
-      if (!res.ok) throw new Error(await res.text());
-      setResult(await res.json());
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("project_id", projectId);
+      fd.append("bca", bca);
+      const res = await apiUpload<ExtractResponse>("/extract", fd);
+      router.push(`/projects/${projectId}/rfi/${res.letter_id}`);
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
@@ -48,11 +56,6 @@ export function UploadRfi({ projectId, bca }: { projectId: string; bca: string }
         {busy ? "Extracting…" : "Extract"}
       </button>
       {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
-      {result !== null && (
-        <pre className="mt-4 max-h-96 overflow-auto rounded bg-ink-700/5 p-3 text-xs">
-          {JSON.stringify(result, null, 2)}
-        </pre>
-      )}
     </form>
   );
 }

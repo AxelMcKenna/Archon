@@ -1,0 +1,521 @@
+{
+  "baseline": [
+    {
+      "id": "assessment_of_environmental_effects",
+      "title": "Assessment of Environmental Effects (AEE)",
+      "description": "Core resource consent report describing the proposal, site context, effects, and mitigation. Usually prepared by a planning consultant with specialist inputs.",
+      "category": "baseline",
+      "trigger": "Required for most resource consent applications under Schedule 4 requirements.",
+      "specialist": "Planning consultant",
+      "referenceClause": "RMA Schedule 4"
+    },
+    {
+      "id": "site_plan_and_set",
+      "title": "Site Plan, Elevations, and Floor Plans",
+      "description": "Scaled plans showing site boundaries, setbacks, existing/proposed buildings, access, and key dimensions. Prepared by an architect or architectural designer.",
+      "category": "baseline",
+      "trigger": "Council requires scaled plans to assess district plan compliance and effects.",
+      "specialist": "Architectural designer",
+      "referenceClause": "RMA Schedule 4"
+    },
+    {
+      "id": "certificate_of_title",
+      "title": "Certificate of Title and Legal Description",
+      "description": "Current title record identifying ownership, legal boundaries, and encumbrances relevant to consent assessment.",
+      "category": "baseline",
+      "trigger": "Required to identify land status and any relevant legal interests.",
+      "specialist": null,
+      "referenceClause": "RMA Schedule 4"
+    }
+  ],
+  "byZoneCategory": {
+    "residential": [
+      {
+        "id": "residential_neighbourhood_context",
+        "title": "Residential Neighbourhood Context Assessment",
+        "description": "Assessment of scale, dominance, privacy, and amenity effects on neighbouring residential properties.",
+        "category": "location",
+        "trigger": "Residential zones typically require evaluation of amenity and neighbourhood character effects.",
+        "specialist": "Planning consultant",
+        "referenceClause": "CCC District Plan 14.x"
+      }
+    ],
+    "commercial": [
+      {
+        "id": "commercial_activity_and_servicing_assessment",
+        "title": "Commercial Activity and Servicing Assessment",
+        "description": "Assessment of business activity effects including servicing, loading, noise interface, and operating profile.",
+        "category": "location",
+        "trigger": "Commercial zones require confirmation that activity effects remain compatible with zone outcomes.",
+        "specialist": "Planning consultant",
+        "referenceClause": "CCC District Plan 15.x"
+      }
+    ],
+    "industrial": [
+      {
+        "id": "industrial_reverse_sensitivity_assessment",
+        "title": "Industrial Reverse Sensitivity Assessment",
+        "description": "Assessment of compatibility between sensitive uses and existing/anticipated industrial operations.",
+        "category": "location",
+        "trigger": "Industrial zones need assessment of reverse sensitivity and operational effects.",
+        "specialist": "Planning consultant",
+        "referenceClause": "CCC District Plan 16.x"
+      }
+    ],
+    "rural": [
+      {
+        "id": "rural_landscape_and_servicing_assessment",
+        "title": "Rural Landscape and Servicing Assessment",
+        "description": "Assessment covering rural amenity, landscape character, and practical servicing/access arrangements.",
+        "category": "location",
+        "trigger": "Rural zones generally require broader landscape and rural character consideration.",
+        "specialist": "Planning consultant",
+        "referenceClause": "CCC District Plan 17.x"
+      }
+    ],
+    "openspace": [
+      {
+        "id": "open_space_interface_assessment",
+        "title": "Open Space Interface Assessment",
+        "description": "Assessment of how the proposal affects public open-space values, outlook, and recreational function.",
+        "category": "location",
+        "trigger": "Open space zones require analysis of effects on public amenity and recreation outcomes.",
+        "specialist": "Planning consultant",
+        "referenceClause": "CCC District Plan 18.x"
+      }
+    ]
+  },
+  "byOverlay": {
+    "liquefaction": [
+      {
+        "id": "geotechnical_site_investigation",
+        "title": "Geotechnical Site Investigation Report",
+        "description": "Ground investigation and geotechnical interpretation addressing bearing, settlement, and liquefaction behaviour.",
+        "category": "specialist",
+        "trigger": "Liquefaction overlay indicates elevated subsoil risk requiring geotechnical verification.",
+        "specialist": "CPEng geotechnical engineer",
+        "referenceClause": "NZBC Clause B1"
+      }
+    ],
+    "floodHigh": [
+      {
+        "id": "flood_hazard_assessment",
+        "title": "Flood Hazard and Floor Level Assessment",
+        "description": "Hydraulic/flood assessment confirming hazard exposure, minimum floor levels, and mitigation approach.",
+        "category": "specialist",
+        "trigger": "High flood hazard overlay requires flood effects and mitigation evidence.",
+        "specialist": "Hydraulic engineer",
+        "referenceClause": "CCC District Plan 5.x"
+      }
+    ],
+    "floodPonding": [
+      {
+        "id": "stormwater_ponding_assessment",
+        "title": "Ponding and Surface Water Management Assessment",
+        "description": "Assessment of local ponding risk and proposed on-site and network stormwater management responses.",
+        "category": "location",
+        "trigger": "Ponding overlay requires evidence of safe surface water handling.",
+        "specialist": "Civil engineer",
+        "referenceClause": "NZBC Clause E1"
+      }
+    ],
+    "slopeHazard": [
+      {
+        "id": "slope_stability_assessment",
+        "title": "Slope Stability and Geotechnical Risk Assessment",
+        "description": "Specialist report on slope stability, retaining requirements, and construction-stage geotechnical controls.",
+        "category": "specialist",
+        "trigger": "Slope hazard overlay requires confirmation of geotechnical stability.",
+        "specialist": "CPEng geotechnical engineer",
+        "referenceClause": "NZBC Clause B1"
+      }
+    ],
+    "heritage": [
+      {
+        "id": "heritage_impact_assessment",
+        "title": "Heritage Impact Assessment",
+        "description": "Specialist assessment of effects on heritage fabric, values, and significance with mitigation methods.",
+        "category": "specialist",
+        "trigger": "Heritage overlay requires assessment of effects on identified heritage values.",
+        "specialist": "Heritage specialist",
+        "referenceClause": "CCC District Plan 9.x"
+      }
+    ],
+    "heritageChar": [
+      {
+        "id": "heritage_character_assessment",
+        "title": "Heritage Character Assessment",
+        "description": "Assessment of proposed design against heritage character outcomes and relevant precinct controls.",
+        "category": "location",
+        "trigger": "Heritage character overlay requires demonstration of compatible form and detailing.",
+        "specialist": "Heritage specialist",
+        "referenceClause": "CCC District Plan 9.x"
+      }
+    ],
+    "residentialChar": [
+      {
+        "id": "residential_character_assessment",
+        "title": "Residential Character Assessment",
+        "description": "Context and urban design assessment showing how built form responds to local character patterns.",
+        "category": "location",
+        "trigger": "Residential character overlay requires assessment of streetscape and built-form effects.",
+        "specialist": "Urban designer",
+        "referenceClause": "CCC District Plan 14.x"
+      }
+    ],
+    "tsunami": [
+      {
+        "id": "tsunami_hazard_and_evacuation_assessment",
+        "title": "Tsunami Hazard and Evacuation Considerations",
+        "description": "Assessment of tsunami hazard exposure and relevant design or emergency planning considerations.",
+        "category": "specialist",
+        "trigger": "Tsunami overlay indicates coastal hazard exposure requiring specialist confirmation.",
+        "specialist": "Coastal hazards specialist",
+        "referenceClause": "Canterbury Regional Policy Statement"
+      }
+    ],
+    "coastalErosion": [
+      {
+        "id": "coastal_erosion_assessment",
+        "title": "Coastal Erosion Risk Assessment",
+        "description": "Specialist assessment of erosion susceptibility, setbacks, and long-term risk management.",
+        "category": "specialist",
+        "trigger": "Coastal erosion overlay requires coastal hazard assessment.",
+        "specialist": "Coastal engineer",
+        "referenceClause": "CCC District Plan 6.x"
+      }
+    ],
+    "coastalInundation": [
+      {
+        "id": "coastal_inundation_assessment",
+        "title": "Coastal Inundation Assessment",
+        "description": "Assessment of inundation pathways, levels, and adaptation/mitigation measures for development.",
+        "category": "specialist",
+        "trigger": "Coastal inundation overlay requires confirmation of exposure and mitigation.",
+        "specialist": "Coastal engineer",
+        "referenceClause": "CCC District Plan 6.x"
+      }
+    ],
+    "protectedVeg": [
+      {
+        "id": "arborist_report_protected_vegetation",
+        "title": "Protected Vegetation Arborist Report",
+        "description": "Arboricultural report detailing tree/vegetation condition, root protection areas, and avoidance/mitigation.",
+        "category": "specialist",
+        "trigger": "Protected vegetation overlay requires specialist arboricultural input.",
+        "specialist": "Qualified arborist",
+        "referenceClause": "CCC District Plan 8.x"
+      }
+    ],
+    "notableTree": [
+      {
+        "id": "notable_tree_assessment",
+        "title": "Notable Tree Assessment and Method Statement",
+        "description": "Detailed arborist report and construction method statement for works within notable tree protection zones.",
+        "category": "specialist",
+        "trigger": "Notable tree overlay triggers specific protection and assessment requirements.",
+        "specialist": "Qualified arborist",
+        "referenceClause": "CCC District Plan 8.x"
+      }
+    ]
+  },
+  "byProjectType": {
+    "new_dwelling": [
+      {
+        "id": "h1_energy_efficiency_statement",
+        "title": "H1 Energy Efficiency Compliance Statement",
+        "description": "Statement and supporting method (Schedule, Calculation, or Modelling) demonstrating NZBC H1 compliance.",
+        "category": "project",
+        "trigger": "New dwellings must demonstrate thermal performance compliance.",
+        "specialist": "Architectural designer",
+        "referenceClause": "NZBC Clause H1"
+      },
+      {
+        "id": "ccc_new_dwelling_checklist",
+        "title": "CCC New Dwelling Application Checklist",
+        "description": "Council checklist confirming all required drawings, specifications, and supporting information are included.",
+        "category": "project",
+        "trigger": "Council requires complete lodgement information for new dwelling applications.",
+        "specialist": null,
+        "referenceClause": "CCC guidance"
+      },
+      {
+        "id": "daylight_outlook_assessment_multi_unit",
+        "title": "Daylight and Outlook Assessment (Where Multi-unit Applies)",
+        "description": "Assessment of daylight access and outlook compliance for multi-unit or intensified residential forms.",
+        "category": "project",
+        "trigger": "Triggered where dwelling form and intensity create potential daylight/outlook effects.",
+        "specialist": "Planning consultant",
+        "referenceClause": "CCC District Plan 14.x"
+      }
+    ],
+    "extension": [
+      {
+        "id": "existing_and_proposed_drawings",
+        "title": "Existing vs Proposed Plans and Elevations",
+        "description": "Comparative drawing package identifying altered elements, new work scope, and compliance impacts.",
+        "category": "project",
+        "trigger": "Extensions require clear delineation of retained versus new work.",
+        "specialist": "Architectural designer",
+        "referenceClause": "RMA Schedule 4"
+      }
+    ],
+    "accessory_building": [
+      {
+        "id": "accessory_building_use_and_servicing_note",
+        "title": "Accessory Building Use and Servicing Statement",
+        "description": "Brief statement confirming intended use, occupancy, services, and consistency with accessory-building controls.",
+        "category": "project",
+        "trigger": "Accessory buildings need clear use and compliance description.",
+        "specialist": "Planning consultant",
+        "referenceClause": "CCC District Plan 14.x"
+      }
+    ],
+    "deck": [
+      {
+        "id": "deck_barrier_and_fall_protection_details",
+        "title": "Deck Barrier and Fall Protection Details",
+        "description": "Design details for barriers/balustrades, heights, openings, and fixings to meet fall prevention requirements.",
+        "category": "project",
+        "trigger": "Deck proposals require barrier and user-safety details.",
+        "specialist": "Architectural designer",
+        "referenceClause": "NZBC Clause F4"
+      },
+      {
+        "id": "deck_structural_engineering_over_1_5m",
+        "title": "Structural Engineering for Decks Above 1.5 m",
+        "description": "Structural design and supporting calculations for elevated decks treated as restricted building work.",
+        "category": "specialist",
+        "trigger": "Decks above 1.5 m above ground require structural design and RBW controls.",
+        "specialist": "CPEng structural engineer",
+        "referenceClause": "Building Act 2004"
+      }
+    ]
+  },
+  "byProjectDetails": {
+    "involvesStructuralWork": [
+      {
+        "id": "record_of_building_work",
+        "title": "Record of Building Work (RoBW)",
+        "description": "Formal record completed by each LBP carrying out or supervising restricted building work.",
+        "category": "project",
+        "trigger": "Required where restricted building work is undertaken by Licensed Building Practitioners.",
+        "specialist": "Licensed Building Practitioner",
+        "referenceClause": "Building Act 2004"
+      },
+      {
+        "id": "lbp_licence_details_and_scope",
+        "title": "LBP Licence Details and Scope Confirmation",
+        "description": "Details of LBP class, registration, and confirmation that work undertaken matches licensed scope.",
+        "category": "project",
+        "trigger": "Council needs confirmation of competent licensed practitioners for RBW.",
+        "specialist": "Licensed Building Practitioner",
+        "referenceClause": "Building Act 2004"
+      },
+      {
+        "id": "producer_statement_ps1_structural",
+        "title": "Producer Statement PS1 (Design)",
+        "description": "Design producer statement from structural engineer confirming design intent and compliance basis.",
+        "category": "specialist",
+        "trigger": "Structural work commonly requires PS1 support for engineering design components.",
+        "specialist": "CPEng structural engineer",
+        "referenceClause": "NZBC Clause B1"
+      },
+      {
+        "id": "producer_statement_ps3_monitoring_commitment",
+        "title": "Producer Statement PS3 (Construction Monitoring Commitment)",
+        "description": "Commitment from design engineer regarding construction monitoring scope and verification approach.",
+        "category": "specialist",
+        "trigger": "Structural work with engineering design typically requires monitoring commitment.",
+        "specialist": "CPEng structural engineer",
+        "referenceClause": "NZBC Clause B1"
+      }
+    ],
+    "involvesEarthworks": [
+      {
+        "id": "earthworks_management_plan",
+        "title": "Earthworks Management Plan",
+        "description": "Plan addressing staging, erosion and sediment controls, stabilisation, and site environmental protection.",
+        "category": "project",
+        "trigger": "Earthworks activities require documented erosion/sediment and site management controls.",
+        "specialist": "Civil engineer",
+        "referenceClause": "ECan Land and Water Regional Plan"
+      },
+      {
+        "id": "geotechnical_stability_confirmation_for_earthworks",
+        "title": "Geotechnical Stability Confirmation for Earthworks",
+        "description": "Geotechnical confirmation of stability where cuts/fills are significant or undertaken on sloping land.",
+        "category": "specialist",
+        "trigger": "Earthworks over 50 m3 or on sloping terrain generally require geotechnical confirmation.",
+        "specialist": "CPEng geotechnical engineer",
+        "referenceClause": "NZBC Clause B1"
+      },
+      {
+        "id": "ecan_earthworks_regional_consent_screen",
+        "title": "Environment Canterbury Regional Consent Screening Note",
+        "description": "Assessment note identifying whether additional ECan earthworks consents are needed near waterways or sensitive areas.",
+        "category": "project",
+        "trigger": "Earthworks near waterways may trigger separate regional consent requirements.",
+        "specialist": "Planning consultant",
+        "referenceClause": "ECan Land and Water Regional Plan"
+      }
+    ],
+    "existingStructureDemolished": [
+      {
+        "id": "hazardous_materials_asbestos_survey",
+        "title": "Hazardous Materials Survey (Including Asbestos Risk)",
+        "description": "Survey identifying hazardous materials before demolition, with asbestos assessment emphasis for older buildings.",
+        "category": "specialist",
+        "trigger": "Demolition requires hazardous material risk identification prior to works.",
+        "specialist": "Licensed asbestos assessor",
+        "referenceClause": "Health and Safety at Work (Asbestos) Regulations 2016"
+      },
+      {
+        "id": "demolition_consent_application_documents",
+        "title": "Demolition Consent Application Documents",
+        "description": "Demolition scope, method, safety controls, and sequencing information required for council processing.",
+        "category": "project",
+        "trigger": "Existing structure demolition triggers dedicated demolition consent documentation.",
+        "specialist": "Demolition contractor",
+        "referenceClause": "Building Act 2004"
+      },
+      {
+        "id": "construction_and_demolition_waste_plan",
+        "title": "Construction and Demolition Waste Management Plan",
+        "description": "Plan detailing waste segregation, disposal pathways, and recovery/recycling approach for demolition works.",
+        "category": "project",
+        "trigger": "Demolition works require managed waste handling and disposal documentation.",
+        "specialist": null,
+        "referenceClause": "CCC Solid Waste Bylaw"
+      }
+    ],
+    "newRoadAccess": [
+      {
+        "id": "vehicle_crossing_application",
+        "title": "Vehicle Crossing Application",
+        "description": "Separate council application for new or modified vehicle crossing and kerb/channel works.",
+        "category": "project",
+        "trigger": "New road access requires a CCC vehicle crossing approval pathway.",
+        "specialist": null,
+        "referenceClause": "CCC Infrastructure Design Standards"
+      },
+      {
+        "id": "traffic_impact_assessment_collector_arterial",
+        "title": "Traffic Impact Assessment (Collector/Arterial Roads)",
+        "description": "Assessment of network effects, safety, sightlines, and access design for busier road classifications.",
+        "category": "specialist",
+        "trigger": "Where access is onto collector/arterial roads, transport effects must be assessed.",
+        "specialist": "Transport engineer",
+        "referenceClause": "CCC District Plan transport chapter"
+      }
+    ],
+    "newServiceConnections": {
+      "water": [
+        {
+          "id": "water_connection_application",
+          "title": "Water Supply Connection Application",
+          "description": "Application package for new or upgraded potable water connection to council network.",
+          "category": "project",
+          "trigger": "New water servicing requires formal council connection application.",
+          "specialist": "Civil engineer",
+          "referenceClause": "CCC Three Waters standards"
+        },
+        {
+          "id": "water_network_capacity_confirmation",
+          "title": "Water Network Capacity Confirmation",
+          "description": "Evidence of available network capacity and servicing constraints for proposed demand.",
+          "category": "project",
+          "trigger": "Council requires confirmation that network can service proposal demand.",
+          "specialist": "Civil engineer",
+          "referenceClause": "CCC Infrastructure Design Standards"
+        }
+      ],
+      "wastewater": [
+        {
+          "id": "wastewater_connection_application",
+          "title": "Wastewater Connection Application",
+          "description": "Application and design information for connection to public wastewater infrastructure.",
+          "category": "project",
+          "trigger": "New wastewater discharge connection requires council approval documentation.",
+          "specialist": "Civil engineer",
+          "referenceClause": "CCC Three Waters standards"
+        },
+        {
+          "id": "trade_waste_screening_note",
+          "title": "Trade Waste Screening Note (Commercial Uses)",
+          "description": "Statement identifying whether trade waste consent is required for non-domestic discharge.",
+          "category": "project",
+          "trigger": "Commercial/industrial wastewater proposals may require trade waste assessment.",
+          "specialist": "Three waters consultant",
+          "referenceClause": "CCC Trade Waste Bylaw"
+        }
+      ],
+      "stormwater": [
+        {
+          "id": "stormwater_management_plan",
+          "title": "Stormwater Management Plan",
+          "description": "Plan showing collection, attenuation, treatment, and lawful discharge pathway for stormwater.",
+          "category": "project",
+          "trigger": "New stormwater connections require documented management and discharge design.",
+          "specialist": "Civil engineer",
+          "referenceClause": "NZBC Clause E1"
+        },
+        {
+          "id": "stormwater_connection_application",
+          "title": "Stormwater Connection Application",
+          "description": "Council application for physical stormwater tie-in, including levels and discharge details.",
+          "category": "project",
+          "trigger": "Formal council approval is required for stormwater network connections.",
+          "specialist": "Civil engineer",
+          "referenceClause": "CCC Three Waters standards"
+        }
+      ]
+    },
+    "thresholds": {
+      "floorAreaOver100m2": [
+        {
+          "id": "producer_statement_ps2_peer_review",
+          "title": "Producer Statement PS2 (Peer Review) Recommendation",
+          "description": "Independent peer review statement for structural design, commonly requested on larger structural scopes.",
+          "category": "specialist",
+          "trigger": "Floor area over 100 m2 with structural scope typically warrants engineering peer review.",
+          "specialist": "CPEng structural engineer",
+          "referenceClause": "NZBC Clause B1"
+        }
+      ],
+      "floorAreaOver300m2": [
+        {
+          "id": "integrated_fire_and_egress_strategy_note",
+          "title": "Integrated Fire and Egress Strategy Note",
+          "description": "Higher-level note confirming fire safety strategy, occupancy assumptions, and egress implications for larger developments.",
+          "category": "specialist",
+          "trigger": "Large floor area developments may require integrated fire strategy documentation.",
+          "specialist": "Fire engineer",
+          "referenceClause": "NZBC Clauses C and D"
+        }
+      ],
+      "constructionValueOver500k": [
+        {
+          "id": "quantity_surveyor_cost_estimate",
+          "title": "Quantity Surveyor Cost Estimate",
+          "description": "Professionally prepared construction cost estimate supporting consent valuation and fee calculation.",
+          "category": "project",
+          "trigger": "Higher-value projects commonly require robust cost evidence for processing.",
+          "specialist": "Quantity surveyor",
+          "referenceClause": "CCC fees and charges policy"
+        }
+      ],
+      "constructionValueOver2m": [
+        {
+          "id": "construction_staging_and_management_plan",
+          "title": "Construction Staging and Management Plan",
+          "description": "Comprehensive staging and construction management plan covering logistics, safety, nuisance, and programme controls.",
+          "category": "project",
+          "trigger": "Major-value projects generally require detailed construction management planning.",
+          "specialist": "Project manager",
+          "referenceClause": "RMA Schedule 4"
+        }
+      ]
+    }
+  }
+}

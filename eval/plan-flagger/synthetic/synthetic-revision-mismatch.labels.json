@@ -1,0 +1,14 @@
+{
+  "plan_id": "synthetic-revision-mismatch",
+  "bca": "selwyn",
+  "project_type": "deck",
+  "ground_truth_flags": [
+    {
+      "category": "documentation:revision_mismatch",
+      "severity": "nice_to_have",
+      "page": 3,
+      "area_hint": "rev",
+      "rationale": "A3.01 is at Rev B while the rest are Rev C."
+    }
+  ]
+}
