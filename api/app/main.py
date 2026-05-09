@@ -19,7 +19,11 @@ app = FastAPI(title="ConsentIQ RFI API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://consentiq-web.vercel.app",
+    ],
+    allow_origin_regex=r"https://consentiq-web-[a-z0-9-]+-axel-mckennas-projects\.vercel\.app|https://consentiq-[a-z0-9]+-axel-mckennas-projects\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
