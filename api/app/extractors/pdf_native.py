@@ -21,11 +21,27 @@ from app.models import CanonicalRfi, ExtractionMeta, RfiItem, RfiLetter
 EXTRACTOR_VERSION = "1.0.0"
 
 # Numbered list patterns commonly used in RFI letters.
-# 1.  …  / 1)  …  / Item 1.  …  / 1.1  …
-_ITEM_HEAD = re.compile(
+# Two-tier: prefer explicit "Item N" headings when present (council letters),
+# fall back to bare numbered/lettered list markers otherwise.
+
+# Explicit: "Item 1", "Item 1.2", followed by em-dash / en-dash / hyphen / colon
+# / dot / paren / a newline. Required for styled letters where bodies contain
+# their own internal "1." / "2." sub-bullets.
+_ITEM_HEAD_EXPLICIT = re.compile(
     r"""
     ^\s*
-    (?:item\s+)?
+    item\s+
+    (?P<num>\d{1,2}(?:\.\d{1,2}){0,2})
+    (?:\s*[—–\-:.\)]\s+   # em-dash / en-dash / hyphen / colon / dot / paren
+       | \s+(?=\S))        # or just whitespace before the title text
+    """,
+    re.IGNORECASE | re.VERBOSE | re.MULTILINE,
+)
+
+# Generic fallback: 1.  …  / 1)  …  / 1.1  …  / a)  …
+_ITEM_HEAD_GENERIC = re.compile(
+    r"""
+    ^\s*
     (?P<num>
         \d{1,2}(?:\.\d{1,2}){0,2}    # 1, 1.1, 1.1.1
         | [a-z]                       # a, b, c
@@ -49,8 +65,15 @@ def has_text_layer(pdf_bytes: bytes, threshold_chars: int = 50) -> bool:
 
 
 def _split_items(full_text: str) -> list[tuple[str, str]]:
-    """Split letter body into (raw_number, raw_text) tuples."""
-    matches = list(_ITEM_HEAD.finditer(full_text))
+    """Split letter body into (raw_number, raw_text) tuples.
+
+    Prefers explicit "Item N" headings when at least two are present in the
+    letter (typical council format). Falls back to generic numbered-list
+    markers, which is more permissive but can be confused by sub-bullets
+    embedded within an item body.
+    """
+    explicit = list(_ITEM_HEAD_EXPLICIT.finditer(full_text))
+    matches = explicit if len(explicit) >= 2 else list(_ITEM_HEAD_GENERIC.finditer(full_text))
     if not matches:
         return []
     out: list[tuple[str, str]] = []

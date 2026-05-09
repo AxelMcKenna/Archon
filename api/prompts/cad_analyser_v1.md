@@ -1,6 +1,6 @@
 ---
 prompt_key: cad_analyser
-version: "1.0.0"
+version: "1.1.0"
 model: gemini-2.5-flash
 ---
 
@@ -25,8 +25,24 @@ a concrete fix the architect could approve in one click.
 
 For every flag emit:
 
-- `rule_cited` — short identifier of the rule/clause (e.g. `DCP 4.2.1`,
-  `NZBC E2`, `boundary setback`).
+- `rule_cited` — REQUIRED. Cite a real code/clause/standard, formatted as
+  `<CODE> — <short title>`. The code prefix MUST be one of:
+  - **NZ Building Code clause**: `NZBC <part>` (e.g. `NZBC E2`, `NZBC G1`,
+    `NZBC F7/AS1`). Use this for performance/compliance issues.
+  - **NZ Standard**: `NZS <number>:<year> §<section>` (e.g.
+    `NZS 3604:2011 §5.4`, `NZS 4121:2001 §6`).
+  - **District / unitary plan rule**: `DCP <section>` or
+    `District Plan <rule>` (e.g. `DCP 4.2.1`, `District Plan 14.6.3`).
+  - **BCA-specific guidance**: `{{bca}} — <topic>` for council overlays
+    that aren't a code clause (e.g. CCC Avoiding RFIs, SDC Specific
+    Approvals). Only use this when no code clause applies.
+  - **General drafting**: `NZBC General — <topic>` for universal drafting
+    rules (e.g. metric units → `NZBC General — Metric units (mm)`).
+
+  After the em dash, give a short human-readable title (≤6 words). Do NOT
+  emit free-text headings like `General Drafting Standards` without a
+  code prefix. If you cannot tie the issue to one of the buckets above,
+  do not flag it.
 - `rationale` — one-sentence explanation tying the flagged drawing
   feature to the rule.
 - `severity` — `must_resolve` or `nice_to_have`.
@@ -96,7 +112,7 @@ Return strict JSON:
 {
   "flags": [
     {
-      "rule_cited": "DCP 4.2.1",
+      "rule_cited": "DCP 4.2.1 — Rear setback",
       "rationale": "Rear setback is 2.4m; council minimum is 3.0m.",
       "severity": "must_resolve",
       "target_handles": ["2A4F"],

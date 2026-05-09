@@ -21,6 +21,8 @@ def insert_letter(
     storage_path: str,
     canonical: CanonicalRfi,
     rendered_markdown: str,
+    plan_upload_id: str | None = None,
+    cad_upload_id: str | None = None,
 ) -> str:
     """Insert rfi_letters + rfi_items rows. Returns the rfi_letters.id."""
     letter = canonical.rfi_letter
@@ -37,6 +39,8 @@ def insert_letter(
         "rendered_markdown": rendered_markdown,
         "extraction_metadata": letter.extraction.model_dump(mode="json"),
         "status": "extracted",
+        "plan_upload_id": plan_upload_id,
+        "cad_upload_id": cad_upload_id,
     }
     inserted = (
         client.table("rfi_letters").insert(letter_row).execute()

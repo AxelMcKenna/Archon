@@ -20,7 +20,96 @@ from app.llm.gemini import call_gemini_tool
 from app.llm.openrouter import call_openrouter_tool
 
 PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
-ACTIVE_PROMPT = "drafter_v1.md"
+ACTIVE_PROMPT = "drafter_v2.md"
+
+
+def _render_plan_evidence_block(plan_evidence: dict[str, Any] | None) -> str:
+    """Format the evidence row for the prompt's `{{plan_evidence_block}}` slot.
+
+    Three shapes ('flag', 'vision', 'none') so the model can branch its tone
+    and grounding behaviour without us forking the prompt template.
+    """
+    if not plan_evidence:
+        return (
+            "**Source: NO MATCH** — no linked plan, or the linked plan was "
+            "not analysed before the RFI arrived. Treat per the NO MATCH rules."
+        )
+
+    source = plan_evidence.get("source", "none")
+    if source == "none":
+        reason = plan_evidence.get("rationale") or "no flag above threshold"
+        return (
+            f"**Source: NO MATCH** — {reason}. Treat per the NO MATCH rules."
+        )
+    if source == "vision":
+        return (
+            "**Source: VISION-LOCATED** — Stage B vision retrieval is not "
+            "yet wired. Treat as NO MATCH for now."
+        )
+
+    # source == "flag"
+    ev = plan_evidence.get("evidence") or {}
+    rule = ev.get("rule_cited") or "(unknown clause)"
+    rationale = ev.get("rationale") or "(no rationale recorded)"
+    quote = ev.get("verbatim_quote")
+    handles = ev.get("target_handles") or []
+    page = ev.get("page")
+    proposed = ev.get("proposed_change")
+    plan_format = plan_evidence.get("plan_format")
+    plan_filename = plan_evidence.get("plan_filename")
+
+    location_bits: list[str] = []
+    if plan_format == "dxf" and handles:
+        location_bits.append(f"DXF entity handle(s) {', '.join(handles)}")
+    if page is not None:
+        location_bits.append(f"page {page}")
+    if quote:
+        location_bits.append(f'plan text "{quote}"')
+    location = "; ".join(location_bits) or "(location not recorded)"
+
+    fix_line = ""
+    if proposed:
+        op = proposed.get("op", "(no op)")
+        if op == "place_symbol":
+            sym = proposed.get("symbol", "(symbol)")
+            anchor = proposed.get("anchor_handle", "(anchor)")
+            fix_line = (
+                f"Proposed fix (already specified by the analyser): place a "
+                f"`{sym}` symbol anchored at handle {anchor}."
+            )
+        elif op == "add_text_note":
+            text = proposed.get("text", "(text)")
+            anchor = proposed.get("anchor_handle", "(anchor)")
+            fix_line = (
+                f'Proposed fix: add the note "{text}" near handle {anchor}.'
+            )
+        else:
+            fix_line = f"Proposed fix op: `{op}` (see evidence for details)."
+
+    confidence = plan_evidence.get("confidence")
+    conf_str = f"{confidence:.2f}" if isinstance(confidence, int | float) else "?"
+
+    file_line = ""
+    if plan_filename:
+        file_line = (
+            f"Plan referenced: {plan_filename} ({plan_format or '?'})"
+        )
+
+    return "\n".join(
+        line
+        for line in [
+            "**Source: FLAG-MATCHED** (Stage A retrieval).",
+            file_line,
+            f"Matched clause: {rule}.",
+            f"Located on plan: {location}.",
+            f"Analyser rationale: {rationale}",
+            fix_line,
+            f"Match confidence: {conf_str}.",
+            "",
+            "Apply the FLAG-MATCHED rules — ground every claim in the above.",
+        ]
+        if line
+    )
 
 _TOOL_SCHEMA: dict[str, Any] = {
     "name": "record_draft",
@@ -74,11 +163,18 @@ def draft_response(
     severity: str,
     reasoning: str,
     acceptable_solution: str | None,
+    plan_evidence: dict[str, Any] | None = None,
 ) -> tuple[str, str, Metrics]:
     """Returns (draft_text, prompt_version, metrics)."""
     template, version = _load_prompt(ACTIVE_PROMPT)
+    evidence_block = _render_plan_evidence_block(plan_evidence)
+    # Cache key includes the evidence source so re-grounded items get
+    # re-drafted (a flag match should not return a previously cached
+    # NO MATCH draft).
+    evidence_source = (plan_evidence or {}).get("source", "absent")
+    evidence_flag_idx = (plan_evidence or {}).get("flag_index", "")
     cache_key = hashlib.sha256(
-        f"{item_text}|{category}|{bca}|{project_type}|{version}".encode()
+        f"{item_text}|{category}|{bca}|{project_type}|{version}|{evidence_source}|{evidence_flag_idx}".encode()
     ).hexdigest()
     if cache_key in _DRAFT_CACHE:
         cached, ver = _DRAFT_CACHE[cache_key]
@@ -98,6 +194,7 @@ def draft_response(
         severity=severity,
         reasoning=reasoning or "(none)",
         acceptable_solution=acceptable_solution or "(none for this category)",
+        plan_evidence_block=evidence_block,
     )
 
     t0 = time.monotonic()

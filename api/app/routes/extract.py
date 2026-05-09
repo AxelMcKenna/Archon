@@ -24,10 +24,14 @@ async def extract(
     file: UploadFile = File(...),
     project_id: UUID = Form(...),
     bca: str = Form(...),
+    plan_upload_id: UUID | None = Form(None),
+    cad_upload_id: UUID | None = Form(None),
     db: Client = Depends(get_db),
 ) -> dict[str, object]:
     if file.content_type not in ALLOWED_MEDIA:
         raise HTTPException(415, f"unsupported media type: {file.content_type}")
+    if plan_upload_id and cad_upload_id:
+        raise HTTPException(400, "link to plan_upload_id OR cad_upload_id, not both")
     payload = await file.read()
     if len(payload) > MAX_BYTES:
         raise HTTPException(413, "file exceeds 25MB")
@@ -58,6 +62,8 @@ async def extract(
         storage_path=storage_path,
         canonical=canonical,
         rendered_markdown=rendered,
+        plan_upload_id=str(plan_upload_id) if plan_upload_id else None,
+        cad_upload_id=str(cad_upload_id) if cad_upload_id else None,
     )
     insert_extraction_audit(db, letter_id=letter_id, canonical=canonical, metrics=metrics)
 

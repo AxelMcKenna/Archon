@@ -115,6 +115,82 @@ async def classify_letter(
     )
 
 
+@router.post("/{letter_id}/full")
+async def classify_and_draft(
+    letter_id: str,
+    db: Client = Depends(get_db_for),
+) -> dict[str, Any]:
+    """Ground against the linked plan, classify, then draft a response for each.
+
+    Convenience endpoint for the inline upload flow: one round-trip turns an
+    extracted letter into a populated review (grounded + classified + drafted)
+    so the user lands on a page with content, not empty columns.
+    """
+    from app.grounding.runner import ground_letter
+    from app.routes.drafts import generate_draft
+
+    grounding = ground_letter(db, letter_id)
+    classify_resp = await classify_letter(letter_id, db)
+
+    items_rows = (
+        db.table("rfi_items")
+        .select("id, item_id")
+        .eq("rfi_letter_id", letter_id)
+        .execute()
+        .data
+        or []
+    )
+    db_id_by_item = {r["item_id"]: r["id"] for r in items_rows}
+
+    drafted = 0
+    failed: list[dict[str, str]] = []
+    for cls in classify_resp.classifications:
+        db_id = db_id_by_item.get(cls.rfi_item_id)
+        if not db_id:
+            continue
+        try:
+            await generate_draft(db_id, db)
+            drafted += 1
+        except HTTPException as e:
+            failed.append({"item_id": cls.rfi_item_id, "reason": e.detail or str(e)})
+        except Exception as e:  # noqa: BLE001 — surface as soft failure per-item
+            failed.append({"item_id": cls.rfi_item_id, "reason": str(e)})
+
+    return {
+        "letter_id": letter_id,
+        "grounding": grounding,
+        "classified": len(classify_resp.classifications),
+        "drafted": drafted,
+        "failed": failed,
+    }
+
+
+@router.post("/{letter_id}/ground")
+async def ground_only(
+    letter_id: str,
+    db: Client = Depends(get_db_for),
+) -> dict[str, Any]:
+    """Run Stage A grounding only (idempotent; safe to re-run)."""
+    from app.grounding.runner import ground_letter
+
+    return ground_letter(db, letter_id)
+
+
+@router.get("/{letter_id}/render")
+async def render_letter_payload(
+    letter_id: str,
+    db: Client = Depends(get_db_for),
+) -> dict[str, Any]:
+    """Return per-item suggested fixes + a markdown covering letter.
+
+    Pure templating from grounding evidence — no LLM calls. Re-run any time;
+    the output is a deterministic function of the evidence rows.
+    """
+    from app.grounding.render import fetch_letter_render_payload
+
+    return fetch_letter_render_payload(db, letter_id)
+
+
 @router.get("/{letter_id}")
 async def get_classifications(
     letter_id: str,
