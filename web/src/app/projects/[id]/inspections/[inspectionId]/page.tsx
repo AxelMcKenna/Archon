@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { InspectionDetailPage } from "@/components/inspections/inspection-detail-page";
+import { loadInspectionRecords } from "@/components/inspections/persistence";
 import { getInspectionSchedule } from "@/lib/inspections";
 import { getSupabaseServer } from "@/lib/supabase/server";
 
@@ -37,12 +38,14 @@ export default async function ProjectInspectionDetailRoute({
   }
 
   const schedule = getInspectionSchedule(project);
+  const savedRecords = await loadInspectionRecords(supabase, project.id);
 
   return (
     <InspectionDetailPage
       projectId={project.id}
       inspectionId={inspectionId}
       schedule={schedule}
+      savedRecords={savedRecords}
     />
   );
 }

@@ -17,12 +17,13 @@ import { useInspections } from "./use-inspections";
 interface InspectionsPageProps {
   projectId: string;
   schedule: InspectionSchedule;
+  savedRecords: Record<string, InspectionRecord>;
 }
 
-export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
+export function InspectionsPage({ projectId, schedule, savedRecords }: InspectionsPageProps) {
   const router = useRouter();
   const { inspections, stats, addManualInspection, reorderInspection, deleteInspection } =
-    useInspections(projectId, schedule);
+    useInspections(projectId, schedule, savedRecords);
   const [draggedInspectionId, setDraggedInspectionId] = useState<string | null>(null);
   const suppressCardClickRef = useRef(false);
   const currentInspectionIndex = getCurrentInspectionIndex(inspections);

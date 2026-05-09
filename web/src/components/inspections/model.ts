@@ -13,6 +13,8 @@ export interface InspectionPdf {
   size: number;
   uploadedAt: string;
   dataUrl: string;
+  storageBucket?: string;
+  storagePath?: string;
 }
 
 export interface InspectionRecord {
