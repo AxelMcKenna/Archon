@@ -46,11 +46,6 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
                 />
               </svg>
             </button>
-            <nav className="ml-auto text-sm text-ink-500">
-              <a href="/auth/sign-in" className="hover:text-ink-900">
-                Sign in
-              </a>
-            </nav>
           </div>
         </header>
         {isProjectPage && projectId && <ProjectSubnav projectId={projectId} />}
