@@ -22,12 +22,7 @@ export const projectTabs: ProjectTab[] = [
   { name: "Drawings", href: "/drawings", slug: "drawings" },
   { name: "Lodgement", href: "/application-prep", slug: "application-prep" },
   { name: "Council", href: "/rfis", slug: "rfis" },
-  {
-    name: "Construction",
-    href: "/inspections",
-    slug: "inspections",
-    alsoMatch: ["/ccc"],
-  },
+  { name: "Construction", href: "/inspections", slug: "inspections", alsoMatch: ["/ccc"] },
 ];
 
 function tabMatchesPath(tab: ProjectTab, pathname: string, projectId: string): boolean {

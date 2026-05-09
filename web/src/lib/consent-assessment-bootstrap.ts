@@ -103,9 +103,8 @@ export async function bootstrapConsentAssessment(
 
     const mergedChecklist: Checklist = {
       ...checklist,
-      required_documents: mergeRequiredDocuments(
-        checklist.required_documents ?? [],
-        resolvedDocuments,
+      required_documents: ensureNationalBaselineDocuments(
+        mergeRequiredDocuments(checklist.required_documents ?? [], resolvedDocuments),
       ),
     };
 
@@ -220,4 +219,25 @@ function mergeRequiredDocuments(
   }
 
   return Array.from(merged.values());
+}
+
+function ensureNationalBaselineDocuments(
+  documents: ChecklistRequiredDocument[],
+): ChecklistRequiredDocument[] {
+  const hasForm2 = documents.some((doc) => /form\s*2/i.test(doc.document_type));
+  if (hasForm2) return documents;
+
+  return [
+    ...documents,
+    {
+      document_type: "Form 2 Building Consent Application",
+      category: "baseline",
+      reason:
+        "National standard building consent application form required for lodgement.",
+      triggered_by: [
+        "Building (Forms) Regulations 2004 - Form 2",
+        "National baseline requirement",
+      ],
+    },
+  ];
 }

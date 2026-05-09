@@ -6,7 +6,7 @@ interface Suggestion {
   display_name: string;
 }
 
-const ADDRESS_AUTOCOMPLETE_DEBOUNCE_MS = 300;
+const ADDRESS_AUTOCOMPLETE_DEBOUNCE_MS = 80;
 
 export function AddressAutocompleteInput({
   name,
