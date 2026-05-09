@@ -15,14 +15,15 @@ const projectTabs = [
   { name: "Inspections", href: "/inspections" },
   { name: "Documents", href: "/documents" },
   { name: "CCC", href: "/ccc" },
+  { name: "Settings", href: "/settings" },
 ];
 
 export function ProjectSubnav({ projectId }: ProjectSubnavProps) {
   const pathname = usePathname();
 
   return (
-    <nav className="border-b border-ink-700/10 px-6 py-3 bg-ink-50">
-      <ul className="flex gap-6 text-sm">
+    <nav className="border-b border-ink-700/10 bg-ink-50 px-6 py-3">
+      <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
         {projectTabs.map((tab) => {
           const tabPath = `/projects/${projectId}${tab.href}` as Route;
           const isActive =

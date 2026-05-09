@@ -25,9 +25,10 @@ export async function getProjectById(
   projectId: string,
   selectClause = "*",
 ) {
+  const withProjectDetails = selectClause === "*" ? "*" : appendProjectDetails(selectClause);
   const withDetails = await supabase
     .from("projects")
-    .select(selectClause === "*" ? "*" : appendProjectDetails(selectClause))
+    .select(withProjectDetails)
     .eq("id", projectId)
     .single<ProjectRecord>();
 
@@ -36,9 +37,10 @@ export async function getProjectById(
   }
 
   if (selectClause !== "*" && isMissingProjectDetailsColumnError(withDetails.error)) {
+    const withoutProjectDetails = stripProjectDetails(selectClause);
     return supabase
       .from("projects")
-      .select(selectClause)
+      .select(withoutProjectDetails)
       .eq("id", projectId)
       .single<ProjectRecord>();
   }
@@ -60,13 +62,18 @@ export async function createProjectRecord(
     return withDetails;
   }
 
-  if (isMissingProjectDetailsColumnError(withDetails.error)) {
-    const { project_details: _projectDetails, ...legacyPayload } = payload;
-    return supabase
-      .from("projects")
-      .insert(legacyPayload)
-      .select("id")
-      .single<{ id: string }>();
+  if (
+    isMissingProjectDetailsColumnError(withDetails.error) ||
+    isMissingUserIdColumnError(withDetails.error)
+  ) {
+    const legacyPayload = { ...payload } as Record<string, unknown>;
+    if (isMissingProjectDetailsColumnError(withDetails.error)) {
+      delete legacyPayload.project_details;
+    }
+    if (isMissingUserIdColumnError(withDetails.error)) {
+      delete legacyPayload.user_id;
+    }
+    return supabase.from("projects").insert(legacyPayload).select("id").single<{ id: string }>();
   }
 
   return withDetails;
@@ -88,13 +95,20 @@ export async function updateProjectRecord(
     return withDetails;
   }
 
-  if (isMissingProjectDetailsColumnError(withDetails.error)) {
-    const { project_details: _projectDetails, ...legacyPayload } = payload;
-    return supabase
-      .from("projects")
-      .update(legacyPayload)
-      .eq("id", projectId)
-      .eq("user_id", userId);
+  if (
+    isMissingProjectDetailsColumnError(withDetails.error) ||
+    isMissingUserIdColumnError(withDetails.error)
+  ) {
+    const legacyPayload = { ...payload } as Record<string, unknown>;
+    if (isMissingProjectDetailsColumnError(withDetails.error)) {
+      delete legacyPayload.project_details;
+    }
+
+    let query = supabase.from("projects").update(legacyPayload).eq("id", projectId);
+    if (!isMissingUserIdColumnError(withDetails.error)) {
+      query = query.eq("user_id", userId);
+    }
+    return query;
   }
 
   return withDetails;
@@ -106,11 +120,32 @@ function appendProjectDetails(selectClause: string) {
     : `${selectClause}, project_details`;
 }
 
+function stripProjectDetails(selectClause: string) {
+  const next = selectClause
+    .split(",")
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0 && part !== "project_details");
+  return next.join(", ");
+}
+
 function isMissingProjectDetailsColumnError(error: { code?: string; message?: string }) {
+  const message = error.message ?? "";
+  const missingByMessage =
+    message.includes("project_details") ||
+    message.includes("Could not find the 'project_details' column") ||
+    message.includes('column "project_details" does not exist');
   return (
     error.code === "PGRST204" ||
-    error.message?.includes("project_details") ||
-    error.message?.includes("Could not find the 'project_details' column") ||
-    error.message?.includes('column "project_details" does not exist')
+    missingByMessage ||
+    (error.code === "42703" && missingByMessage)
   );
+}
+
+function isMissingUserIdColumnError(error: { code?: string; message?: string }) {
+  const message = error.message ?? "";
+  const missingByMessage =
+    message.includes("user_id") ||
+    message.includes("Could not find the 'user_id' column") ||
+    message.includes('column "user_id" does not exist');
+  return error.code === "PGRST204" ? missingByMessage : error.code === "42703" && missingByMessage;
 }

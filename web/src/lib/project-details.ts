@@ -10,6 +10,29 @@ export interface ProjectFormValues {
   projectDetails: ProjectDetails;
 }
 
+export interface ProjectSettingsValues {
+  buildingConsentNumbers: string;
+  ownerPreferredFormOfAddress: "" | "Mr" | "Mrs" | "Ms" | "Miss" | "Dr";
+  ownerFullName: string;
+  ownerContactPersonFullName: string;
+  ownerMailingAddress: string;
+  ownerStreetAddressDifferent: boolean;
+  ownerStreetAddress: string;
+  ownerPhoneLandline: string;
+  ownerPhoneMobile: string;
+  ownerPhoneDaytime: string;
+  ownerPhoneAfterHours: string;
+  ownerPhoneFax: string;
+  ownerEmailAddress: string;
+  ownerWebsiteUrl: string;
+  ownerEvidenceOfOwnershipType:
+    | ""
+    | "Certificate of title"
+    | "Lease"
+    | "Agreement for sale and purchase"
+    | "Other document";
+}
+
 export function normalizeProjectType(value: string | null | undefined): ProjectType {
   if (value === "accessory" || value === "accessory_building") {
     return "accessory_building";
@@ -44,6 +67,21 @@ export function createDefaultProjectDetails(projectType?: string | null): Projec
       wastewater: false,
       stormwater: false,
     },
+    buildingConsentNumbers: "",
+    ownerPreferredFormOfAddress: "",
+    ownerFullName: "",
+    ownerContactPersonFullName: "",
+    ownerMailingAddress: "",
+    ownerStreetAddressDifferent: false,
+    ownerStreetAddress: "",
+    ownerPhoneLandline: "",
+    ownerPhoneMobile: "",
+    ownerPhoneDaytime: "",
+    ownerPhoneAfterHours: "",
+    ownerPhoneFax: "",
+    ownerEmailAddress: "",
+    ownerWebsiteUrl: "",
+    ownerEvidenceOfOwnershipType: "",
   };
 }
 
@@ -75,6 +113,65 @@ export function normalizeProjectDetails(
       wastewater: Boolean(input.newServiceConnections?.wastewater),
       stormwater: Boolean(input.newServiceConnections?.stormwater),
     },
+    buildingConsentNumbers: String(input.buildingConsentNumbers ?? "").trim(),
+    ownerPreferredFormOfAddress: normalizePreferredFormOfAddress(input.ownerPreferredFormOfAddress),
+    ownerFullName: String(input.ownerFullName ?? "").trim(),
+    ownerContactPersonFullName: String(input.ownerContactPersonFullName ?? "").trim(),
+    ownerMailingAddress: String(input.ownerMailingAddress ?? "").trim(),
+    ownerStreetAddressDifferent: Boolean(input.ownerStreetAddressDifferent),
+    ownerStreetAddress: String(input.ownerStreetAddress ?? "").trim(),
+    ownerPhoneLandline: String(input.ownerPhoneLandline ?? "").trim(),
+    ownerPhoneMobile: String(input.ownerPhoneMobile ?? "").trim(),
+    ownerPhoneDaytime: String(input.ownerPhoneDaytime ?? "").trim(),
+    ownerPhoneAfterHours: String(input.ownerPhoneAfterHours ?? "").trim(),
+    ownerPhoneFax: String(input.ownerPhoneFax ?? "").trim(),
+    ownerEmailAddress: String(input.ownerEmailAddress ?? "").trim(),
+    ownerWebsiteUrl: String(input.ownerWebsiteUrl ?? "").trim(),
+    ownerEvidenceOfOwnershipType: normalizeEvidenceType(input.ownerEvidenceOfOwnershipType),
+  };
+}
+
+export function buildProjectSettingsValues(project: {
+  project_type: string;
+  project_details?: unknown;
+}): ProjectSettingsValues {
+  const projectDetails = normalizeProjectDetails(project.project_details, project.project_type);
+  return {
+    buildingConsentNumbers: projectDetails.buildingConsentNumbers ?? "",
+    ownerPreferredFormOfAddress: normalizePreferredFormOfAddress(projectDetails.ownerPreferredFormOfAddress),
+    ownerFullName: projectDetails.ownerFullName ?? "",
+    ownerContactPersonFullName: projectDetails.ownerContactPersonFullName ?? "",
+    ownerMailingAddress: projectDetails.ownerMailingAddress ?? "",
+    ownerStreetAddressDifferent: Boolean(projectDetails.ownerStreetAddressDifferent),
+    ownerStreetAddress: projectDetails.ownerStreetAddress ?? "",
+    ownerPhoneLandline: projectDetails.ownerPhoneLandline ?? "",
+    ownerPhoneMobile: projectDetails.ownerPhoneMobile ?? "",
+    ownerPhoneDaytime: projectDetails.ownerPhoneDaytime ?? "",
+    ownerPhoneAfterHours: projectDetails.ownerPhoneAfterHours ?? "",
+    ownerPhoneFax: projectDetails.ownerPhoneFax ?? "",
+    ownerEmailAddress: projectDetails.ownerEmailAddress ?? "",
+    ownerWebsiteUrl: projectDetails.ownerWebsiteUrl ?? "",
+    ownerEvidenceOfOwnershipType: normalizeEvidenceType(projectDetails.ownerEvidenceOfOwnershipType),
+  };
+}
+
+export function parseProjectSettingsFormData(formData: FormData): ProjectSettingsValues {
+  return {
+    buildingConsentNumbers: String(formData.get("building_consent_numbers") ?? "").trim(),
+    ownerPreferredFormOfAddress: normalizePreferredFormOfAddress(formData.get("owner_preferred_form_of_address")),
+    ownerFullName: String(formData.get("owner_full_name") ?? "").trim(),
+    ownerContactPersonFullName: String(formData.get("owner_contact_person_full_name") ?? "").trim(),
+    ownerMailingAddress: String(formData.get("owner_mailing_address") ?? "").trim(),
+    ownerStreetAddressDifferent: hasCheckedValue(formData, "owner_street_address_different"),
+    ownerStreetAddress: String(formData.get("owner_street_address") ?? "").trim(),
+    ownerPhoneLandline: String(formData.get("owner_phone_landline") ?? "").trim(),
+    ownerPhoneMobile: String(formData.get("owner_phone_mobile") ?? "").trim(),
+    ownerPhoneDaytime: String(formData.get("owner_phone_daytime") ?? "").trim(),
+    ownerPhoneAfterHours: String(formData.get("owner_phone_after_hours") ?? "").trim(),
+    ownerPhoneFax: String(formData.get("owner_phone_fax") ?? "").trim(),
+    ownerEmailAddress: String(formData.get("owner_email_address") ?? "").trim(),
+    ownerWebsiteUrl: String(formData.get("owner_website_url") ?? "").trim(),
+    ownerEvidenceOfOwnershipType: normalizeEvidenceType(formData.get("owner_evidence_of_ownership_type")),
   };
 }
 
@@ -151,4 +248,29 @@ function normalizeNullableNumber(value: unknown) {
   }
 
   return Math.max(0, Math.trunc(value));
+}
+
+function normalizePreferredFormOfAddress(
+  value: unknown,
+): "" | "Mr" | "Mrs" | "Ms" | "Miss" | "Dr" {
+  const text = String(value ?? "").trim();
+  if (text === "Mr" || text === "Mrs" || text === "Ms" || text === "Miss" || text === "Dr") {
+    return text;
+  }
+  return "";
+}
+
+function normalizeEvidenceType(
+  value: unknown,
+): "" | "Certificate of title" | "Lease" | "Agreement for sale and purchase" | "Other document" {
+  const text = String(value ?? "").trim();
+  if (
+    text === "Certificate of title" ||
+    text === "Lease" ||
+    text === "Agreement for sale and purchase" ||
+    text === "Other document"
+  ) {
+    return text;
+  }
+  return "";
 }
