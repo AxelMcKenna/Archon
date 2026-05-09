@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
@@ -55,6 +56,12 @@ interface LbpMemorandaFile {
   sizeBytes: number | null;
   lbpName: string;
   mimeType: string | null;
+}
+
+interface InspectionSettlementItem {
+  id: string;
+  title: string;
+  status: string;
 }
 
 const statusWeight: Record<Status, number> = {
@@ -169,7 +176,7 @@ const SPECIFIED_SYSTEM_OPTIONS: SpecifiedSystemOption[] = [
 function Collapsible({
   title,
   status,
-  defaultOpen = true,
+  defaultOpen = false,
   children,
 }: {
   title: string;
@@ -224,7 +231,7 @@ export function CccTabClient({
   consentExpiryDate?: string | null;
 }) {
   const router = useRouter();
-  const supabase = getSupabaseBrowser();
+  const supabase = useMemo(() => getSupabaseBrowser(), []);
   const [submittedDocs, setSubmittedDocs] = useState<ChecklistRow[]>(() => {
     const baseRows: ChecklistRow[] = [
     {
@@ -263,7 +270,8 @@ export function CccTabClient({
   });
   });
 
-  const [inspectionsSettled, setInspectionsSettled] = useState(false);
+  const [inspectionItems, setInspectionItems] = useState<InspectionSettlementItem[]>([]);
+  const [inspectionsLoaded, setInspectionsLoaded] = useState(false);
   const [feesSettled, setFeesSettled] = useState(false);
   const [uploadingRowId, setUploadingRowId] = useState<string | null>(null);
   const [dragOverRowId, setDragOverRowId] = useState<string | null>(null);
@@ -282,20 +290,26 @@ export function CccTabClient({
   const [selectedSpecifiedSystems, setSelectedSpecifiedSystems] = useState<string[]>([]);
   const [specifiedSystemsHydrated, setSpecifiedSystemsHydrated] = useState(false);
 
-  const inspections: Array<{ type: string; scheduled: string; status: string; notes: string }> = [];
-
   const mandatory = submittedDocs.filter((d) => d.mandatory);
   const conditional = submittedDocs.filter((d) => !d.mandatory);
   const doneCount = submittedDocs.filter((d) => d.status !== "not_started").length;
   const totalCount = submittedDocs.length;
-  const inspectionsPassed = inspections.every((i) => i.status === "passed");
+  const hasInspections = inspectionItems.length > 0;
+  const pendingInspections = inspectionItems.filter((inspection) => inspection.status !== "Passed");
+  const inspectionsPassed = inspectionsLoaded && hasInspections && pendingInspections.length === 0;
   const mandatoryReady = mandatory.every((d) => d.status !== "not_started");
 
   const sectionStatus = useMemo(() => {
     const docsStatus: Status = mandatoryReady ? "complete" : "action_required";
-    const inspectionsSettledStatus: Status = inspectionsSettled ? "complete" : "action_required";
+    const inspectionsSettledStatus: Status = !inspectionsLoaded
+      ? "not_started"
+      : !hasInspections
+        ? "not_started"
+        : inspectionsPassed
+          ? "complete"
+          : "action_required";
     const feesSettledStatus: Status = feesSettled ? "complete" : "action_required";
-    const downloadReady = mandatoryReady && inspectionsPassed && inspectionsSettled && feesSettled;
+    const downloadReady = mandatoryReady && inspectionsPassed && feesSettled;
     const submitStatus: Status = downloadReady ? "complete" : "not_started";
     const sendOffStatus: Status = !downloadReady
       ? "not_started"
@@ -315,7 +329,7 @@ export function CccTabClient({
       submit: submitStatus,
       sendOff: sendOffStatus,
     };
-  }, [mandatoryReady, inspectionsPassed, inspectionsSettled, feesSettled, packageSent]);
+  }, [mandatoryReady, inspectionsLoaded, hasInspections, inspectionsPassed, feesSettled, packageSent]);
 
   const overall: Status = (Object.values(sectionStatus) as Status[]).reduce((worst, current) =>
     statusWeight[current] > statusWeight[worst] ? current : worst,
@@ -377,6 +391,40 @@ export function CccTabClient({
     const saved = window.localStorage.getItem(packageSentStorageKey);
     setPackageSent(saved === "1");
   }, [packageSentStorageKey]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadInspections() {
+      setInspectionsLoaded(false);
+      const { data, error } = await supabase
+        .from("project_inspections")
+        .select("inspection_id,title,status,deleted,sort_order")
+        .eq("project_id", projectId)
+        .eq("deleted", false)
+        .order("sort_order", { ascending: true });
+
+      if (cancelled) return;
+      if (error) {
+        setInspectionItems([]);
+        setInspectionsLoaded(true);
+        return;
+      }
+
+      setInspectionItems(
+        (data ?? []).map((row) => ({
+          id: String(row.inspection_id ?? ""),
+          title: String(row.title ?? "Inspection"),
+          status: String(row.status ?? "Not Conducted"),
+        })),
+      );
+      setInspectionsLoaded(true);
+    }
+
+    void loadInspections();
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId, supabase]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -548,16 +596,13 @@ export function CccTabClient({
     setUploadingRowId("2m");
     setUploadError(null);
     try {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-      if (userError || !user) throw new Error("You need to be signed in to upload documents.");
+      const { data: authData } = await supabase.auth.getUser();
+      const storageOwner = authData.user?.id ?? "single-user";
 
       const createdFiles: LbpMemorandaFile[] = [];
       for (const file of filesToUpload) {
         const safeName = file.name.replace(/\s+/g, "_");
-        const storagePath = `${user.id}/${projectId}/ccc-2m-${Date.now()}-${safeName}`;
+        const storagePath = `${storageOwner}/${projectId}/ccc-2m-${Date.now()}-${safeName}`;
         const { error: storageError } = await supabase.storage
           .from("attachments")
           .upload(storagePath, file, { upsert: false, contentType: file.type });
@@ -573,6 +618,7 @@ export function CccTabClient({
 
         let inserted:
           | {
+              id: string;
               filename: string;
               storage_path: string;
               uploaded_at: string;
@@ -582,7 +628,7 @@ export function CccTabClient({
             }
           | null = null;
 
-        const { error: primaryInsertError } = await supabase
+        const { data: primaryInserted, error: primaryInsertError } = await supabase
           .from("attachments")
           .insert({
             ...baseInsert,
@@ -590,36 +636,27 @@ export function CccTabClient({
             linked_requirement_label: rowLabel,
             linked_requirement_source: "ccc",
             display_name: "",
-          });
+          })
+          .select("id,filename,storage_path,uploaded_at,size_bytes,display_name,mime_type")
+          .single();
 
         if (primaryInsertError) {
-          const { error: fallbackInsertError } = await supabase
+          const { data: fallbackInserted, error: fallbackInsertError } = await supabase
             .from("attachments")
-            .insert(baseInsert);
+            .insert(baseInsert)
+            .select("id,filename,storage_path,uploaded_at,size_bytes,mime_type")
+            .single();
 
           if (fallbackInsertError) throw primaryInsertError;
-          inserted = {
-            filename: baseInsert.filename,
-            storage_path: baseInsert.storage_path,
-            uploaded_at: new Date().toISOString(),
-            size_bytes: baseInsert.size_bytes ?? null,
-            mime_type: baseInsert.mime_type ?? null,
-          };
+          inserted = fallbackInserted;
         } else {
-          inserted = {
-            filename: baseInsert.filename,
-            storage_path: baseInsert.storage_path,
-            uploaded_at: new Date().toISOString(),
-            size_bytes: baseInsert.size_bytes ?? null,
-            display_name: "",
-            mime_type: baseInsert.mime_type ?? null,
-          };
+          inserted = primaryInserted;
         }
 
         if (!inserted) throw new Error("Upload failed while saving attachment metadata.");
 
         createdFiles.push({
-          id: createClientRowId(),
+          id: inserted.id,
           filename: inserted.filename,
           storagePath: inserted.storage_path,
           uploadedAt: inserted.uploaded_at,
@@ -687,15 +724,12 @@ export function CccTabClient({
     setUploadingRowId(rowId);
     setUploadError(null);
     try {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-      if (userError || !user) throw new Error("You need to be signed in to upload documents.");
+      const { data: authData } = await supabase.auth.getUser();
+      const storageOwner = authData.user?.id ?? "single-user";
 
       for (const file of Array.from(files)) {
         const safeName = file.name.replace(/\s+/g, "_");
-        const storagePath = `${user.id}/${projectId}/ccc-${row.id}-${Date.now()}-${safeName}`;
+        const storagePath = `${storageOwner}/${projectId}/ccc-${row.id}-${Date.now()}-${safeName}`;
         const { error: storageError } = await supabase.storage
           .from("attachments")
           .upload(storagePath, file, { upsert: false, contentType: file.type });
@@ -916,16 +950,53 @@ export function CccTabClient({
 
       <Collapsible title="3. Inspections Settlement Check" status={sectionStatus.inspectionsSettled}>
         <p className="text-sm text-ink-700">
-          Confirm inspections are settled in the inspections module before CCC submission.
+          This check is automatic and reflects inspection results from the Inspections tab.
         </p>
-        <label className="mt-3 inline-flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={inspectionsSettled}
-            onChange={(e) => setInspectionsSettled(e.target.checked)}
-          />
-          Inspections settled
-        </label>
+        {!inspectionsLoaded ? (
+          <p className="mt-3 text-xs text-ink-500">Loading inspections...</p>
+        ) : inspectionsPassed ? (
+          <p className="mt-3 text-sm text-emerald-700">
+            All inspections are passed. Inspection settlement is complete.
+          </p>
+        ) : (
+          <div className="mt-3 space-y-2">
+            {inspectionItems.length === 0 ? (
+              <>
+                <p className="text-sm text-ink-700">
+                  No inspections found yet in this project.
+                </p>
+                <p className="text-xs text-ink-500">
+                  Add and complete inspections in the Inspections tab to unlock CCC submission.
+                </p>
+                <Link
+                  href={`/projects/${projectId}/inspections`}
+                  className="inline-block text-sm text-ink-900 underline underline-offset-2 hover:text-ink-700"
+                >
+                  Open Inspections
+                </Link>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-red-700">
+                  Action required: complete and pass all inspections before CCC submission.
+                </p>
+              <ul className="space-y-1 text-sm">
+                {pendingInspections.map((inspection) => (
+                  <li key={inspection.id}>
+                    <Link
+                      href={`/projects/${projectId}/inspections/${inspection.id}`}
+                      className="text-ink-900 underline underline-offset-2 hover:text-ink-700"
+                    >
+                      {inspection.title}
+                    </Link>
+                    <span className="ml-2 text-xs text-ink-500">({inspection.status})</span>
+                  </li>
+                ))}
+              </ul>
+              </>
+            )}
+          </div>
+        )}
       </Collapsible>
 
       <Collapsible title="4. Fees Settlement Check" status={sectionStatus.feesSettled}>
