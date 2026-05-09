@@ -20,15 +20,8 @@ export async function deleteProject(projectId: string) {
 
 export async function updateProject(projectId: string, formData: FormData) {
   const supabase = await getSupabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    redirect("/auth/sign-in");
-  }
-
   const nextProject = parseProjectFormData(formData);
-  const { error } = await updateProjectRecord(supabase, projectId, user.id, {
+  const { error } = await updateProjectRecord(supabase, projectId, {
     address: nextProject.address,
     bca: nextProject.bca,
     project_type: nextProject.projectType,

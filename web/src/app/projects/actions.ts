@@ -7,11 +7,6 @@ import { createProjectRecord } from "@/lib/projects";
 
 export async function createProject(formData: FormData) {
   const supabase = await getSupabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/sign-in");
-
   const project = parseProjectFormData(formData);
   const description = project.description || null;
 
@@ -19,7 +14,6 @@ export async function createProject(formData: FormData) {
   const { data: existingProject } = await supabase
     .from("projects")
     .select("id")
-    .eq("user_id", user.id)
     .eq("address", project.address)
     .eq("bca", project.bca)
     .eq("project_type", project.projectType)
@@ -33,7 +27,6 @@ export async function createProject(formData: FormData) {
   }
 
   const { data, error } = await createProjectRecord(supabase, {
-    user_id: user.id,
     address: project.address,
     bca: project.bca,
     project_type: project.projectType,

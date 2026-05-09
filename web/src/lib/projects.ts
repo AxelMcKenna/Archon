@@ -50,7 +50,7 @@ export async function getProjectById(
 
 export async function createProjectRecord(
   supabase: SupabaseClient,
-  payload: ProjectMutation & { user_id: string },
+  payload: ProjectMutation,
 ) {
   const withDetails = await supabase
     .from("projects")
@@ -62,17 +62,9 @@ export async function createProjectRecord(
     return withDetails;
   }
 
-  if (
-    isMissingProjectDetailsColumnError(withDetails.error) ||
-    isMissingUserIdColumnError(withDetails.error)
-  ) {
+  if (isMissingProjectDetailsColumnError(withDetails.error)) {
     const legacyPayload = { ...payload } as Record<string, unknown>;
-    if (isMissingProjectDetailsColumnError(withDetails.error)) {
-      delete legacyPayload.project_details;
-    }
-    if (isMissingUserIdColumnError(withDetails.error)) {
-      delete legacyPayload.user_id;
-    }
+    delete legacyPayload.project_details;
     return supabase.from("projects").insert(legacyPayload).select("id").single<{ id: string }>();
   }
 
@@ -82,33 +74,23 @@ export async function createProjectRecord(
 export async function updateProjectRecord(
   supabase: SupabaseClient,
   projectId: string,
-  userId: string,
   payload: ProjectMutation,
 ) {
   const withDetails = await supabase
     .from("projects")
     .update(payload)
-    .eq("id", projectId)
-    .eq("user_id", userId);
+    .eq("id", projectId);
 
   if (!withDetails.error) {
     return withDetails;
   }
 
-  if (
-    isMissingProjectDetailsColumnError(withDetails.error) ||
-    isMissingUserIdColumnError(withDetails.error)
-  ) {
-    const legacyPayload = { ...payload } as Record<string, unknown>;
-    if (isMissingProjectDetailsColumnError(withDetails.error)) {
-      delete legacyPayload.project_details;
-    }
-
-    let query = supabase.from("projects").update(legacyPayload).eq("id", projectId);
-    if (!isMissingUserIdColumnError(withDetails.error)) {
-      query = query.eq("user_id", userId);
-    }
-    return query;
+  if (isMissingProjectDetailsColumnError(withDetails.error)) {
+    const { project_details: _projectDetails, ...legacyPayload } = payload;
+    return supabase
+      .from("projects")
+      .update(legacyPayload)
+      .eq("id", projectId);
   }
 
   return withDetails;
@@ -139,13 +121,4 @@ function isMissingProjectDetailsColumnError(error: { code?: string; message?: st
     missingByMessage ||
     (error.code === "42703" && missingByMessage)
   );
-}
-
-function isMissingUserIdColumnError(error: { code?: string; message?: string }) {
-  const message = error.message ?? "";
-  const missingByMessage =
-    message.includes("user_id") ||
-    message.includes("Could not find the 'user_id' column") ||
-    message.includes('column "user_id" does not exist');
-  return error.code === "PGRST204" ? missingByMessage : error.code === "42703" && missingByMessage;
 }

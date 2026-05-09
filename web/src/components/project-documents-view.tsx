@@ -79,15 +79,9 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
     setUploading(true);
     setUploadError(null);
     try {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-      if (userError || !user) throw new Error("You need to be signed in to upload documents.");
-
       for (const file of Array.from(files)) {
         const safeName = file.name.replace(/\s+/g, "_");
-        const storagePath = `${user.id}/${projectId}/${Date.now()}-${safeName}`;
+        const storagePath = `${projectId}/${Date.now()}-${safeName}`;
         const { error: uploadErrorResult } = await supabase.storage
           .from("attachments")
           .upload(storagePath, file, { upsert: false, contentType: file.type });
