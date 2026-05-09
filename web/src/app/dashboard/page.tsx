@@ -81,9 +81,20 @@ export default async function Dashboard() {
       : null;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
+      <header className="flex items-end justify-between gap-6">
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
+            Overview
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+            Dashboard
+          </h1>
+        </div>
+      </header>
+
       <section>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <StatCard
             label="Projects"
             value={projectCount ?? 0}
@@ -122,7 +133,7 @@ export default async function Dashboard() {
         </div>
       </section>
 
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <Panel
           title="Recent RFI letters"
           href="/projects"
@@ -216,20 +227,20 @@ function StatCard({
   return (
     <Link
       href={href}
-      className={`group block rounded-sm bg-white p-5 ring-1 ${t.ring} hover:ring-tan-300 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer`}
+      className={`group relative block rounded-sm bg-surface-raised p-6 ring-1 ${t.ring} shadow-card hover:ring-ink-300 hover:shadow-raised hover:-translate-y-0.5 transition-all cursor-pointer`}
     >
       <div className="flex items-center justify-between">
         <div
-          className={`inline-flex h-8 w-8 items-center justify-center rounded-sm ${t.iconBg} ${t.iconText}`}
+          className={`inline-flex h-9 w-9 items-center justify-center rounded-sm ${t.iconBg} ${t.iconText} ring-1 ring-ink-200/60`}
         >
           {icon}
         </div>
-        <ArrowRight className="h-4 w-4 text-ink-400 group-hover:text-ink-700 transition-colors" />
+        <ArrowRight className="h-4 w-4 text-ink-400 group-hover:text-ink-900 group-hover:translate-x-0.5 transition-all" />
       </div>
-      <div className="mt-3 text-3xl font-semibold tracking-tight tabular-nums">
+      <div className="mt-5 text-[28px] leading-none font-semibold tracking-tight tabular-nums text-ink-900">
         {value}
       </div>
-      <div className="mt-0.5 text-sm text-ink-700">{label}</div>
+      <div className="mt-2 text-sm text-ink-700">{label}</div>
       {sublabel && <div className="mt-1 text-xs text-ink-500">{sublabel}</div>}
     </Link>
   );
@@ -260,29 +271,29 @@ function Panel({
   }>;
 }) {
   return (
-    <div className="rounded-sm bg-white ring-1 ring-ink-700/10">
-      <div className="flex items-center justify-between px-5 py-3 border-b border-ink-700/10">
-        <h2 className="text-sm font-semibold">{title}</h2>
+    <div className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card overflow-hidden">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-ink-200/70">
+        <h2 className="text-sm font-semibold tracking-tight text-ink-900">{title}</h2>
         <Link
           href={href}
-          className="text-xs text-ink-500 hover:text-ink-900 inline-flex items-center gap-0.5 cursor-pointer"
+          className="text-xs font-medium text-ink-500 hover:text-ink-900 inline-flex items-center gap-1 transition-colors cursor-pointer"
         >
           View all
           <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
       {rows.length === 0 ? (
-        <div className="px-5 py-8 text-center">
+        <div className="px-6 py-12 text-center">
           <CheckCircle2 className="h-5 w-5 mx-auto text-ink-300 mb-2" />
           <p className="text-sm text-ink-500">{empty}</p>
         </div>
       ) : (
-        <ul className="divide-y divide-ink-700/10">
+        <ul className="divide-y divide-ink-200/70">
           {rows.map((r) => (
             <li key={r.key}>
               <Link
                 href={r.href}
-                className="flex items-center justify-between px-5 py-3 gap-4 hover:bg-ink-700/5 transition-colors cursor-pointer"
+                className="flex items-center justify-between px-6 py-3.5 gap-4 hover:bg-ink-50 transition-colors cursor-pointer"
               >
                 <div className="min-w-0">
                   <p className="text-sm font-medium truncate">{r.primary}</p>

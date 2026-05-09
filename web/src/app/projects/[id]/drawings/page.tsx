@@ -113,32 +113,35 @@ export default async function ProjectDrawings({
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-      <header>
-        <h1 className="text-2xl font-semibold">Drawings</h1>
-        <p className="text-sm text-ink-500 mt-1">
+    <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
+      <header className="space-y-1.5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
+          Pre-flight
+        </p>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">Drawings</h1>
+        <p className="text-sm text-ink-500 max-w-2xl leading-relaxed">
           Pre-flight a building plan or CAD drawing against likely council RFIs
           before lodgement. Upload a PDF for flagged redlines, or a DXF for
           flagged redlines + one-click geometry fixes.
         </p>
       </header>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-500">
+      <section className="space-y-4">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
           Analyse a drawing
         </h2>
         <UploadPlanInline projects={projectsForUpload} />
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-500">
+      <section className="space-y-4">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
           Drawings ({rows.length})
         </h2>
         <RowsList rows={rows} active={selected?.id} projectId={projectId} />
       </section>
 
       {selected && (
-        <section className="space-y-3 pt-6 border-t border-ink-700/10">
+        <section className="space-y-4 pt-8 border-t border-ink-200/70">
           <SelectedHeader row={selected} projectId={projectId} />
           {selected.format === "pdf" ? (
             <PlanReview
@@ -172,7 +175,7 @@ function RowsList({
     );
   }
   return (
-    <ul className="divide-y divide-ink-700/10 rounded-sm border border-ink-700/10">
+    <ul className="divide-y divide-ink-200/70 rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card overflow-hidden">
       {rows.map((r) => {
         const bcaName =
           taxonomy.bcas.find((b) => b.id === r.projects?.bca)?.name ?? r.projects?.bca;
@@ -191,22 +194,22 @@ function RowsList({
         return (
           <li
             key={`${r.format}-${r.id}`}
-            className={`flex items-center gap-2 pr-3 ${
-              isActive ? "bg-ink-700/5" : "hover:bg-ink-700/5"
+            className={`flex items-center gap-2 pr-3 transition-colors ${
+              isActive ? "bg-ink-50" : "hover:bg-ink-50"
             }`}
           >
             <Link
               href={href}
-              className="flex-1 min-w-0 flex items-center justify-between px-4 py-3 text-sm gap-4"
+              className="flex-1 min-w-0 flex items-center justify-between px-5 py-3.5 text-sm gap-4 cursor-pointer"
             >
               <div className="min-w-0">
-                <p className="font-medium truncate">
-                  <span className="inline-block mr-2 text-[10px] font-semibold tracking-wide rounded-sm bg-ink-700/10 px-1.5 py-0.5">
+                <p className="font-medium text-ink-900 truncate">
+                  <span className="inline-block mr-2 text-[10px] font-semibold tracking-wide rounded-sm bg-ink-100 text-ink-700 px-1.5 py-0.5">
                     {r.format.toUpperCase()}
                   </span>
                   {r.filename}
                 </p>
-                <p className="text-xs text-ink-500">
+                <p className="text-xs text-ink-500 mt-0.5">
                   {bcaName} · {new Date(r.created_at).toLocaleDateString()} ·{" "}
                   {r.status === "analysed"
                     ? `${flags.length} flags (${must} must / ${nice} nice)${
@@ -216,14 +219,14 @@ function RowsList({
                 </p>
               </div>
               <span
-                className={`rounded-sm px-2 py-0.5 text-xs ${
+                className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
                   r.status === "analysed"
                     ? must > 0
                       ? "bg-red-100 text-red-800"
                       : "bg-emerald-100 text-emerald-800"
                     : r.status === "failed"
                       ? "bg-red-100 text-red-800"
-                      : "bg-ink-700/10"
+                      : "bg-ink-100 text-ink-700"
                 }`}
               >
                 {r.status}
@@ -240,13 +243,13 @@ function RowsList({
 function SelectedHeader({ row, projectId }: { row: Row; projectId: string }) {
   return (
     <div className="flex items-baseline justify-between flex-wrap gap-2">
-      <div>
-        <p className="text-xs text-ink-500">{row.format.toUpperCase()}</p>
-        <h2 className="text-xl font-semibold">{row.filename}</h2>
+      <div className="space-y-1">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">{row.format.toUpperCase()}</p>
+        <h2 className="text-xl font-semibold tracking-tight text-ink-900">{row.filename}</h2>
       </div>
       <Link
         href={`/projects/${projectId}/drawings`}
-        className="text-sm text-ink-500 hover:text-ink-900"
+        className="text-sm font-medium text-ink-500 hover:text-ink-900 transition-colors cursor-pointer"
       >
         Close →
       </Link>

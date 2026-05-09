@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch, apiUpload } from "@/lib/api";
 import { taxonomy } from "@consentiq/shared";
+import { AiThinking } from "@/components/ai-thinking";
 
 type Project = { id: string; address: string; bca: string; project_type: string };
 
@@ -223,11 +224,23 @@ export function UploadRfiInline({
         </p>
         <button
           disabled={!rfiFile || busy}
-          className="rounded-sm bg-ink-900 text-white px-4 py-2 text-sm font-medium disabled:opacity-50 cursor-pointer hover:bg-ink-700 transition-colors"
+          className="rounded-sm bg-ink-900 text-white px-4 py-2 text-sm font-medium shadow-card disabled:opacity-50 cursor-pointer hover:bg-ink-700 transition-colors"
         >
-          {busy ? stage || "Processing…" : "Process RFI"}
+          {busy ? (
+            <AiThinking label={stage || "Processing"} variant="button" />
+          ) : (
+            "Process RFI"
+          )}
         </button>
       </div>
+
+      {busy && (
+        <AiThinking
+          label={stage || "Working through the RFI pipeline"}
+          hint="Each step uses AI: classify items, match to plan flags, then draft responses."
+          variant="block"
+        />
+      )}
 
       {error && <p className="text-sm text-red-600">{error}</p>}
     </form>

@@ -68,20 +68,18 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
-      <section className="flex flex-col gap-4 rounded-sm border border-ink-700/10 bg-white p-8 shadow-sm sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-ink-500">
+    <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
             Project Workflow
           </p>
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-ink-900">
-              Inspections
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-ink-500">
-              Automatically generated BCO hold points for {schedule.profile.toLowerCase()}.
-            </p>
-          </div>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+            Inspections
+          </h1>
+          <p className="text-sm text-ink-500 max-w-2xl leading-relaxed">
+            Automatically generated BCO hold points for {schedule.profile.toLowerCase()}.
+          </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <button
@@ -101,9 +99,9 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
             </button>
           )}
         </div>
-      </section>
+      </header>
 
-      <section className="rounded-sm border border-ink-700/10 bg-gradient-to-br from-white to-slate-50 p-8 shadow-sm">
+      <section className="rounded-sm ring-1 ring-ink-700/10 bg-gradient-to-br from-white to-ink-50 p-8 shadow-card">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
             <p className="text-sm font-medium text-ink-500">Inspection Readiness</p>
@@ -180,8 +178,8 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
                 onDragOver={handleDragOver}
                 onDrop={(event) => handleDrop(event, index)}
                 className={[
-                  "group relative overflow-hidden rounded-sm border bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-ink-700/20 hover:shadow-md",
-                  isCurrent ? "border-accent ring-2 ring-accent/20" : "border-ink-700/10",
+                  "group relative overflow-hidden rounded-sm bg-surface-raised p-5 shadow-card ring-1 transition-all hover:-translate-y-0.5 hover:shadow-raised",
+                  isCurrent ? "ring-accent ring-2" : "ring-ink-700/10 hover:ring-ink-300",
                   "cursor-grab active:cursor-grabbing",
                   isDragging ? "opacity-60" : "",
                 ].filter(Boolean).join(" ")}

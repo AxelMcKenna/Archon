@@ -11,7 +11,6 @@ interface ProjectSubnavProps {
 const projectTabs = [
   { name: "Overview", href: "" },
   { name: "Forecasting", href: "/forecasting" },
-  { name: "Consent Assessment", href: "/consent-assessment" },
   { name: "Application Prep", href: "/application-prep" },
   { name: "Drawings", href: "/drawings" },
   { name: "RFIs", href: "/rfis" },

@@ -273,11 +273,14 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
   }, [documents, query, sortBy, statusFilter, typeFilter]);
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
-      <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold">Documents</h1>
-          <p className="mt-1 text-sm text-ink-500">{projectRef}</p>
+    <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
+            Project Workflow
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">Documents</h1>
+          <p className="text-sm text-ink-500 max-w-2xl leading-relaxed">{projectRef}</p>
         </div>
         <div className="flex flex-col items-end gap-2">
           <input
@@ -310,7 +313,7 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
         </div>
       </header>
 
-      <section className="sticky top-0 z-10 mb-6 rounded-sm border border-ink-200 bg-white/95 p-4 shadow-sm backdrop-blur">
+      <section className="sticky top-0 z-10 rounded-sm border border-ink-200 bg-white/95 p-4 shadow-sm backdrop-blur">
         <div className="grid gap-3 md:grid-cols-4">
           <input
             value={query}

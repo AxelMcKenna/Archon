@@ -72,14 +72,14 @@ export function ConsentDocumentPage({
     }
 
     removeDocument(documentId);
-    router.push(`/projects/${projectId}/consent-assessment`);
+    router.push(`/projects/${projectId}/application-prep`);
   }
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-6 py-8">
       <div className="flex items-center justify-between gap-4">
         <Link
-          href={`/projects/${projectId}/consent-assessment` as Route}
+          href={`/projects/${projectId}/application-prep` as Route}
           className="text-sm font-medium text-ink-500 transition-colors hover:text-ink-900"
         >
           ← Back to Consent Assessment

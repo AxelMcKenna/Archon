@@ -154,9 +154,9 @@ export function ProjectsPageClient({ projects }: { projects: ProjectListItem[] }
   }, [cards, filter, query]);
 
   return (
-    <div className="min-h-full bg-white">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">
-        <section className="overflow-hidden rounded-sm border border-slate-200 bg-white">
+    <div className="min-h-full">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-8 py-10">
+        <section className="overflow-hidden rounded-sm border border-ink-200 bg-surface-raised shadow-card">
           <div className="border-b border-slate-200 bg-white px-6 py-8 sm:px-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-2xl space-y-3">
@@ -266,7 +266,7 @@ function ProjectCard({ project }: { project: ProjectCardViewModel }) {
   return (
     <Link
       href={`/projects/${project.id}`}
-      className="group block rounded-sm border border-slate-200 bg-white p-6 transition duration-200 hover:-translate-y-0.5 hover:border-slate-400 hover:shadow-md cursor-pointer"
+      className="group block rounded-sm border border-ink-200 bg-surface-raised p-6 shadow-card transition duration-200 hover:-translate-y-0.5 hover:border-ink-300 hover:shadow-raised cursor-pointer"
     >
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">

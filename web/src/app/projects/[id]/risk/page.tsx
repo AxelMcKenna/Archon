@@ -22,16 +22,17 @@ export default async function RiskPage({
   const bcaName = taxonomy.bcas.find((b) => b.id === project.bca)?.name ?? project.bca;
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10 space-y-6">
-      <div>
-        <a href={`/projects/${id}`} className="text-sm text-ink-500 hover:text-ink-900">
-          ← back to project
-        </a>
-        <h1 className="text-2xl font-semibold mt-2">Pre-lodgement risk check</h1>
-        <p className="text-sm text-ink-500 mt-1">
-          {bcaName} · {project.project_type}
+    <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
+      <header className="space-y-1.5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
+          Pre-lodgement
         </p>
-      </div>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">Risk check</h1>
+        <p className="text-sm text-ink-500">
+          Score the description against historical RFI patterns for {bcaName} ·{" "}
+          {project.project_type}.
+        </p>
+      </header>
 
       <RiskRunner
         bca={project.bca}

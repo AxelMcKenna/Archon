@@ -29,20 +29,25 @@ export default async function CCC({ params }: { params: Promise<{ id: string }> 
   const ccc = await getCccViewModel(supabase, id);
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
-      <header className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold">Code Compliance Certificate</h1>
-          <p className="mt-2 text-sm text-ink-600">
+    <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
+      <header className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
+            Closeout
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+            Code Compliance Certificate
+          </h1>
+          <p className="text-sm text-ink-600 max-w-xl leading-relaxed">
             Aggregated from consent, inspections, and uploaded project documents.
           </p>
         </div>
         <Link
           href={`/projects/${id}/ccc/export`}
-          className={`rounded-sm px-4 py-2 text-sm font-medium border ${
+          className={`rounded-sm px-4 py-2.5 text-sm font-semibold transition shadow-card ${
             ccc.readinessStatus === "green"
-              ? "bg-ink-900 text-white border-ink-900 hover:bg-ink-700"
-              : "bg-ink-100 text-ink-500 border-ink-200 pointer-events-none"
+              ? "bg-ink-900 text-white hover:bg-ink-700 cursor-pointer"
+              : "bg-ink-100 text-ink-500 ring-1 ring-ink-200 pointer-events-none"
           }`}
           aria-disabled={ccc.readinessStatus !== "green"}
         >
@@ -52,7 +57,7 @@ export default async function CCC({ params }: { params: Promise<{ id: string }> 
 
       {ccc.deadlineStatus !== "ok" && (
         <section
-          className={`rounded-sm border px-4 py-3 ${
+          className={`rounded-sm border px-5 py-4 shadow-card ${
             ccc.deadlineStatus === "overdue"
               ? "border-red-300 bg-red-50 text-red-900"
               : "border-amber-300 bg-amber-50 text-amber-900"
@@ -71,8 +76,8 @@ export default async function CCC({ params }: { params: Promise<{ id: string }> 
         </section>
       )}
 
-      <section className={`rounded-sm border p-5 ${statusTone(ccc.readinessStatus)}`}>
-        <h2 className="text-xl font-semibold">CCC Readiness</h2>
+      <section className={`rounded-sm border p-6 shadow-card ${statusTone(ccc.readinessStatus)}`}>
+        <h2 className="text-lg font-semibold tracking-tight">CCC Readiness</h2>
         <p className="mt-2 text-sm">
           {ccc.readinessStatus === "green"
             ? "Ready to apply. All required inspections and documents are complete."
@@ -91,8 +96,8 @@ export default async function CCC({ params }: { params: Promise<{ id: string }> 
         )}
       </section>
 
-      <section className="bg-white rounded-sm border border-ink-200 p-5">
-        <h2 className="text-xl font-semibold">Consent Reference Panel</h2>
+      <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-6">
+        <h2 className="text-lg font-semibold tracking-tight text-ink-900">Consent Reference Panel</h2>
         <p className="mt-3 text-sm text-ink-700">{ccc.consentPromise}</p>
         <p className="mt-2 text-xs text-ink-500">
           Grant date: {ccc.consentGrantDate ?? "Unknown"} · {ccc.consentGrantSource}
@@ -118,8 +123,8 @@ export default async function CCC({ params }: { params: Promise<{ id: string }> 
         </div>
       </section>
 
-      <section className="bg-white rounded-sm border border-ink-200 p-5">
-        <h2 className="text-xl font-semibold">Inspection Checklist</h2>
+      <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-6">
+        <h2 className="text-lg font-semibold tracking-tight text-ink-900">Inspection Checklist</h2>
         <ul className="mt-4 space-y-2">
           {ccc.inspectionChecklist.map((inspection) => (
             <li key={inspection.name} className="flex justify-between gap-4 text-sm">
@@ -135,8 +140,8 @@ export default async function CCC({ params }: { params: Promise<{ id: string }> 
         </ul>
       </section>
 
-      <section className="bg-white rounded-sm border border-ink-200 p-5">
-        <h2 className="text-xl font-semibold">Document Checklist (Christchurch City Council)</h2>
+      <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-6">
+        <h2 className="text-lg font-semibold tracking-tight text-ink-900">Document Checklist (Christchurch City Council)</h2>
         <ul className="mt-4 space-y-2">
           {[...ccc.requiredDocumentItems, ...ccc.conditionalDocumentItems].map((doc) => (
             <li key={doc.key} className="flex justify-between gap-4 text-sm">

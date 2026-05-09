@@ -32,14 +32,14 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
   const isProjectPage = projectId && projectId !== "new";
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <header className="sticky top-0 z-30 border-b border-ink-700/10 bg-white/95 backdrop-blur">
-        <div className="flex items-center gap-1 px-6 py-3">
+    <div className="min-h-screen bg-surface-canvas flex flex-col">
+      <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-md shadow-header">
+        <div className="flex items-center gap-1 px-8 py-3.5">
           <Link
             href="/dashboard"
-            className="group inline-flex items-center gap-2 mr-4 text-base font-semibold tracking-tight text-ink-900 transition-colors hover:text-ink-700"
+            className="group inline-flex items-center gap-2.5 mr-6 text-[15px] font-semibold tracking-tight text-ink-900 transition-colors hover:text-ink-700"
           >
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-sm bg-ink-900 text-tan-300 text-xs font-bold ring-1 ring-tan-300/30">
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-sm bg-ink-900 text-tan-300 text-xs font-bold ring-1 ring-tan-300/30 shadow-card">
               C
             </span>
             ConsentIQ
@@ -77,8 +77,8 @@ function NavList({
             href={tab.href}
             className={`inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-sm transition-colors ${
               isActive
-                ? "bg-ink-700/10 text-ink-900 font-medium"
-                : "text-ink-600 hover:bg-ink-700/5 hover:text-ink-900"
+                ? "bg-ink-900 text-white font-medium shadow-card"
+                : "text-ink-600 hover:bg-ink-150 hover:text-ink-900"
             }`}
             title={tab.name}
           >

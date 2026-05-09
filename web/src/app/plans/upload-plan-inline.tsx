@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiUpload } from "@/lib/api";
 import { taxonomy } from "@consentiq/shared";
+import { AiThinking } from "@/components/ai-thinking";
 
 type Project = { id: string; address: string; bca: string; project_type: string };
 
@@ -100,10 +101,19 @@ export function UploadPlanInline({ projects }: { projects: Project[] }) {
       </label>
       <button
         disabled={!file || busy}
-        className="rounded-sm bg-ink-900 text-white px-4 py-2 text-sm font-medium disabled:opacity-50 sm:self-end cursor-pointer hover:bg-ink-700 transition-colors"
+        className="rounded-sm bg-ink-900 text-white px-4 py-2 text-sm font-medium shadow-card disabled:opacity-50 sm:self-end cursor-pointer hover:bg-ink-700 transition-colors"
       >
-        {busy ? "Analysing…" : "Analyse plan"}
+        {busy ? <AiThinking label="Analysing" variant="button" /> : "Analyse plan"}
       </button>
+      {busy && (
+        <div className="sm:col-span-3">
+          <AiThinking
+            label={file && isDxf(file.name) ? "Analysing CAD geometry" : "Analysing drawing"}
+            hint="Detecting flags and proposed redlines against the document rules corpus."
+            variant="block"
+          />
+        </div>
+      )}
       {error && <p className="sm:col-span-3 text-sm text-red-600">{error}</p>}
     </form>
   );

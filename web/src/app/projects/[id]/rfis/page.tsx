@@ -194,27 +194,28 @@ export default async function ProjectRfis({
   ].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-      <header>
-        <h1 className="text-2xl font-semibold">RFIs</h1>
-        <p className="text-sm text-ink-500 mt-1">
+    <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
+      <header className="space-y-1.5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
+          Requests for information
+        </p>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">RFIs</h1>
+        <p className="text-sm text-ink-500 max-w-2xl leading-relaxed">
           Upload an incoming RFI letter alongside the submitted plan.
           We&rsquo;ll match each item to a flag on the plan and draft a
           covering letter.
         </p>
       </header>
 
-      <section className="space-y-3">
-        <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-500">
-            Received an RFI?
-          </h2>
-        </div>
+      <section className="space-y-4">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
+          Received an RFI?
+        </h2>
         <UploadRfiInline projects={projectsForUpload} plans={plansForUpload} />
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-500">
+      <section className="space-y-4">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
           RFI letters ({letters.length})
         </h2>
         <LettersList
@@ -227,7 +228,7 @@ export default async function ProjectRfis({
       </section>
 
       {selectedLetter && (
-        <section className="space-y-3 pt-6 border-t border-ink-700/10">
+        <section className="space-y-4 pt-8 border-t border-ink-200/70">
           <SelectedLetterHeader
             selected={selectedLetter}
             projectId={projectId}
@@ -264,30 +265,30 @@ function LettersList({
   }
   const bcaName = taxonomy.bcas.find((b) => b.id === projectBca)?.name ?? projectBca;
   return (
-    <ul className="divide-y divide-ink-700/10 rounded-sm border border-ink-700/10">
+    <ul className="divide-y divide-ink-200/70 rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card overflow-hidden">
       {letters.map((l) => {
         const isActive = l.id === activeId;
         const p = progress.get(l.id);
         return (
-          <li key={l.id} className={isActive ? "bg-ink-700/5" : "hover:bg-ink-700/5"}>
+          <li key={l.id} className={isActive ? "bg-ink-50" : "hover:bg-ink-50 transition-colors"}>
             <Link
               href={{
                 pathname: `/projects/${projectId}/rfis`,
                 query: { letter: l.id },
               }}
-              className="flex items-center justify-between px-4 py-3 text-sm gap-4"
+              className="flex items-center justify-between px-5 py-3.5 text-sm gap-4 cursor-pointer"
             >
               <div className="min-w-0">
-                <p className="font-medium truncate">
+                <p className="font-medium text-ink-900 truncate">
                   RFI {l.rfi_number ?? "?"}
                   {l.issue_date ? ` — ${l.issue_date}` : ""}
                 </p>
-                <p className="text-xs text-ink-500">
+                <p className="text-xs text-ink-500 mt-0.5">
                   {bcaName} · {new Date(l.created_at).toLocaleDateString()}
                   {p ? ` · ${p.matched}/${p.total} matched` : ""}
                 </p>
               </div>
-              <span className="rounded-sm bg-ink-700/10 px-2 py-0.5 text-xs">
+              <span className="rounded-full bg-ink-100 text-ink-700 px-2.5 py-0.5 text-[11px] font-medium">
                 {l.status}
               </span>
             </Link>
@@ -311,17 +312,17 @@ function SelectedLetterHeader({
   const bcaName = taxonomy.bcas.find((b) => b.id === projectBca)?.name ?? projectBca;
   return (
     <div className="flex items-baseline justify-between flex-wrap gap-2">
-      <div>
-        <p className="text-xs text-ink-500">{bcaName}</p>
-        <h2 className="text-xl font-semibold">
+      <div className="space-y-1">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">{bcaName}</p>
+        <h2 className="text-xl font-semibold tracking-tight text-ink-900">
           RFI {l.rfi_number ?? "?"}
           {l.issue_date ? ` — ${l.issue_date}` : ""}
         </h2>
-        <p className="text-xs text-ink-500 mt-1">{selected.items.length} items</p>
+        <p className="text-xs text-ink-500">{selected.items.length} items</p>
       </div>
       <Link
         href={`/projects/${projectId}/rfis`}
-        className="text-sm text-ink-500 hover:text-ink-900"
+        className="text-sm font-medium text-ink-500 hover:text-ink-900 transition-colors cursor-pointer"
       >
         Close →
       </Link>

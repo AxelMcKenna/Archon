@@ -145,20 +145,18 @@ export function ConsentAssessmentPage({
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 px-6 py-8">
-      <section className="flex flex-col gap-4 rounded-sm border border-ink-700/10 bg-white p-8 shadow-sm sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-ink-500">
+    <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
             Project Workflow
           </p>
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-ink-900">
-              Consent Assessment
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-ink-500">
-              Track and prepare required documentation for consent submission.
-            </p>
-          </div>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+            Consent Assessment
+          </h1>
+          <p className="text-sm text-ink-500 max-w-2xl leading-relaxed">
+            Track and prepare required documentation for consent submission.
+          </p>
         </div>
         <button
           onClick={() => void generateChecklist()}
@@ -167,9 +165,9 @@ export function ConsentAssessmentPage({
         >
           {actionLabel}
         </button>
-      </section>
+      </header>
 
-      <section className="rounded-sm border border-ink-700/10 bg-gradient-to-br from-white to-slate-50 p-8 shadow-sm">
+      <section className="rounded-sm bg-gradient-to-br from-white to-slate-50 ring-1 ring-ink-700/10 shadow-card p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
             <p className="text-sm font-medium text-ink-500">Consent Readiness</p>
@@ -265,7 +263,7 @@ export function ConsentAssessmentPage({
         </div>
 
         {showAddForm && (
-          <section className="rounded-sm border border-ink-700/10 bg-white p-6 shadow-sm">
+          <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-6">
             <div className="grid gap-5 lg:grid-cols-2">
               <div className="space-y-4">
                 <div>
@@ -357,7 +355,7 @@ export function ConsentAssessmentPage({
         )}
 
         {isReorderMode && reorderedDocuments.length > 0 && (
-          <section className="rounded-sm border border-ink-700/10 bg-white p-6 shadow-sm">
+          <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-ink-900">Reorder Documents</h3>
@@ -435,7 +433,7 @@ export function ConsentAssessmentPage({
             {documents.map((document) => {
               const upload = uploads[document.id];
               const isCompleted = Boolean(completions[document.id]);
-              const href = `/projects/${projectId}/consent-assessment/${document.id}` as Route;
+              const href = `/projects/${projectId}/application-prep/${document.id}` as Route;
               const manual = isManualDocument(document);
 
               return (

@@ -37,50 +37,46 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
   const drawingsTotal = (drawingCount ?? 0) + (cadCount ?? 0);
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10 space-y-10">
-      <header className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm text-ink-500">{bca?.name}</p>
-          <h1 className="text-2xl font-semibold">{project.address}</h1>
-          <p className="mt-2 text-sm text-ink-500">
-            {project.project_type} - status {project.status}
-          </p>
-        </div>
-        <Link
-          href={`/projects/${id}/risk`}
-          className="rounded-sm border border-ink-700/15 px-3 py-2 text-sm hover:bg-ink-700/5"
-        >
-          Pre-lodgement risk check →
-        </Link>
+    <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
+      <header className="space-y-1.5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">
+          {bca?.name ?? "Project"}
+        </p>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
+          {project.address}
+        </h1>
+        <p className="text-sm text-ink-500">
+          {project.project_type} · status {project.status}
+        </p>
       </header>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <Link
           href={`/projects/${id}/drawings`}
-          className="rounded-sm border border-ink-700/10 p-5 hover:bg-ink-700/5 transition-colors"
+          className="group rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-6 hover:ring-ink-300 hover:shadow-raised hover:-translate-y-0.5 transition-all cursor-pointer"
         >
-          <p className="text-xs uppercase tracking-wide text-ink-500">Drawings</p>
-          <p className="mt-2 text-2xl font-semibold">{drawingsTotal}</p>
-          <p className="mt-1 text-xs text-ink-500">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">Drawings</p>
+          <p className="mt-3 text-[28px] leading-none font-semibold tracking-tight tabular-nums">{drawingsTotal}</p>
+          <p className="mt-2 text-xs text-ink-500">
             {drawingCount ?? 0} PDF · {cadCount ?? 0} DXF
           </p>
         </Link>
         <Link
           href={`/projects/${id}/rfis`}
-          className="rounded-sm border border-ink-700/10 p-5 hover:bg-ink-700/5 transition-colors"
+          className="group rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-card p-6 hover:ring-ink-300 hover:shadow-raised hover:-translate-y-0.5 transition-all cursor-pointer"
         >
-          <p className="text-xs uppercase tracking-wide text-ink-500">RFI letters</p>
-          <p className="mt-2 text-2xl font-semibold">{letterCount ?? 0}</p>
-          <p className="mt-1 text-xs text-ink-500">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-500">RFI letters</p>
+          <p className="mt-3 text-[28px] leading-none font-semibold tracking-tight tabular-nums">{letterCount ?? 0}</p>
+          <p className="mt-2 text-xs text-ink-500">
             {(letterCount ?? 0) > 0 ? "open the RFIs tab to respond" : "no RFIs received yet"}
           </p>
         </Link>
       </section>
 
-      <section className="border-t border-ink-700/10 pt-8">
-        <div className="rounded-sm border border-red-200 bg-red-50/60 p-5">
-          <h2 className="text-lg font-semibold text-red-900">Danger zone</h2>
-          <p className="mt-2 text-sm text-red-800/80">
+      <section className="pt-2">
+        <div className="rounded-sm border border-red-200 bg-red-50/70 p-6 shadow-card">
+          <h2 className="text-base font-semibold tracking-tight text-red-900">Danger zone</h2>
+          <p className="mt-1.5 text-sm text-red-800/80">
             Deleting a project permanently removes the project and its associated consent data.
           </p>
           <div className="mt-5">

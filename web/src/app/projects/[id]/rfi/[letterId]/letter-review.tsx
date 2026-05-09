@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { apiFetch, apiUpload } from "@/lib/api";
 import { taxonomy } from "@consentiq/shared";
 import type { ExtractedEntities } from "@consentiq/shared";
+import { AiThinking, AiBadge } from "@/components/ai-thinking";
 
 type ReconLog = {
   id: string;
@@ -396,7 +397,13 @@ export function LetterReview({
                     disabled={classifying}
                     className="rounded-sm border border-ink-700/20 bg-white text-ink-900 px-3 py-1.5 text-sm font-medium disabled:opacity-50 cursor-pointer hover:bg-ink-700/5"
                   >
-                    {classifying ? "Classifying…" : classified ? "Re-classify" : "Classify"}
+                    {classifying ? (
+                      <AiThinking label="Classifying" variant="button" />
+                    ) : classified ? (
+                      "Re-classify"
+                    ) : (
+                      "Classify"
+                    )}
                   </button>
                   {missingDrafts > 0 && (
                     <button
@@ -409,7 +416,11 @@ export function LetterReview({
                           : `${missingDrafts} item${missingDrafts === 1 ? "" : "s"} need a draft`
                       }
                     >
-                      {draftingAll ? "Drafting…" : `Generate all drafts (${missingDrafts})`}
+                      {draftingAll ? (
+                        <AiThinking label="Drafting all" variant="button" />
+                      ) : (
+                        `Generate all drafts (${missingDrafts})`
+                      )}
                     </button>
                   )}
                   <button
@@ -445,6 +456,17 @@ export function LetterReview({
             </div>
           )}
         </div>
+        {(classifying || draftingAll) && (
+          <AiThinking
+            label={classifying ? "Classifying RFI items" : "Drafting responses"}
+            hint={
+              classifying
+                ? "Splitting the letter into items and tagging each by category."
+                : `Generating ${missingDrafts} draft${missingDrafts === 1 ? "" : "s"} grounded in matched plan flags.`
+            }
+            variant="block"
+          />
+        )}
         {error && <p className="text-sm text-red-600">{error}</p>}
         {items.map((item) => (
           <ItemCard
@@ -606,7 +628,11 @@ function CoveringLetterModal({
         </div>
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {loading || !text ? (
-            <p className="text-sm text-ink-500">Rendering…</p>
+            <AiThinking
+              label="Composing covering letter"
+              hint="Stitching item drafts and plan evidence into a single submission letter."
+              variant="block"
+            />
           ) : (
             <div
               className="prose prose-sm max-w-none [&_h3]:text-base [&_h3]:font-semibold [&_h3]:mt-5 [&_h3]:mb-1 [&_h3]:text-emerald-900 [&_p]:my-2 [&_blockquote]:border-l-4 [&_blockquote]:border-amber-400 [&_blockquote]:bg-amber-50 [&_blockquote]:px-3 [&_blockquote]:py-2 [&_blockquote]:my-2 [&_blockquote]:text-sm [&_code]:bg-ink-700/5 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded-sm [&_code]:text-xs"
@@ -1043,14 +1069,23 @@ function DraftBlock({
   return (
     <div className="mt-4 border-t border-ink-700/10 pt-3 space-y-2">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold">Response draft</h4>
+        <h4 className="text-sm font-semibold inline-flex items-center gap-2">
+          Response draft
+          <AiBadge label="AI draft" />
+        </h4>
         <div className="flex gap-2">
           <button
             onClick={generate}
             disabled={busy}
             className="text-xs rounded-sm border border-ink-700/20 px-2 py-1 hover:bg-ink-700/5 disabled:opacity-50"
           >
-            {busy ? "Working…" : response ? "Regenerate" : "Generate draft"}
+            {busy ? (
+              <AiThinking label="Drafting" variant="button" />
+            ) : response ? (
+              "Regenerate"
+            ) : (
+              "Generate draft"
+            )}
           </button>
           {response && dirty && (
             <button
