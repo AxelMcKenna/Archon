@@ -38,6 +38,13 @@ def main() -> int:
             "noSpecifiedSystems": False,
             "selected": ["SS1", "SS4", "SS9"],
         },
+        "attachments": {
+            "otherDocuments": True,
+            "lbpMemorandaUploaded": True,
+            "energyCertificates": True,
+            "specifiedSystemsEvidence": True,
+            "manufacturersCertificate": False,
+        },
     }
 
     with tempfile.TemporaryDirectory(prefix="b011-smoke-") as tmp:

@@ -10,6 +10,7 @@ export const runtime = "nodejs";
 const execFileAsync = promisify(execFile);
 
 interface RawExportPayload {
+  projectName?: string;
   completionDate?: string;
   lbpEntries?: Array<{
     lbpName?: string;
@@ -26,6 +27,13 @@ interface RawExportPayload {
   specifiedSystems?: {
     noSpecifiedSystems?: boolean;
     selectedCodes?: string[];
+  } | null;
+  attachments?: {
+    otherDocuments?: boolean;
+    lbpMemorandaUploaded?: boolean;
+    energyCertificates?: boolean;
+    specifiedSystemsEvidence?: boolean;
+    manufacturersCertificate?: boolean;
   } | null;
 }
 
@@ -47,11 +55,27 @@ interface PythonPayload {
     noSpecifiedSystems: boolean;
     selected: string[];
   } | null;
+  attachments: {
+    otherDocuments: boolean;
+    lbpMemorandaUploaded: boolean;
+    energyCertificates: boolean;
+    specifiedSystemsEvidence: boolean;
+    manufacturersCertificate: boolean;
+  } | null;
 }
 
 function normalizeText(value: unknown) {
   if (typeof value !== "string") return "";
   return value.trim();
+}
+
+function sanitizeFilenamePart(value: string) {
+  const cleaned = value
+    .replace(/[^\w\s.-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  return cleaned.slice(0, 80) || "project";
 }
 
 function hasAnyText(values: string[]) {
@@ -122,15 +146,30 @@ function toPythonPayload(raw: RawExportPayload): PythonPayload {
       }
     : null;
 
+  const attachments = raw.attachments
+    ? {
+        otherDocuments: Boolean(raw.attachments.otherDocuments),
+        lbpMemorandaUploaded: Boolean(raw.attachments.lbpMemorandaUploaded),
+        energyCertificates: Boolean(raw.attachments.energyCertificates),
+        specifiedSystemsEvidence: Boolean(raw.attachments.specifiedSystemsEvidence),
+        manufacturersCertificate: Boolean(raw.attachments.manufacturersCertificate),
+      }
+    : null;
+
   return {
     completionDate: normalizeText(raw.completionDate),
     lbpEntries,
     otherPersonnelEntries,
     specifiedSystems,
+    attachments,
   };
 }
 
-export async function POST(request: Request) {
+export async function POST(
+  request: Request,
+  context: { params: Promise<{ id: string }> },
+) {
+  const { id } = await context.params;
   const body = (await request.json().catch(() => ({}))) as RawExportPayload;
 
   let workDir = "";
@@ -143,6 +182,8 @@ export async function POST(request: Request) {
     const inputPath = join(workDir, "B011ApplicationforCCC.docx");
     const payloadPath = join(workDir, "payload.json");
     const outputPath = join(workDir, "B-011-completed.docx");
+    const baseName = sanitizeFilenamePart(normalizeText(body.projectName) || id);
+    const downloadFilename = `B-011-${baseName}.docx`;
 
     await copyFile(templatePath, inputPath);
     await writeFile(payloadPath, JSON.stringify(payload), "utf8");
@@ -155,7 +196,7 @@ export async function POST(request: Request) {
       headers: {
         "Content-Type":
           "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "Content-Disposition": 'attachment; filename="B-011-completed.docx"',
+        "Content-Disposition": `attachment; filename="${downloadFilename}"`,
       },
     });
   } catch (error) {

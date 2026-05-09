@@ -270,6 +270,7 @@ export function CccTabClient({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [downloadingB011, setDownloadingB011] = useState(false);
+  const [packageSent, setPackageSent] = useState(false);
   const [formPanelOpenByRow, setFormPanelOpenByRow] = useState<Record<string, boolean>>({});
   const defaultCompletionDateRef = useRef("");
   const [form6ACompletionDate, setForm6ACompletionDate] = useState("");
@@ -294,19 +295,27 @@ export function CccTabClient({
     const docsStatus: Status = mandatoryReady ? "complete" : "action_required";
     const inspectionsSettledStatus: Status = inspectionsSettled ? "complete" : "action_required";
     const feesSettledStatus: Status = feesSettled ? "complete" : "action_required";
-    const submitStatus: Status =
-      mandatoryReady && inspectionsPassed && inspectionsSettled && feesSettled
+    const downloadReady = mandatoryReady && inspectionsPassed && inspectionsSettled && feesSettled;
+    const submitStatus: Status = downloadReady ? "complete" : "not_started";
+    const sendOffStatus: Status = !downloadReady
+      ? "not_started"
+      : packageSent
         ? "complete"
-        : "not_started";
-    const statusBar: Status = "in_progress";
+        : "in_progress";
+    const statusBar: Status = packageSent
+      ? "complete"
+      : downloadReady
+        ? "in_progress"
+        : "action_required";
     return {
       statusBar,
       docs: docsStatus,
       inspectionsSettled: inspectionsSettledStatus,
       feesSettled: feesSettledStatus,
       submit: submitStatus,
+      sendOff: sendOffStatus,
     };
-  }, [mandatoryReady, inspectionsPassed, inspectionsSettled, feesSettled]);
+  }, [mandatoryReady, inspectionsPassed, inspectionsSettled, feesSettled, packageSent]);
 
   const overall: Status = (Object.values(sectionStatus) as Status[]).reduce((worst, current) =>
     statusWeight[current] > statusWeight[worst] ? current : worst,
@@ -319,6 +328,7 @@ export function CccTabClient({
     consentExpiryDate?.trim() || addYearsToDateValue(consentIssueDisplay, 2) || "Not set";
   const form6AStorageKey = `ccc:form6a:${projectId}`;
   const specifiedSystemsStorageKey = `ccc:specified-systems:${projectId}`;
+  const packageSentStorageKey = `ccc:package-sent:${projectId}`;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -361,6 +371,17 @@ export function CccTabClient({
     }
     setForm6AHydrated(true);
   }, [form6AStorageKey]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = window.localStorage.getItem(packageSentStorageKey);
+    setPackageSent(saved === "1");
+  }, [packageSentStorageKey]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(packageSentStorageKey, packageSent ? "1" : "0");
+  }, [packageSentStorageKey, packageSent]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -728,10 +749,19 @@ export function CccTabClient({
     setDownloadError(null);
     setDownloadingB011(true);
     try {
+      const hasRowAttachment = (rowId: string) =>
+        submittedDocs.some((row) => row.id === rowId && row.status !== "not_started");
+      const otherDocuments = submittedDocs.some(
+        (row) =>
+          row.status !== "not_started" &&
+          !["2", "2m", "5", "6", "9"].includes(row.id) &&
+          !/manufacturer(?:'s)?\s+certificate/i.test(`${row.name} ${row.fileName ?? ""}`),
+      );
       const response = await fetch(`/projects/${projectId}/ccc/export`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          projectName: projectName?.trim() || projectId,
           completionDate: form6ACompletionDate,
           lbpEntries: form6AEntries,
           otherPersonnelEntries: form6ANonRestrictedEntries,
@@ -740,6 +770,14 @@ export function CccTabClient({
             selectedCodes: selectedSpecifiedSystems,
           },
           lbpMemorandaFilenames: lbpMemorandaFiles.map((file) => memorandaDisplayName(file.filename)),
+          attachments: {
+            otherDocuments,
+            lbpMemorandaUploaded: lbpMemorandaFiles.length > 0,
+            energyCertificates: hasRowAttachment("5") || hasRowAttachment("6"),
+            specifiedSystemsEvidence:
+              hasRowAttachment("9") || (!noSpecifiedSystems && selectedSpecifiedSystems.length > 0),
+            manufacturersCertificate: false,
+          },
         }),
       });
       if (!response.ok) {
@@ -787,7 +825,7 @@ export function CccTabClient({
           <Metric label="Documents submitted" value={`${doneCount} of ${totalCount}`} />
           <Metric label="Consent issue date" value={consentIssueDisplay} />
           <Metric label="Consent expiry (2 years)" value={consentExpiryDisplay} />
-          <Metric label="CCC application submitted" value="Not submitted" />
+          <Metric label="CCC application submitted" value={packageSent ? "Submitted" : "Not submitted"} />
           <Metric label="Overall tab status" value={overall.replaceAll("_", " ")} />
         </div>
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
@@ -904,31 +942,54 @@ export function CccTabClient({
         </label>
       </Collapsible>
 
-      <Collapsible title="5. Submit Application" status={sectionStatus.submit}>
+      <Collapsible title="5. Download Prefilled Form" status={sectionStatus.submit}>
         <p className="text-sm text-ink-700">
           {sectionStatus.submit === "complete"
-            ? "Ready to submit."
-            : "Submission locked until all mandatory documents are uploaded, inspections passed, and settlement checks are confirmed."}
+            ? "Ready to download the prefilled B-011 form."
+            : "Download is locked until all mandatory documents are uploaded, inspections passed, and settlement checks are confirmed."}
         </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <a
-            href="https://onlineservices.ccc.govt.nz"
-            target="_blank"
-            rel="noreferrer"
-            className={`rounded-md px-3 py-2 text-sm ${sectionStatus.submit === "complete" ? "bg-ink-900 text-white" : "bg-ink-100 text-ink-500 pointer-events-none"}`}
-          >
-            Submit via CCC Online Services
-          </a>
+        <div className="mt-3">
           <button
             type="button"
             disabled={sectionStatus.submit !== "complete" || downloadingB011}
             onClick={() => void downloadB011()}
-            className="rounded-md border border-ink-200 px-3 py-2 text-sm disabled:opacity-50"
+            className="rounded-md bg-ink-900 px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {downloadingB011 ? "Generating..." : "Download B-011"}
+            {downloadingB011 ? "Generating..." : "Download now"}
           </button>
         </div>
         {downloadError && <p className="mt-2 text-xs text-red-600">{downloadError}</p>}
+      </Collapsible>
+
+      <Collapsible title="6. Package And Send Off" status={sectionStatus.sendOff}>
+        <p className="text-sm text-ink-700">
+          {sectionStatus.submit === "complete"
+            ? "Package the downloaded B-011 with all required supporting documents, then submit via CCC Online Services."
+            : "Packaging is locked until the prefilled B-011 is ready to download."}
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <a
+            href="https://onlineservices.ccc.govt.nz"
+            target="_blank"
+            rel="noreferrer"
+            className={`rounded-md px-3 py-2 text-sm ${
+              sectionStatus.submit === "complete"
+                ? "bg-ink-900 text-white"
+                : "pointer-events-none bg-ink-100 text-ink-500"
+            }`}
+          >
+            Open CCC Online Services
+          </a>
+          <label className="inline-flex items-center gap-2 text-sm text-ink-700">
+            <input
+              type="checkbox"
+              checked={packageSent}
+              disabled={sectionStatus.submit !== "complete"}
+              onChange={(e) => setPackageSent(e.target.checked)}
+            />
+            Package sent
+          </label>
+        </div>
       </Collapsible>
 
     </div>

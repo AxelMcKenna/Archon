@@ -169,10 +169,10 @@ def replace_insert_date(root, completion_date: str) -> None:
             return
 
 
-def set_checkbox_in_element(element, checked: bool) -> bool:
+def set_checkbox_in_element(element, checked: bool, checked_glyph: str = "x") -> bool:
     updated = False
     checked_value = "1" if checked else "0"
-    glyph = "x" if checked else "☐"
+    glyph = checked_glyph if checked else "☐"
 
     for checked_el in element.xpath(".//w14:checked"):
         checked_el.set(qn("w14:val"), checked_value)
@@ -181,9 +181,10 @@ def set_checkbox_in_element(element, checked: bool) -> bool:
     # Override checked state glyph to plain x when selected.
     if checked:
         for checked_state in element.xpath(".//w14:checkedState"):
-            checked_state.set(qn("w14:val"), "0078")
-            checked_state.set(qn("w14:font"), "Arial")
-            updated = True
+            if checked_glyph == "x":
+                checked_state.set(qn("w14:val"), "0078")
+                checked_state.set(qn("w14:font"), "Arial")
+                updated = True
 
     for t in element.xpath(".//w:sdt//w:t"):
         if (t.text or "") in {"☐", "☑"}:
@@ -211,7 +212,7 @@ def find_specified_systems_table(root):
     return matches[0][1]
 
 
-def set_checkbox_by_label(table, label_match: str, checked: bool) -> bool:
+def set_checkbox_by_label(table, label_match: str, checked: bool, checked_glyph: str = "x") -> bool:
     needle = normalize(label_match)
     if not needle:
         return False
@@ -240,7 +241,7 @@ def set_checkbox_by_label(table, label_match: str, checked: bool) -> bool:
 
         for candidate in candidates:
             if candidate.xpath(".//w14:checkbox"):
-                if set_checkbox_in_element(candidate, checked):
+                if set_checkbox_in_element(candidate, checked, checked_glyph=checked_glyph):
                     return True
     return False
 
@@ -259,11 +260,16 @@ def populate_specified_systems(root, payload: dict[str, Any]) -> None:
         return
 
     # Reset only specified-systems checkboxes, not unrelated form checkboxes.
-    set_checkbox_by_label(table, "There are no specified systems in the building", False)
+    set_checkbox_by_label(table, "There are no specified systems in the building", False, checked_glyph="x")
     for code in ALL_SPECIFIED_SYSTEM_CODES:
-        set_checkbox_by_label(table, f"{code} –", False)
+        set_checkbox_by_label(table, f"{code} –", False, checked_glyph="x")
 
-    set_checkbox_by_label(table, "There are no specified systems in the building", no_specified)
+    set_checkbox_by_label(
+        table,
+        "There are no specified systems in the building",
+        no_specified,
+        checked_glyph="x",
+    )
 
     if no_specified:
         return
@@ -271,7 +277,46 @@ def populate_specified_systems(root, payload: dict[str, Any]) -> None:
     for code in selected_codes:
         if not isinstance(code, str):
             continue
-        set_checkbox_by_label(table, f"{normalize(code)} –", True)
+        set_checkbox_by_label(table, f"{normalize(code)} –", True, checked_glyph="x")
+
+
+def populate_section5_attachments(root, payload: dict[str, Any]) -> None:
+    attachments = payload.get("attachments")
+    if not isinstance(attachments, dict):
+        return
+
+    table = find_table(
+        root,
+        [
+            "The following documents are attached to this application:",
+            "Other documents from the personnel who carried out the work",
+            "Current manufacturer’s certificate, if applicable",
+        ],
+    )
+    if table is None:
+        return
+
+    mapping = [
+        ("otherDocuments", "Other documents from the personnel who carried out the work"),
+        (
+            "lbpMemorandaUploaded",
+            "Memoranda from licensed building practitioner(s) stating what restricted building work",
+        ),
+        ("energyCertificates", "Certificates that relate to the energy work"),
+        (
+            "specifiedSystemsEvidence",
+            "Evidence that specified systems are capable of performing to the performance standards set out in the building consent",
+        ),
+        ("manufacturersCertificate", "Current manufacturer’s certificate, if applicable"),
+    ]
+
+    # Normalize Section 5 first so stale/templated marks don't leak into output.
+    for _, label in mapping:
+        set_checkbox_by_label(table, label, False, checked_glyph="x")
+
+    for key, label in mapping:
+        if bool(attachments.get(key)):
+            set_checkbox_by_label(table, label, True, checked_glyph="x")
 
 
 def main() -> int:
@@ -346,6 +391,7 @@ def main() -> int:
         fill_table(other_table, other_rows)
 
     populate_specified_systems(root, payload)
+    populate_section5_attachments(root, payload)
 
     document.save(output_docx)
     return 0
