@@ -6,8 +6,16 @@ interface Suggestion {
   display_name: string;
 }
 
-export function AddressAutocompleteInput({ name, required }: { name: string; required?: boolean }) {
-  const [value, setValue] = useState("");
+export function AddressAutocompleteInput({
+  name,
+  required,
+  initialValue = "",
+}: {
+  name: string;
+  required?: boolean;
+  initialValue?: string;
+}) {
+  const [value, setValue] = useState(initialValue);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

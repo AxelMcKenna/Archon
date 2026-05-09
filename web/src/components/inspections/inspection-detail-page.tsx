@@ -10,7 +10,7 @@ import {
   manualInspectionTypeOptions,
   type InspectionSchedule,
 } from "@/lib/inspections";
-import { type EditableInspectionStatus, type InspectionPdf, getCurrentInspectionIndex } from "./model";
+import { type EditableInspectionStatus, type InspectionRecord, getCurrentInspectionIndex } from "./model";
 import { StatusBadge } from "./inspections-page";
 import { useInspections } from "./use-inspections";
 
@@ -18,6 +18,7 @@ interface InspectionDetailPageProps {
   projectId: string;
   inspectionId: string;
   schedule: InspectionSchedule;
+  savedRecords: Record<string, InspectionRecord>;
 }
 
 const statuses: EditableInspectionStatus[] = ["Passed", "Failed", "Not Conducted"];
@@ -27,9 +28,11 @@ export function InspectionDetailPage({
   projectId,
   inspectionId,
   schedule,
+  savedRecords,
 }: InspectionDetailPageProps) {
   const router = useRouter();
-  const { inspections, updateInspection, deleteInspection } = useInspections(projectId, schedule);
+  const { inspections, updateInspection, deleteInspection, uploadInspectionPdf, removeInspectionPdf } =
+    useInspections(projectId, schedule, savedRecords);
   const inspection = inspections.find((item) => item.id === inspectionId);
   const inspectionIndex = inspections.findIndex((item) => item.id === inspectionId);
   const currentInspectionIndex = getCurrentInspectionIndex(inspections);
@@ -57,14 +60,17 @@ export function InspectionDetailPage({
     );
   }
 
-  function save(update: Parameters<typeof updateInspection>[1], message = "Inspection updated.") {
-    updateInspection(inspectionId, update);
-    setFlashMessage(message);
+  async function save(update: Parameters<typeof updateInspection>[1], message = "Inspection updated.") {
+    const persisted = await updateInspection(inspectionId, update);
+    setFlashMessage(persisted ? message : "Inspection updated locally, but database save failed.");
+    if (persisted) {
+      router.refresh();
+    }
   }
 
   function updateChecklist(requirement: string, checked: boolean) {
     if (!inspection) return;
-    save(
+    void save(
       {
         checklist: {
           ...inspection.checklist,
@@ -81,7 +87,7 @@ export function InspectionDetailPage({
       return;
     }
 
-    save(
+    void save(
       { status },
       status === "Failed"
         ? "Inspection marked failed. A rescheduled follow-up has been added to the inspection list."
@@ -94,7 +100,7 @@ export function InspectionDetailPage({
 
     const inspectionType = getInspectionTypeDefinition(inspectionTypeId);
     if (!inspectionType) {
-      save(
+      void save(
         {
           inspectionTypeId: MANUAL_INSPECTION_TYPE_ID,
           category: "Manual",
@@ -107,7 +113,7 @@ export function InspectionDetailPage({
       return;
     }
 
-    save(
+    void save(
       {
         inspectionTypeId: inspectionType.id,
         title: inspectionType.title,
@@ -140,23 +146,20 @@ export function InspectionDetailPage({
     }
 
     try {
-      const pdf: InspectionPdf = {
-        id: `inspection-pdf-${Date.now()}`,
-        name: file.name,
-        size: file.size,
-        uploadedAt: new Date().toISOString(),
-        dataUrl: await readFileAsDataUrl(file),
-      };
-
-      save({ pdfs: [...inspection.pdfs, pdf] }, "PDF uploaded.");
-    } catch {
-      setFlashMessage("PDF upload failed.");
+      await uploadInspectionPdf(inspectionId, file);
+      setFlashMessage("PDF uploaded.");
+    } catch (error) {
+      setFlashMessage(error instanceof Error ? error.message : "PDF upload failed.");
     }
   }
 
-  function removePdf(pdfId: string) {
-    if (!inspection) return;
-    save({ pdfs: inspection.pdfs.filter((pdf) => pdf.id !== pdfId) }, "PDF removed.");
+  async function removePdf(pdfId: string) {
+    try {
+      await removeInspectionPdf(inspectionId, pdfId);
+      setFlashMessage("PDF removed.");
+    } catch (error) {
+      setFlashMessage(error instanceof Error ? error.message : "PDF remove failed.");
+    }
   }
 
   return (
@@ -195,7 +198,7 @@ export function InspectionDetailPage({
                 <>
                   <label className="block">
                     <span className="text-sm font-medium text-ink-500">Inspection type</span>
-                    <select
+                  <select
                       value={inspection.inspectionTypeId}
                       onChange={(event) => updateInspectionType(event.target.value)}
                       className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
@@ -213,7 +216,7 @@ export function InspectionDetailPage({
                     <input
                       type="text"
                       value={inspection.title}
-                      onChange={(event) => save({ title: event.target.value }, "Inspection name updated.")}
+                      onChange={(event) => void save({ title: event.target.value }, "Inspection name updated.")}
                       className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
                     />
                   </label>
@@ -225,7 +228,7 @@ export function InspectionDetailPage({
                 <input
                   type="date"
                   value={inspection.dueDate}
-                  onChange={(event) => save({ dueDate: event.target.value }, "Due date updated.")}
+                  onChange={(event) => void save({ dueDate: event.target.value }, "Due date updated.")}
                   className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
                 />
               </label>
@@ -235,7 +238,7 @@ export function InspectionDetailPage({
                 <input
                   type="date"
                   value={inspection.bookedDate}
-                  onChange={(event) => save({ bookedDate: event.target.value }, "Booked date updated.")}
+                  onChange={(event) => void save({ bookedDate: event.target.value }, "Booked date updated.")}
                   className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
                 />
               </label>
@@ -244,7 +247,7 @@ export function InspectionDetailPage({
                 <span className="text-sm font-medium text-ink-500">Booking and site details</span>
                 <textarea
                   value={inspection.details}
-                  onChange={(event) => save({ details: event.target.value }, "Inspection details updated.")}
+                  onChange={(event) => void save({ details: event.target.value }, "Inspection details updated.")}
                   rows={5}
                   className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
                   placeholder="Add booking reference, inspector name, site contact, access notes, or preparation details."
@@ -322,7 +325,7 @@ export function InspectionDetailPage({
               <textarea
                 value={inspection.resultNotes}
                 disabled={isResultLocked}
-                onChange={(event) => save({ resultNotes: event.target.value }, "Result notes updated.")}
+                onChange={(event) => void save({ resultNotes: event.target.value }, "Result notes updated.")}
                 rows={5}
                 className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-ink-50 disabled:text-ink-500"
                 placeholder="Record BCO comments, failed items, remedial work required, or pass evidence."
@@ -366,7 +369,7 @@ export function InspectionDetailPage({
                       <span>{formatFileSize(pdf.size)}</span>
                       <button
                         type="button"
-                        onClick={() => removePdf(pdf.id)}
+                        onClick={() => void removePdf(pdf.id)}
                         className="font-medium text-red-600 hover:text-red-700"
                       >
                         Remove
@@ -405,15 +408,6 @@ function BackLink({ projectId }: { projectId: string }) {
       Back to Inspections
     </Link>
   );
-}
-
-function readFileAsDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
 }
 
 function formatFileSize(bytes: number) {
