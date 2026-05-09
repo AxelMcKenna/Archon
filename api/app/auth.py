@@ -12,11 +12,18 @@ from supabase import Client, create_client
 from app.config import get_settings
 
 
+def _normalize_key(raw: str) -> str:
+    key = (raw or "").strip().strip("\"'")
+    if key.lower().startswith("bearer "):
+        key = key[7:].strip()
+    return key
+
+
 def _client() -> Client:
     s = get_settings()
     # Prefer service role for writes; fall back to anon if the secret isn't set
     # (useful for read-only local dev).
-    key = s.supabase_service_role_key or s.supabase_anon_key
+    key = _normalize_key(s.supabase_service_role_key) or _normalize_key(s.supabase_anon_key)
     return create_client(s.supabase_url, key)
 
 

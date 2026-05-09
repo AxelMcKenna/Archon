@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
-import { ConsentAssessmentPage } from "@/components/consent-assessment/consent-assessment-page";
+import { ForecastingClient } from "./forecasting-client";
 
 export const dynamic = "force-dynamic";
 
-export default async function ProjectConsentAssessmentPage({
+export default async function ProjectForecastingPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -13,17 +13,18 @@ export default async function ProjectConsentAssessmentPage({
   const supabase = await getSupabaseServer();
   const { data: project } = await supabase
     .from("projects")
-    .select("id, address")
+    .select("id, address, project_type")
     .eq("id", id)
     .single();
 
-  if (!project) {
-    notFound();
-  }
+  if (!project) notFound();
 
   return (
-    <div className="max-w-7xl mx-auto px-8 py-10 space-y-8">
-      <ConsentAssessmentPage projectId={project.id} address={project.address} />
-    </div>
+    <ForecastingClient
+      projectId={project.id}
+      address={project.address}
+      projectType={project.project_type}
+    />
   );
 }
+

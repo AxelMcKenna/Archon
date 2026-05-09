@@ -63,6 +63,9 @@ export interface ConsentDocument extends RequiredDocument {
 
 const DEFAULT_REFERENCE_URL =
   "https://www.building.govt.nz/projects-and-consents/apply-for-building-consent";
+const FORM2_TEMPLATE_URL = `${
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"
+}/api/templates/form2`;
 
 const DOCUMENT_LIBRARY: Record<
   string,
@@ -126,6 +129,11 @@ const DOCUMENT_LIBRARY: Record<
       "The building consent application form captures the statutory project and ownership details that accompany the supporting plans and specifications.",
     referenceUrl:
       "https://ccc.govt.nz/consents-and-licences/building-consents/building-consent-forms-guides-fees/building-consent-forms-and-guides",
+  },
+  "form-2-building-consent-application": {
+    description:
+      "Form 2 is the standard NZ building consent application form. Download, complete, and upload it back to this project.",
+    referenceUrl: FORM2_TEMPLATE_URL,
   },
   "plans-and-specifications": {
     description:

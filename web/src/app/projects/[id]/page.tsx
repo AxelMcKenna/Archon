@@ -2,19 +2,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { taxonomy } from "@consentiq/shared";
-import { deleteProject } from "./actions";
 import { ProjectDeleteButton } from "@/components/project-delete-button";
+import { deleteProject } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProjectOverview({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await getSupabaseServer();
-  const { data: project } = await supabase
-    .from("projects")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const { data: project } = await supabase.from("projects").select("*").eq("id", id).single();
   if (!project) notFound();
 
   const [
@@ -47,7 +43,7 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
           <p className="text-sm text-ink-500">{bca?.name}</p>
           <h1 className="text-2xl font-semibold">{project.address}</h1>
           <p className="mt-2 text-sm text-ink-500">
-            {project.project_type} · status {project.status}
+            {project.project_type} - status {project.status}
           </p>
         </div>
         <Link
