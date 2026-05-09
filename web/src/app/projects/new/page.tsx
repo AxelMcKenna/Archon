@@ -3,6 +3,18 @@ import { getSupabaseServer } from "@/lib/supabase/server";
 import { taxonomy } from "@consentiq/shared";
 import { ProjectCreateButton } from "@/components/project-create-button";
 
+function isMissingUserIdColumn(error: unknown) {
+  const message =
+    typeof error === "object" && error !== null && "message" in error
+      ? String((error as { message?: unknown }).message ?? "").toLowerCase()
+      : "";
+  const mentionsUserId = message.includes("user_id") || message.includes("projects.user_id");
+  return (
+    mentionsUserId &&
+    (message.includes("could not find") || message.includes("does not exist"))
+  );
+}
+
 async function createProject(formData: FormData) {
   "use server";
   const supabase = await getSupabaseServer();
@@ -15,7 +27,8 @@ async function createProject(formData: FormData) {
   const description = String(formData.get("description") ?? "").trim() || null;
 
   const recentThreshold = new Date(Date.now() - 15_000).toISOString();
-  const { data: existingProject } = await supabase
+  let existingProjectId: string | null = null;
+  const existingWithUser = await supabase
     .from("projects")
     .select("id")
     .eq("user_id", user.id)
@@ -27,11 +40,35 @@ async function createProject(formData: FormData) {
     .limit(1)
     .maybeSingle();
 
-  if (existingProject) {
-    redirect(`/projects/${existingProject.id}`);
+  if (existingWithUser.error && !isMissingUserIdColumn(existingWithUser.error)) {
+    throw new Error(existingWithUser.error.message || "Unable to check existing projects.");
+  }
+  if (existingWithUser.data?.id) {
+    existingProjectId = existingWithUser.data.id;
+  } else if (existingWithUser.error && isMissingUserIdColumn(existingWithUser.error)) {
+    const existingWithoutUser = await supabase
+      .from("projects")
+      .select("id")
+      .eq("address", address)
+      .eq("bca", bca)
+      .eq("project_type", projectType)
+      .gte("created_at", recentThreshold)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (existingWithoutUser.error) {
+      throw new Error(existingWithoutUser.error.message || "Unable to check existing projects.");
+    }
+    existingProjectId = existingWithoutUser.data?.id ?? null;
   }
 
-  const { data, error } = await supabase
+  if (existingProjectId) {
+    redirect(`/projects/${existingProjectId}`);
+  }
+
+  let createdProjectId: string | null = null;
+
+  const withUserInsert = await supabase
     .from("projects")
     .insert({
       user_id: user.id,
@@ -42,8 +79,35 @@ async function createProject(formData: FormData) {
     })
     .select("id")
     .single();
-  if (error) throw error;
-  redirect(`/projects/${data.id}`);
+
+  if (withUserInsert.error && isMissingUserIdColumn(withUserInsert.error)) {
+    const withoutUserInsert = await supabase
+      .from("projects")
+      .insert({
+        address,
+        bca,
+        project_type: projectType,
+        description,
+      })
+      .select("id")
+      .single();
+    if (withoutUserInsert.error) {
+      throw new Error(withoutUserInsert.error.message || "Unable to create project.");
+    }
+    createdProjectId = withoutUserInsert.data.id;
+  } else if (withUserInsert.error) {
+    const message = withUserInsert.error.message?.toLowerCase?.() ?? "";
+    const staleUserSession =
+      withUserInsert.error.code === "23503" &&
+      (message.includes("user_id") || message.includes("projects_user_id_fkey"));
+    if (staleUserSession) {
+      redirect("/auth/sign-in");
+    }
+    throw new Error(withUserInsert.error.message || "Unable to create project.");
+  } else {
+    createdProjectId = withUserInsert.data.id;
+  }
+  redirect(`/projects/${createdProjectId}`);
 }
 
 export default function NewProjectPage() {
