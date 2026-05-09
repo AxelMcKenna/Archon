@@ -1,10 +1,10 @@
-export default function RFIs() {
-  return (
-    <div className="max-w-6xl mx-auto px-6 py-8">
-      <h1 className="text-3xl font-semibold mb-8">RFIs</h1>
-      <div className="bg-white p-8 rounded-lg border border-ink-200">
-        <p className="text-ink-600">RFI letters and responses will appear here.</p>
-      </div>
-    </div>
-  );
+import { redirect } from "next/navigation";
+
+export default async function RfisRedirect({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  redirect(`/projects/${id}/project-application`);
 }
