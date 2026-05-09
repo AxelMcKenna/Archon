@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "bcas": [
+    { "id": "ccc", "name": "Christchurch City Council", "portal": "AlphaOne", "naming_convention": "[appref]_RFI[n]_item[n]_[date].pdf", "lodgement_url": "https://online.ccc.govt.nz/" },
+    { "id": "selwyn", "name": "Selwyn District Council", "portal": "Objective Build", "naming_convention": "[appref]_[doc-description].pdf", "lodgement_url": "https://www.selwyn.govt.nz/" },
+    { "id": "waimakariri", "name": "Waimakariri District Council", "portal": "Objective Build", "naming_convention": "[appref]_[doc-description].pdf", "lodgement_url": "https://www.waimakariri.govt.nz/" }
+  ],
+  "project_types": [
+    { "id": "new_dwelling", "label": "New dwelling" },
+    { "id": "extension", "label": "Extension / addition" },
+    { "id": "accessory", "label": "Accessory building (sleep-out / garage)" },
+    { "id": "deck", "label": "Deck" }
+  ],
+  "categories": [
+    { "id": "building_code:B1", "label": "B1 — Structure", "rfi_share": 0.315, "weight": 1.0 },
+    { "id": "building_code:B2", "label": "B2 — Durability", "rfi_share": 0.05, "weight": 0.8 },
+    { "id": "building_code:C", "label": "C — Protection from fire", "rfi_share": 0.05, "weight": 0.8 },
+    { "id": "building_code:D", "label": "D — Access", "rfi_share": 0.02, "weight": 0.5 },
+    { "id": "building_code:E1", "label": "E1 — Surface water", "rfi_share": 0.03, "weight": 0.7 },
+    { "id": "building_code:E2", "label": "E2 — External moisture", "rfi_share": 0.22, "weight": 1.0 },
+    { "id": "building_code:E3", "label": "E3 — Internal moisture", "rfi_share": 0.03, "weight": 0.6 },
+    { "id": "building_code:F", "label": "F — Safety of users", "rfi_share": 0.03, "weight": 0.6 },
+    { "id": "building_code:G", "label": "G — Services & facilities", "rfi_share": 0.05, "weight": 0.7 },
+    { "id": "building_code:H1", "label": "H1 — Energy efficiency", "rfi_share": 0.05, "weight": 0.7 },
+    { "id": "documentation:plans", "label": "Documentation — Plans", "weight": 0.6 },
+    { "id": "documentation:specifications", "label": "Documentation — Specifications", "weight": 0.6 },
+    { "id": "documentation:producer_statements", "label": "Documentation — Producer statements", "weight": 0.9 },
+    { "id": "documentation:fees", "label": "Documentation — Fees", "weight": 0.5 },
+    { "id": "documentation:lbp", "label": "Documentation — LBP", "weight": 0.7 },
+    { "id": "documentation:other", "label": "Documentation — Other", "weight": 0.4 }
+  ],
+  "severities": ["must_resolve", "nice_to_have"],
+  "project_statuses": [
+    "pre-lodgement",
+    "lodged",
+    "rfi-open",
+    "rfi-responded",
+    "decision-pending",
+    "granted",
+    "declined"
+  ],
+  "acceptable_solutions": {
+    "B1": { "title": "Structure", "documents": ["B1/AS1", "B1/VM1", "B1/VM4"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/b-stability/b1-structure/" },
+    "B2": { "title": "Durability", "documents": ["B2/AS1", "B2/VM1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/b-stability/b2-durability/" },
+    "C":  { "title": "Protection from fire", "documents": ["C/AS1", "C/AS2", "C/VM2"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/c-protection-from-fire/" },
+    "D":  { "title": "Access", "documents": ["D1/AS1", "D2/AS1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/d-access/" },
+    "E1": { "title": "Surface water", "documents": ["E1/AS1", "E1/VM1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/e-moisture/e1-surface-water/" },
+    "E2": { "title": "External moisture", "documents": ["E2/AS1", "E2/VM1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/e-moisture/e2-external-moisture/" },
+    "E3": { "title": "Internal moisture", "documents": ["E3/AS1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/e-moisture/e3-internal-moisture/" },
+    "F":  { "title": "Safety of users", "documents": ["F2/AS1", "F4/AS1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/f-safety-of-users/" },
+    "G":  { "title": "Services and facilities", "documents": ["G12/AS1", "G13/AS1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/g-services-and-facilities/" },
+    "H1": { "title": "Energy efficiency", "documents": ["H1/AS1", "H1/VM1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/h-energy-efficiency/h1-energy-efficiency/" }
+  }
+}

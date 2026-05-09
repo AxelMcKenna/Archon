@@ -1,0 +1,6 @@
+packages:
+  - web
+  - shared
+allowBuilds:
+  sharp: false
+  unrs-resolver: false

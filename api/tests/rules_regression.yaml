@@ -1,0 +1,74 @@
+# Rules engine regression set (FR-2.10).
+# Each case: input item → expected primary category from rules engine.
+# CI fails if any case stops matching.
+
+cases:
+  - id: ps1
+    raw_text: "Please provide PS1 from a Chartered Professional Engineer for the proposed retaining wall."
+    expected_category: documentation:producer_statements
+    expected_rule: ps1-mention
+
+  - id: ps3
+    raw_text: "PS3 (Construction Review) is required prior to CCC issue."
+    expected_category: documentation:producer_statements
+    expected_rule: ps3-mention
+
+  - id: e2-explicit
+    raw_text: "Show flashings to head, jamb and sill at all window penetrations. Refer E2/AS1."
+    expected_category: building_code:E2
+    expected_rule: e2-as1
+
+  - id: e2-keyword
+    raw_text: "Show all weathertight junctions on the elevations."
+    expected_category: building_code:E2
+    expected_rule: weathertightness-keyword
+
+  - id: b1-clause
+    raw_text: "Provide structural calculations demonstrating compliance with Building Code clause B1."
+    expected_category: building_code:B1
+    expected_rule: clause-b1
+
+  - id: nzs-3604
+    raw_text: "Bracing design shall comply with NZS 3604:2011."
+    expected_category: building_code:B1
+    expected_rule: nzs-3604
+
+  - id: lbp
+    raw_text: "Provide LBP details for the licensed building practitioner."
+    expected_category: documentation:lbp
+    expected_rule: lbp-mention
+
+  - id: fee
+    raw_text: "Outstanding fee shortfall of $450 must be paid before processing continues."
+    expected_category: documentation:fees
+    expected_rule: fee-shortfall
+
+  - id: drainage
+    raw_text: "Provide a drainage layout including stormwater discharge point."
+    expected_category: building_code:G
+    expected_rule: drainage-keyword
+
+  - id: barrier
+    raw_text: "Balustrade height to deck must comply with safety glazing requirements."
+    expected_category: building_code:F
+    expected_rule: barrier-glazing
+
+  - id: insulation
+    raw_text: "Confirm wall insulation R-value meets H1 schedule method."
+    expected_category: building_code:H1
+    expected_rule: insulation-h1
+
+  - id: fire
+    raw_text: "Provide fire-rated separation between garage and habitable spaces."
+    expected_category: building_code:C
+    expected_rule: fire-protection
+
+  - id: site-plan
+    raw_text: "Site plan does not show north arrow or scale bar. Please amend."
+    expected_category: documentation:plans
+    expected_rule: site-plan-issue
+
+  - id: specs
+    raw_text: "Material specifications are missing for the cladding system. Please provide."
+    expected_category: documentation:specifications
+    expected_rule: specifications-issue

@@ -1,0 +1,210 @@
+# ConsentIQ RFI classification rules
+# Versioned. Changes must pass /api/tests/rules_regression.yaml before merge.
+
+version: "1.0.0"
+
+rules:
+  - id: ps1-mention
+    description: "Item references PS1 producer statement"
+    matcher:
+      type: entity
+      field: extracted.document_references
+      contains: PS1
+    category: documentation:producer_statements
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    example_match: "Please provide PS1 from a Chartered Professional Engineer..."
+    version_introduced: "1.0.0"
+
+  - id: ps3-mention
+    description: "Item references PS3 producer statement"
+    matcher:
+      type: entity
+      field: extracted.document_references
+      contains: PS3
+    category: documentation:producer_statements
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.0.0"
+
+  - id: ps4-mention
+    description: "Item references PS4 producer statement"
+    matcher:
+      type: entity
+      field: extracted.document_references
+      contains: PS4
+    category: documentation:producer_statements
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.0.0"
+
+  - id: clause-b1
+    description: "Item explicitly references Building Code clause B1"
+    matcher:
+      type: entity
+      field: extracted.clause_references
+      contains: B1
+    category: building_code:B1
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.0.0"
+
+  - id: clause-e2
+    description: "Item explicitly references Building Code clause E2"
+    matcher:
+      type: entity
+      field: extracted.clause_references
+      contains: E2
+    category: building_code:E2
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.0.0"
+
+  - id: weathertightness-keyword
+    description: "Item mentions weathertightness terminology (E2 proxy)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(weathertight|weather-tight|cladding|flashing|junction|head\\s+and\\s+sill)\\b"
+    category: building_code:E2
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.0.0"
+
+  - id: structural-keyword
+    description: "Item mentions structural design terminology (B1 proxy)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(timber\\s+framing|steel\\s+beam|lateral\\s+load|wind\\s+zone|seismic|foundation\\s+design|bracing)\\b"
+    category: building_code:B1
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.0.0"
+
+  - id: nzs-3604
+    description: "Item references NZS 3604 (timber-framed buildings)"
+    matcher:
+      type: entity
+      field: extracted.standards_references
+      contains: NZS 3604
+    category: building_code:B1
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.0.0"
+
+  - id: e2-as1
+    description: "Item references E2/AS1 (external moisture acceptable solution)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)E2/AS1"
+    category: building_code:E2
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.0.0"
+
+  - id: lbp-mention
+    description: "Item asks for LBP details"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(LBP|licen[sc]ed\\s+building\\s+practitioner)\\b"
+    category: documentation:lbp
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.0.0"
+
+  - id: fee-shortfall
+    description: "Item references fee/payment shortfall"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(fee|invoice|payment|shortfall|outstanding\\s+balance)\\b.*\\$\\d"
+    category: documentation:fees
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.0.0"
+
+  - id: drainage-keyword
+    description: "Item mentions drainage / plumbing (G clauses)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(drainage|stormwater|wastewater|sewer|plumbing|G12|G13)\\b"
+    category: building_code:G
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.0.0"
+
+  - id: barrier-glazing
+    description: "Item mentions barriers, glazing, balustrades (F clauses)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(balustrade|barrier|glazing|safety\\s+glass|F4|F2)\\b"
+    category: building_code:F
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.0.0"
+
+  - id: insulation-h1
+    description: "Item mentions insulation / energy efficiency (H1)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(insulation|R-value|H1|thermal|double\\s+glaz|low-e)\\b"
+    category: building_code:H1
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.0.0"
+
+  - id: fire-protection
+    description: "Item mentions fire protection (C clauses)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)(\\bfire[\\s-]+rat|\\bfire[\\s-]+separation|\\bfire[\\s-]+door|\\bC/AS|\\bC1\\b|\\bC2\\b|\\bC3\\b|\\bC4\\b)"
+    category: building_code:C
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.0.0"
+
+  - id: site-plan-issue
+    description: "Item asks for amended/clearer site plan"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(site\\s+plan|setback|boundary\\s+distance|north\\s+arrow|scale\\s+bar)\\b"
+    category: documentation:plans
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.0.0"
+
+  - id: specifications-issue
+    description: "Item asks for amended/clearer specifications"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(specifications?|product\\s+spec|material\\s+spec)\\b.*\\b(missing|insufficient|incomplete|amended|provide)\\b"
+    category: documentation:specifications
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.0.0"
