@@ -1,20 +1,17 @@
 import { notFound } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { taxonomy } from "@consentiq/shared";
-import { UploadRfi } from "./upload-rfi";
-import { deleteProject } from "./actions";
 import { ProjectDeleteButton } from "@/components/project-delete-button";
+import { deleteProject } from "./actions";
+import { RiskRunner } from "./risk/risk-runner";
+import { UploadRfi } from "./upload-rfi";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProjectOverview({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await getSupabaseServer();
-  const { data: project } = await supabase
-    .from("projects")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const { data: project } = await supabase.from("projects").select("*").eq("id", id).single();
   if (!project) notFound();
 
   const { data: letters } = await supabase
@@ -33,16 +30,20 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
           <p className="text-sm text-ink-500">{bca?.name}</p>
           <h1 className="text-2xl font-semibold">{project.address}</h1>
           <p className="mt-2 text-sm text-ink-500">
-            {project.project_type} · status {project.status}
+            {project.project_type} - status {project.status}
           </p>
         </div>
-        <a
-          href={`/projects/${id}/risk`}
-          className="rounded-lg border border-ink-700/15 px-3 py-2 text-sm hover:bg-ink-700/5"
-        >
-          Pre-lodgement risk check →
-        </a>
       </header>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">Pre-lodgement risk assessment</h2>
+        <RiskRunner
+          bca={project.bca}
+          projectType={project.project_type}
+          defaultDescription={project.description ?? ""}
+          autoRun
+        />
+      </section>
 
       <section>
         <h2 className="text-lg font-semibold mb-3">RFI letters</h2>
@@ -53,7 +54,7 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
             {letters.map((l) => (
               <li key={l.id} className="py-3 flex justify-between text-sm">
                 <a href={`/projects/${id}/rfis`} className="hover:underline">
-                  RFI {l.rfi_number ?? "?"} — {l.issue_date ?? "(no date)"}
+                  RFI {l.rfi_number ?? "?"} - {l.issue_date ?? "(no date)"}
                 </a>
                 <span className="text-ink-500">{l.status}</span>
               </li>
@@ -62,6 +63,7 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
         )}
         <UploadRfi projectId={id} bca={project.bca} />
       </section>
+
       <section className="border-t border-ink-700/10 pt-8">
         <div className="rounded-2xl border border-red-200 bg-red-50/60 p-5">
           <h2 className="text-lg font-semibold text-red-900">Danger zone</h2>

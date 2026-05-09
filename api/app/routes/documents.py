@@ -21,6 +21,7 @@ class ProjectDetails(BaseModel):
     involvesStructuralWork: bool = False
     involvesEarthworks: bool = False
     existingStructureDemolished: bool = False
+    yearOfConstruction: Optional[int] = None
     newRoadAccess: bool = False
     newServiceConnections: ServiceConnections = Field(default_factory=ServiceConnections)
 
@@ -127,6 +128,13 @@ async def resolve_documents(payload: ResolveDocumentsRequest) -> ResolveDocument
         _add_docs(matched, thresholds.get("constructionValueOver500k", []))
     if value_nzd > 2000000:
         _add_docs(matched, thresholds.get("constructionValueOver2m", []))
+
+    if (
+        project_details.existingStructureDemolished
+        and project_details.yearOfConstruction is not None
+        and project_details.yearOfConstruction < 1990
+    ):
+        _add_docs(matched, details_rules.get("pre1990Demolition", []))
 
     ordered_docs = sorted(
         (Document(**doc) for doc in matched.values()),

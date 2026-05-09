@@ -24,7 +24,11 @@ export default async function ProjectConsentAssessmentPage({
 
   return (
     <div className="space-y-8">
-      <AddressChecklist address={project.address} initialProjectType={project.project_type} />
+      <AddressChecklist
+        address={project.address}
+        initialProjectType={project.project_type}
+        projectId={project.id}
+      />
       <ConsentAssessmentPage projectId={project.id} address={project.address} />
     </div>
   );

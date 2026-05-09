@@ -26,6 +26,15 @@
       "trigger": "Required to identify land status and any relevant legal interests.",
       "specialist": null,
       "referenceClause": "RMA Schedule 4"
+    },
+    {
+      "id": "form2_building_consent_application",
+      "title": "Form 2 Building Consent Application",
+      "description": "National standard building consent application form (Form 2). Complete and lodge with the required supporting documents.",
+      "category": "baseline",
+      "trigger": "Required for building consent applications under the Building Act application forms.",
+      "specialist": null,
+      "referenceClause": "Building (Forms) Regulations 2004 - Form 2"
     }
   ],
   "byZoneCategory": {
@@ -362,15 +371,6 @@
     ],
     "existingStructureDemolished": [
       {
-        "id": "hazardous_materials_asbestos_survey",
-        "title": "Hazardous Materials Survey (Including Asbestos Risk)",
-        "description": "Survey identifying hazardous materials before demolition, with asbestos assessment emphasis for older buildings.",
-        "category": "specialist",
-        "trigger": "Demolition requires hazardous material risk identification prior to works.",
-        "specialist": "Licensed asbestos assessor",
-        "referenceClause": "Health and Safety at Work (Asbestos) Regulations 2016"
-      },
-      {
         "id": "demolition_consent_application_documents",
         "title": "Demolition Consent Application Documents",
         "description": "Demolition scope, method, safety controls, and sequencing information required for council processing.",
@@ -387,6 +387,17 @@
         "trigger": "Demolition works require managed waste handling and disposal documentation.",
         "specialist": null,
         "referenceClause": "CCC Solid Waste Bylaw"
+      }
+    ],
+    "pre1990Demolition": [
+      {
+        "id": "hazardous_materials_asbestos_survey",
+        "title": "Hazardous Materials Survey (Asbestos)",
+        "description": "Pre-demolition asbestos survey required under the Health and Safety at Work (Asbestos) Regulations 2016. Must be carried out by a licensed asbestos assessor before any demolition or refurbishment work begins.",
+        "category": "specialist",
+        "trigger": "Existing structure demolition with known pre-1990 construction year.",
+        "specialist": "Licensed asbestos assessor",
+        "referenceClause": "Health and Safety at Work (Asbestos) Regulations 2016, Regulation 9"
       }
     ],
     "newRoadAccess": [

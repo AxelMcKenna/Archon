@@ -6,6 +6,8 @@ interface Suggestion {
   display_name: string;
 }
 
+const ADDRESS_AUTOCOMPLETE_DEBOUNCE_MS = 80;
+
 export function AddressAutocompleteInput({ name, required }: { name: string; required?: boolean }) {
   const [value, setValue] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -41,7 +43,7 @@ export function AddressAutocompleteInput({ name, required }: { name: string; req
       } finally {
         if (requestId === requestIdRef.current) setIsLoading(false);
       }
-    }, 250);
+    }, ADDRESS_AUTOCOMPLETE_DEBOUNCE_MS);
 
     return () => clearTimeout(timeout);
   }, [value]);

@@ -11,6 +11,8 @@ from app.routes import documents as documents_routes
 from app.routes import drafts as drafts_routes
 from app.routes import export as export_routes
 from app.routes import extract as extract_routes
+from app.routes import forecasting as forecasting_routes
+from app.routes import form_templates as form_templates_routes
 from app.routes import health as health_routes
 from app.routes import letters as letters_routes
 from app.routes import plans as plans_routes
@@ -22,9 +24,14 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
+        "http://127.0.0.1:3000",
         "https://consentiq-web.vercel.app",
     ],
-    allow_origin_regex=r"https://consentiq-web-[a-z0-9-]+-axel-mckennas-projects\.vercel\.app|https://consentiq-[a-z0-9]+-axel-mckennas-projects\.vercel\.app",
+    allow_origin_regex=(
+        r"http://(localhost|127\.0\.0\.1)(:\d+)?"
+        r"|https://consentiq-web-[a-z0-9-]+-axel-mckennas-projects\.vercel\.app"
+        r"|https://consentiq-[a-z0-9]+-axel-mckennas-projects\.vercel\.app"
+    ),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -49,4 +56,6 @@ app.include_router(
 )
 app.include_router(address_suggest_routes.router, prefix="/address-suggest", tags=["address-suggest"])
 app.include_router(documents_routes.router, prefix="/api/resolve-documents", tags=["documents"])
+app.include_router(forecasting_routes.router, prefix="/api", tags=["forecasting"])
+app.include_router(form_templates_routes.router, prefix="/api/templates", tags=["templates"])
 app.include_router(debug_env_routes.router, prefix="/debug/env", tags=["debug"])

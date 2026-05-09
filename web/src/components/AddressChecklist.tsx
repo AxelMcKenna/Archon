@@ -40,9 +40,11 @@ const PROJECT_TYPE_OPTIONS: Array<{ value: ProjectType; label: string }> = [
 export function AddressChecklist({
   address,
   initialProjectType = "new_dwelling",
+  projectId,
 }: {
   address: string;
   initialProjectType?: string;
+  projectId?: string;
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,6 +59,7 @@ export function AddressChecklist({
     involvesStructuralWork: false,
     involvesEarthworks: false,
     existingStructureDemolished: false,
+    yearOfConstruction: null,
     newRoadAccess: false,
     newServiceConnections: {
       water: false,
@@ -93,8 +96,15 @@ export function AddressChecklist({
     () => Object.values(completedDocs).filter(Boolean).length,
     [completedDocs]
   );
+  const currentYear = new Date().getFullYear();
+  const yearOfConstructionError = getYearOfConstructionError(projectDetails.yearOfConstruction, currentYear);
 
   const handleQuery = async () => {
+    if (yearOfConstructionError) {
+      setError(yearOfConstructionError);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     setResult(null);
@@ -140,6 +150,19 @@ export function AddressChecklist({
 
       const docsData = (await docsResponse.json()) as ResolveDocumentsResponse;
       setDocuments(docsData);
+      const forecastContext = {
+        address,
+        lat: geoData.coordinates.lat,
+        lon: geoData.coordinates.lon,
+        zoneCategory: getZoneCategory(geoData.zone_info?.zone_type),
+        activeOverlays: Object.entries(geoData.overlays)
+          .filter(([, isActive]) => isActive)
+          .map(([key]) => normalizeOverlayKey(key))
+          .filter((key): key is string => Boolean(key)),
+        ...projectDetails,
+      };
+      const contextKey = projectId ? `forecast-context:${projectId}` : "forecast-context:latest";
+      window.localStorage.setItem(contextKey, JSON.stringify(forecastContext));
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -221,7 +244,11 @@ export function AddressChecklist({
             label="Existing structure demolished"
             checked={projectDetails.existingStructureDemolished}
             onChange={(checked) =>
-              setProjectDetails((prev) => ({ ...prev, existingStructureDemolished: checked }))
+              setProjectDetails((prev) => ({
+                ...prev,
+                existingStructureDemolished: checked,
+                yearOfConstruction: checked ? prev.yearOfConstruction : null,
+              }))
             }
           />
           <Checkbox
@@ -229,6 +256,44 @@ export function AddressChecklist({
             checked={projectDetails.newRoadAccess}
             onChange={(checked) => setProjectDetails((prev) => ({ ...prev, newRoadAccess: checked }))}
           />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <label
+            className={`block text-sm ${
+              projectDetails.existingStructureDemolished ? "" : "opacity-70"
+            }`}
+            aria-disabled={!projectDetails.existingStructureDemolished}
+          >
+            <span className="text-ink-500 block mb-1">
+              Year of construction (optional, 4-digit)
+            </span>
+            <input
+              type="number"
+              min={1800}
+              max={currentYear}
+              placeholder="e.g. 1985"
+              disabled={!projectDetails.existingStructureDemolished}
+              aria-disabled={!projectDetails.existingStructureDemolished}
+              className={`w-full rounded border px-3 py-2 ${
+                projectDetails.existingStructureDemolished
+                  ? "border-ink-700/20"
+                  : "border-ink-700/10 bg-ink-100 text-ink-500 cursor-not-allowed"
+              }`}
+              value={projectDetails.yearOfConstruction ?? ""}
+              onChange={(event) =>
+                setProjectDetails((prev) => ({
+                  ...prev,
+                  yearOfConstruction: parseNullableInteger(event.target.value),
+                }))
+              }
+            />
+            <p className="mt-1 text-xs text-ink-500">
+              If built before 1990, an asbestos survey will be required.
+            </p>
+            {yearOfConstructionError && projectDetails.existingStructureDemolished && (
+              <p className="mt-1 text-xs text-red-700">{yearOfConstructionError}</p>
+            )}
+          </label>
         </div>
 
         <div>
@@ -324,7 +389,17 @@ export function AddressChecklist({
 
           {documents && (
             <div className="rounded-lg border border-ink-700/10 p-4">
-              <h3 className="font-semibold mb-4">Required Documents</h3>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <h3 className="font-semibold">Required Documents</h3>
+                {projectId && (
+                  <a
+                    href={`/projects/${projectId}/forecasting`}
+                    className="rounded-lg border border-ink-700/20 px-3 py-2 text-xs font-medium text-ink-700 hover:bg-ink-50"
+                  >
+                    Open Forecasting
+                  </a>
+                )}
+              </div>
               <div className="mb-2 h-2 w-full overflow-hidden rounded-full bg-ink-700/10">
                 <div
                   className="h-full bg-ink-900 transition-all"
@@ -433,6 +508,20 @@ function parseNullableNumber(value: string): number | null {
   if (!value.trim()) return null;
   const num = Number(value);
   return Number.isFinite(num) ? Math.max(0, Math.trunc(num)) : null;
+}
+
+function parseNullableInteger(value: string): number | null {
+  if (!value.trim()) return null;
+  const num = Number(value);
+  return Number.isFinite(num) ? Math.trunc(num) : null;
+}
+
+function getYearOfConstructionError(year: number | null, currentYear: number): string | null {
+  if (year === null) return null;
+  if (!Number.isInteger(year) || year < 1800 || year > currentYear || year < 1000 || year > 9999) {
+    return `Enter a valid year between 1800 and ${currentYear}.`;
+  }
+  return null;
 }
 
 function normalizeProjectType(value: string): ProjectType {
