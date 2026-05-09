@@ -23,10 +23,14 @@ import {
 
 const INSPECTION_STORAGE_PREFIX = "project-inspections";
 
+// Stable empty reference so callers that omit the third arg don't churn the
+// effect dep array (used to cause a setState-in-useEffect loop).
+const EMPTY_RECORDS: Record<string, InspectionRecord> = {};
+
 export function useInspections(
   projectId: string,
   schedule: InspectionSchedule,
-  initialSavedRecords: Record<string, InspectionRecord>,
+  initialSavedRecords: Record<string, InspectionRecord> = EMPTY_RECORDS,
 ) {
   const supabase = useMemo(() => getSupabaseBrowser(), []);
   const [savedRecords, setSavedRecords] = useState<Record<string, InspectionRecord>>(initialSavedRecords);

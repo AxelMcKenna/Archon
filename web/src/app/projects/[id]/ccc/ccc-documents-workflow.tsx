@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { useMemo, useState } from "react";
 import type { CccDocumentStatus } from "@/lib/ccc";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
@@ -90,7 +91,7 @@ export function CccDocumentsWorkflow({
           </p>
         </div>
         <Link
-          href={`/projects/${projectId}/documents`}
+          href={`/projects/${projectId}/documents` as Route}
           className="rounded-lg border border-ink-200 px-3 py-2 text-sm text-ink-700 hover:bg-ink-50"
         >
           Open Documents

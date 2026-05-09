@@ -20,7 +20,7 @@ import {
 interface UseConsentAssessmentOptions {
   projectId: string;
   address: string;
-  projectDetails: ProjectDetails;
+  projectDetails?: ProjectDetails;
 }
 
 interface ConsentAssessmentState {
@@ -345,7 +345,7 @@ export function useConsentAssessment({
 async function resolveProjectDocuments(
   apiUrl: string,
   checklist: ChecklistResult,
-  projectDetails: ProjectDetails,
+  projectDetails: ProjectDetails | undefined,
 ) {
   const response = await fetch(`${apiUrl}/api/resolve-documents`, {
     method: "POST",
