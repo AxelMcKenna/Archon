@@ -15,6 +15,7 @@ const projectTabs = [
   { name: "RFIs", href: "/rfis" },
   { name: "Processing", href: "/processing" },
   { name: "Inspections", href: "/inspections" },
+  { name: "Documents", href: "/documents" },
   { name: "CCC", href: "/ccc" },
 ];
 
