@@ -82,6 +82,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
       abortRef.current = controller;
 
       try {
+        console.log("[agent] send →", { project_id: projectId, tab, route, conversation_id: conversationIdRef.current, message: text });
         for await (const evt of streamAgent(
           {
             project_id: projectId,
@@ -147,13 +148,16 @@ export function AgentProvider({ children }: { children: ReactNode }) {
           } else if (evt.type === "error") {
             setError(evt.error);
           } else if (evt.type === "done") {
+            console.log("[agent] done event received");
             break;
           }
         }
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
+        console.error("[agent] stream error:", msg, e);
         if (!controller.signal.aborted) setError(msg);
       } finally {
+        console.log("[agent] turn complete (pending → false)");
         setPending(false);
         abortRef.current = null;
       }

@@ -66,8 +66,8 @@ export function AgentTrigger({
         size={size}
         intent={intent}
         badge={summary.badge}
-        ariaLabel={`Ask the assistant about ${tab}`}
-        onClick={() => open(opener)}
+        ariaLabel={`Open the assistant`}
+        onClick={() => open()}
       />
 
       {/* Hover popover with suggestion chips */}

@@ -86,7 +86,10 @@ async def chat(request: Request, req: ChatRequest) -> EventSourceResponse:
         finally:
             STORE.put(conversation_id, history)
 
-    return EventSourceResponse(event_stream())
+    # text/plain instead of text/event-stream — Safari's fetch() drops body
+    # chunks for text/event-stream over chunked transfer; text/plain streams
+    # cleanly across browsers while keeping the SSE wire framing intact.
+    return EventSourceResponse(event_stream(), media_type="text/plain; charset=utf-8")
 
 
 @router.delete("/{conversation_id}")
@@ -99,4 +102,4 @@ def _error_response(msg: str) -> EventSourceResponse:
     async def gen() -> AsyncIterator[dict[str, str]]:
         yield {"event": "error", "data": json.dumps({"error": msg})}
 
-    return EventSourceResponse(gen())
+    return EventSourceResponse(gen(), media_type="text/plain; charset=utf-8")
