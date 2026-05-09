@@ -10,7 +10,7 @@ import {
   manualInspectionTypeOptions,
   type InspectionSchedule,
 } from "@/lib/inspections";
-import { type EditableInspectionStatus, type InspectionRecord, getCurrentInspectionIndex } from "./model";
+import { type EditableInspectionStatus, type InspectionRecord } from "./model";
 import { StatusBadge } from "./inspections-page";
 import { useInspections } from "./use-inspections";
 
@@ -38,9 +38,6 @@ export function InspectionDetailPage({
   const { inspections, updateInspection, deleteInspection, uploadInspectionPdf, removeInspectionPdf } =
     useInspections(projectId, schedule, savedRecords);
   const inspection = inspections.find((item) => item.id === inspectionId);
-  const inspectionIndex = inspections.findIndex((item) => item.id === inspectionId);
-  const currentInspectionIndex = getCurrentInspectionIndex(inspections);
-  const isResultLocked = inspection ? !inspection.manual && inspectionIndex > currentInspectionIndex : false;
   const [flashMessage, setFlashMessage] = useState<string | null>(null);
 
   const checkedCount = useMemo(
@@ -85,12 +82,64 @@ export function InspectionDetailPage({
     );
   }
 
-  function updateStatus(status: EditableInspectionStatus) {
-    if (isResultLocked) {
-      setFlashMessage("Complete the current inspection before setting the result for this one.");
-      return;
+  function addChecklistItem() {
+    if (!inspection) return;
+
+    const baseLabel = "New checklist item";
+    const existing = new Set(inspection.requirements);
+    let requirement = baseLabel;
+    let index = 2;
+
+    while (existing.has(requirement)) {
+      requirement = `${baseLabel} ${index}`;
+      index += 1;
     }
 
+    void save(
+      {
+        requirements: [...inspection.requirements, requirement],
+        checklist: {
+          ...inspection.checklist,
+          [requirement]: false,
+        },
+      },
+      "Checklist item added.",
+    );
+  }
+
+  function updateChecklistItem(previousRequirement: string, nextRequirement: string) {
+    if (!inspection) return;
+
+    const trimmed = nextRequirement.trim();
+    if (!trimmed || trimmed === previousRequirement) return;
+
+    const requirements = inspection.requirements.map((requirement) =>
+      requirement === previousRequirement ? trimmed : requirement,
+    );
+    const checklist = Object.fromEntries(
+      requirements.map((requirement) => [
+        requirement,
+        requirement === trimmed
+          ? Boolean(inspection.checklist[previousRequirement])
+          : Boolean(inspection.checklist[requirement]),
+      ]),
+    );
+
+    void save({ requirements, checklist }, "Checklist item updated.");
+  }
+
+  function removeChecklistItem(requirementToRemove: string) {
+    if (!inspection) return;
+
+    const requirements = inspection.requirements.filter((requirement) => requirement !== requirementToRemove);
+    const checklist = Object.fromEntries(
+      requirements.map((requirement) => [requirement, Boolean(inspection.checklist[requirement])]),
+    );
+
+    void save({ requirements, checklist }, "Checklist item removed.");
+  }
+
+  function updateStatus(status: EditableInspectionStatus) {
     void save(
       { status },
       status === "Failed"
@@ -275,33 +324,63 @@ export function InspectionDetailPage({
               </p>
             </div>
 
-            <div className="mt-4 space-y-1.5">
+            <div className="mt-4 space-y-2">
               {inspection.requirements.map((requirement) => (
-                <label
+                <div
                   key={requirement}
-                  className="flex items-start gap-3 rounded-md bg-ink-50 ring-1 ring-ink-200/70 px-3.5 py-2 text-sm transition hover:bg-ink-100/80 cursor-pointer"
+                  className="grid gap-2 rounded-md bg-ink-50 ring-1 ring-ink-200/70 px-3 py-2 text-sm transition hover:bg-ink-100/80 sm:grid-cols-[auto,minmax(0,1fr),2rem] sm:items-center"
                 >
+                  <label className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(inspection.checklist[requirement])}
+                      onChange={(event) => updateChecklist(requirement, event.target.checked)}
+                      className="h-4 w-4 rounded border-ink-700/30 accent-ink-900"
+                    />
+                    <span className="sr-only">Checklist item completed</span>
+                  </label>
                   <input
-                    type="checkbox"
-                    checked={Boolean(inspection.checklist[requirement])}
-                    onChange={(event) => updateChecklist(requirement, event.target.checked)}
-                    className="mt-0.5 h-4 w-4 rounded border-ink-700/30 accent-ink-900"
+                    type="text"
+                    defaultValue={requirement}
+                    onBlur={(event) => updateChecklistItem(requirement, event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.currentTarget.blur();
+                      }
+                    }}
+                    className="w-full rounded-md bg-white px-3 py-2 text-[13px] text-ink-900 outline-none ring-1 ring-ink-200/70 transition focus:ring-2 focus:ring-brand-500/30"
                   />
-                  <span className="text-ink-700 leading-relaxed">{requirement}</span>
-                </label>
+                  <button
+                    type="button"
+                    aria-label={`Remove ${requirement}`}
+                    title="Remove checklist item"
+                    onClick={() => removeChecklistItem(requirement)}
+                    className="flex h-8 w-8 items-center justify-center rounded-md text-lg leading-none text-red-700 transition hover:bg-red-50 hover:text-red-800"
+                  >
+                    ×
+                  </button>
+                </div>
               ))}
+              {inspection.requirements.length === 0 && (
+                <p className="rounded-md bg-ink-50 px-3.5 py-3 text-sm text-ink-500 ring-1 ring-ink-200/70">
+                  No checklist items yet.
+                </p>
+              )}
             </div>
+
+            <button
+              type="button"
+              onClick={addChecklistItem}
+              className="mt-4 inline-flex items-center justify-center rounded-md border border-ink-200 bg-surface-raised px-3 py-2 text-[12px] font-medium text-ink-900 shadow-depth transition hover:bg-ink-50"
+            >
+              Add checklist item
+            </button>
           </section>
         </div>
 
         <aside className="space-y-5">
           <section className="rounded-md bg-surface-raised p-5 shadow-depth">
             <h2 className="text-base font-semibold tracking-tight text-ink-900">Result</h2>
-            {isResultLocked && (
-              <div className="mt-3 rounded-md bg-amber-50 ring-1 ring-amber-200 px-3 py-2 text-[12px] text-amber-800">
-                Locked until the current inspection is passed or failed.
-              </div>
-            )}
 
             <div className="mt-4 grid grid-cols-3 gap-2">
               {statuses.map((status) => {
@@ -310,14 +389,12 @@ export function InspectionDetailPage({
                   <button
                     key={status}
                     type="button"
-                    disabled={isResultLocked}
                     onClick={() => updateStatus(status)}
                     className={[
                       "rounded-md px-2 py-2 text-center text-[12px] font-medium transition shadow-depth cursor-pointer",
                       isActive
                         ? "bg-ink-900 text-white hover:shadow-depth-hover"
                         : "bg-surface-raised text-ink-700 ring-1 ring-ink-200/70 hover:bg-ink-50",
-                      isResultLocked ? "cursor-not-allowed opacity-50 hover:shadow-depth" : "",
                     ].filter(Boolean).join(" ")}
                   >
                     {status === "Not Conducted" ? "Not Done" : status}
@@ -330,7 +407,6 @@ export function InspectionDetailPage({
               <span className={labelClass}>Pass/fail notes</span>
               <textarea
                 value={inspection.resultNotes}
-                disabled={isResultLocked}
                 onChange={(event) => void save({ resultNotes: event.target.value }, "Result notes updated.")}
                 rows={4}
                 className={inputClass}
@@ -345,7 +421,6 @@ export function InspectionDetailPage({
                 <input
                   type="file"
                   accept="application/pdf"
-                  disabled={isResultLocked}
                   onChange={(event) => {
                     void uploadPdf(event.target.files?.[0]);
                     event.currentTarget.value = "";
