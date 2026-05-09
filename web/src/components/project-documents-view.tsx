@@ -20,6 +20,7 @@ export interface ProjectDocumentItem {
   uploadedBy: string;
   fileSize: string;
   extension: string;
+  linkedTo: string | null;
 }
 
 interface Props {
@@ -414,6 +415,10 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
                 <div>
                   <dt className="text-ink-500">File size</dt>
                   <dd className="text-ink-800">{doc.fileSize}</dd>
+                </div>
+                <div className="col-span-2">
+                  <dt className="text-ink-500">Linked to</dt>
+                  <dd className="text-ink-800">{doc.linkedTo ?? "Unlinked"}</dd>
                 </div>
               </dl>
 

@@ -55,6 +55,28 @@ function toDisplayStatus(value: string | null): ProjectDocumentItem["status"] {
   return "Pending";
 }
 
+const CCC_ROW_PREFIXES: Array<{ label: string; prefix: string }> = [
+  { label: "Record of Building Work", prefix: "Record of Building Work - " },
+  { label: "Certificate of Design Work", prefix: "Certificate of Design Work - " },
+  { label: "PS3 — Construction Statement", prefix: "PS3 — Construction Statement - " },
+  { label: "PS4 — Construction Review", prefix: "PS4 — Construction Review - " },
+  { label: "Electrical Code of Compliance", prefix: "Electrical Code of Compliance - " },
+  { label: "Gasfitting Code of Compliance", prefix: "Gasfitting Code of Compliance - " },
+  { label: "Test certificate for potable water", prefix: "Test certificate for potable water - " },
+  { label: "Site inspection reports conducted by an engineer", prefix: "Site inspection reports conducted by an engineer - " },
+  { label: "Form B-068 — Specified Systems Declaration", prefix: "Form B-068 — Specified Systems Declaration - " },
+  { label: "Form B-065 — Accessible Facilities Upgrade Report", prefix: "Form B-065 — Accessible Facilities Upgrade Report - " },
+];
+
+function linkedToLabel(filename: string, source: string | null, label: string | null) {
+  if (label) {
+    const sourceLabel = source?.toUpperCase() ?? "Requirement";
+    return `${sourceLabel} · ${label}`;
+  }
+  const match = CCC_ROW_PREFIXES.find((item) => filename.startsWith(item.prefix));
+  return match ? `CCC · ${match.label}` : null;
+}
+
 export default async function ProjectDocumentsPage({
   params,
 }: {
@@ -83,6 +105,11 @@ export default async function ProjectDocumentsPage({
     uploadedBy: "Project owner",
     fileSize: formatFileSize(item.size_bytes),
     extension: extensionFromName(item.filename),
+    linkedTo: linkedToLabel(
+      item.filename,
+      item.linked_requirement_source ?? null,
+      item.linked_requirement_label ?? null,
+    ),
   }));
   const canEditStatus = Boolean(
     attachments &&

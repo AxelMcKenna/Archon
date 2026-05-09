@@ -6,7 +6,10 @@ begin
 
   alter table attachments
   add column if not exists display_name text,
-  add column if not exists document_type text;
+  add column if not exists document_type text,
+  add column if not exists linked_requirement_key text,
+  add column if not exists linked_requirement_label text,
+  add column if not exists linked_requirement_source text;
 
   if not exists (
     select 1
