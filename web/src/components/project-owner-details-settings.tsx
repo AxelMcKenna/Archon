@@ -47,6 +47,41 @@ function formatUploadedDate(isoDate: string) {
   return `${day}/${month}/${year}`;
 }
 
+function Collapsible({
+  title,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <section className="overflow-hidden rounded-md border border-ink-200 bg-surface-raised shadow-depth">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-ink-50/60"
+      >
+        <h2 className="text-base font-semibold text-ink-900">{title}</h2>
+        <span className="text-ink-500" aria-hidden="true">
+          {open ? (
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="m18 15-6-6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </span>
+      </button>
+      {open && <div className="border-t border-ink-200/80 px-5 py-5">{children}</div>}
+    </section>
+  );
+}
+
 export function ProjectOwnerDetailsSettings({
   projectId,
   initialValues,
@@ -186,23 +221,20 @@ export function ProjectOwnerDetailsSettings({
 
   return (
     <form action={action} className="space-y-6">
-      <section className="rounded-2xl border border-ink-700/10 bg-white p-6 shadow-sm">
-        <h2 className="mb-3 text-lg font-semibold text-ink-900">Building Consent Number(s)</h2>
+      <Collapsible title="Building Consent Number(s)">
         <label className="block">
           <span className="mb-1 block text-sm text-ink-500">Building consent number(s)</span>
           <textarea
             name="building_consent_numbers"
-            rows={3}
+            rows={1}
             defaultValue={initialValues.buildingConsentNumbers}
             placeholder="e.g. BCN-12345, BCN-12346"
             className="w-full rounded border border-ink-700/20 px-3 py-2"
           />
         </label>
-      </section>
+      </Collapsible>
 
-      <section className="rounded-2xl border border-ink-700/10 bg-white p-6 shadow-sm">
-        <h2 className="mb-3 text-lg font-semibold text-ink-900">Owner Details</h2>
-
+      <Collapsible title="Client Details">
         <div className="grid gap-4 md:grid-cols-2">
           <label className="block">
             <span className="mb-1 block text-sm text-ink-500">Preferred form of address</span>
@@ -221,7 +253,7 @@ export function ProjectOwnerDetailsSettings({
           </label>
 
           <label className="block md:col-span-2">
-            <span className="mb-1 block text-sm text-ink-500">Owner full name</span>
+            <span className="mb-1 block text-sm text-ink-500">Client full name</span>
             <input
               type="text"
               name="owner_full_name"
@@ -232,18 +264,18 @@ export function ProjectOwnerDetailsSettings({
           </label>
 
           <label className="block md:col-span-2">
-            <span className="mb-1 block text-sm text-ink-500">Contact person</span>
+            <span className="mb-1 block text-sm text-ink-500">Client contact person</span>
             <input
               type="text"
               name="owner_contact_person_full_name"
               defaultValue={initialValues.ownerContactPersonFullName}
               className="w-full rounded border border-ink-700/20 bg-slate-50 px-3 py-2"
             />
-            <span className="mt-1 block text-xs text-ink-500">Not required if owner is an individual.</span>
+            <span className="mt-1 block text-xs text-ink-500">Not required if client is an individual.</span>
           </label>
 
           <label className="block md:col-span-2">
-            <span className="mb-1 block text-sm text-ink-500">Mailing address</span>
+            <span className="mb-1 block text-sm text-ink-500">Client mailing address</span>
             <textarea
               name="owner_mailing_address"
               rows={3}
@@ -259,7 +291,7 @@ export function ProjectOwnerDetailsSettings({
               defaultChecked={initialValues.ownerStreetAddressDifferent}
               onChange={(e) => setStreetAddressDifferent(e.target.checked)}
             />
-            <span className="text-sm text-ink-700">Street address is different from mailing address</span>
+            <span className="text-sm text-ink-700">Street address is different from client mailing address</span>
           </label>
 
           {streetAddressDifferent && (
@@ -316,8 +348,8 @@ export function ProjectOwnerDetailsSettings({
 
         <div className="mt-6 rounded-lg border border-ink-700/10 p-4">
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-ink-900">The following evidence of ownership is attached to this application</span>
-            <span className="mb-2 block text-xs text-ink-500">Copy of certificate of title, lease, agreement for sale and purchase, or other document showing full name of legal owner(s) of the building.</span>
+            <span className="mb-1 block text-sm font-medium text-ink-900">The following ownership evidence is attached to this application</span>
+            <span className="mb-2 block text-xs text-ink-500">Copy of certificate of title, lease, agreement for sale and purchase, or other document showing full name of legal client/owner of the building.</span>
             <select
               name="owner_evidence_of_ownership_type"
               required
@@ -376,7 +408,7 @@ export function ProjectOwnerDetailsSettings({
             {previewError && <p className="mt-2 text-xs text-red-600">{previewError}</p>}
           </div>
         </div>
-      </section>
+      </Collapsible>
 
       <div className="flex justify-end">
         <button
