@@ -69,7 +69,7 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
-      <section className="flex flex-col gap-4 rounded-2xl border border-ink-700/10 bg-white p-8 shadow-sm sm:flex-row sm:items-end sm:justify-between">
+      <section className="flex flex-col gap-4 rounded-sm border border-ink-700/10 bg-white p-8 shadow-sm sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
           <p className="text-sm font-medium uppercase tracking-[0.18em] text-ink-500">
             Project Workflow
@@ -87,7 +87,7 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
           <button
             type="button"
             onClick={handleAddManualInspection}
-            className="inline-flex items-center justify-center rounded-xl border border-ink-700/10 bg-white px-4 py-2.5 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
+            className="inline-flex items-center justify-center rounded-sm border border-ink-700/10 bg-white px-4 py-2.5 text-sm font-medium text-ink-900 transition-colors hover:bg-ink-50"
           >
             Add Inspection
           </button>
@@ -95,7 +95,7 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
             <button
               type="button"
               onClick={showCurrentInspection}
-              className="inline-flex items-center justify-center rounded-xl bg-ink-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-ink-700"
+              className="inline-flex items-center justify-center rounded-sm bg-ink-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-ink-700"
             >
               Show Current Inspection
             </button>
@@ -103,7 +103,7 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-ink-700/10 bg-gradient-to-br from-white to-slate-50 p-8 shadow-sm">
+      <section className="rounded-sm border border-ink-700/10 bg-gradient-to-br from-white to-slate-50 p-8 shadow-sm">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
             <p className="text-sm font-medium text-ink-500">Inspection Readiness</p>
@@ -134,7 +134,7 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
           </div>
         </div>
 
-        <div className="mt-6 rounded-xl border border-ink-700/10 bg-white/80 p-5">
+        <div className="mt-6 rounded-sm border border-ink-700/10 bg-white/80 p-5">
           <p className="text-sm font-medium text-ink-900">Next inspection</p>
           <p className="mt-3 text-sm text-ink-600">
             {nextInspection
@@ -180,7 +180,7 @@ export function InspectionsPage({ projectId, schedule }: InspectionsPageProps) {
                 onDragOver={handleDragOver}
                 onDrop={(event) => handleDrop(event, index)}
                 className={[
-                  "group relative overflow-hidden rounded-2xl border bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-ink-700/20 hover:shadow-md",
+                  "group relative overflow-hidden rounded-sm border bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-ink-700/20 hover:shadow-md",
                   isCurrent ? "border-accent ring-2 ring-accent/20" : "border-ink-700/10",
                   "cursor-grab active:cursor-grabbing",
                   isDragging ? "opacity-60" : "",
@@ -243,7 +243,7 @@ function InspectionSummary({
   onDelete: () => void;
 }) {
   return (
-    <div className="flex min-w-56 flex-col items-start gap-3 rounded-xl bg-ink-50 px-4 py-3 text-sm text-ink-500">
+    <div className="flex min-w-56 flex-col items-start gap-3 rounded-sm bg-ink-50 px-4 py-3 text-sm text-ink-500">
       <span className="font-medium text-ink-900">
         {inspection.dueDate ? `Due ${formatDate(inspection.dueDate)}` : "No due date"}
       </span>
@@ -251,7 +251,7 @@ function InspectionSummary({
       <button
         type="button"
         onClick={onDelete}
-        className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50"
+        className="rounded-sm border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50"
       >
         Delete
       </button>
@@ -261,7 +261,7 @@ function InspectionSummary({
 
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-ink-700/10 bg-white px-4 py-3 shadow-sm">
+    <div className="rounded-sm border border-ink-700/10 bg-white px-4 py-3 shadow-sm">
       <div className="text-xs font-medium uppercase tracking-[0.14em] text-ink-500">{label}</div>
       <div className="mt-2 text-2xl font-semibold tracking-tight text-ink-900">{value}</div>
     </div>

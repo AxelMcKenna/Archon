@@ -153,7 +153,7 @@ export function CadReview({ cad }: { cad: Cad }) {
 
   return (
     <section className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 mt-6">
-      <div className="rounded-lg border border-ink-700/10 bg-ink-700/5 flex flex-col">
+      <div className="rounded-sm border border-ink-700/10 bg-ink-700/5 flex flex-col">
         <div className="px-4 py-2 text-xs uppercase tracking-wide text-ink-500 border-b border-ink-700/10 flex items-center justify-between gap-2">
           <span className="truncate">Drawing — {cad.filename}</span>
           <div className="flex items-center gap-3 normal-case tracking-normal">
@@ -171,7 +171,7 @@ export function CadReview({ cad }: { cad: Cad }) {
                   <button
                     key={v.name}
                     onClick={() => setActiveView(v.name)}
-                    className={`px-2 py-0.5 text-[11px] rounded border ${
+                    className={`px-2 py-0.5 text-[11px] rounded-sm border ${
                       activeView === v.name
                         ? "bg-ink-900 text-white border-ink-900"
                         : "border-ink-700/15 text-ink-700"
@@ -194,7 +194,7 @@ export function CadReview({ cad }: { cad: Cad }) {
         </div>
         <div className="flex-1 p-4">
           <div
-            className="relative w-full bg-white border border-ink-700/10 rounded shadow-sm overflow-hidden"
+            className="relative w-full bg-white border border-ink-700/10 rounded-sm shadow-sm overflow-hidden"
             style={
               activeViewInfo
                 ? { aspectRatio: `${activeViewInfo.width} / ${activeViewInfo.height}` }
@@ -268,7 +268,7 @@ export function CadReview({ cad }: { cad: Cad }) {
           <button
             onClick={applyApproved}
             disabled={busy || approved.size === 0}
-            className="px-3 py-1 text-sm bg-ink-900 text-white rounded disabled:opacity-50"
+            className="px-3 py-1 text-sm bg-ink-900 text-white rounded-sm disabled:opacity-50"
           >
             {busy ? "Applying…" : `Apply ${approved.size}`}
           </button>
@@ -292,17 +292,31 @@ export function CadReview({ cad }: { cad: Cad }) {
               <li
                 key={f._i}
                 onClick={() => setActiveFlag(f._n)}
-                className={`border-l-4 ${sev} bg-white border rounded p-3 text-sm space-y-1 cursor-pointer ${
+                className={`border-l-4 ${sev} bg-white border rounded-sm p-3 text-sm space-y-1 cursor-pointer ${
                   isActive ? "ring-2 ring-yellow-500" : ""
                 }`}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span
                     className={`${SEV_PIN[f.severity]} text-white rounded-full w-5 h-5 inline-flex items-center justify-center text-[10px] font-bold`}
                   >
                     {f._n}
                   </span>
-                  <span className="font-medium">{f.rule_cited}</span>
+                  {(() => {
+                    const m = f.rule_cited.match(/^\s*([^—\-]+?)\s*[—\-]\s*(.+)$/);
+                    const code = m ? m[1] : null;
+                    const title = m ? m[2] : f.rule_cited;
+                    return (
+                      <>
+                        <span className="font-medium">{title}</span>
+                        {code && (
+                          <span className="rounded-sm bg-ink-900 text-white text-[10px] font-mono px-1.5 py-0.5 tracking-wide">
+                            {code}
+                          </span>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
                 <div className="text-ink-700">{f.rationale}</div>
                 {f.verbatim_quote && (
@@ -310,9 +324,6 @@ export function CadReview({ cad }: { cad: Cad }) {
                     &ldquo;{f.verbatim_quote}&rdquo;
                   </div>
                 )}
-                <div className="text-xs text-ink-500">
-                  Targets: {f.target_handles.join(", ")}
-                </div>
                 {f.proposed_change ? (
                   <div className="flex items-center justify-between mt-2 pt-2 border-t">
                     <div className="text-xs">
@@ -350,7 +361,7 @@ export function CadReview({ cad }: { cad: Cad }) {
               {resolvedFlags.map((f) => (
                 <li
                   key={f._i}
-                  className="border-l-4 border-ink-700/20 bg-ink-700/5 border rounded p-3 text-xs space-y-1 opacity-60"
+                  className="border-l-4 border-ink-700/20 bg-ink-700/5 border rounded-sm p-3 text-xs space-y-1 opacity-60"
                   title="Applied to revised DXF"
                 >
                   <div className="flex items-center gap-2">

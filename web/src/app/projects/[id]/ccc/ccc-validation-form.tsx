@@ -26,7 +26,7 @@ export function CccValidationForm({ requiredItems, conditionalItems, inspectionB
   const canSubmit = errors.length === 0;
 
   return (
-    <section className="bg-white rounded-lg border border-ink-200 p-5">
+    <section className="bg-white rounded-sm border border-ink-200 p-5">
       <h2 className="text-xl font-semibold">CCC Application Validation</h2>
       <p className="mt-2 text-sm text-ink-600">
         Required documents are mandatory. “If Applicable” items only become mandatory when selected.
@@ -35,7 +35,7 @@ export function CccValidationForm({ requiredItems, conditionalItems, inspectionB
       <div className="mt-5 space-y-4">
         <h3 className="text-sm font-semibold">Required documents</h3>
         {requiredItems.map((item) => (
-          <div key={item.key} className="rounded-md border border-ink-200 p-3">
+          <div key={item.key} className="rounded-sm border border-ink-200 p-3">
             <div className="flex items-start justify-between gap-3">
               <p className="text-sm font-medium">{item.label}</p>
               <span className="rounded-full bg-red-100 text-red-800 text-xs px-2 py-0.5">Required</span>
@@ -54,7 +54,7 @@ export function CccValidationForm({ requiredItems, conditionalItems, inspectionB
       <div className="mt-5 space-y-4">
         <h3 className="text-sm font-semibold">Conditionally required / if applicable documents</h3>
         {conditionalItems.map((item) => (
-          <div key={item.key} className="rounded-md border border-ink-200 p-3">
+          <div key={item.key} className="rounded-sm border border-ink-200 p-3">
             <div className="flex items-start justify-between gap-3">
               <label className="flex items-start gap-2 text-sm font-medium">
                 <input
@@ -81,7 +81,7 @@ export function CccValidationForm({ requiredItems, conditionalItems, inspectionB
       </div>
 
       {showErrors && errors.length > 0 && (
-        <div className="mt-5 rounded-md border border-red-200 bg-red-50 p-3">
+        <div className="mt-5 rounded-sm border border-red-200 bg-red-50 p-3">
           <p className="text-sm font-medium text-red-900">Cannot submit yet</p>
           <ul className="mt-2 text-xs text-red-800 space-y-1">
             {errors.map((error) => (
@@ -95,7 +95,7 @@ export function CccValidationForm({ requiredItems, conditionalItems, inspectionB
         <button
           type="button"
           onClick={() => setShowErrors(true)}
-          className={`rounded-lg px-4 py-2 text-sm font-medium border ${
+          className={`rounded-sm px-4 py-2 text-sm font-medium border ${
             canSubmit
               ? "bg-ink-900 text-white border-ink-900 hover:bg-ink-700"
               : "bg-ink-100 text-ink-600 border-ink-200"

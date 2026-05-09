@@ -45,7 +45,7 @@ export function InspectionDetailPage({
     return (
       <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
         <BackLink projectId={projectId} />
-        <section className="rounded-2xl border border-ink-700/10 bg-white p-8 shadow-sm">
+        <section className="rounded-sm border border-ink-700/10 bg-white p-8 shadow-sm">
           <h1 className="text-2xl font-semibold tracking-tight text-ink-900">
             Inspection not available
           </h1>
@@ -163,7 +163,7 @@ export function InspectionDetailPage({
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
       <BackLink projectId={projectId} />
 
-      <section className="rounded-2xl border border-ink-700/10 bg-white p-8 shadow-sm">
+      <section className="rounded-sm border border-ink-700/10 bg-white p-8 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-ink-500">
@@ -181,14 +181,14 @@ export function InspectionDetailPage({
       </section>
 
       {flashMessage && (
-        <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+        <section className="rounded-sm border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
           {flashMessage}
         </section>
       )}
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr),minmax(18rem,0.9fr)]">
         <div className="space-y-6">
-          <section className="rounded-2xl border border-ink-700/10 bg-white p-8 shadow-sm">
+          <section className="rounded-sm border border-ink-700/10 bg-white p-8 shadow-sm">
             <h2 className="text-lg font-semibold text-ink-900">Inspection details</h2>
             <div className="mt-5 grid gap-4">
               {inspection.manual && (
@@ -198,7 +198,7 @@ export function InspectionDetailPage({
                     <select
                       value={inspection.inspectionTypeId}
                       onChange={(event) => updateInspectionType(event.target.value)}
-                      className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
+                      className="mt-1 w-full rounded-sm border border-ink-700/20 px-3 py-2 text-sm"
                     >
                       {manualInspectionTypeOptions.map((option) => (
                         <option key={option.id} value={option.id}>
@@ -214,7 +214,7 @@ export function InspectionDetailPage({
                       type="text"
                       value={inspection.title}
                       onChange={(event) => save({ title: event.target.value }, "Inspection name updated.")}
-                      className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
+                      className="mt-1 w-full rounded-sm border border-ink-700/20 px-3 py-2 text-sm"
                     />
                   </label>
                 </>
@@ -226,7 +226,7 @@ export function InspectionDetailPage({
                   type="date"
                   value={inspection.dueDate}
                   onChange={(event) => save({ dueDate: event.target.value }, "Due date updated.")}
-                  className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded-sm border border-ink-700/20 px-3 py-2 text-sm"
                 />
               </label>
 
@@ -236,7 +236,7 @@ export function InspectionDetailPage({
                   type="date"
                   value={inspection.bookedDate}
                   onChange={(event) => save({ bookedDate: event.target.value }, "Booked date updated.")}
-                  className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded-sm border border-ink-700/20 px-3 py-2 text-sm"
                 />
               </label>
 
@@ -246,14 +246,14 @@ export function InspectionDetailPage({
                   value={inspection.details}
                   onChange={(event) => save({ details: event.target.value }, "Inspection details updated.")}
                   rows={5}
-                  className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm"
+                  className="mt-1 w-full rounded-sm border border-ink-700/20 px-3 py-2 text-sm"
                   placeholder="Add booking reference, inspector name, site contact, access notes, or preparation details."
                 />
               </label>
             </div>
           </section>
 
-          <section className="rounded-2xl border border-ink-700/10 bg-white p-8 shadow-sm">
+          <section className="rounded-sm border border-ink-700/10 bg-white p-8 shadow-sm">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold text-ink-900">Readiness checklist</h2>
@@ -267,13 +267,13 @@ export function InspectionDetailPage({
               {inspection.requirements.map((requirement) => (
                 <label
                   key={requirement}
-                  className="flex items-start gap-3 rounded-xl border border-ink-700/10 bg-ink-50 px-4 py-3 text-sm"
+                  className="flex items-start gap-3 rounded-sm border border-ink-700/10 bg-ink-50 px-4 py-3 text-sm"
                 >
                   <input
                     type="checkbox"
                     checked={Boolean(inspection.checklist[requirement])}
                     onChange={(event) => updateChecklist(requirement, event.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-ink-700/30"
+                    className="mt-1 h-4 w-4 rounded-sm border-ink-700/30"
                   />
                   <span className="text-ink-700">{requirement}</span>
                 </label>
@@ -283,18 +283,18 @@ export function InspectionDetailPage({
         </div>
 
         <aside className="space-y-6">
-          <section className="rounded-2xl border border-ink-700/10 bg-white p-6 shadow-sm">
+          <section className="rounded-sm border border-ink-700/10 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-ink-900">Result</h2>
             <p className="mt-2 text-sm text-ink-500">
               Mark the outcome after the BCO inspection. Failed inspections create a follow-up.
             </p>
             {(inspection.status === "Passed" || inspection.status === "Failed") && (
-              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+              <div className="mt-4 rounded-sm border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
                 ✓ Inspection result recorded
               </div>
             )}
             {isResultLocked && (
-              <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <div className="mt-4 rounded-sm border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
                 This inspection is locked until the current inspection is passed or failed.
               </div>
             )}
@@ -306,7 +306,7 @@ export function InspectionDetailPage({
                   type="button"
                   disabled={isResultLocked}
                   onClick={() => updateStatus(status)}
-                  className={`rounded-xl border px-4 py-3 text-left text-sm font-medium transition-colors ${
+                  className={`rounded-sm border px-4 py-3 text-left text-sm font-medium transition-colors ${
                     inspection.status === status
                       ? "border-ink-900 bg-ink-900 text-white"
                       : "border-ink-700/10 bg-white text-ink-700 hover:bg-ink-50"
@@ -324,7 +324,7 @@ export function InspectionDetailPage({
                 disabled={isResultLocked}
                 onChange={(event) => save({ resultNotes: event.target.value }, "Result notes updated.")}
                 rows={5}
-                className="mt-1 w-full rounded-xl border border-ink-700/20 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-ink-50 disabled:text-ink-500"
+                className="mt-1 w-full rounded-sm border border-ink-700/20 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:bg-ink-50 disabled:text-ink-500"
                 placeholder="Record BCO comments, failed items, remedial work required, or pass evidence."
               />
             </label>
@@ -341,7 +341,7 @@ export function InspectionDetailPage({
                     void uploadPdf(event.target.files?.[0]);
                     event.currentTarget.value = "";
                   }}
-                  className="block w-full text-sm text-ink-600 file:mr-4 file:rounded-lg file:border-0 file:bg-ink-900 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  className="block w-full text-sm text-ink-600 file:mr-4 file:rounded-sm file:border-0 file:bg-ink-900 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white disabled:cursor-not-allowed disabled:opacity-50"
                 />
               </label>
               <p className="mt-2 text-xs text-ink-500">
@@ -352,7 +352,7 @@ export function InspectionDetailPage({
                 {inspection.pdfs.map((pdf) => (
                   <div
                     key={pdf.id}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-ink-700/10 bg-ink-50 px-3 py-2 text-sm"
+                    className="flex items-center justify-between gap-3 rounded-sm border border-ink-700/10 bg-ink-50 px-3 py-2 text-sm"
                   >
                     <a
                       href={pdf.dataUrl}
@@ -383,11 +383,11 @@ export function InspectionDetailPage({
         </aside>
       </section>
 
-      <section className="rounded-2xl border border-red-200 bg-red-50 p-5">
+      <section className="rounded-sm border border-red-200 bg-red-50 p-5">
         <button
           type="button"
           onClick={handleDeleteInspection}
-          className="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-700"
+          className="rounded-sm bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-700"
         >
           Delete Inspection
         </button>

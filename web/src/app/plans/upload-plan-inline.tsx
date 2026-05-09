@@ -42,7 +42,9 @@ export function UploadPlanInline({ projects }: { projects: Project[] }) {
       const endpoint = dxf ? "/cad" : "/plans";
       const res = await apiUpload<AnalyseResponse>(endpoint, fd);
       const id = dxf ? res.cad_id : res.plan_id;
-      router.push(`/plans?${dxf ? "cad" : "plan"}=${id}`);
+      router.push(
+        `/projects/${project.id}/drawings?${dxf ? "cad" : "plan"}=${id}`,
+      );
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Plan analysis failed");
@@ -53,11 +55,11 @@ export function UploadPlanInline({ projects }: { projects: Project[] }) {
 
   if (!projects.length) {
     return (
-      <div className="rounded-lg border border-ink-700/10 p-5 text-sm">
+      <div className="rounded-sm border border-ink-700/10 p-5 text-sm">
         <p className="mb-2">Create a project first.</p>
         <Link
           href="/projects/new"
-          className="rounded-lg bg-ink-900 text-white px-4 py-2 text-xs font-medium inline-block"
+          className="rounded-sm bg-ink-900 text-white px-4 py-2 text-xs font-medium inline-block"
         >
           Create a project
         </Link>
@@ -68,14 +70,14 @@ export function UploadPlanInline({ projects }: { projects: Project[] }) {
   return (
     <form
       onSubmit={submit}
-      className="rounded-lg border border-dashed border-ink-700/20 p-5 grid grid-cols-1 sm:grid-cols-[1fr_2fr_auto] gap-3 items-end"
+      className="rounded-sm border border-dashed border-ink-700/20 p-5 grid grid-cols-1 sm:grid-cols-[1fr_2fr_auto] gap-3 items-end"
     >
       <label className="block text-sm">
         <span className="text-ink-500 block mb-1">Project</span>
         <select
           value={projectId}
           onChange={(e) => setProjectId(e.target.value)}
-          className="w-full rounded border border-ink-700/15 px-2 py-2"
+          className="w-full rounded-sm border border-ink-700/15 px-2 py-2"
         >
           {projects.map((p) => {
             const bca = taxonomy.bcas.find((b) => b.id === p.bca)?.name ?? p.bca;
@@ -98,7 +100,7 @@ export function UploadPlanInline({ projects }: { projects: Project[] }) {
       </label>
       <button
         disabled={!file || busy}
-        className="rounded-lg bg-accent text-white px-4 py-2 text-sm font-medium disabled:opacity-50 sm:self-end"
+        className="rounded-sm bg-ink-900 text-white px-4 py-2 text-sm font-medium disabled:opacity-50 sm:self-end cursor-pointer hover:bg-ink-700 transition-colors"
       >
         {busy ? "Analysing…" : "Analyse plan"}
       </button>

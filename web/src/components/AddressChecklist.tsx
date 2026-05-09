@@ -153,13 +153,13 @@ export function AddressChecklist({
         <h2 className="text-lg font-semibold mb-4">Resource Consent Checklist</h2>
       </div>
 
-      <div className="rounded-lg border border-ink-700/10 p-4 space-y-4">
+      <div className="rounded-sm border border-ink-700/10 p-4 space-y-4">
         <h3 className="font-semibold">Project details</h3>
 
         <label className="block text-sm">
           <span className="text-ink-500 block mb-1">Project type</span>
           <select
-            className="w-full rounded border border-ink-700/20 px-3 py-2"
+            className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
             value={projectDetails.projectType}
             onChange={(event) =>
               setProjectDetails((prev) => ({ ...prev, projectType: event.target.value as ProjectType }))
@@ -179,7 +179,7 @@ export function AddressChecklist({
             <input
               type="number"
               min={0}
-              className="w-full rounded border border-ink-700/20 px-3 py-2"
+              className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
               value={projectDetails.estimatedFloorAreaM2 ?? ""}
               onChange={(event) =>
                 setProjectDetails((prev) => ({
@@ -194,7 +194,7 @@ export function AddressChecklist({
             <input
               type="number"
               min={0}
-              className="w-full rounded border border-ink-700/20 px-3 py-2"
+              className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
               value={projectDetails.estimatedConstructionValueNZD ?? ""}
               onChange={(event) =>
                 setProjectDetails((prev) => ({
@@ -271,20 +271,20 @@ export function AddressChecklist({
       <button
         onClick={handleQuery}
         disabled={isLoading || !address}
-        className="inline-flex items-center rounded-lg bg-ink-900 text-white px-4 py-2 text-sm font-medium disabled:bg-ink-700/50"
+        className="inline-flex items-center rounded-sm bg-ink-900 text-white px-4 py-2 text-sm font-medium disabled:bg-ink-700/50"
       >
         {isLoading ? "Analyzing..." : "Generate Checklist"}
       </button>
 
       {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 p-4 flex gap-3">
+        <div className="rounded-sm bg-red-50 border border-red-200 p-4 flex gap-3">
           <div className="text-sm text-red-800">{error}</div>
         </div>
       )}
 
       {result && (
         <div className="space-y-6">
-          <div className="rounded-lg border border-ink-700/10 p-4">
+          <div className="rounded-sm border border-ink-700/10 p-4">
             <h3 className="font-semibold mb-3">Zone & Location</h3>
             <dl className="grid grid-cols-2 gap-4 text-sm">
               <div>
@@ -309,7 +309,7 @@ export function AddressChecklist({
           </div>
 
           {!!activeOverlayLabels.length && (
-            <div className="rounded-lg border border-ink-700/10 p-4">
+            <div className="rounded-sm border border-ink-700/10 p-4">
               <h3 className="font-semibold mb-3">Active Hazard & Character Overlays</h3>
               <ul className="space-y-2 text-sm">
                 {activeOverlayLabels.map((overlay) => (
@@ -323,7 +323,7 @@ export function AddressChecklist({
           )}
 
           {documents && (
-            <div className="rounded-lg border border-ink-700/10 p-4">
+            <div className="rounded-sm border border-ink-700/10 p-4">
               <h3 className="font-semibold mb-4">Required Documents</h3>
               <div className="mb-2 h-2 w-full overflow-hidden rounded-full bg-ink-700/10">
                 <div
@@ -337,7 +337,7 @@ export function AddressChecklist({
                 {totalCompleted}/{documents.totalCount} completed
               </p>
               {groupedDocuments.map((section) => (
-                <details key={section.key} className="mb-3 rounded-lg border border-ink-700/10 px-3 py-2">
+                <details key={section.key} className="mb-3 rounded-sm border border-ink-700/10 px-3 py-2">
                   <summary className="list-none cursor-pointer">
                     <div className="flex items-center justify-between gap-3">
                       <div>
@@ -398,7 +398,7 @@ export function AddressChecklist({
                   </div>
                 </details>
               ))}
-              <div className="mt-4 p-3 rounded bg-blue-50 border border-blue-200">
+              <div className="mt-4 p-3 rounded-sm bg-blue-50 border border-blue-200">
                 <p className="text-xs text-blue-900">
                   <strong>Total documents required:</strong> {documents.totalCount}. Specialist documents:{" "}
                   {documents.specialistCount}.

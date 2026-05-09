@@ -68,14 +68,14 @@ export default function NewProjectPage() {
           <AddressAutocompleteInput name="address" required />
         </Field>
         <Field label="BCA">
-          <select name="bca" required className="w-full rounded border border-ink-700/20 px-3 py-2">
+          <select name="bca" required className="w-full rounded-sm border border-ink-700/20 px-3 py-2">
             {taxonomy.bcas.map((b) => (
               <option key={b.id} value={b.id}>{b.name}</option>
             ))}
           </select>
         </Field>
         <Field label="Project type">
-          <select name="project_type" required className="w-full rounded border border-ink-700/20 px-3 py-2">
+          <select name="project_type" required className="w-full rounded-sm border border-ink-700/20 px-3 py-2">
             {taxonomy.project_types.map((t) => (
               <option key={t.id} value={t.id}>{t.label}</option>
             ))}
@@ -87,7 +87,7 @@ export default function NewProjectPage() {
             type="number"
             min="0"
             step="0.1"
-            className="w-full rounded border border-ink-700/20 px-3 py-2"
+            className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
           />
         </Field>
         <Field label="Estimated construction value (NZD)">
@@ -96,16 +96,16 @@ export default function NewProjectPage() {
             type="number"
             min="0"
             step="1"
-            className="w-full rounded border border-ink-700/20 px-3 py-2"
+            className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
           />
         </Field>
-        <div className="grid gap-3 rounded border border-ink-700/10 bg-white p-4 sm:grid-cols-2">
+        <div className="grid gap-3 rounded-sm border border-ink-700/10 bg-white p-4 sm:grid-cols-2">
           <CheckboxField name="involves_structural_work" label="Involves structural work" />
           <CheckboxField name="involves_earthworks" label="Involves earthworks" />
           <CheckboxField name="existing_structure_demolished" label="Existing structure demolished" />
           <CheckboxField name="new_road_access" label="New road access" />
         </div>
-        <fieldset className="rounded border border-ink-700/10 bg-white p-4">
+        <fieldset className="rounded-sm border border-ink-700/10 bg-white p-4">
           <legend className="text-sm text-ink-500">New service connections</legend>
           <div className="mt-3 grid gap-3 sm:grid-cols-3">
             <CheckboxField name="service_connection_water" label="Water" />
@@ -114,7 +114,7 @@ export default function NewProjectPage() {
           </div>
         </fieldset>
         <Field label="Description (optional)">
-          <textarea name="description" rows={4} className="w-full rounded border border-ink-700/20 px-3 py-2" />
+          <textarea name="description" rows={4} className="w-full rounded-sm border border-ink-700/20 px-3 py-2" />
         </Field>
         <ProjectCreateButton />
       </form>
@@ -139,7 +139,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function CheckboxField({ name, label }: { name: string; label: string }) {
   return (
     <label className="flex items-center gap-2 text-sm text-ink-700">
-      <input name={name} type="checkbox" className="h-4 w-4 rounded border-ink-700/30" />
+      <input name={name} type="checkbox" className="h-4 w-4 rounded-sm border-ink-700/30" />
       <span>{label}</span>
     </label>
   );

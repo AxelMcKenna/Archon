@@ -76,19 +76,19 @@ export function RiskRunner({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-ink-700/10 p-5 space-y-3">
+      <div className="rounded-sm border border-ink-700/10 p-5 space-y-3">
         <label className="block text-sm font-medium">Project description</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={6}
           placeholder="e.g. Two-storey new dwelling, steel beam over garage, direct-fixed weatherboard cladding, retaining wall to south boundary 1.8m high…"
-          className="w-full rounded border border-ink-700/15 px-3 py-2 text-sm leading-relaxed"
+          className="w-full rounded-sm border border-ink-700/15 px-3 py-2 text-sm leading-relaxed"
         />
         <button
           onClick={run}
           disabled={busy || !description.trim()}
-          className="rounded-lg bg-ink-900 text-white px-4 py-2 text-sm font-medium disabled:opacity-50"
+          className="rounded-sm bg-ink-900 text-white px-4 py-2 text-sm font-medium disabled:opacity-50"
         >
           {busy ? "Scoring…" : result ? "Re-run with addressed items" : "Run risk check"}
         </button>
@@ -97,7 +97,7 @@ export function RiskRunner({
 
       {result && (
         <>
-          <div className={`rounded-lg border px-5 py-4 ${BAND_STYLE[result.band]}`}>
+          <div className={`rounded-sm border px-5 py-4 ${BAND_STYLE[result.band]}`}>
             <p className="text-sm">Risk band</p>
             <p className="text-3xl font-semibold capitalize">{result.band}</p>
             <p className="text-xs mt-1 opacity-80">aggregate score {result.score}</p>
@@ -113,7 +113,7 @@ export function RiskRunner({
               return (
                 <div
                   key={item.corpus_id}
-                  className={`rounded-lg border p-4 ${isAddressed ? "border-emerald-300 bg-emerald-50" : "border-ink-700/10"}`}
+                  className={`rounded-sm border p-4 ${isAddressed ? "border-emerald-300 bg-emerald-50" : "border-ink-700/10"}`}
                 >
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div>

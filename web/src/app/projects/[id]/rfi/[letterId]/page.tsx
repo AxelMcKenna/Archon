@@ -49,6 +49,22 @@ export default async function LetterPage({
     attsByItem.set(a.rfi_item_id, list);
   }
 
+  const { data: ev } = itemIds.length
+    ? await supabase
+        .from("rfi_item_plan_evidence")
+        .select(
+          "rfi_item_id, source, confidence, rationale, evidence, " +
+            "flag_index, plan_upload_id, cad_upload_id",
+        )
+        .in("rfi_item_id", itemIds)
+    : { data: [] };
+  const evByItem = new Map(
+    ((ev ?? []) as unknown as Array<{ rfi_item_id: string }>).map((e) => [
+      e.rfi_item_id,
+      e,
+    ]),
+  );
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
       <div className="mb-6">
@@ -74,6 +90,7 @@ export default async function LetterPage({
           reconciliation: logByItem.get(i.id) ?? null,
           response: draftByItem.get(i.id) ?? null,
           attachments: attsByItem.get(i.id) ?? [],
+          plan_evidence: evByItem.get(i.id) ?? null,
         }))}
       />
     </div>

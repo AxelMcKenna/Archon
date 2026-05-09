@@ -114,25 +114,25 @@ export function PlanReview({ plan }: { plan: Plan }) {
 
       <section className="space-y-4">
         {plan.status === "failed" && (
-          <p className="rounded bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+          <p className="rounded-sm bg-red-50 border border-red-200 p-3 text-sm text-red-700">
             Analysis failed. Try re-uploading.
           </p>
         )}
         {truncated && (
-          <p className="rounded bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
+          <p className="rounded-sm bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
             This plan exceeded the per-analysis image budget; later pages were
             not analysed. Consider splitting the upload.
           </p>
         )}
         {verificationStatus === "skipped" && (
-          <p className="rounded bg-sky-50 border border-sky-200 p-3 text-sm text-sky-800">
+          <p className="rounded-sm bg-sky-50 border border-sky-200 p-3 text-sm text-sky-800">
             Flag verification could not run on this analysis. Treat all flags
             as &quot;may want to check&quot;.
           </p>
         )}
 
         {plan.analysis?.summary && (
-          <div className="rounded-lg border border-ink-700/10 p-4 text-sm">
+          <div className="rounded-sm border border-ink-700/10 p-4 text-sm">
             <p className="text-xs uppercase tracking-wide text-ink-500 mb-2">Summary</p>
             <p>{plan.analysis.summary}</p>
             <div className="mt-3 flex gap-4 text-xs text-ink-500 flex-wrap">
@@ -171,7 +171,7 @@ export function PlanReview({ plan }: { plan: Plan }) {
         )}
 
         {lowConfidence.length > 0 && (
-          <div className="rounded-lg border border-ink-700/10">
+          <div className="rounded-sm border border-ink-700/10">
             <button
               type="button"
               onClick={() => setShowLowConfidence((v) => !v)}
@@ -247,7 +247,7 @@ function PlanCanvas({
   }, [flags]);
 
   return (
-    <div className="rounded-lg border border-ink-700/10 bg-ink-700/5 h-full flex flex-col">
+    <div className="rounded-sm border border-ink-700/10 bg-ink-700/5 h-full flex flex-col">
       <div className="px-4 py-2 text-xs uppercase tracking-wide text-ink-500 border-b border-ink-700/10 flex items-center justify-between gap-2">
         <span className="truncate">Plan — {plan.filename}</span>
         <div className="flex items-center gap-3 normal-case tracking-normal">
@@ -311,7 +311,7 @@ function PageView({
 }) {
   return (
     <div
-      className="relative w-full bg-white border border-ink-700/10 rounded shadow-sm"
+      className="relative w-full bg-white border border-ink-700/10 rounded-sm shadow-sm"
       style={{ aspectRatio: `${info.width} / ${info.height}` }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -332,7 +332,7 @@ function PageView({
           ))}
         </div>
       )}
-      <div className="absolute bottom-1 right-2 text-[10px] text-ink-500 bg-white/70 px-1 rounded">
+      <div className="absolute bottom-1 right-2 text-[10px] text-ink-500 bg-white/70 px-1 rounded-sm">
         Page {info.page}
       </div>
     </div>
@@ -481,7 +481,7 @@ function FlagCard({
       tabIndex={0}
       onClick={onSelect}
       onKeyDown={onKey}
-      className={`rounded-lg border p-4 cursor-pointer transition-shadow ${SEV_STYLE[f.severity]} ${
+      className={`rounded-sm border p-4 cursor-pointer transition-shadow ${SEV_STYLE[f.severity]} ${
         active ? "ring-2" : "hover:shadow-sm"
       }`}
       style={active ? { boxShadow: `0 0 0 2px ${sevColour}` } : undefined}
@@ -504,7 +504,7 @@ function FlagCard({
         </p>
         <div className="flex items-center gap-2">
           <span
-            className={`text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded border ${CONF_STYLE[conf]}`}
+            className={`text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-sm border ${CONF_STYLE[conf]}`}
           >
             {conf}
           </span>

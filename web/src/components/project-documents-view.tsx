@@ -297,7 +297,7 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
             onDragLeave={() => setIsDragOver(false)}
             onDrop={onDropUpload}
             disabled={uploading}
-            className={`w-72 rounded-xl border border-dashed px-4 py-3 text-left text-sm shadow-sm transition ${
+            className={`w-72 rounded-sm border border-dashed px-4 py-3 text-left text-sm shadow-sm transition ${
               isDragOver
                 ? "border-ink-500 bg-ink-100 text-ink-900"
                 : "border-ink-300 bg-white text-ink-700 hover:bg-ink-50"
@@ -310,18 +310,18 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
         </div>
       </header>
 
-      <section className="sticky top-0 z-10 mb-6 rounded-xl border border-ink-200 bg-white/95 p-4 shadow-sm backdrop-blur">
+      <section className="sticky top-0 z-10 mb-6 rounded-sm border border-ink-200 bg-white/95 p-4 shadow-sm backdrop-blur">
         <div className="grid gap-3 md:grid-cols-4">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search document names"
-            className="md:col-span-2 rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-ink-400"
+            className="md:col-span-2 rounded-sm border border-ink-200 px-3 py-2 text-sm outline-none focus:border-ink-400"
           />
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value as "All" | DocumentType)}
-            className="rounded-lg border border-ink-200 px-3 py-2 text-sm"
+            className="rounded-sm border border-ink-200 px-3 py-2 text-sm"
           >
             <option value="All">All types</option>
             {typeOptions.map((value) => (
@@ -333,7 +333,7 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as "All" | DocumentStatus)}
-            className="rounded-lg border border-ink-200 px-3 py-2 text-sm"
+            className="rounded-sm border border-ink-200 px-3 py-2 text-sm"
           >
             <option value="All">All statuses</option>
             {statusOptions.map((value) => (
@@ -347,7 +347,7 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortValue)}
-            className="rounded-lg border border-ink-200 px-3 py-2 text-sm"
+            className="rounded-sm border border-ink-200 px-3 py-2 text-sm"
           >
             <option value="newest">Newest first</option>
             <option value="oldest">Oldest first</option>
@@ -357,20 +357,20 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
         </div>
       </section>
       {actionError && (
-        <p className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+        <p className="mb-4 rounded-sm border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
           {actionError}
         </p>
       )}
 
       {documents.length === 0 ? (
-        <section className="rounded-xl border border-dashed border-ink-300 bg-white p-12 text-center">
+        <section className="rounded-sm border border-dashed border-ink-300 bg-white p-12 text-center">
           <p className="text-lg font-medium text-ink-800">No documents uploaded yet</p>
           <p className="mt-2 text-sm text-ink-500">
             Upload plans, consent records, certificates, and supporting files for this project.
           </p>
         </section>
       ) : filtered.length === 0 ? (
-        <section className="rounded-xl border border-dashed border-ink-300 bg-white p-12 text-center">
+        <section className="rounded-sm border border-dashed border-ink-300 bg-white p-12 text-center">
           <p className="text-lg font-medium text-ink-800">No matching documents</p>
           <p className="mt-2 text-sm text-ink-500">Try a different search or filter combination.</p>
         </section>
@@ -379,11 +379,11 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
           {filtered.map((doc) => (
             <article
               key={doc.id}
-              className="rounded-xl border border-ink-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              className="rounded-sm border border-ink-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-ink-100 text-xs font-semibold text-ink-700">
+                  <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-ink-100 text-xs font-semibold text-ink-700">
                     {extIcon(doc.extension)}
                   </span>
                   <div className="min-w-0">
@@ -415,21 +415,21 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
                 <button
                   onClick={() => handleView(doc)}
                   disabled={actionBusyId === doc.id}
-                  className="rounded-md border border-ink-200 px-3 py-1.5 text-xs text-ink-700 hover:bg-ink-50 disabled:opacity-60"
+                  className="rounded-sm border border-ink-200 px-3 py-1.5 text-xs text-ink-700 hover:bg-ink-50 disabled:opacity-60"
                 >
                   {actionBusyId === doc.id ? "Working…" : "View"}
                 </button>
                 <button
                   onClick={() => handleDownload(doc)}
                   disabled={actionBusyId === doc.id}
-                  className="rounded-md border border-ink-200 px-3 py-1.5 text-xs text-ink-700 hover:bg-ink-50 disabled:opacity-60"
+                  className="rounded-sm border border-ink-200 px-3 py-1.5 text-xs text-ink-700 hover:bg-ink-50 disabled:opacity-60"
                 >
                   Download
                 </button>
                 <button
                   onClick={() => setDeleteTarget(doc)}
                   disabled={actionBusyId === doc.id}
-                  className="rounded-md border border-red-200 px-3 py-1.5 text-xs text-red-700 hover:bg-red-50 disabled:opacity-60"
+                  className="rounded-sm border border-red-200 px-3 py-1.5 text-xs text-red-700 hover:bg-red-50 disabled:opacity-60"
                 >
                   Delete
                 </button>
@@ -440,14 +440,14 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
                   value={getDraft(doc).name}
                   onChange={(event) => updateDraft(doc, { name: event.target.value })}
                   disabled={actionBusyId === doc.id || !metadataSupported}
-                  className="rounded-md border border-ink-200 px-2 py-1.5 text-xs text-ink-700 disabled:opacity-60"
+                  className="rounded-sm border border-ink-200 px-2 py-1.5 text-xs text-ink-700 disabled:opacity-60"
                 />
                 <label className="text-xs text-ink-500">Document type</label>
                 <select
                   value={getDraft(doc).type}
                   onChange={(event) => updateDraft(doc, { type: event.target.value as DocumentType })}
                   disabled={actionBusyId === doc.id || !metadataSupported}
-                  className="rounded-md border border-ink-200 px-2 py-1.5 text-xs text-ink-700 disabled:opacity-60"
+                  className="rounded-sm border border-ink-200 px-2 py-1.5 text-xs text-ink-700 disabled:opacity-60"
                 >
                   {typeOptions.map((value) => (
                     <option key={value} value={value}>
@@ -459,7 +459,7 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
                   type="button"
                   onClick={() => saveMetadata(doc)}
                   disabled={actionBusyId === doc.id || !metadataSupported || !hasMetadataChanges(doc)}
-                  className="rounded-md border border-ink-200 px-3 py-1.5 text-xs text-ink-700 hover:bg-ink-50 disabled:opacity-60"
+                  className="rounded-sm border border-ink-200 px-3 py-1.5 text-xs text-ink-700 hover:bg-ink-50 disabled:opacity-60"
                 >
                   Save details
                 </button>
@@ -475,7 +475,7 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
                   value={doc.status}
                   onChange={(event) => handleStatusUpdate(doc, event.target.value as DocumentStatus)}
                   disabled={actionBusyId === doc.id || !canEditStatus}
-                  className="mt-1 w-full rounded-md border border-ink-200 px-2 py-1.5 text-xs text-ink-700 disabled:opacity-60"
+                  className="mt-1 w-full rounded-sm border border-ink-200 px-2 py-1.5 text-xs text-ink-700 disabled:opacity-60"
                 >
                   {statusOptions.map((value) => (
                     <option key={value} value={value}>
@@ -496,7 +496,7 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
 
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/40 px-4">
-          <div className="w-full max-w-md rounded-xl border border-ink-200 bg-white p-5 shadow-xl">
+          <div className="w-full max-w-md rounded-sm border border-ink-200 bg-white p-5 shadow-xl">
             <h3 className="text-lg font-semibold text-ink-900">Delete document?</h3>
             <p className="mt-2 text-sm text-ink-600">
               This will permanently remove <span className="font-medium text-ink-800">{deleteTarget.name}</span> from
@@ -508,7 +508,7 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
                 type="button"
                 onClick={() => setDeleteTarget(null)}
                 disabled={actionBusyId === deleteTarget.id}
-                className="rounded-lg border border-ink-200 px-3 py-2 text-sm text-ink-700 hover:bg-ink-50 disabled:opacity-60"
+                className="rounded-sm border border-ink-200 px-3 py-2 text-sm text-ink-700 hover:bg-ink-50 disabled:opacity-60"
               >
                 Cancel
               </button>
@@ -516,7 +516,7 @@ export function ProjectDocumentsView({ projectId, projectRef, documents, canEdit
                 type="button"
                 onClick={() => handleDelete(deleteTarget)}
                 disabled={actionBusyId === deleteTarget.id}
-                className="rounded-lg border border-red-200 bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
+                className="rounded-sm border border-red-200 bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
               >
                 {actionBusyId === deleteTarget.id ? "Deleting…" : "Delete document"}
               </button>

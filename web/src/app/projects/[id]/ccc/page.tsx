@@ -39,7 +39,7 @@ export default async function CCC({ params }: { params: Promise<{ id: string }> 
         </div>
         <Link
           href={`/projects/${id}/ccc/export`}
-          className={`rounded-lg px-4 py-2 text-sm font-medium border ${
+          className={`rounded-sm px-4 py-2 text-sm font-medium border ${
             ccc.readinessStatus === "green"
               ? "bg-ink-900 text-white border-ink-900 hover:bg-ink-700"
               : "bg-ink-100 text-ink-500 border-ink-200 pointer-events-none"
@@ -52,7 +52,7 @@ export default async function CCC({ params }: { params: Promise<{ id: string }> 
 
       {ccc.deadlineStatus !== "ok" && (
         <section
-          className={`rounded-lg border px-4 py-3 ${
+          className={`rounded-sm border px-4 py-3 ${
             ccc.deadlineStatus === "overdue"
               ? "border-red-300 bg-red-50 text-red-900"
               : "border-amber-300 bg-amber-50 text-amber-900"
@@ -71,7 +71,7 @@ export default async function CCC({ params }: { params: Promise<{ id: string }> 
         </section>
       )}
 
-      <section className={`rounded-lg border p-5 ${statusTone(ccc.readinessStatus)}`}>
+      <section className={`rounded-sm border p-5 ${statusTone(ccc.readinessStatus)}`}>
         <h2 className="text-xl font-semibold">CCC Readiness</h2>
         <p className="mt-2 text-sm">
           {ccc.readinessStatus === "green"
@@ -91,7 +91,7 @@ export default async function CCC({ params }: { params: Promise<{ id: string }> 
         )}
       </section>
 
-      <section className="bg-white rounded-lg border border-ink-200 p-5">
+      <section className="bg-white rounded-sm border border-ink-200 p-5">
         <h2 className="text-xl font-semibold">Consent Reference Panel</h2>
         <p className="mt-3 text-sm text-ink-700">{ccc.consentPromise}</p>
         <p className="mt-2 text-xs text-ink-500">
@@ -118,7 +118,7 @@ export default async function CCC({ params }: { params: Promise<{ id: string }> 
         </div>
       </section>
 
-      <section className="bg-white rounded-lg border border-ink-200 p-5">
+      <section className="bg-white rounded-sm border border-ink-200 p-5">
         <h2 className="text-xl font-semibold">Inspection Checklist</h2>
         <ul className="mt-4 space-y-2">
           {ccc.inspectionChecklist.map((inspection) => (
@@ -135,7 +135,7 @@ export default async function CCC({ params }: { params: Promise<{ id: string }> 
         </ul>
       </section>
 
-      <section className="bg-white rounded-lg border border-ink-200 p-5">
+      <section className="bg-white rounded-sm border border-ink-200 p-5">
         <h2 className="text-xl font-semibold">Document Checklist (Christchurch City Council)</h2>
         <ul className="mt-4 space-y-2">
           {[...ccc.requiredDocumentItems, ...ccc.conditionalDocumentItems].map((doc) => (

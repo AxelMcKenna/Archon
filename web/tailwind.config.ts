@@ -15,6 +15,18 @@ const config: Config = {
           100: "#f1f5f9",
         },
         accent: { DEFAULT: "#2563eb", soft: "#dbeafe" },
+        tan: {
+          50: "#faf6ef",
+          100: "#f3ebd9",
+          200: "#e6d4ac",
+          300: "#d6b87f",
+          400: "#c19a5b",
+          500: "#a98148",
+          600: "#8a6738",
+          700: "#6b4f2c",
+          800: "#4d3920",
+          900: "#332615",
+        },
       },
       fontFamily: {
         sans: ["ui-sans-serif", "system-ui", "sans-serif"],

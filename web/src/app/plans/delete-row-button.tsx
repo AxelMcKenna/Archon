@@ -40,7 +40,7 @@ export function DeleteRowButton({
       onClick={onDelete}
       disabled={busy}
       title={`Delete ${filename}`}
-      className="text-ink-400 hover:text-red-600 text-xs px-2 py-0.5 rounded disabled:opacity-50"
+      className="text-ink-400 hover:text-red-600 text-xs px-2 py-0.5 rounded-sm disabled:opacity-50"
     >
       {busy ? "…" : "Delete"}
     </button>

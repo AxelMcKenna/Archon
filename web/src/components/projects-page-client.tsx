@@ -154,10 +154,10 @@ export function ProjectsPageClient({ projects }: { projects: ProjectListItem[] }
   }, [cards, filter, query]);
 
   return (
-    <div className="min-h-full bg-gradient-to-b from-slate-50 via-white to-slate-100/80">
+    <div className="min-h-full bg-white">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">
-        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm shadow-slate-200/70">
-          <div className="border-b border-slate-200 bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.15),_transparent_35%),linear-gradient(135deg,#ffffff_0%,#f8fafc_50%,#eff6ff_100%)] px-6 py-8 sm:px-8">
+        <section className="overflow-hidden rounded-sm border border-slate-200 bg-white">
+          <div className="border-b border-slate-200 bg-white px-6 py-8 sm:px-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-2xl space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
@@ -175,7 +175,7 @@ export function ProjectsPageClient({ projects }: { projects: ProjectListItem[] }
               </div>
               <Link
                 href="/projects/new"
-                className="inline-flex items-center justify-center rounded-xl bg-ink-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-ink-700"
+                className="inline-flex items-center justify-center rounded-sm bg-ink-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-ink-700"
               >
                 New Project
               </Link>
@@ -203,7 +203,7 @@ export function ProjectsPageClient({ projects }: { projects: ProjectListItem[] }
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Search by project name or address"
-                  className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-accent focus:ring-4 focus:ring-accent/10"
+                  className="w-full rounded-sm border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-ink-900 focus:ring-2 focus:ring-ink-900/10"
                 />
               </label>
 
@@ -212,7 +212,7 @@ export function ProjectsPageClient({ projects }: { projects: ProjectListItem[] }
                 <select
                   value={filter}
                   onChange={(event) => setFilter(event.target.value as FilterValue)}
-                  className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm text-slate-900 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/10"
+                  className="w-full appearance-none rounded-sm border border-slate-200 bg-white px-4 py-3 pr-10 text-sm text-slate-900 outline-none transition focus:border-ink-900 focus:ring-2 focus:ring-ink-900/10"
                 >
                   {filterOptions.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -241,7 +241,7 @@ export function ProjectsPageClient({ projects }: { projects: ProjectListItem[] }
         {!cards.length ? (
           <EmptyState />
         ) : !filteredCards.length ? (
-          <section className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center shadow-sm">
+          <section className="rounded-sm border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
             <p className="text-lg font-semibold text-slate-900">No matching projects</p>
             <p className="mt-2 text-sm text-slate-500">
               Try adjusting your search or filter to see more consent applications.
@@ -266,13 +266,13 @@ function ProjectCard({ project }: { project: ProjectCardViewModel }) {
   return (
     <Link
       href={`/projects/${project.id}`}
-      className="group block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/70 transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/80"
+      className="group block rounded-sm border border-slate-200 bg-white p-6 transition duration-200 hover:-translate-y-0.5 hover:border-slate-400 hover:shadow-md cursor-pointer"
     >
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-accent">
+              <span className="rounded-full bg-tan-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-tan-700">
                 {getStageLabel(project.stage)}
               </span>
               <span className={`rounded-full px-3 py-1 text-xs font-semibold ${riskClasses}`}>
@@ -280,7 +280,7 @@ function ProjectCard({ project }: { project: ProjectCardViewModel }) {
               </span>
             </div>
             <div>
-              <h2 className="text-xl font-semibold tracking-tight text-slate-950 transition group-hover:text-accent">
+              <h2 className="text-xl font-semibold tracking-tight text-slate-950 transition group-hover:text-slate-700">
                 {project.name}
               </h2>
               <p className="mt-1 text-sm text-slate-500">{project.address}</p>
@@ -288,8 +288,8 @@ function ProjectCard({ project }: { project: ProjectCardViewModel }) {
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:min-w-[240px]">
-            <MetricTile label="Readiness" value={`${project.readinessScore}%`} tone="blue" />
-            <MetricTile label="Progress" value={`${project.progress}%`} tone="slate" />
+            <MetricTile label="Readiness" value={`${project.readinessScore}%`} />
+            <MetricTile label="Progress" value={`${project.progress}%`} />
           </div>
         </div>
 
@@ -300,7 +300,7 @@ function ProjectCard({ project }: { project: ProjectCardViewModel }) {
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-slate-100">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600"
+              className="h-full rounded-full bg-ink-900"
               style={{ width: `${project.progress}%` }}
             />
           </div>
@@ -330,7 +330,7 @@ function LifecycleBar({ stage }: { stage: ProjectStage }) {
   const currentIndex = stageIndex[stage];
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+    <div className="rounded-sm border border-slate-200 bg-slate-50/80 p-4">
       <div className="flex flex-wrap gap-3">
         {lifecycle.map((item, index) => {
           const state =
@@ -341,9 +341,9 @@ function LifecycleBar({ stage }: { stage: ProjectStage }) {
               <div
                 className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-semibold ${
                   state === "complete"
-                    ? "border-emerald-200 bg-emerald-500 text-white"
+                    ? "border-ink-900 bg-ink-900 text-white"
                     : state === "current"
-                      ? "border-blue-200 bg-blue-600 text-white shadow-sm shadow-blue-200"
+                      ? "border-ink-900 bg-white text-ink-900 ring-2 ring-ink-900/10"
                       : "border-slate-200 bg-white text-slate-400"
                 }`}
               >
@@ -353,9 +353,9 @@ function LifecycleBar({ stage }: { stage: ProjectStage }) {
                 <p
                   className={`text-xs font-semibold uppercase tracking-wide ${
                     state === "current"
-                      ? "text-blue-700"
+                      ? "text-ink-900"
                       : state === "complete"
-                        ? "text-emerald-700"
+                        ? "text-ink-700"
                         : "text-slate-400"
                   }`}
                 >
@@ -370,23 +370,9 @@ function LifecycleBar({ stage }: { stage: ProjectStage }) {
   );
 }
 
-function MetricTile({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone: "blue" | "slate";
-}) {
+function MetricTile({ label, value }: { label: string; value: string }) {
   return (
-    <div
-      className={`rounded-2xl border px-4 py-3 ${
-        tone === "blue"
-          ? "border-blue-100 bg-blue-50/80"
-          : "border-slate-200 bg-slate-50/80"
-      }`}
-    >
+    <div className="rounded-sm border border-slate-200 bg-slate-50 px-4 py-3">
       <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
       <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{value}</p>
     </div>
@@ -403,7 +389,7 @@ function ProjectStat({
   hint: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4">
+    <div className="rounded-sm border border-slate-200 bg-white px-4 py-4">
       <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
       <p className="mt-2 text-lg font-semibold text-slate-950">{value}</p>
       <p className="mt-1 text-xs leading-5 text-slate-500">{hint}</p>
@@ -413,9 +399,9 @@ function ProjectStat({
 
 function EmptyState() {
   return (
-    <section className="overflow-hidden rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center shadow-sm">
+    <section className="overflow-hidden rounded-sm border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
       <div className="mx-auto flex max-w-md flex-col items-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-slate-100 text-slate-500">
+        <div className="flex h-20 w-20 items-center justify-center rounded-sm bg-slate-100 text-slate-500">
           <svg className="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
@@ -434,7 +420,7 @@ function EmptyState() {
         </p>
         <Link
           href="/projects/new"
-          className="mt-8 inline-flex items-center justify-center rounded-xl bg-ink-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-ink-700"
+          className="mt-8 inline-flex items-center justify-center rounded-sm bg-ink-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-ink-700"
         >
           Create your first project
         </Link>
