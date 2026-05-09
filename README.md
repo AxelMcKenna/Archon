@@ -2,6 +2,8 @@
 
 Canterbury BCA RFI ingestion, two-pronged classification, and response drafting.
 
+## Saasathon
+
 ## Structure
 
 ```
@@ -32,3 +34,9 @@ cd supabase && supabase start
 ```
 
 See PRD for full scope.
+
+## Shared scope
+- Councils:
+  - Chch City
+  - Selwyn
+  - Waimakariri
