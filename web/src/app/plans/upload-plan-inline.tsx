@@ -9,11 +9,16 @@ import { taxonomy } from "@consentiq/shared";
 type Project = { id: string; address: string; bca: string; project_type: string };
 
 type AnalyseResponse = {
-  plan_id: string;
+  plan_id?: string;
+  cad_id?: string;
   flags_count: number;
   processing_ms: number;
-  cost_usd: number;
+  cost_usd?: number;
 };
+
+function isDxf(name: string): boolean {
+  return name.toLowerCase().endsWith(".dxf");
+}
 
 export function UploadPlanInline({ projects }: { projects: Project[] }) {
   const router = useRouter();
@@ -33,8 +38,11 @@ export function UploadPlanInline({ projects }: { projects: Project[] }) {
       const fd = new FormData();
       fd.append("file", file);
       fd.append("project_id", project.id);
-      const res = await apiUpload<AnalyseResponse>("/plans", fd);
-      router.push(`/plans?plan=${res.plan_id}`);
+      const dxf = isDxf(file.name);
+      const endpoint = dxf ? "/cad" : "/plans";
+      const res = await apiUpload<AnalyseResponse>(endpoint, fd);
+      const id = dxf ? res.cad_id : res.plan_id;
+      router.push(`/plans?${dxf ? "cad" : "plan"}=${id}`);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Plan analysis failed");
@@ -80,10 +88,10 @@ export function UploadPlanInline({ projects }: { projects: Project[] }) {
         </select>
       </label>
       <label className="block text-sm">
-        <span className="text-ink-500 block mb-1">Building plan (PDF / JPG / PNG, ≤50MB)</span>
+        <span className="text-ink-500 block mb-1">Building plan (PDF / JPG / PNG / DXF, ≤50MB)</span>
         <input
           type="file"
-          accept="application/pdf,image/png,image/jpeg"
+          accept="application/pdf,image/png,image/jpeg,.dxf"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           className="block w-full text-sm"
         />

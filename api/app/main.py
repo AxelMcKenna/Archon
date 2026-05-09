@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routes import address_checklist as address_checklist_routes
 from app.routes import address_suggest as address_suggest_routes
 from app.routes import attachments as attachments_routes
+from app.routes import cad as cad_routes
 from app.routes import classify as classify_routes
 from app.routes import debug_env as debug_env_routes
 from app.routes import documents as documents_routes
@@ -42,6 +43,7 @@ app.include_router(attachments_routes.router, prefix="/attachments", tags=["atta
 app.include_router(export_routes.router, prefix="/export", tags=["export"])
 app.include_router(risk_routes.router, prefix="/risk", tags=["risk"])
 app.include_router(plans_routes.router, prefix="/plans", tags=["plans"])
+app.include_router(cad_routes.router, prefix="/cad", tags=["cad"])
 app.include_router(
     address_checklist_routes.router, prefix="/address-to-checklist", tags=["address-to-checklist"]
 )

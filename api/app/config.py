@@ -37,6 +37,11 @@ class Settings(BaseSettings):
     rfi_extractor_provider: Provider = "gemini"
     classifier_provider: Provider = "gemini"
     drafter_provider: Provider = "gemini"
+    # CAD analyser routes through OpenRouter by default — keeps using a
+    # Gemini-class vision model but bills via OR so we don't trip the
+    # Gemini direct free-tier daily quota.
+    cad_analyser_provider: Provider = "openrouter"
+    cad_analyser_model: str = "google/gemini-3.1-pro-preview"
 
     # Self-consistency voting on the analyser. N parallel runs; keep flags
     # appearing in >= threshold of them. N=1 short-circuits the threadpool.
