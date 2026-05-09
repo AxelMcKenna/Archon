@@ -78,6 +78,11 @@ const badgeClasses: Record<Status, string> = {
   action_required: "bg-red-100 text-red-800 border-red-200",
 };
 
+function statusLabel(status: Status) {
+  if (status === "complete") return "completed";
+  return status.replaceAll("_", " ");
+}
+
 const checklistStatusBadge = (status: ChecklistRow["status"]): Status =>
   status === "accepted" ? "complete" : status === "uploaded" ? "in_progress" : "not_started";
 
@@ -195,7 +200,7 @@ function Collapsible({
         <div className="flex items-center gap-2">
           <h2 className="text-base font-semibold text-ink-900">{title}</h2>
           <span className={`rounded-full border px-2 py-0.5 text-xs ${badgeClasses[status]}`}>
-            {status.replaceAll("_", " ")}
+            {statusLabel(status)}
           </span>
         </div>
         <span className="text-ink-500" aria-hidden="true">
@@ -277,7 +282,9 @@ export function CccTabClient({
   const [dragOverRowId, setDragOverRowId] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [packageError, setPackageError] = useState<string | null>(null);
   const [downloadingB011, setDownloadingB011] = useState(false);
+  const [downloadingPackageZip, setDownloadingPackageZip] = useState(false);
   const [packageSent, setPackageSent] = useState(false);
   const [formPanelOpenByRow, setFormPanelOpenByRow] = useState<Record<string, boolean>>({});
   const defaultCompletionDateRef = useRef("");
@@ -343,6 +350,7 @@ export function CccTabClient({
   const form6AStorageKey = `ccc:form6a:${projectId}`;
   const specifiedSystemsStorageKey = `ccc:specified-systems:${projectId}`;
   const packageSentStorageKey = `ccc:package-sent:${projectId}`;
+  const feesSettledStorageKey = `ccc:fees-settled:${projectId}`;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -393,6 +401,12 @@ export function CccTabClient({
   }, [packageSentStorageKey]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = window.localStorage.getItem(feesSettledStorageKey);
+    setFeesSettled(saved === "1");
+  }, [feesSettledStorageKey]);
+
+  useEffect(() => {
     let cancelled = false;
     async function loadInspections() {
       setInspectionsLoaded(false);
@@ -430,6 +444,11 @@ export function CccTabClient({
     if (typeof window === "undefined") return;
     window.localStorage.setItem(packageSentStorageKey, packageSent ? "1" : "0");
   }, [packageSentStorageKey, packageSent]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(feesSettledStorageKey, feesSettled ? "1" : "0");
+  }, [feesSettledStorageKey, feesSettled]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -783,36 +802,11 @@ export function CccTabClient({
     setDownloadError(null);
     setDownloadingB011(true);
     try {
-      const hasRowAttachment = (rowId: string) =>
-        submittedDocs.some((row) => row.id === rowId && row.status !== "not_started");
-      const otherDocuments = submittedDocs.some(
-        (row) =>
-          row.status !== "not_started" &&
-          !["2", "2m", "5", "6", "9"].includes(row.id) &&
-          !/manufacturer(?:'s)?\s+certificate/i.test(`${row.name} ${row.fileName ?? ""}`),
-      );
+      const payload = buildB011RequestPayload();
       const response = await fetch(`/projects/${projectId}/ccc/export`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          projectName: projectName?.trim() || projectId,
-          completionDate: form6ACompletionDate,
-          lbpEntries: form6AEntries,
-          otherPersonnelEntries: form6ANonRestrictedEntries,
-          specifiedSystems: {
-            noSpecifiedSystems,
-            selectedCodes: selectedSpecifiedSystems,
-          },
-          lbpMemorandaFilenames: lbpMemorandaFiles.map((file) => memorandaDisplayName(file.filename)),
-          attachments: {
-            otherDocuments,
-            lbpMemorandaUploaded: lbpMemorandaFiles.length > 0,
-            energyCertificates: hasRowAttachment("5") || hasRowAttachment("6"),
-            specifiedSystemsEvidence:
-              hasRowAttachment("9") || (!noSpecifiedSystems && selectedSpecifiedSystems.length > 0),
-            manufacturersCertificate: false,
-          },
-        }),
+        body: JSON.stringify(payload),
       });
       if (!response.ok) {
         const contentType = response.headers.get("content-type") ?? "";
@@ -847,6 +841,83 @@ export function CccTabClient({
     }
   }
 
+  function buildB011RequestPayload() {
+    const hasRowAttachment = (rowId: string) =>
+      submittedDocs.some((row) => row.id === rowId && row.status !== "not_started");
+    const otherDocuments = submittedDocs.some(
+      (row) =>
+        row.status !== "not_started" &&
+        !["2", "2m", "5", "6", "9"].includes(row.id) &&
+        !/manufacturer(?:'s)?\s+certificate/i.test(`${row.name} ${row.fileName ?? ""}`),
+    );
+
+    return {
+      projectName: projectName?.trim() || projectId,
+      completionDate: form6ACompletionDate,
+      lbpEntries: form6AEntries,
+      otherPersonnelEntries: form6ANonRestrictedEntries,
+      specifiedSystems: {
+        noSpecifiedSystems,
+        selectedCodes: selectedSpecifiedSystems,
+      },
+      lbpMemorandaFilenames: lbpMemorandaFiles.map((file) =>
+        memorandaDisplayName(file.filename),
+      ),
+      attachments: {
+        otherDocuments,
+        lbpMemorandaUploaded: lbpMemorandaFiles.length > 0,
+        energyCertificates: hasRowAttachment("5") || hasRowAttachment("6"),
+        specifiedSystemsEvidence:
+          hasRowAttachment("9") || (!noSpecifiedSystems && selectedSpecifiedSystems.length > 0),
+        manufacturersCertificate: false,
+      },
+    };
+  }
+
+  async function downloadPackagedZip() {
+    setPackageError(null);
+    setDownloadingPackageZip(true);
+    try {
+      const payload = buildB011RequestPayload();
+      const response = await fetch(`/projects/${projectId}/ccc/package`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const contentType = response.headers.get("content-type") ?? "";
+        let serverMessage = "";
+        if (contentType.includes("application/json")) {
+          const errorPayload = (await response.json()) as { error?: string };
+          serverMessage = errorPayload.error ?? "";
+        } else {
+          serverMessage = await response.text();
+        }
+        throw new Error(serverMessage || "Unable to generate CCC package zip.");
+      }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const contentDisposition = response.headers.get("Content-Disposition") ?? "";
+      const match = contentDisposition.match(/filename=\"?([^\";]+)\"?/i);
+      link.download = match?.[1] ?? `CCC-Package-${projectId}.zip`;
+      link.href = objectUrl;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message.trim().length > 0
+          ? error.message
+          : "Unable to generate CCC package zip.";
+      setPackageError(message);
+    } finally {
+      setDownloadingPackageZip(false);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-6xl space-y-4 px-4 py-6 sm:px-6">
       <header>
@@ -860,7 +931,7 @@ export function CccTabClient({
           <Metric label="Consent issue date" value={consentIssueDisplay} />
           <Metric label="Consent expiry (2 years)" value={consentExpiryDisplay} />
           <Metric label="CCC application submitted" value={packageSent ? "Submitted" : "Not submitted"} />
-          <Metric label="Overall tab status" value={overall.replaceAll("_", " ")} />
+          <Metric label="Overall tab status" value={statusLabel(overall)} />
         </div>
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
           <div className="h-full rounded-full bg-ink-900" style={{ width: `${Math.round((doneCount / totalCount) * 100)}%` }} />
@@ -1039,6 +1110,14 @@ export function CccTabClient({
             : "Packaging is locked until the prefilled B-011 is ready to download."}
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            disabled={sectionStatus.submit !== "complete" || downloadingPackageZip}
+            onClick={() => void downloadPackagedZip()}
+            className="rounded-md bg-ink-900 px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {downloadingPackageZip ? "Packaging..." : "Download package (.zip)"}
+          </button>
           <a
             href="https://onlineservices.ccc.govt.nz"
             target="_blank"
@@ -1061,6 +1140,7 @@ export function CccTabClient({
             Package sent
           </label>
         </div>
+        {packageError && <p className="mt-2 text-xs text-red-600">{packageError}</p>}
       </Collapsible>
 
     </div>
