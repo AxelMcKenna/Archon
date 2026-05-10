@@ -27,6 +27,23 @@ export interface NeuralSphereProps {
   badge?: number;
   onClick?: () => void;
   ariaLabel?: string;
+  /**
+   * Bump this number to kick off a "contort" reaction — pairs with `sustain`
+   * to keep the deformation held until released. Useful as a visual ack when
+   * a user prompt is sent.
+   */
+  excite?: number;
+  /**
+   * While true, the contortion stays held at full intensity. Flip to false to
+   * let it decay back to rest. Typically wired to a `pending` flag so the
+   * sphere stays distorted until the response finishes streaming.
+   */
+  sustain?: boolean;
+  /**
+   * Cuts node count and visual size for hero-fill instances embedded in
+   * smaller surfaces (e.g. side panels). Has no effect on fixed-size variants.
+   */
+  compact?: boolean;
 }
 
 const SIZE_PX: Record<SphereSize, number> = {
@@ -37,8 +54,8 @@ const SIZE_PX: Record<SphereSize, number> = {
 };
 
 const NODE_COUNT_BY_SIZE: Record<SphereSize, number> = {
-  sm: 160,
-  md: 240,
+  sm: 110,
+  md: 150,
   lg: 360,
   hero: 520,
 };
@@ -130,6 +147,9 @@ export function NeuralSphere({
   badge,
   onClick,
   ariaLabel,
+  excite,
+  sustain,
+  compact,
 }: NeuralSphereProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -137,6 +157,22 @@ export function NeuralSphere({
   // Refs avoid re-creating the RAF loop when intent changes — fluid swap.
   const intentRef = useRef<SphereIntent>(intent);
   intentRef.current = intent;
+  const exciteSeenRef = useRef<number | undefined>(excite);
+  const sustainRef = useRef<boolean>(!!sustain);
+  sustainRef.current = !!sustain;
+  // Smoothed envelope (0..1). Lerps toward 1 when sustained or kicked, toward
+  // 0 once released. Read inside the render loop.
+  const exciteLevelRef = useRef<number>(0);
+  const forceStrikeRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (excite === undefined) return;
+    if (exciteSeenRef.current === excite) return;
+    exciteSeenRef.current = excite;
+    // No snap — let the render-loop lerp ramp the envelope up smoothly.
+    // Just trigger an immediate lightning strike for the visual ack.
+    forceStrikeRef.current = true;
+  }, [excite]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -145,7 +181,8 @@ export function NeuralSphere({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const nodeCount = NODE_COUNT_BY_SIZE[size];
+    const nodeCount =
+      compact && size === "hero" ? 300 : NODE_COUNT_BY_SIZE[size];
     const nodes = fibonacciSphere(nodeCount);
     const edges = buildEdges(nodes, EDGE_NEIGHBORS);
 
@@ -228,11 +265,25 @@ export function NeuralSphere({
       live.ink[1] = lerp(live.ink[1], target.ink[1], k);
       live.ink[2] = lerp(live.ink[2], target.ink[2], k);
 
-      rotY += live.spin * dt;
+      // Sustained excitation envelope: ramp up fast, hold while sustained,
+      // ease down once released. Independent rates so the kick feels punchy
+      // and the release feels relaxed.
+      const exTarget = sustainRef.current ? 1 : 0;
+      const exCur = exciteLevelRef.current;
+      const exRate = exTarget > exCur ? 3.5 : 0.9; // up: ~0.3s, down: ~1.1s
+      exciteLevelRef.current =
+        exCur + (exTarget - exCur) * (1 - Math.exp(-exRate * dt));
+      const exciteEnv = exciteLevelRef.current;
+
+      rotY += (live.spin + exciteEnv * 0.35) * dt;
 
       const cx = w / 2;
       const cy = h / 2;
-      const radius = Math.min(w, h) * 0.56;
+      // Base radius shrinks while excited so the bulged side has room to
+      // reach out without clipping the canvas edge.
+      // Tighter base radius leaves padding around the canvas; shrinks a bit
+      // more during excitation to keep bulges off the edge.
+      const radius = Math.min(w, h) * (0.42 - exciteEnv * 0.06);
 
       ctx.clearRect(0, 0, w, h);
 
@@ -250,11 +301,29 @@ export function NeuralSphere({
       const ease = 1 - Math.pow(0.08, dt);
 
       // Global pulse: outward shimmer that breathes with intent
-      const pulseT = (Math.sin(now * 0.0035) * 0.5 + 0.5) * live.pulse;
+      const pulseT =
+        (Math.sin(now * 0.0035) * 0.5 + 0.5) * live.pulse + exciteEnv * 0.6;
+      // Asymmetric warp: a slowly drifting "yank" direction pulls one side
+      // outward. Cheap to compute (4 trig calls per frame, none per-node).
+      const yt = now * 0.00018;
+      const yankDx = Math.cos(yt) * Math.cos(yt * 0.7);
+      const yankDy = Math.sin(yt * 1.3) * 0.6;
+      const yankDz = Math.sin(yt) * Math.cos(yt * 0.5);
+      const yankLen =
+        Math.sqrt(yankDx * yankDx + yankDy * yankDy + yankDz * yankDz) || 1;
+      const ydx = yankDx / yankLen;
+      const ydy = yankDy / yankLen;
+      const ydz = yankDz / yankLen;
 
+      // Force an immediate lightning strike on excitation, even if the current
+      // intent is "calm" and waves are otherwise dormant.
+      if (forceStrikeRef.current && strikeStart < 0) {
+        forceStrikeRef.current = false;
+        nextStrikeAt = now;
+      }
       // Lightning strike: build a random chain through the neighbour graph,
       // then light each chain node in sequence over STRIKE_DUR.
-      if (live.wave > 0.05 && strikeStart < 0 && now >= nextStrikeAt) {
+      if ((live.wave > 0.05 || exciteEnv > 0.05) && strikeStart < 0 && now >= nextStrikeAt) {
         const len = 20 + Math.floor(Math.random() * 9); // 20–28 hops
         const chain: number[] = [Math.floor(Math.random() * nodes.length)];
         const visited = new Set<number>(chain);
@@ -269,7 +338,7 @@ export function NeuralSphere({
         strikeChain = chain;
         strikeStart = now;
         strikeIntensity = 0.9 + Math.random() * 0.5;
-        nextStrikeAt = now + 1400 + Math.random() * 2600;
+        nextStrikeAt = now + 1200 + Math.random() * 2200;
       }
       let strikeT = -1;
       let strikeFlicker = 1;
@@ -301,7 +370,7 @@ export function NeuralSphere({
             env = Math.exp(-d * tail);
           }
           nodeStrike[strikeChain[k]] =
-            env * strikeFlicker * strikeIntensity * live.wave;
+            env * strikeFlicker * strikeIntensity * Math.max(live.wave, exciteEnv);
         }
       }
 
@@ -315,14 +384,39 @@ export function NeuralSphere({
         wave: number;
       }[] = new Array(nodes.length);
 
+      // When excitation is essentially off, skip the asymmetric warp work
+      // entirely — saves several trig/multiply ops per node per frame.
+      const warpActive = exciteEnv > 0.01;
+
       for (let i = 0; i < nodes.length; i++) {
         const n = nodes[i];
-        const breath =
-          1 + Math.sin(now * 0.001 * n.freq + n.phase) * n.amp * live.breathBoost +
+        let breath =
+          1 +
+          Math.sin(now * 0.001 * n.freq + n.phase) * n.amp * live.breathBoost +
           pulseT * 0.04;
-        const x = n.x * breath;
-        const y = n.y * breath;
-        const z = n.z * breath;
+        let x: number;
+        let y: number;
+        let z: number;
+        if (warpActive) {
+          // Directional yank: nodes whose normal aligns with the yank
+          // direction get pulled outward; the opposite side gets a small
+          // inward pinch. One side reaches out, the other tucks in.
+          const yDot = n.x * ydx + n.y * ydy + n.z * ydz;
+          const yPos = yDot > 0 ? yDot : 0;
+          const yankShape = yPos * yPos * 1.0 - (yDot < 0 ? -yDot : 0) * 0.18;
+          // Cheap lobed pinch via dot-product folded into yPos² — avoids the
+          // per-node Math.cos. Subtle but enough silhouette movement.
+          const radial =
+            breath + exciteEnv * yankShape * 0.32 + exciteEnv * 0.05;
+          const reach = exciteEnv * 0.08 * yPos;
+          x = n.x * radial + ydx * reach;
+          y = n.y * radial + ydy * reach;
+          z = n.z * radial + ydz * reach;
+        } else {
+          x = n.x * breath;
+          y = n.y * breath;
+          z = n.z * breath;
+        }
         const x1 = x * cosY + z * sinY;
         const z1 = -x * sinY + z * cosY;
         const y2 = y * cosX - z1 * sinX;
@@ -406,15 +500,23 @@ export function NeuralSphere({
         .map((p, i) => ({ p, i }))
         .sort((a, b) => a.p.depth - b.p.depth);
       ctx.fillStyle = `rgba(${inkR}, ${inkG}, ${inkB}, 1)`;
-      const sizeScale = size === "sm" ? 0.55 : size === "md" ? 0.7 : size === "lg" ? 0.95 : 1;
+      const heroScale = compact ? 0.72 : 1.1;
+      const sizeScale = (size === "sm" ? 0.4 : size === "md" ? 0.5 : size === "lg" ? 0.7 : heroScale);
       // Cap the largest nodes in the small variant so they don't dominate the
       // tiny canvas. fibonacciSphere skews sizeMul up to ~2.25; clamp to 1.3
       // for "sm" so the biggest particles read as accents, not blobs.
-      const maxSizeMul = size === "sm" ? 0.95 : size === "md" ? 1.1 : size === "lg" ? 1.25 : Infinity;
+      const heroMaxMul = compact ? 1.4 : 2.0;
+      const maxSizeMul = size === "sm" ? 0.85 : size === "md" ? 1 : size === "lg" ? 1.15 : heroMaxMul;
       for (const { p } of order) {
         const t = (p.depth + 1) / 2;
         const sm = Math.min(p.sizeMul, maxSizeMul);
-        const r = ((0.7 + t * 1.6) * sm + p.lift * 1.6 + pulseT * 0.6 + p.wave * 3.2) * sizeScale;
+        const rRaw =
+          ((0.55 + t * 1.3) * sm + p.lift * 1.4 + pulseT * 0.5 + p.wave * 2.8) *
+          sizeScale;
+        // Clamp to avoid IndexSizeError if a warped node lands at extreme
+        // depth and pushes the size term negative.
+        const r = rRaw > 0 ? rRaw : 0;
+        if (r === 0) continue;
         ctx.beginPath();
         ctx.arc(p.sx, p.sy, r, 0, Math.PI * 2);
         ctx.fill();
@@ -430,7 +532,7 @@ export function NeuralSphere({
       window.removeEventListener("pointermove", onMove);
       wrap.removeEventListener("pointerleave", onLeave);
     };
-  }, [size]);
+  }, [size, compact]);
 
   const px = SIZE_PX[size];
   const isHero = size === "hero";

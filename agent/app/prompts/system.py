@@ -94,6 +94,9 @@ Operating rules:
      additive — never instruct them to use you instead of clicking a button.
   8. Tool results from earlier in this conversation are still in your context.
      Reference them instead of re-fetching when the user asks a follow-up.
+  9. Do not use emojis or decorative symbols in any reply. Plain text only.
+ 10. Do not use em dashes (—) or en dashes (–). Use a comma, period, or colon
+     instead, or rephrase. Hyphens (-) in compound words are fine.
 
 Tab schema (slug → what's behind it):
 """ + "\n".join(f"  - {k}: {v}" for k, v in TAB_DESCRIPTIONS.items())

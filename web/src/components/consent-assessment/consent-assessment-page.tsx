@@ -235,19 +235,13 @@ export function ConsentAssessmentPage({
               Review each required item, mark it complete when ready, and upload supporting files separately.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            {checklist?.zone_info && (
-              <div className="rounded-sm border border-ink-700/10 bg-surface-raised px-4 py-3 text-right text-sm text-ink-500 shadow-sm">
-                <div>{checklist.zone_info.zone_type}</div>
-                <div className="capitalize">{checklist.zone_info.source_council}</div>
-              </div>
-            )}
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => {
                 setShowAddForm((current) => !current);
                 setIsReorderMode(false);
               }}
-              className="inline-flex items-center rounded-sm border border-ink-700/10 bg-surface-raised px-4 py-3 text-sm font-medium text-ink-900 shadow-sm transition-colors hover:bg-ink-50"
+              className="inline-flex items-center justify-center rounded-md border border-ink-200 bg-surface-raised px-4 py-2.5 text-[13px] font-medium text-ink-900 shadow-depth transition hover:bg-ink-50 cursor-pointer"
             >
               {showAddForm ? "Close Form" : "Add Required Document"}
             </button>
@@ -256,7 +250,7 @@ export function ConsentAssessmentPage({
                 setIsReorderMode((current) => !current);
                 setShowAddForm(false);
               }}
-              className="inline-flex items-center rounded-sm border border-ink-700/10 bg-surface-raised px-4 py-3 text-sm font-medium text-ink-900 shadow-sm transition-colors hover:bg-ink-50"
+              className="inline-flex items-center justify-center rounded-md border border-ink-200 bg-surface-raised px-4 py-2.5 text-[13px] font-medium text-ink-900 shadow-depth transition hover:bg-ink-50 cursor-pointer"
             >
               {isReorderMode ? "Exit Reorder" : "Reorder Documents"}
             </button>

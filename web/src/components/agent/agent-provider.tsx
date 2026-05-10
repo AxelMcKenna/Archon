@@ -36,6 +36,9 @@ interface AgentContextValue {
   // Conversation state
   turns: ChatTurn[];
   pending: boolean;
+  /** True while the typewriter still has buffered chars to drip out, even if
+   *  the underlying SSE stream has finished. Use to show a trailing cursor. */
+  streaming: boolean;
   error: string | null;
   send: (text: string) => Promise<void>;
   reset: () => void;
@@ -49,9 +52,74 @@ export function AgentProvider({ children }: { children: ReactNode }) {
   const [pendingInitial, setPendingInitial] = useState<string | null>(null);
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [pending, setPending] = useState(false);
+  const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const conversationIdRef = useRef<string | null>(null);
+
+  // Typewriter throttle: token events arrive in big chunks, so we buffer them
+  // per-turn and drip characters out non-linearly to feel like an LLM thinking
+  // out loud — variable burst sizes, plus pauses at punctuation/line breaks.
+  const tokenBufferRef = useRef<Map<string, string>>(new Map());
+  const pauseUntilRef = useRef<Map<string, number>>(new Map());
+  const typewriterRafRef = useRef<number | null>(null);
+
+  const ensureTypewriter = useCallback(() => {
+    if (typewriterRafRef.current !== null) return;
+    setStreaming(true);
+    const tick = () => {
+      const now = performance.now();
+      let anyLeft = false;
+      const updates: Array<[string, string]> = [];
+      for (const [id, queued] of tokenBufferRef.current) {
+        if (!queued) continue;
+        const pauseUntil = pauseUntilRef.current.get(id) ?? 0;
+        if (pauseUntil > now) {
+          anyLeft = true;
+          continue;
+        }
+        // Burst size: most frames emit 1–3 chars; ~12% of frames burst out a
+        // word-sized chunk; ~3% emit a tiny single-char "hesitation".
+        const r = Math.random();
+        const burst =
+          r < 0.03
+            ? 1
+            : r < 0.85
+              ? 1 + Math.floor(Math.random() * 3)
+              : 5 + Math.floor(Math.random() * 9);
+        const take = queued.slice(0, burst);
+        const rest = queued.slice(burst);
+        tokenBufferRef.current.set(id, rest);
+        updates.push([id, take]);
+
+        // Schedule a pause if we just emitted a natural breakpoint.
+        const last = take[take.length - 1] ?? "";
+        let wait = 0;
+        if (/[.!?]/.test(last)) wait = 160 + Math.random() * 200;
+        else if (last === "\n") wait = 120 + Math.random() * 220;
+        else if (/[,;:]/.test(last)) wait = 60 + Math.random() * 90;
+        else if (Math.random() < 0.04) wait = 70 + Math.random() * 140;
+        if (wait > 0) pauseUntilRef.current.set(id, now + wait);
+
+        if (rest.length > 0) anyLeft = true;
+      }
+      if (updates.length > 0) {
+        setTurns((prev) =>
+          prev.map((t) => {
+            const u = updates.find(([id]) => id === t.id);
+            return u ? { ...t, content: t.content + u[1] } : t;
+          }),
+        );
+      }
+      if (anyLeft) {
+        typewriterRafRef.current = requestAnimationFrame(tick);
+      } else {
+        typewriterRafRef.current = null;
+        setStreaming(false);
+      }
+    };
+    typewriterRafRef.current = requestAnimationFrame(tick);
+  }, []);
 
   const send = useCallback(
     async (text: string) => {
@@ -96,11 +164,9 @@ export function AgentProvider({ children }: { children: ReactNode }) {
           if (evt.type === "conversation") {
             conversationIdRef.current = evt.conversation_id;
           } else if (evt.type === "token") {
-            setTurns((prev) =>
-              prev.map((t) =>
-                t.id === assistantId ? { ...t, content: t.content + evt.text } : t,
-              ),
-            );
+            const cur = tokenBufferRef.current.get(assistantId) ?? "";
+            tokenBufferRef.current.set(assistantId, cur + evt.text);
+            ensureTypewriter();
           } else if (evt.type === "tool_call") {
             setTurns((prev) =>
               prev.map((t) =>
@@ -179,9 +245,16 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     const id = conversationIdRef.current;
     conversationIdRef.current = null;
     if (id) void resetConversation(id);
+    tokenBufferRef.current.clear();
+    pauseUntilRef.current.clear();
+    if (typewriterRafRef.current !== null) {
+      cancelAnimationFrame(typewriterRafRef.current);
+      typewriterRafRef.current = null;
+    }
     setTurns([]);
     setError(null);
     setPending(false);
+    setStreaming(false);
   }, []);
 
   // Auto-send any queued initial message once the panel is open and idle.
@@ -202,6 +275,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
         available: !!AGENT_BASE,
         turns,
         pending,
+        streaming,
         error,
         send,
         reset,

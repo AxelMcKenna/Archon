@@ -73,11 +73,24 @@ export async function* streamAgent(
   let buffer = "";
   let frameCount = 0;
 
+  // SSE frames may be separated by either "\n\n" or "\r\n\r\n" (sse_starlette
+  // emits CRLF). Find the earliest of the two on each pass.
   const drain = function* (): Generator<AgentEvent> {
-    let sepIdx: number;
-    while ((sepIdx = buffer.indexOf("\n\n")) !== -1) {
-      const raw = buffer.slice(0, sepIdx);
-      buffer = buffer.slice(sepIdx + 2);
+    while (true) {
+      const lf = buffer.indexOf("\n\n");
+      const crlf = buffer.indexOf("\r\n\r\n");
+      let cut = -1;
+      let advance = 0;
+      if (crlf !== -1 && (lf === -1 || crlf < lf)) {
+        cut = crlf;
+        advance = 4;
+      } else if (lf !== -1) {
+        cut = lf;
+        advance = 2;
+      }
+      if (cut === -1) break;
+      const raw = buffer.slice(0, cut);
+      buffer = buffer.slice(cut + advance);
       const event = parseSseFrame(raw);
       if (event) {
         frameCount++;

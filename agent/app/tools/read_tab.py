@@ -86,7 +86,7 @@ def _read_tab_sync(project_id: str, tab: str, limit: int) -> dict[str, Any]:
         return {"tab": tab, "project": (proj.data if proj else None)}
 
     if tab == "drawings":
-        rows = (
+        plan_rows = (
             sb.table("plan_uploads")
             .select(
                 "id,filename,status,analyser_version,prompt_version,"
@@ -97,13 +97,14 @@ def _read_tab_sync(project_id: str, tab: str, limit: int) -> dict[str, Any]:
             .limit(limit)
             .execute()
         )
-        items = []
-        for r in rows.data or []:
+        plan_items = []
+        for r in plan_rows.data or []:
             analysis = r.get("analysis") or {}
             flags = analysis.get("flags") if isinstance(analysis, dict) else None
-            items.append(
+            plan_items.append(
                 {
                     "id": r["id"],
+                    "kind": "plan",
                     "filename": r.get("filename"),
                     "status": r.get("status"),
                     "created_at": r.get("created_at"),
@@ -112,7 +113,40 @@ def _read_tab_sync(project_id: str, tab: str, limit: int) -> dict[str, Any]:
                     "cost_usd": r.get("cost_usd"),
                 }
             )
-        return {"tab": tab, "uploads": items, "count": len(items)}
+
+        cad_rows = (
+            sb.table("cad_uploads")
+            .select(
+                "id,filename,status,analyser_version,prompt_version,"
+                "processing_ms,error,created_at,analysis"
+            )
+            .eq("project_id", project_id)
+            .order("created_at", desc=True)
+            .limit(limit)
+            .execute()
+        )
+        cad_items = []
+        for r in cad_rows.data or []:
+            analysis = r.get("analysis") or {}
+            flags = analysis.get("flags") if isinstance(analysis, dict) else None
+            cad_items.append(
+                {
+                    "id": r["id"],
+                    "kind": "cad",
+                    "filename": r.get("filename"),
+                    "status": r.get("status"),
+                    "created_at": r.get("created_at"),
+                    "flag_count": len(flags) if isinstance(flags, list) else None,
+                    "error": r.get("error"),
+                }
+            )
+
+        return {
+            "tab": tab,
+            "plan_uploads": plan_items,
+            "cad_uploads": cad_items,
+            "count": len(plan_items) + len(cad_items),
+        }
 
     if tab == "rfis":
         letters = (
