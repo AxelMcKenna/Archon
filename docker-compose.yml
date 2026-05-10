@@ -1,0 +1,24 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    image: consentiq-api:latest
+    container_name: consentiq-api
+    restart: unless-stopped
+    env_file:
+      - api/.env
+    ports:
+      - "8000:8000"
+
+  agent:
+    build:
+      context: .
+      dockerfile: agent/Dockerfile
+    image: consentiq-agent:latest
+    container_name: consentiq-agent
+    restart: unless-stopped
+    env_file:
+      - agent/.env
+    ports:
+      - "8001:8001"

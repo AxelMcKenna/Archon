@@ -76,8 +76,7 @@ function paramsForIntent(intent: SphereIntent): IntentParams {
     case "active":
       return { spin: 0.32, breathBoost: 1.4, edgeAlphaBoost: 0.04, ink: [11, 14, 20], pulse: 0.25, wave: 0 };
     case "alert":
-      // desaturated brand-warning red — same ink density, just hue shift
-      return { spin: 0.22, breathBoost: 1.6, edgeAlphaBoost: 0.06, ink: [180, 50, 50], pulse: 0.5, wave: 0 };
+      return { spin: 0.22, breathBoost: 1.6, edgeAlphaBoost: 0.06, ink: [11, 14, 20], pulse: 0.5, wave: 0 };
     case "thinking":
       return { spin: 0.12, breathBoost: 1.4, edgeAlphaBoost: 0.06, ink: [11, 14, 20], pulse: 0.35, wave: 1 };
     case "calm":
@@ -543,14 +542,6 @@ export function NeuralSphere({
       <div ref={wrapRef} className={isHero ? "h-full w-full" : "absolute inset-0"} aria-hidden>
         <canvas ref={canvasRef} className="block h-full w-full" />
       </div>
-      {badge !== undefined && badge > 0 && (
-        <span
-          className="pointer-events-none absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold leading-none text-white shadow-sm"
-          aria-label={`${badge} item${badge === 1 ? "" : "s"} need attention`}
-        >
-          {badge > 99 ? "99+" : badge}
-        </span>
-      )}
     </>
   );
 
