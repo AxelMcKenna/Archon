@@ -61,6 +61,7 @@ export interface SubmissionPackage {
   createdAt: string;
   submittedAt: string | null;
   status: string | null;
+  councilUrl: string | null;
 }
 
 export interface ConsentDocument extends RequiredDocument {
@@ -243,6 +244,7 @@ export function createSubmissionPackageRecord(
     createdAt: new Date().toISOString(),
     submittedAt: null,
     status: "draft",
+    councilUrl: null,
   };
 }
 

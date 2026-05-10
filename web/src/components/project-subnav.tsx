@@ -20,7 +20,7 @@ interface ProjectTab {
 export const projectTabs: ProjectTab[] = [
   { name: "Overview", href: "", slug: "overview" },
   { name: "Drawings", href: "/drawings", slug: "drawings" },
-  { name: "Lodgement", href: "/application-prep", slug: "application-prep" },
+  { name: "Lodgement", href: "/application-prep", slug: "application-prep", alsoMatch: ["/submissions"] },
   { name: "Council", href: "/rfis", slug: "rfis" },
   { name: "Construction", href: "/inspections", slug: "inspections", alsoMatch: ["/ccc"] },
 ];

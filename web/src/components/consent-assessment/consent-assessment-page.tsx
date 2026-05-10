@@ -3,9 +3,12 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { SettingsDeleteProjectButton } from "@/app/settings/project-row-delete";
 import { CompletionCheckbox } from "./completion-checkbox";
 import type { ConsentDocument } from "./model";
 import { isManualDocument } from "./model";
+import { DEFAULT_COUNCIL_SUBMISSION_URL } from "./submission-defaults";
+import { formatSubmissionDate, groupDocumentsBySubmission } from "./submission-groups";
 import { useConsentAssessment, type ProjectIntake } from "./use-consent-assessment";
 
 interface ConsentAssessmentPageProps {
@@ -43,6 +46,7 @@ export function ConsentAssessmentPage({
     error,
     createManualDocument,
     createSubmissionPackage,
+    deleteSubmissionPackage,
     removeDocument,
     saveDocumentOrder,
     saveUpload,
@@ -75,9 +79,10 @@ export function ConsentAssessmentPage({
         .map((id) => documents.find((document) => document.id === id))
         .filter((document): document is ConsentDocument => Boolean(document))
     : documents;
-  const groupedDocuments = useMemo(() => {
-    return groupDocumentsBySubmission(documents, submissionPackages, documentSubmissionIds);
-  }, [documents, submissionPackages, documentSubmissionIds]);
+  const groupedDocuments = useMemo(
+    () => groupDocumentsBySubmission(documents, submissionPackages, documentSubmissionIds),
+    [documents, submissionPackages, documentSubmissionIds],
+  );
 
   useEffect(() => {
     setSelectedDocumentIds((current) =>
@@ -185,6 +190,14 @@ export function ConsentAssessmentPage({
     setSubmissionError(null);
   }
 
+  async function handleDeleteSubmission(submissionId: string) {
+    const deleted = deleteSubmissionPackage(submissionId);
+    if (!deleted) {
+      setSubmissionError("Unable to delete this submission package.");
+      throw new Error("Unable to delete this submission package.");
+    }
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
       <header className="space-y-1.5">
@@ -257,22 +270,23 @@ export function ConsentAssessmentPage({
       )}
 
       <section className="space-y-4">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-3">
             <h2 className="text-xl font-semibold tracking-tight text-ink-900">
               Required Consent Documents
             </h2>
             <p className="mt-1 text-sm text-ink-500">
               Review each required item, mark it complete when ready, and upload supporting files separately.
             </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
             {checklist?.zone_info && (
-              <div className="rounded-sm border border-ink-700/10 bg-surface-raised px-4 py-3 text-right text-sm text-ink-500 shadow-sm">
-                <div>{checklist.zone_info.zone_type}</div>
-                <div className="capitalize">{checklist.zone_info.source_council}</div>
+              <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-ink-700/10 bg-ink-50 px-4 py-2 text-sm text-ink-600">
+                <span className="font-medium text-ink-900">{checklist.zone_info.zone_type}</span>
+                <span className="text-ink-400">•</span>
+                <span className="capitalize">{checklist.zone_info.source_council}</span>
               </div>
             )}
+          </div>
+          <div className="flex flex-wrap items-center gap-3 lg:justify-end">
             <button
               onClick={() => {
                 setShowAddForm((current) => !current);
@@ -583,23 +597,29 @@ export function ConsentAssessmentPage({
           </div>
         ) : (
           <div className="space-y-4">
-            {groupedDocuments.map((submissionGroup, groupIndex) => (
-              <section
-                key={submissionGroup.id}
-                className="rounded-sm border border-ink-700/10 bg-surface-raised shadow-sm"
-              >
+            {groupedDocuments.map((submissionGroup, groupIndex) => {
+              const councilLink = submissionGroup.councilUrl ?? DEFAULT_COUNCIL_SUBMISSION_URL;
+
+              return (
+                <section
+                  key={submissionGroup.id}
+                  className="rounded-sm border border-ink-700/10 bg-surface-raised shadow-sm"
+                >
                 <div className="flex flex-col gap-3 border-b border-ink-700/10 px-5 py-4 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
                       Submission Package
                     </p>
-                    <h3 className="mt-1 text-lg font-semibold text-ink-900">
+                    <Link
+                      href={`/projects/${projectId}/submissions/${submissionGroup.id}` as Route}
+                      className="mt-1 inline-block text-lg font-semibold text-ink-900 hover:text-accent"
+                    >
                       {submissionGroup.label}
-                    </h3>
+                    </Link>
                     <p className="mt-1 text-sm text-ink-500">
                       {submissionGroup.isUnsubmitted
                         ? "Documents not yet bundled into a lodgement."
-                        : `Created ${formatDate(submissionGroup.createdAt)}`}
+                        : `Created ${formatSubmissionDate(submissionGroup.createdAt)}`}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -612,12 +632,36 @@ export function ConsentAssessmentPage({
                       </span>
                     )}
                     {!submissionGroup.isUnsubmitted && (
-                      <a
-                        href={`/projects/${projectId}/submissions/${submissionGroup.id}/download`}
-                        className="rounded-sm border border-ink-700/10 bg-white px-3 py-2 text-xs font-medium text-ink-900 transition-colors hover:bg-ink-50"
-                      >
-                        Download Submission ZIP
-                      </a>
+                      <>
+                        <a
+                          href={councilLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-sm border border-ink-700/10 bg-white px-3 py-2 text-xs font-medium text-ink-900 transition-colors hover:bg-ink-50"
+                        >
+                          Open Council Submission
+                        </a>
+                        <a
+                          href={`/submissions/${submissionGroup.id}/download`}
+                          className="rounded-sm border border-ink-700/10 bg-white px-3 py-2 text-xs font-medium text-ink-900 transition-colors hover:bg-ink-50"
+                        >
+                          Download ZIP
+                        </a>
+                        <SettingsDeleteProjectButton
+                          onDelete={() => handleDeleteSubmission(submissionGroup.id)}
+                          projectLabel={submissionGroup.label}
+                          title="Delete submission?"
+                          description={
+                            <>
+                              Permanently delete{" "}
+                              <strong className="text-slate-900">{submissionGroup.label}</strong>? Documents
+                              will remain available and move back to Unsubmitted Documents.
+                            </>
+                          }
+                          triggerLabel="Delete Submission"
+                          triggerClassName="rounded-sm border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700 transition-colors hover:bg-red-100"
+                        />
+                      </>
                     )}
                   </div>
                 </div>
@@ -724,108 +768,13 @@ export function ConsentAssessmentPage({
                   ))}
                 </div>
               </section>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
     </div>
   );
-}
-
-function normalizeCategory(value: string) {
-  const normalized = value?.trim();
-  if (!normalized) return "General";
-  return normalized
-    .replace(/[_-]+/g, " ")
-    .replace(/\s+/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function groupDocumentsBySubmission(
-  documents: ConsentDocument[],
-  submissionPackages: Array<{
-    id: string;
-    title: string;
-    createdAt: string;
-    submittedAt: string | null;
-    status: string | null;
-  }>,
-  documentSubmissionIds: Record<string, string>,
-) {
-  const packageOrder = new Map(submissionPackages.map((item, index) => [item.id, index]));
-  const groups = new Map<
-    string,
-    {
-      id: string;
-      label: string;
-      createdAt: string | null;
-      submittedAt: string | null;
-      status: string | null;
-      isUnsubmitted: boolean;
-      items: ConsentDocument[];
-    }
-  >();
-
-  for (const document of documents) {
-    const submissionId = documentSubmissionIds[document.id];
-    const submissionPackage = submissionPackages.find((item) => item.id === submissionId);
-    const key = submissionPackage?.id ?? "unsubmitted";
-    const existing = groups.get(key) ?? {
-      id: key,
-      label: submissionPackage?.title ?? "Unsubmitted Documents",
-      createdAt: submissionPackage?.createdAt ?? null,
-      submittedAt: submissionPackage?.submittedAt ?? null,
-      status: submissionPackage?.status ?? null,
-      isUnsubmitted: !submissionPackage,
-      items: [],
-    };
-    existing.items.push(document);
-    groups.set(key, existing);
-  }
-
-  return Array.from(groups.values())
-    .sort((left, right) => {
-      if (left.isUnsubmitted && !right.isUnsubmitted) return 1;
-      if (!left.isUnsubmitted && right.isUnsubmitted) return -1;
-      return (packageOrder.get(left.id) ?? Number.MAX_SAFE_INTEGER) - (packageOrder.get(right.id) ?? Number.MAX_SAFE_INTEGER);
-    })
-    .map((group) => {
-      const categories = new Map<string, ConsentDocument[]>();
-      for (const document of group.items) {
-        const category = normalizeCategory(document.category);
-        const existing = categories.get(category) ?? [];
-        existing.push(document);
-        categories.set(category, existing);
-      }
-
-      return {
-        ...group,
-        categories: Array.from(categories.entries())
-          .sort(([left], [right]) => categorySortKey(left) - categorySortKey(right))
-          .map(([category, items]) => ({
-            id: category.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-            label: category,
-            items,
-          })),
-      };
-    });
-}
-
-function formatDate(value: string | null) {
-  if (!value) return "recently";
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return "recently";
-  return parsed.toLocaleDateString();
-}
-
-function categorySortKey(category: string) {
-  const key = category.toLowerCase();
-  if (key === "baseline") return 0;
-  if (key === "location") return 1;
-  if (key === "project") return 2;
-  if (key === "specialist") return 3;
-  if (key.includes("additional")) return 9;
-  return 5;
 }
 
 function MetricCard({ label, value }: { label: string; value: string }) {

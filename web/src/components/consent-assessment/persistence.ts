@@ -45,6 +45,8 @@ interface RawRow {
 }
 
 function fromRow(row: RawRow): ConsentAssessmentRow {
+  const legacySubmissionFallback = getLegacySubmissionFallback(row.forecast_context);
+
   return {
     checklist: row.checklist ?? null,
     manualDocuments: row.manual_documents ?? [],
@@ -52,9 +54,12 @@ function fromRow(row: RawRow): ConsentAssessmentRow {
     documentOrder: row.document_order ?? [],
     uploads: normalizeUploads(row.uploads),
     completions: row.completions ?? {},
-    forecastContext: row.forecast_context ?? null,
-    submissionPackages: row.submission_packages ?? [],
-    documentSubmissionIds: row.document_submission_ids ?? {},
+    forecastContext: stripLegacySubmissionFallback(row.forecast_context),
+    submissionPackages: normalizeSubmissionPackages(
+      row.submission_packages ?? legacySubmissionFallback.submissionPackages,
+    ),
+    documentSubmissionIds:
+      row.document_submission_ids ?? legacySubmissionFallback.documentSubmissionIds,
   };
 }
 
@@ -114,6 +119,11 @@ export async function saveConsentAssessment(
   }
 
   if (isMissingSubmissionColumnsError(fullSave.error)) {
+    const legacyForecastContext = mergeLegacySubmissionFallback(
+      row.forecastContext,
+      row.submissionPackages,
+      row.documentSubmissionIds,
+    );
     const { error } = await client.from("consent_assessments").upsert(
       {
         project_id: projectId,
@@ -123,7 +133,7 @@ export async function saveConsentAssessment(
         document_order: row.documentOrder,
         uploads: row.uploads,
         completions: row.completions,
-        forecast_context: row.forecastContext,
+        forecast_context: legacyForecastContext,
       },
       { onConflict: "project_id" },
     );
@@ -147,7 +157,9 @@ export async function loadForecastContext(
     .eq("project_id", projectId)
     .maybeSingle();
   if (error || !data) return null;
-  return (data as { forecast_context: Record<string, unknown> | null }).forecast_context ?? null;
+  return stripLegacySubmissionFallback(
+    (data as { forecast_context: Record<string, unknown> | null }).forecast_context ?? null,
+  );
 }
 
 export function browserClient() {
@@ -178,4 +190,59 @@ function normalizeUploads(
     }));
   }
   return normalized;
+}
+
+function normalizeSubmissionPackages(submissionPackages: SubmissionPackage[] | null | undefined) {
+  return (submissionPackages ?? []).map((submissionPackage) => ({
+    ...submissionPackage,
+    status: submissionPackage.status ?? "draft",
+    submittedAt: submissionPackage.submittedAt ?? null,
+    councilUrl: submissionPackage.councilUrl ?? null,
+  }));
+}
+
+function getLegacySubmissionFallback(
+  forecastContext: Record<string, unknown> | null | undefined,
+): Pick<ConsentAssessmentRow, "submissionPackages" | "documentSubmissionIds"> {
+  const submissionPackages = Array.isArray(forecastContext?.__submission_packages)
+    ? normalizeSubmissionPackages(
+        forecastContext.__submission_packages as SubmissionPackage[],
+      )
+    : [];
+  const documentSubmissionIds =
+    forecastContext?.__document_submission_ids &&
+    typeof forecastContext.__document_submission_ids === "object"
+      ? (forecastContext.__document_submission_ids as Record<string, string>)
+      : {};
+
+  return {
+    submissionPackages,
+    documentSubmissionIds,
+  };
+}
+
+function mergeLegacySubmissionFallback(
+  forecastContext: Record<string, unknown> | null,
+  submissionPackages: SubmissionPackage[],
+  documentSubmissionIds: Record<string, string>,
+) {
+  return {
+    ...(forecastContext ?? {}),
+    __submission_packages: normalizeSubmissionPackages(submissionPackages),
+    __document_submission_ids: documentSubmissionIds,
+  };
+}
+
+function stripLegacySubmissionFallback(
+  forecastContext: Record<string, unknown> | null | undefined,
+) {
+  if (!forecastContext) {
+    return null;
+  }
+
+  const next = { ...forecastContext };
+  delete next.__submission_packages;
+  delete next.__document_submission_ids;
+
+  return Object.keys(next).length > 0 ? next : null;
 }

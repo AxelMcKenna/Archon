@@ -275,6 +275,53 @@ export function useConsentAssessment({
     return submissionPackage.id;
   }
 
+  function deleteSubmissionPackage(submissionId: string) {
+    let found = false;
+
+    commitState((current) => {
+      const nextSubmissionPackages = current.submissionPackages.filter((submissionPackage) => {
+        const matches = submissionPackage.id === submissionId;
+        if (matches) {
+          found = true;
+        }
+        return !matches;
+      });
+      const nextSubmissionIds = Object.fromEntries(
+        Object.entries(current.documentSubmissionIds).filter(([, value]) => value !== submissionId),
+      );
+
+      return {
+        ...current,
+        submissionPackages: nextSubmissionPackages,
+        documentSubmissionIds: nextSubmissionIds,
+      };
+    });
+
+    return found;
+  }
+
+  function updateSubmissionPackageCouncilUrl(submissionId: string, value: string) {
+    const normalizedCouncilUrl = normalizeCouncilUrl(value);
+    let found = false;
+
+    commitState((current) => ({
+      ...current,
+      submissionPackages: current.submissionPackages.map((submissionPackage) => {
+        if (submissionPackage.id !== submissionId) {
+          return submissionPackage;
+        }
+
+        found = true;
+        return {
+          ...submissionPackage,
+          councilUrl: normalizedCouncilUrl,
+        };
+      }),
+    }));
+
+    return found;
+  }
+
   function saveDocumentOrder(nextDocumentOrder: string[]) {
     commitState((current) => ({
       ...current,
@@ -417,6 +464,8 @@ export function useConsentAssessment({
     generateChecklist,
     createManualDocument,
     createSubmissionPackage,
+    deleteSubmissionPackage,
+    updateSubmissionPackageCouncilUrl,
     removeDocument,
     saveDocumentOrder,
     resetDocumentOrder,
@@ -424,6 +473,26 @@ export function useConsentAssessment({
     removeUpload,
     setDocumentCompleted,
   };
+}
+
+function normalizeCouncilUrl(value: string) {
+  const normalized = value.trim();
+  if (!normalized) {
+    return null;
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(normalized);
+  } catch {
+    throw new Error("Council submission link must be a valid URL.");
+  }
+
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new Error("Council submission link must start with http:// or https://.");
+  }
+
+  return parsed.toString();
 }
 
 function intakeToProjectDetails(
