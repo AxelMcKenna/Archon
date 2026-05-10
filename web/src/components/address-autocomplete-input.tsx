@@ -36,7 +36,7 @@ export function AddressAutocompleteInput({
       const requestId = requestIdRef.current;
       setIsLoading(true);
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "/api/backend";
         const response = await fetch(
           `${apiUrl}/address-suggest?q=${encodeURIComponent(query)}&limit=8`,
           { method: "GET" }

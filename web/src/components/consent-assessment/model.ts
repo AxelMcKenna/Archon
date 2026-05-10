@@ -77,7 +77,7 @@ export interface ConsentDocument extends RequiredDocument {
 const DEFAULT_REFERENCE_URL =
   "https://www.building.govt.nz/projects-and-consents/apply-for-building-consent";
 const FORM2_TEMPLATE_URL = `${
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"
+  process.env.NEXT_PUBLIC_API_BASE_URL || "/api/backend"
 }/api/templates/form2`;
 
 const DOCUMENT_LIBRARY: Record<

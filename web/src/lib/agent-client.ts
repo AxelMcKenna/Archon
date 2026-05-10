@@ -1,4 +1,4 @@
-export const AGENT_BASE = process.env.NEXT_PUBLIC_AGENT_URL ?? "";
+export const AGENT_BASE = process.env.NEXT_PUBLIC_AGENT_URL || "/api/agent-proxy";
 
 // One-time visibility into env wiring. Prints once on first import in the browser.
 if (typeof window !== "undefined") {

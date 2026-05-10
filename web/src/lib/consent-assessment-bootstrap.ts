@@ -52,7 +52,7 @@ export async function bootstrapConsentAssessment(
   intake: BootstrapIntake,
 ): Promise<void> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "/api/backend";
 
     const checklistResp = await fetch(`${apiUrl}/address-to-checklist`, {
       method: "POST",

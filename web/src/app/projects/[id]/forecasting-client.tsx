@@ -80,7 +80,7 @@ export function ForecastingClient({
     setLoading(true);
     setError(null);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "/api/backend";
       const response = await fetch(`${apiUrl}/api/forecast`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
