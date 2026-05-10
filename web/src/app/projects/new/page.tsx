@@ -159,6 +159,7 @@ async function insertProjectCompatible(
 ): Promise<InsertProjectResult> {
   const insertPayload: Record<string, unknown> = { ...payload };
   const requiredColumns = new Set(["address", "bca", "project_type", "description"]);
+  let legacyOwnerId: string | null | undefined;
 
   for (let i = 0; i < 20; i++) {
     const inserted = await supabase
@@ -168,6 +169,12 @@ async function insertProjectCompatible(
       .single<{ id: string }>();
     if (!inserted.error) {
       return inserted;
+    }
+
+    if (requiresLegacyProjectsOwner(inserted.error) && !("user_id" in insertPayload)) {
+      legacyOwnerId ??= await resolveLegacyProjectsOwnerId(supabase);
+      insertPayload.user_id = legacyOwnerId;
+      continue;
     }
 
     const missingColumn = extractMissingProjectsColumn(inserted.error);
@@ -196,6 +203,45 @@ function extractMissingProjectsColumn(error: { code?: string; message?: string }
   return null;
 }
 
+function requiresLegacyProjectsOwner(error: { code?: string; message?: string }) {
+  const message = String(error.message ?? "");
+  return (
+    message.includes('null value in column "user_id"') ||
+    message.includes("new row violates row-level security policy")
+  );
+}
+
+async function resolveLegacyProjectsOwnerId(
+  supabase: Awaited<ReturnType<typeof getSupabaseServer>>,
+) {
+  const configured = process.env.SUPABASE_DEFAULT_USER_ID?.trim();
+  if (configured) {
+    return configured;
+  }
+
+  const { data, error } = await supabase.auth.admin.listUsers();
+  if (error) {
+    throw new Error(
+      `Unable to create project. Legacy projects schema requires a real Supabase auth user_id, and listing auth users failed: ${error.message}`,
+    );
+  }
+
+  const users = data.users ?? [];
+  if (users.length === 1) {
+    return users[0].id;
+  }
+
+  if (users.length === 0) {
+    throw new Error(
+      "Unable to create project. Legacy projects schema requires user_id, but no Supabase auth users exist yet.",
+    );
+  }
+
+  throw new Error(
+    "Unable to create project. Legacy projects schema requires user_id, but multiple auth users exist and this app has no request-scoped auth session. Set SUPABASE_DEFAULT_USER_ID for local writes.",
+  );
+}
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
@@ -213,4 +259,3 @@ function CheckboxField({ name, label }: { name: string; label: string }) {
     </label>
   );
 }
-

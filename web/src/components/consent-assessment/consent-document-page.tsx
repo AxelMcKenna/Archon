@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { CompletionCheckbox } from "./completion-checkbox";
+import { browserClient } from "./persistence";
 import { isManualDocument } from "./model";
 import { useConsentAssessment } from "./use-consent-assessment";
 
@@ -21,11 +22,14 @@ export function ConsentDocumentPage({
 }: ConsentDocumentPageProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const supabaseRef = useRef(browserClient());
   const [flashMessage, setFlashMessage] = useState<string | null>(null);
   const {
     documents,
     uploads,
     completions,
+    documentSubmissionIds,
+    submissionPackageMap,
     isLoading,
     error,
     generateChecklist,
@@ -39,9 +43,11 @@ export function ConsentDocumentPage({
   });
 
   const document = documents.find((item) => item.id === documentId);
-  const upload = uploads[documentId];
+  const uploadFiles = uploads[documentId] ?? [];
+  const latestUpload = uploadFiles[uploadFiles.length - 1];
   const isCompleted = Boolean(completions[documentId]);
   const manual = isManualDocument(document);
+  const submissionPackage = submissionPackageMap.get(documentSubmissionIds[documentId] ?? "");
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -49,14 +55,47 @@ export function ConsentDocumentPage({
       return;
     }
 
-    saveUpload(documentId, file);
-    setFlashMessage(`${file.name} uploaded successfully.`);
+    void saveUpload(documentId, file)
+      .then(() => setFlashMessage(`${file.name} uploaded successfully.`))
+      .catch((error) =>
+        setFlashMessage(
+          typeof error === "object" && error !== null && "message" in error
+            ? String((error as { message?: unknown }).message ?? "Upload failed.")
+            : "Upload failed.",
+        ),
+      );
     event.target.value = "";
   }
 
-  function handleRemoveFile() {
-    removeUpload(documentId);
-    setFlashMessage("Uploaded file removed.");
+  function handleRemoveFile(uploadId: string) {
+    void removeUpload(documentId, uploadId)
+      .then(() => setFlashMessage("Uploaded file removed."))
+      .catch((error) =>
+        setFlashMessage(
+          typeof error === "object" && error !== null && "message" in error
+            ? String((error as { message?: unknown }).message ?? "Delete failed.")
+            : "Delete failed.",
+        ),
+      );
+  }
+
+  function handlePreviewFile(storagePath: string) {
+    void supabaseRef.current.storage
+      .from("attachments")
+      .createSignedUrl(storagePath, 60)
+      .then(({ data, error }) => {
+        if (error || !data?.signedUrl) {
+          throw error ?? new Error("Unable to open file.");
+        }
+        window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+      })
+      .catch((error) =>
+        setFlashMessage(
+          typeof error === "object" && error !== null && "message" in error
+            ? String((error as { message?: unknown }).message ?? "Preview failed.")
+            : "Preview failed.",
+        ),
+      );
   }
 
   function handleDeleteDocument() {
@@ -141,7 +180,7 @@ export function ConsentDocumentPage({
               </div>
               <div className="flex flex-wrap gap-2">
                 <CompletionBadge completed={isCompleted} />
-                <UploadBadge uploaded={Boolean(upload)} />
+                <UploadBadge uploaded={uploadFiles.length > 0} />
               </div>
             </div>
           </section>
@@ -208,22 +247,46 @@ export function ConsentDocumentPage({
                   onClick={() => fileInputRef.current?.click()}
                   className="mt-5 inline-flex w-full items-center justify-center rounded-sm bg-ink-900 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-ink-700"
                 >
-                  {upload ? "Replace uploaded file" : "Upload file"}
+                  {uploadFiles.length > 0 ? "Upload another file" : "Upload file"}
                 </button>
 
-                {upload && (
-                  <button
-                    onClick={handleRemoveFile}
-                    className="mt-3 inline-flex w-full items-center justify-center rounded-sm border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 transition-colors hover:bg-red-100"
-                  >
-                    Remove File
-                  </button>
+                {uploadFiles.length > 0 && (
+                  <div className="mt-4 space-y-3">
+                    {uploadFiles.map((upload) => (
+                      <div
+                        key={upload.id}
+                        className="rounded-sm border border-ink-700/10 bg-ink-50 px-4 py-3"
+                      >
+                        <div className="font-medium text-ink-900">{upload.fileName}</div>
+                        <div className="mt-1 text-xs text-ink-500">
+                          {new Date(upload.uploadedAt).toLocaleString("en-NZ", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })}
+                        </div>
+                        <div className="mt-3 flex gap-2">
+                          <button
+                            onClick={() => handlePreviewFile(upload.storagePath)}
+                            className="rounded-sm border border-ink-700/10 bg-white px-3 py-2 text-xs font-medium text-ink-900 transition-colors hover:bg-ink-50"
+                          >
+                            Open
+                          </button>
+                          <button
+                            onClick={() => handleRemoveFile(upload.id)}
+                            className="rounded-sm border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700 transition-colors hover:bg-red-100"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
 
                 {flashMessage && (
                   <div
                     className={`mt-4 rounded-sm px-4 py-3 text-sm ${
-                      upload
+                      uploadFiles.length > 0
                         ? "border border-emerald-200 bg-emerald-50 text-emerald-800"
                         : "border border-slate-200 bg-slate-50 text-slate-700"
                     }`}
@@ -237,6 +300,12 @@ export function ConsentDocumentPage({
                 <h2 className="text-lg font-semibold text-ink-900">Document status</h2>
                 <div className="mt-4 space-y-3 text-sm">
                   <div className="flex items-center justify-between rounded-sm bg-ink-50 px-4 py-3">
+                    <span className="text-ink-500">Submission package</span>
+                    <span className="font-medium text-ink-900">
+                      {submissionPackage?.title ?? "Unsubmitted"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-sm bg-ink-50 px-4 py-3">
                     <span className="text-ink-500">Completion</span>
                     <span
                       className={isCompleted ? "font-medium text-emerald-700" : "font-medium text-amber-700"}
@@ -246,21 +315,21 @@ export function ConsentDocumentPage({
                   </div>
                   <div className="flex items-center justify-between rounded-sm bg-ink-50 px-4 py-3">
                     <span className="text-ink-500">Upload</span>
-                    <span className={upload ? "font-medium text-sky-700" : "font-medium text-slate-600"}>
-                      {upload ? "Uploaded" : "Missing"}
+                    <span className={uploadFiles.length > 0 ? "font-medium text-sky-700" : "font-medium text-slate-600"}>
+                      {uploadFiles.length > 0 ? `${uploadFiles.length} file${uploadFiles.length === 1 ? "" : "s"}` : "Missing"}
                     </span>
                   </div>
                   <div className="rounded-sm bg-ink-50 px-4 py-3">
-                    <div className="text-ink-500">File</div>
+                    <div className="text-ink-500">Latest file</div>
                     <div className="mt-1 font-medium text-ink-900">
-                      {upload ? upload.fileName : "No file uploaded"}
+                      {latestUpload ? latestUpload.fileName : "No file uploaded"}
                     </div>
                   </div>
-                  {upload && (
+                  {latestUpload && (
                     <div className="rounded-sm bg-ink-50 px-4 py-3">
                       <div className="text-ink-500">Uploaded</div>
                       <div className="mt-1 font-medium text-ink-900">
-                        {new Date(upload.uploadedAt).toLocaleString("en-NZ", {
+                        {new Date(latestUpload.uploadedAt).toLocaleString("en-NZ", {
                           dateStyle: "medium",
                           timeStyle: "short",
                         })}
