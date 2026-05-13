@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from supabase import Client
 
@@ -23,6 +23,7 @@ from app.persistence import (
     resolve_reconciliation,
     update_letter_status,
 )
+from app.rate_limit import limiter
 
 router = APIRouter()
 reconciliation_router = APIRouter()
@@ -47,11 +48,10 @@ def _project_context(letter: dict[str, Any]) -> tuple[str, str, str]:
     return bca, "", ""
 
 
-@router.post("/{letter_id}", response_model=ClassifyResponse)
-async def classify_letter(
-    letter_id: str,
-    db: Client = Depends(get_db_for),
-) -> ClassifyResponse:
+async def _run_classify_letter(letter_id: str, db: Client) -> ClassifyResponse:
+    """Pipeline impl. Route handlers wrap this with rate-limit decorators;
+    other handlers (``classify_and_draft``) call it directly.
+    """
     letter = fetch_letter_canonical(db, letter_id)
     if not letter or not letter.get("canonical_json"):
         raise HTTPException(404, "letter not found or not extracted")
@@ -138,8 +138,20 @@ async def classify_letter(
     )
 
 
+@router.post("/{letter_id}", response_model=ClassifyResponse)
+@limiter.limit("10/minute")
+async def classify_letter(
+    request: Request,
+    letter_id: str,
+    db: Client = Depends(get_db_for),
+) -> ClassifyResponse:
+    return await _run_classify_letter(letter_id, db)
+
+
 @router.post("/{letter_id}/full")
+@limiter.limit("5/minute")
 async def classify_and_draft(
+    request: Request,
     letter_id: str,
     db: Client = Depends(get_db_for),
 ) -> dict[str, Any]:
@@ -150,10 +162,10 @@ async def classify_and_draft(
     so the user lands on a page with content, not empty columns.
     """
     from app.grounding.runner import ground_letter
-    from app.routes.drafts import generate_draft
+    from app.routes.drafts import _run_generate_draft
 
     grounding = ground_letter(db, letter_id)
-    classify_resp = await classify_letter(letter_id, db)
+    classify_resp = await _run_classify_letter(letter_id, db)
 
     items_rows = (
         db.table("rfi_items")
@@ -172,7 +184,7 @@ async def classify_and_draft(
         if not db_id:
             continue
         try:
-            await generate_draft(db_id, db)
+            await _run_generate_draft(db_id, db)
             drafted += 1
         except HTTPException as e:
             failed.append({"item_id": cls.rfi_item_id, "reason": e.detail or str(e)})

@@ -4,9 +4,12 @@ from dataclasses import asdict
 from datetime import UTC, datetime
 from typing import Literal
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
+from supabase import Client
 
+from app.auth import get_db
+from app.rate_limit import limiter
 from app.services.cost_calculator import calculate_consent_costs
 from app.services.duration_estimator import estimate_duration
 from app.services.forecast_summarizer import summarize_forecast
@@ -59,7 +62,12 @@ def resolve_council(lat: float, lon: float) -> str:
 
 
 @router.post("/forecast")
-async def forecast(payload: ForecastRequest) -> dict:
+@limiter.limit("20/minute")
+async def forecast(
+    request: Request,
+    payload: ForecastRequest,
+    _db: Client = Depends(get_db),
+) -> dict:
     council = resolve_council(payload.lat, payload.lon)
     mbie = scrape_mbie_data()
     bca_data = mbie.get(council) or mbie.get("Christchurch City")
@@ -111,6 +119,11 @@ class ForecastSummaryRequest(BaseModel):
 
 
 @router.post("/forecast/summary")
-async def forecast_summary(payload: ForecastSummaryRequest) -> dict:
+@limiter.limit("10/minute")
+async def forecast_summary(
+    request: Request,
+    payload: ForecastSummaryRequest,
+    _db: Client = Depends(get_db),
+) -> dict:
     summary, error = summarize_forecast(payload.model_dump(exclude_none=True))
     return {"summary": summary, "error": error}

@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 import Levenshtein
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from supabase import Client
 
@@ -21,6 +21,7 @@ from app.persistence import (
     update_response_edit,
     upsert_response,
 )
+from app.rate_limit import limiter
 from app.taxonomy import acceptable_solution_for
 
 router = APIRouter()
@@ -106,11 +107,7 @@ def _load_item_context(db: Client, item_id: str) -> dict[str, Any]:
     }
 
 
-@router.post("/{item_id}")
-async def generate_draft(
-    item_id: str,
-    db: Client = Depends(get_db_for),
-) -> dict[str, Any]:
+async def _run_generate_draft(item_id: str, db: Client) -> dict[str, Any]:
     ctx = _load_item_context(db, item_id)
     if not ctx["final"]:
         raise HTTPException(409, "item must be classified before drafting")
@@ -147,6 +144,16 @@ async def generate_draft(
         prompt_version=prompt_version,
     )
     return row
+
+
+@router.post("/{item_id}")
+@limiter.limit("20/minute")
+async def generate_draft(
+    request: Request,
+    item_id: str,
+    db: Client = Depends(get_db_for),
+) -> dict[str, Any]:
+    return await _run_generate_draft(item_id, db)
 
 
 @router.get("/{item_id}")

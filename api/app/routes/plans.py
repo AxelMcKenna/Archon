@@ -10,15 +10,17 @@ from __future__ import annotations
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import Response
 from supabase import Client
 
 from app.auth import get_db
 from app.plans.overlay import get_page_info, render_overlay_pdf, render_page
 from app.plans.stats import compute_bbox_stats
+from app.rate_limit import limiter
 from app.services.plan_pipeline import upload_and_analyse as run_pipeline
 from app.storage import PLANS_BUCKET, download, signed_url
+from app.utils.safe_filename import safe_filename
 
 router = APIRouter()
 
@@ -27,7 +29,9 @@ MAX_BYTES = 50 * 1024 * 1024
 
 
 @router.post("")
+@limiter.limit("10/minute")
 async def upload_and_analyse(
+    request: Request,
     file: UploadFile = File(...),
     project_id: UUID = Form(...),
     db: Client = Depends(get_db),
@@ -54,7 +58,7 @@ async def upload_and_analyse(
             db=db,
             project_id=str(project_id),
             project=proj,
-            filename=file.filename or "plan.pdf",
+            filename=safe_filename(file.filename, default="plan.pdf"),
             content_type=file.content_type,
             payload=payload,
         )

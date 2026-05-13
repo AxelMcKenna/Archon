@@ -4,8 +4,11 @@ import json
 from pathlib import Path
 from typing import Literal
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
+from supabase import Client
+
+from app.auth import get_db
 
 
 class ServiceConnections(BaseModel):
@@ -82,7 +85,10 @@ def _add_docs(target: dict[str, dict], docs: list[dict]) -> None:
 
 
 @router.post("", response_model=ResolveDocumentsResponse)
-async def resolve_documents(payload: ResolveDocumentsRequest) -> ResolveDocumentsResponse:
+async def resolve_documents(
+    payload: ResolveDocumentsRequest,
+    _db: Client = Depends(get_db),
+) -> ResolveDocumentsResponse:
     matched: dict[str, dict] = {}
 
     _add_docs(matched, RULES.get("baseline", []))

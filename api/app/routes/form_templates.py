@@ -2,8 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
+from supabase import Client
+
+from app.auth import get_db
 
 router = APIRouter()
 
@@ -14,7 +17,7 @@ FORM2_CANDIDATES = (
 
 
 @router.get("/form2")
-async def download_form2_template() -> FileResponse:
+async def download_form2_template(_db: Client = Depends(get_db)) -> FileResponse:
     for path in FORM2_CANDIDATES:
         if path.exists():
             return FileResponse(

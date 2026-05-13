@@ -4,14 +4,16 @@ from __future__ import annotations
 
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from supabase import Client
 
 from app.auth import get_db
 from app.extractors.markdown import render_letter
 from app.extractors.router import extract_document
 from app.persistence import insert_extraction_audit, insert_letter
+from app.rate_limit import limiter
 from app.storage import upload_rfi_original
+from app.utils.safe_filename import safe_filename
 
 router = APIRouter()
 
@@ -20,7 +22,9 @@ MAX_BYTES = 25 * 1024 * 1024
 
 
 @router.post("")
+@limiter.limit("10/minute")
 async def extract(
+    request: Request,
     file: UploadFile = File(...),
     project_id: UUID = Form(...),
     bca: str = Form(...),
@@ -37,7 +41,7 @@ async def extract(
         raise HTTPException(413, "file exceeds 25MB")
 
     letter_uuid = uuid4()
-    filename = file.filename or "rfi.pdf"
+    filename = safe_filename(file.filename, default="rfi.pdf")
     storage_path = upload_rfi_original(
         db,
         project_id=str(project_id),

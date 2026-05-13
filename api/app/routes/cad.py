@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import Response
 from pydantic import BaseModel
 from supabase import Client
@@ -17,6 +17,7 @@ from supabase import Client
 from app.auth import get_db
 from app.cad.cad_loader import load_dxf
 from app.cad.cad_render import list_views, render_view
+from app.rate_limit import limiter
 from app.services.cad_pipeline import (
     RevisionError,
     apply_revision,
@@ -25,6 +26,7 @@ from app.services.cad_pipeline import (
     upload_and_analyse as run_upload_pipeline,
 )
 from app.storage import CAD_BUCKET, download, signed_url
+from app.utils.safe_filename import safe_filename
 
 router = APIRouter()
 
@@ -33,7 +35,9 @@ MAX_BYTES = 50 * 1024 * 1024
 
 
 @router.post("")
+@limiter.limit("10/minute")
 async def upload_and_analyse_cad(
+    request: Request,
     file: UploadFile = File(...),
     project_id: UUID = Form(...),
     db: Client = Depends(get_db),
@@ -61,7 +65,7 @@ async def upload_and_analyse_cad(
             db=db,
             project_id=str(project_id),
             project=proj,
-            filename=file.filename or "drawing.dxf",
+            filename=safe_filename(file.filename, default="drawing.dxf"),
             payload=payload,
         )
     except Exception as e:

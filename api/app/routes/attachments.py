@@ -10,6 +10,7 @@ from supabase import Client
 from app.auth import get_db
 from app.persistence import insert_attachment
 from app.storage import upload_attachment
+from app.utils.safe_filename import safe_filename
 
 router = APIRouter()
 
@@ -49,11 +50,12 @@ async def upload_for_item(
         raise HTTPException(404, "item not found")
     project_id = res["rfi_letters"]["project_id"]
 
+    fname = safe_filename(file.filename, default="attachment")
     storage_path = upload_attachment(
         db,
         project_id=project_id,
         item_id=item_id,
-        filename=file.filename or "attachment",
+        filename=fname,
         content_type=file.content_type,
         data=payload,
     )
@@ -61,7 +63,7 @@ async def upload_for_item(
         db,
         rfi_item_id=item_id,
         project_id=None,
-        filename=file.filename or "attachment",
+        filename=fname,
         storage_path=storage_path,
         mime_type=file.content_type,
         size_bytes=len(payload),
