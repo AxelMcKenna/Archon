@@ -15,14 +15,20 @@ TAB_DESCRIPTIONS = {
         "cross-domain status. For status questions use get_project_workflow; "
         "for forecast/cost/timeline/risk questions use get_forecast."
     ),
-    "application-prep": "Application documents the user is gathering before lodgement (table: attachments).",
+    "application-prep": (
+        "Application documents the user is gathering before lodgement "
+        "(table: attachments)."
+    ),
     "drawings": "Building plan PDFs uploaded for AI flag analysis (table: plan_uploads).",
     "rfis": "Request-for-info letters from the BCA (table: rfi_letters / rfi_items).",
     "processing": "Internal workflow / processing status.",
     "inspections": "Site inspection schedule + outcomes (table: project_inspections).",
     "documents": "All project attachments (table: attachments).",
     "ccc": "Code Compliance Certificate forms + supporting certificates.",
-    "consent-assessment": "Property/consent questionnaire — produces the forecast_context payload that get_forecast consumes.",
+    "consent-assessment": (
+        "Property/consent questionnaire — produces the forecast_context "
+        "payload that get_forecast consumes."
+    ),
 }
 
 

@@ -12,6 +12,7 @@ on:
     paths:
       - "api/prompts/plan_analyser_*.md"
       - "api/prompts/plan_verification_*.md"
+      - "api/app/plans/**"
       - "api/app/plan_analyzer.py"
       - "api/app/extractors/plan_text.py"
       - "api/app/extractors/doc_rules.py"

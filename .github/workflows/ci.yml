@@ -1,0 +1,61 @@
+# Per-PR checks: api tests, agent lint.
+#
+# Lint is not enforced on api yet — it has a pre-existing backlog
+# (~128 ruff violations) and would block every PR until that's cleaned
+# up in a dedicated pass. The agent service is ruff-clean and enforced.
+
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  api:
+    name: api · pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install api deps
+        working-directory: api
+        run: uv sync --frozen
+
+      - name: Run tests
+        working-directory: api
+        # test_classification_accuracy is gated by ATLAS_RUN_AI=1 (costs
+        # Anthropic credits); it skips itself without the env var.
+        run: uv run pytest --no-header -q --ignore=tests/test_classification_accuracy.py
+
+  agent:
+    name: agent · ruff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install agent deps
+        working-directory: agent
+        run: uv sync --frozen
+
+      - name: Ruff
+        working-directory: agent
+        run: uv run ruff check .
+
+      - name: Import smoke test
+        working-directory: agent
+        run: uv run python -c "from app.main import app; from app.agent_loop import run_agent; print('ok')"
