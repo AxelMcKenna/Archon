@@ -10,7 +10,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.11.12 /uv /usr/local/bin/uv
 
 WORKDIR /app
 
-# Build:  docker build -t consentiq-agent:latest -f agent/Dockerfile .
+# Build:  docker build -t atlas-agent:latest -f agent/Dockerfile .
 COPY agent/pyproject.toml ./
 RUN uv sync --no-install-project --no-dev
 

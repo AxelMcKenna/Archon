@@ -1,4 +1,4 @@
-# Synthetic RFI Corpus — ConsentIQ
+# Synthetic RFI Corpus — ATLAS
 
 **Purpose**: Bootstrap classifier + draft-response training before real RFI samples arrive from design partners.
 

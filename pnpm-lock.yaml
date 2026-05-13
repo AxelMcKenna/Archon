@@ -16,7 +16,7 @@ importers:
 
   web:
     dependencies:
-      '@consentiq/shared':
+      '@atlas/shared':
         specifier: workspace:*
         version: link:../shared
       '@supabase/supabase-js':

@@ -92,8 +92,8 @@ def call_openrouter_tool(
         "Content-Type": "application/json",
         # OpenRouter asks for a referer/title for usage analytics; harmless
         # but useful when reading their dashboard.
-        "HTTP-Referer": settings.openrouter_referer or "https://consentiq.local",
-        "X-Title": "ConsentIQ",
+        "HTTP-Referer": settings.openrouter_referer or "https://atlas.local",
+        "X-Title": "ATLAS",
     }
 
     with httpx.Client(timeout=120.0) as client:

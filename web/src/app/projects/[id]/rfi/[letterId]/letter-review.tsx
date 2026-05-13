@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { apiFetch, apiUpload } from "@/lib/api";
-import { taxonomy } from "@consentiq/shared";
-import type { ExtractedEntities } from "@consentiq/shared";
+import { taxonomy } from "@atlas/shared";
+import type { ExtractedEntities } from "@atlas/shared";
 import { AiThinking, AiBadge } from "@/components/ai-thinking";
 
 type ReconLog = {

@@ -3,8 +3,8 @@ services:
     build:
       context: .
       dockerfile: api/Dockerfile
-    image: consentiq-api:latest
-    container_name: consentiq-api
+    image: atlas-api:latest
+    container_name: atlas-api
     restart: unless-stopped
     env_file:
       - api/.env
@@ -15,8 +15,8 @@ services:
     build:
       context: .
       dockerfile: agent/Dockerfile
-    image: consentiq-agent:latest
-    container_name: consentiq-agent
+    image: atlas-agent:latest
+    container_name: atlas-agent
     restart: unless-stopped
     env_file:
       - agent/.env

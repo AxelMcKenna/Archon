@@ -16,7 +16,7 @@ WORKDIR /app
 
 # Build context must be the repo root so we can pull in `shared/` (used by
 # app/taxonomy.py via Path(__file__).parent.parent.parent / "shared").
-# Build:  docker build -t consentiq-api:latest -f api/Dockerfile .
+# Build:  docker build -t atlas-api:latest -f api/Dockerfile .
 
 COPY api/pyproject.toml api/uv.lock api/.python-version* ./
 RUN uv sync --frozen --no-install-project --no-dev

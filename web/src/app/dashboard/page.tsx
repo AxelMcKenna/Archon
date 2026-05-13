@@ -9,7 +9,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { getSupabaseServer } from "@/lib/supabase/server";
-import { taxonomy } from "@consentiq/shared";
+import { taxonomy } from "@atlas/shared";
 
 export const dynamic = "force-dynamic";
 

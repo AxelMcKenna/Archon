@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { API_BASE, apiFetch } from "@/lib/api";
-import { taxonomy } from "@consentiq/shared";
+import { taxonomy } from "@atlas/shared";
 
 type Confidence = "high" | "medium" | "low";
 

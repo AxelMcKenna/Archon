@@ -1,4 +1,4 @@
-project_id = "consentiq-rfi"
+project_id = "atlas-rfi"
 
 [api]
 enabled = true

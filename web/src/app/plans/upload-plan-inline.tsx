@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiUpload } from "@/lib/api";
-import { taxonomy } from "@consentiq/shared";
+import { taxonomy } from "@atlas/shared";
 import { AiThinking } from "@/components/ai-thinking";
 
 type Project = { id: string; address: string; bca: string; project_type: string };

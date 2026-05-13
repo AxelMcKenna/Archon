@@ -1,4 +1,4 @@
-import type { ProjectTypeId } from "@consentiq/shared";
+import type { ProjectTypeId } from "@atlas/shared";
 
 export type InspectionStatus = "Upcoming" | "Not started";
 

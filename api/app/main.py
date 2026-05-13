@@ -18,19 +18,19 @@ from app.routes import letters as letters_routes
 from app.routes import plans as plans_routes
 from app.routes import risk as risk_routes
 
-app = FastAPI(title="ConsentIQ RFI API", version="0.1.0")
+app = FastAPI(title="ATLAS RFI API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "https://consentiq-web.vercel.app",
+        "https://atlas-web.vercel.app",
     ],
     allow_origin_regex=(
         r"http://(localhost|127\.0\.0\.1)(:\d+)?"
-        r"|https://consentiq-web-[a-z0-9-]+-axel-mckennas-projects\.vercel\.app"
-        r"|https://consentiq-[a-z0-9]+-axel-mckennas-projects\.vercel\.app"
+        r"|https://atlas-web-[a-z0-9-]+-axel-mckennas-projects\.vercel\.app"
+        r"|https://atlas-[a-z0-9]+-axel-mckennas-projects\.vercel\.app"
     ),
     allow_credentials=True,
     allow_methods=["*"],

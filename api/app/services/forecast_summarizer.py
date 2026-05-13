@@ -50,8 +50,8 @@ def summarize_forecast(forecast: dict[str, Any]) -> tuple[str | None, str | None
     headers = {
         "Authorization": f"Bearer {settings.openrouter_api_key}",
         "Content-Type": "application/json",
-        "HTTP-Referer": settings.openrouter_referer or "https://consentiq.local",
-        "X-Title": "ConsentIQ",
+        "HTTP-Referer": settings.openrouter_referer or "https://atlas.local",
+        "X-Title": "ATLAS",
     }
 
     try:

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://consentiq.nz/schema/zone_overlay/1.0",
+  "$id": "https://atlas.nz/schema/zone_overlay/1.0",
   "title": "Zone and Overlay Query Result",
   "description": "Result from querying GCSP FeatureServer for zone and overlay information at a given NZTM2000 coordinate",
   "type": "object",

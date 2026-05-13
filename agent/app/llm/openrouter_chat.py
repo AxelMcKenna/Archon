@@ -52,8 +52,8 @@ async def stream_chat(
         "Authorization": f"Bearer {settings.openrouter_api_key}",
         "Content-Type": "application/json",
         "Accept": "text/event-stream",
-        "HTTP-Referer": settings.openrouter_referer or "https://consentiq.local",
-        "X-Title": "ConsentIQ-Agent",
+        "HTTP-Referer": settings.openrouter_referer or "https://atlas.local",
+        "X-Title": "ATLAS-Agent",
     }
 
     # Accumulators across deltas in a single response.

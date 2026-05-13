@@ -42,7 +42,7 @@ export default function PrivacyPage() {
         <li>Correction — fix anything that's wrong.</li>
         <li>Deletion — delete your account and all associated data.</li>
       </ul>
-      <p className="text-sm mt-2">Email <a href="mailto:privacy@consentiq.nz" className="underline">privacy@consentiq.nz</a> for any of the above.</p>
+      <p className="text-sm mt-2">Email <a href="mailto:privacy@atlas.nz" className="underline">privacy@atlas.nz</a> for any of the above.</p>
     </article>
   );
 }

@@ -41,7 +41,7 @@ async def geocode_address(address: str, city: str = "", postalcode: str = "") ->
     """
     # Nominatim requires proper User-Agent and respects rate limiting
     headers = {
-        "User-Agent": "ConsentIQ/1.0 (https://consentiq.nz)",
+        "User-Agent": "ATLAS/1.0 (https://atlas.nz)",
     }
     
     address = address.strip()
@@ -164,7 +164,7 @@ async def suggest_addresses(query: str, limit: int = 6) -> list[dict]:
         return []
 
     headers = {
-        "User-Agent": "ConsentIQ/1.0 (https://consentiq.nz)",
+        "User-Agent": "ATLAS/1.0 (https://atlas.nz)",
     }
     params = {
         "q": query,

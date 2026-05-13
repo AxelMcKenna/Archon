@@ -1,5 +1,5 @@
 {
-  "name": "@consentiq/web",
+  "name": "@atlas/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,7 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@consentiq/shared": "workspace:*",
+    "@atlas/shared": "workspace:*",
     "@supabase/supabase-js": "^2.46.1",
     "archiver": "^7.0.1",
     "clsx": "^2.1.1",

@@ -36,7 +36,7 @@ function hydrateEnvFromRoot(rootDir) {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@consentiq/shared"],
+  transpilePackages: ["@atlas/shared"],
   typedRoutes: true,
   outputFileTracingRoot: monorepoRoot,
   experimental: {

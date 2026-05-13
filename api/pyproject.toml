@@ -1,7 +1,7 @@
 [project]
-name = "consentiq-api"
+name = "atlas-api"
 version = "0.1.0"
-description = "ConsentIQ RFI module — FastAPI backend"
+description = "ATLAS RFI module — FastAPI backend"
 requires-python = ">=3.12"
 dependencies = [
   "fastapi>=0.115",
