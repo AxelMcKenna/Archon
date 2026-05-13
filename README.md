@@ -1,30 +1,42 @@
-# ConsentIQ — RFI Module
+# ConsentIQ
 
-Canterbury BCA RFI ingestion, two-pronged classification, and response drafting.
+![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38B2AC?logo=tailwind-css&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![uv](https://img.shields.io/badge/uv-package%20mgr-DE5FE9)
+![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20Auth-3ECF8E?logo=supabase&logoColor=white)
+![Gemini](https://img.shields.io/badge/Gemini-2.5%20Flash%20%2B%20Pro-4285F4?logo=google&logoColor=white)
+![OpenRouter](https://img.shields.io/badge/OpenRouter-vision-7C3AED)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![Vercel](https://img.shields.io/badge/Web-Vercel-000?logo=vercel&logoColor=white)
+![Fly.io](https://img.shields.io/badge/API-Fly.io-7B16FF?logo=flydotio&logoColor=white)
 
-## Shared scope
+Canterbury BCA RFI ingestion, two-pronged classification, response drafting, and a pre-lodgement plan analyser with a conversational agent.
 
-- Councils:
-  - Christchurch City
-  - Selwyn
-  - Waimakariri
-## Saasathon
+Councils in scope: Christchurch City, Selwyn, Waimakariri.
 
 ## Structure
 
 ```text
-/web        Next.js 15 app (Vercel)
-/api        FastAPI app (Fly.io)
+/web        Next.js 15 app (App Router), proxies API + agent calls via route handlers
+/api        FastAPI app — RFI pipeline, plan overlay, CAD rendering
+/agent      FastAPI app — conversational agent (tool-use loop, Supabase-backed conversations)
 /supabase   Migrations, RLS, seed
 /shared     Canonical JSON schema + taxonomies (source of truth)
+/eval       Evaluation harnesses (e.g. plan-flagger synthetic suite)
+/docs       Design notes
 ```
 
 ## Stack
 
-- Frontend: Next.js (App Router) + Tailwind
-- Backend: FastAPI (Python 3.12, uv)
+- Frontend: Next.js 15 (App Router) + Tailwind
+- Backend: FastAPI (Python 3.12, uv) — two services: `api` (port 8000) and `agent` (port 8001)
 - DB / Auth / Storage: Supabase
-- LLM: Gemini 2.5 Flash + 3.1 Pro (direct) and any vision model via OpenRouter; tool-use across both
+- LLM: Gemini 2.5 Flash + Pro (direct) and vision models via OpenRouter; tool-use across both
+- CAD: ezdxf with `fonts-dejavu-core` for MTEXT rendering
 
 ## Dev
 
@@ -32,15 +44,29 @@ Canterbury BCA RFI ingestion, two-pronged classification, and response drafting.
 # Web
 cd web && pnpm install && pnpm dev
 
-# API
+# API (port 8000)
 cd api && uv sync && uv run uvicorn app.main:app --reload
+
+# Agent (port 8001)
+cd agent && uv sync && uv run uvicorn app.main:app --reload --port 8001
 
 # Supabase (local)
 cd supabase && supabase start
 ```
 
-See PRD for full scope.
+Web calls `api` and `agent` through Next.js route handlers, so only the web origin needs to be public.
+
+## Deploy
+
+Root `docker-compose.yml` builds and runs both backends:
+
+```bash
+docker compose up -d --build
+```
+
+Each service reads its own `.env` (`api/.env`, `agent/.env`).
 
 ## Docs
 
 - [`docs/plan-overlay.md`](docs/plan-overlay.md) — pre-lodgement plan analyser, bbox grounding pipeline, overlay rendering, inline UI, known limitations.
+- [`eval/plan-flagger/README.md`](eval/plan-flagger/README.md) — plan-flagger evaluation harness.
