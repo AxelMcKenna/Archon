@@ -8,8 +8,8 @@
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![uv](https://img.shields.io/badge/uv-package%20mgr-DE5FE9)
 ![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20Auth-3ECF8E?logo=supabase&logoColor=white)
-![Gemini](https://img.shields.io/badge/Gemini-3.1%20Pro-4285F4?logo=google&logoColor=white)
-![Claude](https://img.shields.io/badge/Claude-Opus%204.7-D97757?logo=anthropic&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT--5-412991?logo=openai&logoColor=white)
+![Anthropic](https://img.shields.io/badge/Anthropic-Claude%20Opus%204.7-D97757?logo=anthropic&logoColor=white)
 ![OpenRouter](https://img.shields.io/badge/OpenRouter-vision-7C3AED)
 ![Google Cloud](https://img.shields.io/badge/Google%20Cloud-API-4285F4?logo=googlecloud&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
@@ -36,7 +36,7 @@ Councils in scope: Christchurch City, Selwyn, Waimakariri.
 - Frontend: Next.js 15 (App Router) + Tailwind
 - Backend: FastAPI (Python 3.12, uv) — two services: `api` (port 8000) and `agent` (port 8001), hosted on Google Cloud
 - DB / Auth / Storage: Supabase
-- LLM: Gemini 3.1 Pro (direct) for the main pipeline, Claude Opus 4.7 for orchestration, and vision models via OpenRouter; tool-use across all providers
+- LLM: OpenAI (GPT-5) and Anthropic (Claude Opus 4.7) for the main pipeline and orchestration, with additional vision models via OpenRouter; tool-use across all providers
 - CAD: ezdxf with `fonts-dejavu-core` for MTEXT rendering
 
 ## Dev
