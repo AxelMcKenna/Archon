@@ -180,6 +180,103 @@ def insert_classification_results(
     return log.data[0]["id"]
 
 
+def replace_letter_classifications(
+    client: Client,
+    *,
+    letter_id: str,
+    item_db_ids: list[str],
+    finals_by_item: dict[str, FinalClassification],
+) -> dict[str, str]:
+    """Idempotent batched replacement of a letter's classifications.
+
+    Three round-trips total (vs. 3N for the per-item path):
+
+      1. DELETE classifications for every item in this letter.
+      2. INSERT all classifications rows (3 prongs × N items) in one call.
+      3. INSERT all reconciliation_log rows (1 × N items) in one call.
+
+    Returns {rfi_item_id: reconciliation_log_id}.
+    """
+    if not item_db_ids:
+        return {}
+
+    client.table("classifications").delete().in_("rfi_item_id", item_db_ids).execute()
+
+    classification_rows: list[dict[str, Any]] = []
+    log_rows: list[dict[str, Any]] = []
+
+    for db_item_id in item_db_ids:
+        final = finals_by_item.get(db_item_id)
+        if final is None:
+            continue
+        rules = final.rules_output
+        ai = final.ai_output
+        rule_ids = [h.rule_id for h in rules.hits]
+        rules_primary = rules.primary_category or "documentation:other"
+        rules_severity = rules.hits[0].severity if rules.hits else "must_resolve"
+        rules_confidence = rules.hits[0].confidence if rules.hits else "low"
+
+        classification_rows.extend(
+            [
+                {
+                    "rfi_item_id": db_item_id,
+                    "prong": "rules",
+                    "primary_category": rules_primary,
+                    "severity": rules_severity,
+                    "confidence": rules_confidence,
+                    "rule_ids": rule_ids,
+                    "rules_version": rules.rules_version,
+                },
+                {
+                    "rfi_item_id": db_item_id,
+                    "prong": "ai",
+                    "primary_category": ai.primary_category,
+                    "secondary_category": ai.secondary_category,
+                    "severity": ai.severity,
+                    "confidence": ai.confidence,
+                    "reasoning": ai.reasoning,
+                    "prompt_version": ai.prompt_version,
+                },
+                {
+                    "rfi_item_id": db_item_id,
+                    "prong": "final",
+                    "primary_category": final.primary_category,
+                    "secondary_category": final.secondary_category,
+                    "severity": final.severity,
+                    "confidence": final.confidence,
+                    "reasoning": ai.reasoning,
+                    "rules_version": rules.rules_version,
+                    "prompt_version": ai.prompt_version,
+                },
+            ]
+        )
+        log_rows.append(
+            {
+                "rfi_item_id": db_item_id,
+                "state": final.state,
+                "rules_output": rules.model_dump(mode="json"),
+                "ai_output": ai.model_dump(mode="json"),
+                "final_category": final.primary_category,
+                "final_severity": final.severity,
+                "rules_version": rules.rules_version,
+                "prompt_version": ai.prompt_version,
+            }
+        )
+
+    if classification_rows:
+        client.table("classifications").insert(classification_rows).execute()
+
+    log_id_by_item: dict[str, str] = {}
+    if log_rows:
+        log_resp = client.table("reconciliation_log").insert(log_rows).execute()
+        for row in log_resp.data or []:
+            item_id = row.get("rfi_item_id")
+            row_id = row.get("id")
+            if item_id and row_id:
+                log_id_by_item[item_id] = row_id
+    return log_id_by_item
+
+
 def fetch_letter_canonical(client: Client, letter_id: str) -> dict[str, Any] | None:
     res = (
         client.table("rfi_letters")

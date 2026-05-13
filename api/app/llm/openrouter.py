@@ -4,10 +4,19 @@ OpenRouter speaks the OpenAI Chat Completions schema, so we can talk to
 GPT-5 vision, Qwen2.5-VL, Llama 4 vision, and Claude/Gemini variants
 with one HTTP client. We always force a single tool call so the parsed
 payload shape stays identical to the other providers.
+
+Two entrypoints:
+
+  - ``call_openrouter_tool``        — sync (kept for sync callers like
+    plan_analyzer's ThreadPoolExecutor pool).
+  - ``call_openrouter_tool_async``  — awaitable wrapper for use from
+    FastAPI handlers; runs the sync function on a worker thread so the
+    event loop stays free for other requests.
 """
 
 from __future__ import annotations
 
+import asyncio
 import base64
 import json
 from dataclasses import dataclass
@@ -139,4 +148,31 @@ def call_openrouter_tool(
         input_tokens=int(usage.get("prompt_tokens", 0) or 0),
         output_tokens=int(usage.get("completion_tokens", 0) or 0),
         model=str(data.get("model") or model_id),
+    )
+
+
+async def call_openrouter_tool_async(
+    *,
+    images: list[bytes],
+    prompt: str,
+    tool_name: str,
+    tool_description: str,
+    tool_parameters: dict[str, Any],
+    image_captions: list[str] | None = None,
+    max_output_tokens: int = 6000,
+    model: str | None = None,
+    temperature: float = 0.0,
+) -> OpenRouterResult:
+    """Awaitable variant. Offloads the sync call onto a worker thread."""
+    return await asyncio.to_thread(
+        call_openrouter_tool,
+        images=images,
+        prompt=prompt,
+        tool_name=tool_name,
+        tool_description=tool_description,
+        tool_parameters=tool_parameters,
+        image_captions=image_captions,
+        max_output_tokens=max_output_tokens,
+        model=model,
+        temperature=temperature,
     )

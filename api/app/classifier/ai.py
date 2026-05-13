@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import re
 from functools import lru_cache
@@ -130,3 +131,30 @@ def classify(
     )
     _AI_CACHE[key] = pred
     return pred
+
+
+async def classify_async(
+    item: RfiItem,
+    *,
+    bca: str,
+    project_type: str,
+    project_description: str,
+) -> AiPrediction:
+    """Awaitable variant — runs the sync classify on a worker thread.
+
+    Lets handlers ``asyncio.gather`` many per-item classifications in
+    parallel without blocking the FastAPI event loop on each LLM call.
+    The cache is shared with the sync ``classify``, so a cache hit
+    returns immediately without entering the threadpool.
+    """
+    template, version, _hash = _load_prompt(ACTIVE_PROMPT)
+    key = _cache_key(item, bca, project_type, version)
+    if key in _AI_CACHE:
+        return _AI_CACHE[key]
+    return await asyncio.to_thread(
+        classify,
+        item,
+        bca=bca,
+        project_type=project_type,
+        project_description=project_description,
+    )

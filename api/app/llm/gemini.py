@@ -8,6 +8,7 @@ caller code stays identical to the Claude path.
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 from typing import Any
 
@@ -133,4 +134,31 @@ def call_gemini_tool(
         payload=payload,
         input_tokens=int(getattr(usage, "prompt_token_count", 0) or 0),
         output_tokens=int(getattr(usage, "candidates_token_count", 0) or 0),
+    )
+
+
+async def call_gemini_tool_async(
+    *,
+    images: list[bytes],
+    prompt: str,
+    tool_name: str,
+    tool_description: str,
+    tool_parameters: dict[str, Any],
+    image_captions: list[str] | None = None,
+    max_output_tokens: int = 6000,
+    model: str | None = None,
+    temperature: float = 0.0,
+) -> GeminiResult:
+    """Awaitable variant. Offloads the sync call onto a worker thread."""
+    return await asyncio.to_thread(
+        call_gemini_tool,
+        images=images,
+        prompt=prompt,
+        tool_name=tool_name,
+        tool_description=tool_description,
+        tool_parameters=tool_parameters,
+        image_captions=image_captions,
+        max_output_tokens=max_output_tokens,
+        model=model,
+        temperature=temperature,
     )

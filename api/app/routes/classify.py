@@ -6,6 +6,7 @@ reconciles, and persists into classifications + reconciliation_log.
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -18,7 +19,7 @@ from app.models import CanonicalRfi, FinalClassification
 from app.persistence import (
     fetch_letter_canonical,
     fetch_reconciliation_for_letter,
-    insert_classification_results,
+    replace_letter_classifications,
     resolve_reconciliation,
     update_letter_status,
 )
@@ -83,27 +84,49 @@ async def classify_letter(
     )
     db_id_by_item = {r["item_id"]: r["id"] for r in items_rows}
 
-    finals: list[FinalClassification] = []
-    prompt_version: str | None = None
+    items = list(canonical.rfi_letter.items)
 
-    for item in canonical.rfi_letter.items:
-        rules_pred = rules.evaluate(item, _RULESET)
-        ai_pred = ai.classify(
-            item,
-            bca=bca,
-            project_type=project_type,
-            project_description=project_description,
+    # Rules prong is pure-python; run all up front.
+    rules_preds = [rules.evaluate(item, _RULESET) for item in items]
+
+    # AI prong is the slow part — gather all calls so they run concurrently
+    # on the threadpool instead of serialising N×(10-60s) round-trips.
+    ai_preds = await asyncio.gather(
+        *(
+            ai.classify_async(
+                item,
+                bca=bca,
+                project_type=project_type,
+                project_description=project_description,
+            )
+            for item in items
         )
-        prompt_version = ai_pred.prompt_version
-        final = reconciler.reconcile(item.item_id, rules_pred, ai_pred)
-        finals.append(final)
+    )
 
+    prompt_version = ai_preds[0].prompt_version if ai_preds else None
+
+    finals: list[FinalClassification] = [
+        reconciler.reconcile(item.item_id, rules_pred, ai_pred)
+        for item, rules_pred, ai_pred in zip(items, rules_preds, ai_preds, strict=True)
+    ]
+
+    # Batch the DB work: one DELETE + one bulk INSERT for classifications
+    # + one bulk INSERT for reconciliation_log (3 round-trips, not 3N).
+    finals_by_db_id: dict[str, FinalClassification] = {}
+    ordered_db_ids: list[str] = []
+    for item, final in zip(items, finals, strict=True):
         db_item_id = db_id_by_item.get(item.item_id)
         if db_item_id is None:
             continue
-        # Replace any prior classifications for this item (idempotent re-run).
-        db.table("classifications").delete().eq("rfi_item_id", db_item_id).execute()
-        insert_classification_results(db, rfi_item_id=db_item_id, final=final)
+        ordered_db_ids.append(db_item_id)
+        finals_by_db_id[db_item_id] = final
+
+    replace_letter_classifications(
+        db,
+        letter_id=letter_id,
+        item_db_ids=ordered_db_ids,
+        finals_by_item=finals_by_db_id,
+    )
 
     update_letter_status(db, letter_id, "classified")
 
