@@ -2,11 +2,8 @@
 
 ![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38B2AC?logo=tailwind-css&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
-![uv](https://img.shields.io/badge/uv-package%20mgr-DE5FE9)
 ![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20Auth-3ECF8E?logo=supabase&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/OpenAI-GPT--5-412991?logo=openai&logoColor=white)
 ![Anthropic](https://img.shields.io/badge/Anthropic-Claude%20Opus%204.7-D97757?logo=anthropic&logoColor=white)
@@ -69,5 +66,6 @@ Each service reads its own `.env` (`api/.env`, `agent/.env`).
 
 ## Docs
 
+- [`docs/architecture.md`](docs/architecture.md) — system + AI pipeline diagrams (Mermaid).
 - [`docs/plan-overlay.md`](docs/plan-overlay.md) — pre-lodgement plan analyser, bbox grounding pipeline, overlay rendering, inline UI, known limitations.
 - [`eval/plan-flagger/README.md`](eval/plan-flagger/README.md) — plan-flagger evaluation harness.
