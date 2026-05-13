@@ -15,7 +15,7 @@ from fastapi.responses import Response
 from supabase import Client
 
 from app.auth import get_db
-from app.plan_overlay import get_page_info, render_overlay_pdf, render_page
+from app.plans.overlay import get_page_info, render_overlay_pdf, render_page
 from app.plans.stats import compute_bbox_stats
 from app.services.plan_pipeline import upload_and_analyse as run_pipeline
 from app.storage import PLANS_BUCKET, download, signed_url

@@ -1,11 +1,13 @@
-"""CAD (DXF) upload, analyse, and revision routes."""
+"""CAD (DXF) upload, analyse, and revision routes.
+
+Thin HTTP layer. Pipeline orchestration lives in
+``app.services.cad_pipeline``.
+"""
 
 from __future__ import annotations
 
-import hashlib
-import time
 from typing import Any
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
@@ -13,11 +15,14 @@ from pydantic import BaseModel
 from supabase import Client
 
 from app.auth import get_db
-from app.cad.cad_analyzer import CAD_ANALYSIS_VERSION, analyse_cad
 from app.cad.cad_loader import load_dxf
-from app.cad.cad_ops import apply_ops, parse_ops
 from app.cad.cad_render import list_views, render_view
-from app.storage import CAD_BUCKET, download, signed_url, upload_cad
+from app.services.cad_pipeline import (
+    RevisionError,
+    apply_revision,
+    upload_and_analyse as run_upload_pipeline,
+)
+from app.storage import CAD_BUCKET, download, signed_url
 
 router = APIRouter()
 
@@ -49,58 +54,23 @@ async def upload_and_analyse_cad(
     if not proj:
         raise HTTPException(404, "project not found")
 
-    cad_id = str(uuid4())
-    storage_path = upload_cad(
-        db,
-        project_id=str(project_id),
-        cad_id=cad_id,
-        filename=file.filename or "drawing.dxf",
-        content_type="application/dxf",
-        data=payload,
-    )
-    content_hash = hashlib.sha256(payload).hexdigest()
-
-    db.table("cad_uploads").insert(
-        {
-            "id": cad_id,
-            "project_id": str(project_id),
-            "filename": file.filename or "drawing.dxf",
-            "storage_path": storage_path,
-            "size_bytes": len(payload),
-            "content_hash": content_hash,
-            "analyser_version": CAD_ANALYSIS_VERSION,
-            "status": "analysing",
-        }
-    ).execute()
-
     try:
-        analysis, prompt_version, metrics, extras = analyse_cad(
-            dxf_bytes=payload,
-            bca=proj["bca"],
-            project_type=proj["project_type"],
-            project_description=proj.get("description") or "",
+        result = run_upload_pipeline(
+            db=db,
+            project_id=str(project_id),
+            project=proj,
+            filename=file.filename or "drawing.dxf",
+            payload=payload,
         )
     except Exception as e:
-        db.table("cad_uploads").update(
-            {"status": "failed", "error": str(e)[:500]}
-        ).eq("id", cad_id).execute()
         raise HTTPException(500, f"analysis failed: {e}") from e
 
-    db.table("cad_uploads").update(
-        {
-            "status": "analysed",
-            "analysis": analysis,
-            "prompt_version": prompt_version,
-            "processing_ms": metrics.processing_ms,
-        }
-    ).eq("id", cad_id).execute()
-
     return {
-        "cad_id": cad_id,
-        "flags_count": len(analysis.get("flags", [])),
-        "entity_count": analysis.get("entity_count", 0),
-        "views": analysis.get("views", []),
-        "processing_ms": metrics.processing_ms,
+        "cad_id": result.cad_id,
+        "flags_count": result.flags_count,
+        "entity_count": result.entity_count,
+        "views": result.views,
+        "processing_ms": result.processing_ms,
     }
 
 
@@ -109,7 +79,7 @@ def _load_for_render(
 ) -> tuple[dict[str, Any], bytes]:
     row = (
         db.table("cad_uploads")
-        .select("storage_path, analysis, status, filename")
+        .select("storage_path, analysis, status, filename, project_id")
         .eq("id", cad_id)
         .maybe_single()
         .execute()
@@ -176,8 +146,6 @@ async def cad_view_image(
     return Response(
         content=png,
         media_type="image/png",
-        # No long cache when serving the revised view — it changes on every
-        # Apply. Cache the original aggressively (browser already does).
         headers={
             "Cache-Control": "no-store" if revised else "private, max-age=3600"
         },
@@ -211,79 +179,22 @@ async def create_revision(
     body: RevisionRequest,
     db: Client = Depends(get_db),
 ) -> dict[str, Any]:
-    """Apply approved proposed_change ops, write a new DXF, return its URL.
-
-    Each new revision is built on top of the most recent prior revision
-    (or the original upload if none yet) so successive Apply clicks
-    accumulate rather than each rebuilding from the original.
-    """
+    """Apply approved proposed_change ops, write a new DXF, return its URL."""
     row, original_bytes = _load_for_render(db, cad_id)
-    flags = (row.get("analysis") or {}).get("flags") or []
-
-    prior = (
-        db.table("cad_revisions")
-        .select("dxf_path")
-        .eq("cad_id", cad_id)
-        .order("created_at", desc=True)
-        .limit(1)
-        .execute()
-        .data
-    )
-    if prior:
-        file_bytes = download(db, bucket=CAD_BUCKET, path=prior[0]["dxf_path"])
-    else:
-        file_bytes = original_bytes
-
-    raw_ops: list[dict[str, Any]] = []
-    applied_log: list[dict[str, Any]] = []
-    for idx in body.approved_flag_indices:
-        if idx < 0 or idx >= len(flags):
-            raise HTTPException(400, f"flag index {idx} out of range")
-        flag = flags[idx]
-        pc = flag.get("proposed_change")
-        if not pc:
-            raise HTTPException(400, f"flag {idx} has no proposed_change")
-        raw_ops.append(pc)
-        applied_log.append(
-            {
-                "flag_index": idx,
-                "rule_cited": flag.get("rule_cited"),
-                "rationale": flag.get("rationale"),
-                "op": pc,
-            }
-        )
-
     try:
-        ops = parse_ops(raw_ops)
-        revised = apply_ops(file_bytes, ops)
-    except Exception as e:
-        raise HTTPException(400, f"failed to apply ops: {e}") from e
-
-    rev_id = str(uuid4())
-    base = (row.get("filename") or "drawing.dxf").rsplit(".", 1)[0]
-    rev_filename = f"{base}-rev-{rev_id[:8]}.dxf"
-    rev_path = upload_cad(
-        db,
-        project_id=str(row.get("project_id") or ""),
-        cad_id=cad_id,
-        filename=rev_filename,
-        content_type="application/dxf",
-        data=revised,
-    )
-
-    db.table("cad_revisions").insert(
-        {
-            "id": rev_id,
-            "cad_id": cad_id,
-            "applied_ops": applied_log,
-            "dxf_path": rev_path,
-        }
-    ).execute()
-
+        result = apply_revision(
+            db=db,
+            cad_id=cad_id,
+            cad_row=row,
+            original_bytes=original_bytes,
+            approved_flag_indices=body.approved_flag_indices,
+        )
+    except RevisionError as e:
+        raise HTTPException(400, str(e)) from e
     return {
-        "revision_id": rev_id,
-        "applied_count": len(applied_log),
-        "url": signed_url(db, bucket=CAD_BUCKET, path=rev_path),
+        "revision_id": result.revision_id,
+        "applied_count": result.applied_count,
+        "url": result.url,
     }
 
 

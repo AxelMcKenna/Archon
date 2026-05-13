@@ -21,9 +21,9 @@ from app.config import get_settings
 from app.extractors.doc_rules import run_doc_rules
 from app.extractors.metrics import Metrics
 from app.extractors.plan_text import PlanTextExtraction, extract_plan_text
-from app.plan_bbox_refiner import refine_flag_bboxes
-from app.plan_ocr_refiner import refine_via_ocr
 from app.plans.bbox import attach_page_bbox
+from app.plans.bbox_refiner import refine_flag_bboxes
+from app.plans.ocr_refiner import refine_via_ocr
 from app.plans.prompt import ACTIVE_PROMPT, fill, load_prompt, taxonomy_block
 from app.plans.render import RenderedImage, caption_str, render_pages
 from app.plans.vision import run_single_vision_pass, verify_flags
