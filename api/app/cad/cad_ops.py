@@ -8,10 +8,8 @@ before it ever touches ezdxf.
 from __future__ import annotations
 
 import io
-from typing import Annotated, Any, Literal, Union
+from typing import Annotated, Any, Literal
 
-import ezdxf
-from ezdxf.document import Drawing
 from pydantic import BaseModel, Field, ValidationError
 
 
@@ -90,15 +88,13 @@ class PlaceSymbol(BaseModel):
 
 
 Op = Annotated[
-    Union[
-        MoveEntity,
-        OffsetPolyline,
-        ResizeBlock,
-        AddDimension,
-        AddTextNote,
-        ChangeLayer,
-        PlaceSymbol,
-    ],
+    MoveEntity
+    | OffsetPolyline
+    | ResizeBlock
+    | AddDimension
+    | AddTextNote
+    | ChangeLayer
+    | PlaceSymbol,
     Field(discriminator="op"),
 ]
 

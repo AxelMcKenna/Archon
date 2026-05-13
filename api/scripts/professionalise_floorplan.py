@@ -44,7 +44,7 @@ def main() -> None:
     # Drawing units appear to be feet from the values in the file.
     unit = max(w, h) / 100  # generic "small text height" unit
 
-    for layer, color in [
+    for layer, _color in [
         ("PRO_BORDER", 7),     # thick frame
         ("PRO_TITLE", 7),      # title block
         ("PRO_TEXT", 7),       # title block text

@@ -4,11 +4,10 @@ Queries the publicly accessible Christchurch City Council GCSP MapServer
 at https://gis.ccc.govt.nz/arcgis/rest/services/OpenData/GCSP/MapServer
 """
 
-import httpx
-from typing import Optional
 import asyncio
 import logging
 
+import httpx
 
 GCSP_BASE_URL = "https://gis.ccc.govt.nz/arcgis/rest/services/OpenData/GCSP/MapServer"
 logger = logging.getLogger(__name__)
@@ -30,7 +29,7 @@ LAYERS = {
 }
 
 
-async def query_zone(x: float, y: float) -> Optional[dict]:
+async def query_zone(x: float, y: float) -> dict | None:
     """
     Query the GCSP Zone layer (layer 0) for zone information at NZTM2000 coordinate.
     
@@ -126,7 +125,10 @@ async def query_overlay(x: float, y: float, overlay_name: str) -> bool:
             
             return bool(data.get("features"))
     except Exception as e:
-        logger.exception("GCSP overlay query failed overlay=%s x=%s y=%s error=%s", overlay_name, x, y, e)
+        logger.exception(
+            "GCSP overlay query failed overlay=%s x=%s y=%s error=%s",
+            overlay_name, x, y, e,
+        )
         # If query fails, assume overlay does not apply
         return False
 
@@ -142,7 +144,7 @@ async def query_all_overlays(x: float, y: float) -> dict[str, bool]:
     Returns:
         Dict mapping overlay names to boolean presence
     """
-    overlay_keys = [k for k in LAYERS.keys() if k != "zone"]
+    overlay_keys = [k for k in LAYERS if k != "zone"]
     
     # Run queries concurrently
     tasks = [query_overlay(x, y, overlay) for overlay in overlay_keys]
@@ -150,7 +152,7 @@ async def query_all_overlays(x: float, y: float) -> dict[str, bool]:
     
     # Combine results, treating exceptions as False
     results = {}
-    for overlay, result in zip(overlay_keys, results_list):
+    for overlay, result in zip(overlay_keys, results_list, strict=True):
         if isinstance(result, Exception):
             results[overlay] = False
         else:

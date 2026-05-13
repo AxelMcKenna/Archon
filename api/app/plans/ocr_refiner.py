@@ -17,11 +17,10 @@ from __future__ import annotations
 import logging
 import re
 from functools import lru_cache
-from io import BytesIO
 from typing import Any
 
-import Levenshtein
 import fitz  # PyMuPDF — already in deps for plan_bbox_refiner
+import Levenshtein
 import numpy as np
 from PIL import Image
 

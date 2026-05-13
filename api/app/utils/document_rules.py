@@ -5,7 +5,6 @@ Maps zones and overlays to required documents based on document_rules.json
 
 import json
 from pathlib import Path
-from typing import Optional
 
 
 def load_rules() -> dict:
@@ -16,7 +15,7 @@ def load_rules() -> dict:
 
 
 def get_required_documents(
-    zone_code: Optional[str],
+    zone_code: str | None,
     overlays: dict[str, bool],
 ) -> list[dict]:
     """

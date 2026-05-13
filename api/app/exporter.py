@@ -226,7 +226,7 @@ def render_index_pdf(items: list[BundleItem], *, file_map: list[str]) -> bytes:
     doc = SimpleDocTemplate(buf, pagesize=A4, title="Bundle index")
     s = _styles()
     rows: list[list[Any]] = [["#", "Subject", "File"]]
-    for i, (it, fname) in enumerate(zip(items, file_map, strict=True), start=1):
+    for _i, (it, fname) in enumerate(zip(items, file_map, strict=True), start=1):
         rows.append([
             it.item_number,
             _para(it.raw_text[:140] + ("…" if len(it.raw_text) > 140 else ""), s["mono"]),

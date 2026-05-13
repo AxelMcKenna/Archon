@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import asdict
 from datetime import UTC, datetime
-from typing import Literal, Optional
+from typing import Literal
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
@@ -29,15 +29,15 @@ class ForecastRequest(BaseModel):
     zoneCategory: str
     activeOverlays: list[str]
     projectType: Literal["new_dwelling", "extension", "accessory_building", "deck"]
-    estimatedFloorAreaM2: Optional[int] = None
-    estimatedConstructionValueNZD: Optional[int] = None
+    estimatedFloorAreaM2: int | None = None
+    estimatedConstructionValueNZD: int | None = None
     involvesStructuralWork: bool = False
     involvesEarthworks: bool = False
     existingStructureDemolished: bool = False
     newRoadAccess: bool = False
-    yearOfConstruction: Optional[int] = None
+    yearOfConstruction: int | None = None
     newServiceConnections: ServiceConnections = Field(default_factory=ServiceConnections)
-    lodgementMonth: Optional[int] = Field(default=None, ge=1, le=12)
+    lodgementMonth: int | None = Field(default=None, ge=1, le=12)
 
 
 CANTERBURY_COUNCIL_BOUNDS = [
@@ -50,7 +50,10 @@ CANTERBURY_COUNCIL_BOUNDS = [
 
 def resolve_council(lat: float, lon: float) -> str:
     for bounds in CANTERBURY_COUNCIL_BOUNDS:
-        if bounds["latMin"] <= lat <= bounds["latMax"] and bounds["lonMin"] <= lon <= bounds["lonMax"]:
+        if (
+            bounds["latMin"] <= lat <= bounds["latMax"]
+            and bounds["lonMin"] <= lon <= bounds["lonMax"]
+        ):
             return bounds["name"]
     return "Christchurch City"
 

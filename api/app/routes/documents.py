@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
@@ -16,12 +16,12 @@ class ServiceConnections(BaseModel):
 
 class ProjectDetails(BaseModel):
     projectType: Literal["new_dwelling", "extension", "accessory_building", "deck"]
-    estimatedFloorAreaM2: Optional[int] = Field(default=None, ge=0)
-    estimatedConstructionValueNZD: Optional[int] = Field(default=None, ge=0)
+    estimatedFloorAreaM2: int | None = Field(default=None, ge=0)
+    estimatedConstructionValueNZD: int | None = Field(default=None, ge=0)
     involvesStructuralWork: bool = False
     involvesEarthworks: bool = False
     existingStructureDemolished: bool = False
-    yearOfConstruction: Optional[int] = None
+    yearOfConstruction: int | None = None
     newRoadAccess: bool = False
     newServiceConnections: ServiceConnections = Field(default_factory=ServiceConnections)
 
@@ -38,8 +38,8 @@ class Document(BaseModel):
     description: str
     category: str
     trigger: str
-    specialist: Optional[str]
-    referenceClause: Optional[str]
+    specialist: str | None
+    referenceClause: str | None
 
 
 class ResolveDocumentsResponse(BaseModel):

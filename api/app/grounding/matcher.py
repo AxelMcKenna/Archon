@@ -25,12 +25,14 @@ MATCH_THRESHOLD = 0.35
 # we want NZBC clause names, fixture words ("smoke", "alarm", "sink") and
 # location words ("hallway", "bathroom") to all count.
 _STOP = frozenset(
-    """
-    the a an and or of to in on at for with without is are be been being
-    this that these those it its as by from into over under not no
-    please provide confirm show update reissue annotate include identify
-    item items rfi nzbc as1 letter response building consent
-    """.split()
+    [
+        "the", "a", "an", "and", "or", "of", "to", "in", "on", "at", "for",
+        "with", "without", "is", "are", "be", "been", "being", "this", "that",
+        "these", "those", "it", "its", "as", "by", "from", "into", "over",
+        "under", "not", "no", "please", "provide", "confirm", "show", "update",
+        "reissue", "annotate", "include", "identify", "item", "items", "rfi",
+        "nzbc", "as1", "letter", "response", "building", "consent",
+    ]
 )
 
 _TOKEN = re.compile(r"[a-z0-9][a-z0-9\-]{1,}", re.IGNORECASE)

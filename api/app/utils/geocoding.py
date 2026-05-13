@@ -4,14 +4,13 @@ No API key required. Returns WGS84 coordinates.
 Note: Nominatim requires a proper User-Agent header and respects rate limiting.
 """
 
-import httpx
-import asyncio
-import time
-from typing import Optional
 import logging
 import os
-from app.config import get_settings
+import time
 
+import httpx
+
+from app.config import get_settings
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 ANTIMERIDIAN_SAFE_CANTERBURY_VIEWBOX = "171.6,-42.2,173.4,-44.4"
@@ -29,7 +28,7 @@ _NOMINATIM_BLOCKED_UNTIL: float = 0.0
 _NOMINATIM_BLOCK_SECONDS: float = 300.0
 
 
-async def geocode_address(address: str, city: str = "", postalcode: str = "") -> Optional[dict]:
+async def geocode_address(address: str, city: str = "", postalcode: str = "") -> dict | None:
     """
     Geocode an address string to WGS84 coordinates using Nominatim.
     
@@ -105,7 +104,8 @@ async def geocode_address(address: str, city: str = "", postalcode: str = "") ->
                     return None
                 if structured_response.status_code != 200:
                     raise Exception(
-                        f"Nominatim error {structured_response.status_code}: {structured_response.text}"
+                        f"Nominatim error {structured_response.status_code}: "
+                        f"{structured_response.text}"
                     )
                 data = structured_response.json()
 
@@ -123,7 +123,7 @@ async def geocode_address(address: str, city: str = "", postalcode: str = "") ->
                     "display_name": result.get("display_name"),
                 }
     except httpx.RequestError as e:
-        raise Exception(f"Geocoding request failed: {str(e)}")
+        raise Exception(f"Geocoding request failed: {e!s}") from e
     
     return None
 
@@ -302,11 +302,10 @@ def _is_within_supported_region(result: dict) -> bool:
         return True
     if municipality in {"selwyn", "waimakariri"}:
         return True
-    if "canterbury" in state and any(
-        token in display_name for token in ("christchurch", "selwyn", "waimakariri")
-    ):
-        return True
-    return False
+    return "canterbury" in state and any(
+        token in display_name
+        for token in ("christchurch", "selwyn", "waimakariri")
+    )
 
 
 def _is_geoapify_within_supported_region(result: dict) -> bool:
@@ -318,6 +317,7 @@ def _is_geoapify_within_supported_region(result: dict) -> bool:
         return True
     if city == "christchurch":
         return True
-    if "canterbury" in state and any(token in formatted for token in ("christchurch", "selwyn", "waimakariri")):
-        return True
-    return False
+    return "canterbury" in state and any(
+        token in formatted
+        for token in ("christchurch", "selwyn", "waimakariri")
+    )

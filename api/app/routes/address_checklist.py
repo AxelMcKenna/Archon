@@ -7,14 +7,15 @@ Flow:
 4. Map results to required documents using rules engine
 """
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 import logging
 
-from app.utils.geocoding import geocode_address
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+
 from app.utils.coordinates import wgs84_to_nztm2000
-from app.utils.gcsp import query_zone, query_all_overlays
 from app.utils.document_rules import get_required_documents
+from app.utils.gcsp import query_all_overlays, query_zone
+from app.utils.geocoding import geocode_address
 
 
 class AddressQuery(BaseModel):
@@ -60,22 +61,23 @@ async def address_to_checklist(query: AddressQuery) -> AddressChecklistResponse:
     except Exception as e:
         raise HTTPException(
             status_code=502,
-            detail=f"Geocoding service error: {str(e)}"
-        )
+            detail=f"Geocoding service error: {e!s}",
+        ) from e
     
     if not geocoding_result:
         raise HTTPException(
             status_code=404,
             detail=(
-                f"Could not geocode address within supported Canterbury councils (Christchurch, Selwyn, "
-                f"Waimakariri): {query.address}."
+                "Could not geocode address within supported Canterbury "
+                f"councils (Christchurch, Selwyn, Waimakariri): {query.address}."
             )
         )
     
     lat = geocoding_result["lat"]
     lon = geocoding_result["lon"]
     logger.info(
-        "Address checklist geocoded input_address=%r city=%r postalcode=%r lat=%s lon=%s display_name=%r",
+        "Address checklist geocoded input_address=%r city=%r postalcode=%r "
+        "lat=%s lon=%s display_name=%r",
         query.address,
         query.city,
         query.postalcode,
@@ -90,8 +92,8 @@ async def address_to_checklist(query: AddressQuery) -> AddressChecklistResponse:
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Coordinate conversion error: {str(e)}"
-        )
+            detail=f"Coordinate conversion error: {e!s}",
+        ) from e
     
     logger.info(
         "Address checklist projected lat=%s lon=%s nztm_x=%s nztm_y=%s",
@@ -107,8 +109,8 @@ async def address_to_checklist(query: AddressQuery) -> AddressChecklistResponse:
     except Exception as e:
         raise HTTPException(
             status_code=502,
-            detail=f"GCSP FeatureServer error: {str(e)}"
-        )
+            detail=f"GCSP FeatureServer error: {e!s}",
+        ) from e
     
     if not zone_info:
         logger.warning(
@@ -121,7 +123,7 @@ async def address_to_checklist(query: AddressQuery) -> AddressChecklistResponse:
         )
         raise HTTPException(
             status_code=404,
-            detail=f"Address is outside Canterbury councils' jurisdiction (CCC, Selwyn, Waimakariki)"
+            detail="Address is outside Canterbury councils' jurisdiction (CCC, Selwyn, Waimakariki)"
         )
     
     try:
@@ -129,8 +131,8 @@ async def address_to_checklist(query: AddressQuery) -> AddressChecklistResponse:
     except Exception as e:
         raise HTTPException(
             status_code=502,
-            detail=f"Overlay query error: {str(e)}"
-        )
+            detail=f"Overlay query error: {e!s}",
+        ) from e
     
     # Step 4: Generate documents list
     try:
@@ -138,8 +140,8 @@ async def address_to_checklist(query: AddressQuery) -> AddressChecklistResponse:
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Document rules error: {str(e)}"
-        )
+            detail=f"Document rules error: {e!s}",
+        ) from e
     
     return AddressChecklistResponse(
         address=geocoding_result.get("display_name", query.address),

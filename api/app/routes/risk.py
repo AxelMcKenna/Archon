@@ -33,7 +33,10 @@ async def score(
     try:
         corpus = (
             db.table("bca_corpus")
-            .select("id, bca, project_type, category, severity, example_text, trigger_description, resolution_hint")
+            .select(
+                "id, bca, project_type, category, severity, "
+                "example_text, trigger_description, resolution_hint"
+            )
             .eq("bca", req.bca)
             .execute()
             .data

@@ -21,8 +21,8 @@ import logging
 import re
 from typing import Any
 
-import Levenshtein
 import fitz  # PyMuPDF
+import Levenshtein
 
 log = logging.getLogger(__name__)
 

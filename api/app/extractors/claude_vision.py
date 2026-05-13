@@ -100,10 +100,11 @@ def extract_via_vision(
     settings = get_settings()
     t0 = time.monotonic()
 
-    if media_type == "application/pdf":
-        images = _pdf_to_images(file_bytes)
-    else:
-        images = [file_bytes]
+    images = (
+        _pdf_to_images(file_bytes)
+        if media_type == "application/pdf"
+        else [file_bytes]
+    )
 
     if settings.rfi_extractor_provider == "openrouter":
         or_result = call_openrouter_tool(

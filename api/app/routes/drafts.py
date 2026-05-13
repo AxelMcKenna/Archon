@@ -57,7 +57,10 @@ def _load_item_context(db: Client, item_id: str) -> dict[str, Any]:
     # between FLAG-MATCHED and NO MATCH branches.
     evidence_row = (
         db.table("rfi_item_plan_evidence")
-        .select("source, plan_upload_id, cad_upload_id, flag_index, evidence, confidence, rationale")
+        .select(
+            "source, plan_upload_id, cad_upload_id, flag_index, "
+            "evidence, confidence, rationale"
+        )
         .eq("rfi_item_id", item_id)
         .maybe_single()
         .execute()

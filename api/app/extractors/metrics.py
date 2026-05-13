@@ -39,7 +39,7 @@ class Metrics:
         )
         return primary + verification
 
-    def add(self, other: "Metrics") -> "Metrics":
+    def add(self, other: Metrics) -> Metrics:
         return Metrics(
             processing_ms=self.processing_ms + other.processing_ms,
             input_tokens=self.input_tokens + other.input_tokens,

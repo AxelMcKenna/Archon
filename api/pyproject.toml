@@ -43,6 +43,30 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
 
+# Data-heavy files where wrapping wide dict literals hurts readability.
+[tool.ruff.lint.per-file-ignores]
+"app/services/risk_profiler.py" = ["E501"]
+"app/services/duration_estimator.py" = ["E501"]
+"app/services/cost_calculator.py" = ["E501"]
+"tests/test_risk.py" = ["E501"]
+"tests/test_exporter.py" = ["E501"]
+
+# FastAPI dependency-injection patterns trip B008 (function call in
+# default arg). They're idiomatic, not bugs.
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+  "fastapi.Depends",
+  "fastapi.File",
+  "fastapi.Form",
+  "fastapi.Body",
+  "fastapi.Query",
+  "fastapi.Path",
+  "fastapi.Header",
+  "fastapi.Cookie",
+  "fastapi.Security",
+  "pydantic.Field",
+]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]

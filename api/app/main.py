@@ -54,7 +54,9 @@ app.include_router(cad_routes.router, prefix="/cad", tags=["cad"])
 app.include_router(
     address_checklist_routes.router, prefix="/address-to-checklist", tags=["address-to-checklist"]
 )
-app.include_router(address_suggest_routes.router, prefix="/address-suggest", tags=["address-suggest"])
+app.include_router(
+    address_suggest_routes.router, prefix="/address-suggest", tags=["address-suggest"]
+)
 app.include_router(documents_routes.router, prefix="/api/resolve-documents", tags=["documents"])
 app.include_router(forecasting_routes.router, prefix="/api", tags=["forecasting"])
 app.include_router(form_templates_routes.router, prefix="/api/templates", tags=["templates"])

@@ -98,10 +98,12 @@ def vote_flags(
             continue
         cat_counts = Counter(f.get("category") for f in hits)
 
-        def _score(f: dict[str, Any]) -> tuple[int, int]:
+        def _score(
+            f: dict[str, Any], _cat_counts: Counter = cat_counts
+        ) -> tuple[int, int]:
             return (
                 _CONFIDENCE_RANK.get(f.get("confidence", "low"), 0),
-                cat_counts[f.get("category")],
+                _cat_counts[f.get("category")],
             )
 
         best = max(hits, key=_score)

@@ -5,7 +5,6 @@ import threading
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Optional
 
 import httpx
 from bs4 import BeautifulSoup
@@ -29,10 +28,10 @@ CACHE_TTL_HOURS = 24
 @dataclass
 class BCAPerformance:
     bca: str
-    medianProcessingDaysAllApplications: Optional[float]
-    medianProcessingDaysBuildingConsents: Optional[float]
-    medianProcessingDaysResidential: Optional[float]
-    medianTotalElapsedDays: Optional[float]
+    medianProcessingDaysAllApplications: float | None
+    medianProcessingDaysBuildingConsents: float | None
+    medianProcessingDaysResidential: float | None
+    medianTotalElapsedDays: float | None
     scrapedAt: str
 
 
@@ -40,7 +39,7 @@ def _utc_now() -> datetime:
     return datetime.now(UTC)
 
 
-def _normalize_bca_name(name: str) -> Optional[str]:
+def _normalize_bca_name(name: str) -> str | None:
     value = (name or "").strip().lower()
     if "christchurch" in value:
         return "Christchurch City"
@@ -85,7 +84,7 @@ def _fallback_data() -> dict[str, BCAPerformance]:
     }
 
 
-def _load_cache(ignore_ttl: bool = False) -> Optional[dict[str, BCAPerformance]]:
+def _load_cache(ignore_ttl: bool = False) -> dict[str, BCAPerformance] | None:
     if not CACHE_PATH.exists():
         return None
     raw = json.loads(CACHE_PATH.read_text(encoding="utf-8"))
@@ -105,7 +104,7 @@ def _save_cache(data: dict[str, BCAPerformance]) -> None:
     CACHE_PATH.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
-def _parse_value(value: str) -> Optional[float]:
+def _parse_value(value: str) -> float | None:
     cleaned = (value or "").replace(",", "").strip()
     if not cleaned or cleaned in {"-", "n/a", "N/A"}:
         return None

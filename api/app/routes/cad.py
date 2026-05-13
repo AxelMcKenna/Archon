@@ -20,6 +20,8 @@ from app.cad.cad_render import list_views, render_view
 from app.services.cad_pipeline import (
     RevisionError,
     apply_revision,
+)
+from app.services.cad_pipeline import (
     upload_and_analyse as run_upload_pipeline,
 )
 from app.storage import CAD_BUCKET, download, signed_url

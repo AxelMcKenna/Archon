@@ -125,10 +125,11 @@ def apply_revision(
     flags = (cad_row.get("analysis") or {}).get("flags") or []
 
     prior_path = latest_revision_path(db, cad_id)
-    if prior_path:
-        file_bytes = download(db, bucket=CAD_BUCKET, path=prior_path)
-    else:
-        file_bytes = original_bytes
+    file_bytes = (
+        download(db, bucket=CAD_BUCKET, path=prior_path)
+        if prior_path
+        else original_bytes
+    )
 
     raw_ops: list[dict[str, Any]] = []
     applied_log: list[dict[str, Any]] = []

@@ -1,8 +1,4 @@
-# Per-PR checks: api tests, agent lint.
-#
-# Lint is not enforced on api yet — it has a pre-existing backlog
-# (~128 ruff violations) and would block every PR until that's cleaned
-# up in a dedicated pass. The agent service is ruff-clean and enforced.
+# Per-PR checks: api lint + tests, agent lint.
 
 name: ci
 
@@ -13,7 +9,7 @@ on:
 
 jobs:
   api:
-    name: api · pytest
+    name: api · ruff + pytest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,6 +24,10 @@ jobs:
       - name: Install api deps
         working-directory: api
         run: uv sync --frozen
+
+      - name: Ruff
+        working-directory: api
+        run: uv run ruff check .
 
       - name: Run tests
         working-directory: api

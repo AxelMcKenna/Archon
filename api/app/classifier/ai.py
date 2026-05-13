@@ -68,7 +68,7 @@ def _cache_key(item: RfiItem, bca: str, project_type: str, prompt_version: str) 
     h.update(b"|")
     h.update(item.extracted.model_dump_json().encode("utf-8"))
     h.update(b"|")
-    h.update(f"{bca}|{project_type}|{prompt_version}".encode("utf-8"))
+    h.update(f"{bca}|{project_type}|{prompt_version}".encode())
     return h.hexdigest()
 
 

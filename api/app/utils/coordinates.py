@@ -9,7 +9,6 @@ from functools import lru_cache
 
 from pyproj import Transformer
 
-
 # NZTM2000 (EPSG:2193) projection parameters
 NZTM_PARAMS = {
     "lat_origin": -41.0,
@@ -67,7 +66,6 @@ def nztm2000_to_wgs84(easting: float, northing: float) -> tuple[float, float]:
     """
     e, ep2, e2 = calculate_eccentricity()
     a = NZTM_PARAMS["semi_major_axis"]
-    b = NZTM_PARAMS["semi_minor_axis"]
     k0 = NZTM_PARAMS["scale_factor"]
     
     # Remove false easting/northing
