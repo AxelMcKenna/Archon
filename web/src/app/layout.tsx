@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { LayoutContent } from "@/components/layout-content";
+import { UserMenu } from "@/components/auth/user-menu";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-NZ" className={`${inter.variable} ${jetbrains.variable} ${dmSans.variable}`}>
       <body>
-        <LayoutContent>{children}</LayoutContent>
+        <LayoutContent userMenu={<UserMenu />}>{children}</LayoutContent>
       </body>
     </html>
   );

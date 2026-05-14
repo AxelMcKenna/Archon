@@ -21,11 +21,21 @@ const SECONDARY_NAV: NavItem[] = [
   { name: "Help", href: "/help" as Route },
 ];
 
-export function LayoutContent({ children }: { children: React.ReactNode }) {
+export function LayoutContent({
+  children,
+  userMenu,
+}: {
+  children: React.ReactNode;
+  userMenu?: React.ReactNode;
+}) {
   const pathname = usePathname();
 
-  // Landing page renders fullbleed without the app chrome.
-  if (pathname === "/") {
+  // Landing page and auth pages render fullbleed without the app chrome.
+  if (
+    pathname === "/" ||
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/auth")
+  ) {
     return <>{children}</>;
   }
 
@@ -50,6 +60,12 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
                 <NavList items={PRIMARY_NAV} pathname={pathname} />
                 <span aria-hidden className="h-4 w-px bg-ink-900/15" />
                 <NavList items={SECONDARY_NAV} pathname={pathname} />
+                {userMenu && (
+                  <>
+                    <span aria-hidden className="h-4 w-px bg-ink-900/15" />
+                    {userMenu}
+                  </>
+                )}
               </nav>
             </div>
           </header>

@@ -33,10 +33,10 @@ const markdownComponents = {
   ),
   em: ({ children }: { children?: React.ReactNode }) => <em className="italic">{children}</em>,
   code: ({ children }: { children?: React.ReactNode }) => (
-    <code className="rounded bg-ink-100 px-1 py-0.5 font-mono text-[12px]">{children}</code>
+    <code className="rounded-sm bg-ink-100 px-1 py-0.5 font-mono text-[12px]">{children}</code>
   ),
   pre: ({ children }: { children?: React.ReactNode }) => (
-    <pre className="mb-2 overflow-auto rounded bg-ink-900 px-2 py-1.5 font-mono text-[12px] text-white last:mb-0">{children}</pre>
+    <pre className="mb-2 overflow-auto rounded-sm bg-ink-900 px-2 py-1.5 font-mono text-[12px] text-white last:mb-0">{children}</pre>
   ),
   hr: () => <hr className="my-3 border-ink-900/10" />,
   a: ({ children, href }: { children?: React.ReactNode; href?: string }) => (
@@ -231,7 +231,7 @@ export function AgentPanel() {
               type="button"
               onClick={reset}
               aria-label="Clear conversation"
-              className="inline-flex h-7 w-7 items-center justify-center rounded text-ink-600 transition-colors hover:bg-ink-900/[0.04] hover:text-ink-900"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-sm text-ink-600 transition-colors hover:bg-ink-900/[0.04] hover:text-ink-900"
             >
               <RotateCcw className="h-3.5 w-3.5" />
             </button>
@@ -239,7 +239,7 @@ export function AgentPanel() {
               type="button"
               onClick={close}
               aria-label="Close assistant"
-              className="inline-flex h-7 w-7 items-center justify-center rounded text-ink-600 transition-colors hover:bg-ink-900/[0.04] hover:text-ink-900"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-sm text-ink-600 transition-colors hover:bg-ink-900/[0.04] hover:text-ink-900"
             >
               <X className="h-3.5 w-3.5" />
             </button>

@@ -4,6 +4,9 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
 import type { ProjectSettingsValues } from "@/lib/project-details";
+import { formatFileSize, formatUploadedDate } from "@/lib/format";
+import { isAllowedDocumentFile } from "@/lib/file-types";
+import { Collapsible } from "@/components/ui/collapsible";
 
 interface OwnershipEvidenceFile {
   id: string;
@@ -21,66 +24,8 @@ interface ProjectOwnerDetailsSettingsProps {
   action: (formData: FormData) => void | Promise<void>;
 }
 
-function isAllowedOwnershipEvidenceFile(file: File) {
-  const allowedMimeTypes = new Set([
-    "application/pdf",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "image/jpeg",
-    "image/png",
-  ]);
-  if (allowedMimeTypes.has(file.type)) return true;
-  const lowerName = file.name.toLowerCase();
-  return [".pdf", ".docx", ".jpg", ".jpeg", ".png"].some((ext) => lowerName.endsWith(ext));
-}
+const isAllowedOwnershipEvidenceFile = isAllowedDocumentFile;
 
-function formatFileSize(sizeBytes: number | null) {
-  if (!sizeBytes || sizeBytes <= 0) return "—";
-  if (sizeBytes < 1024) return `${sizeBytes} B`;
-  if (sizeBytes < 1024 * 1024) return `${(sizeBytes / 1024).toFixed(1)} KB`;
-  return `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function formatUploadedDate(isoDate: string) {
-  const match = isoDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (!match) return "—";
-  const [, year, month, day] = match;
-  return `${day}/${month}/${year}`;
-}
-
-function Collapsible({
-  title,
-  defaultOpen = false,
-  children,
-}: {
-  title: string;
-  defaultOpen?: boolean;
-  children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <section className="overflow-hidden rounded-md border border-ink-200 bg-surface-raised shadow-depth">
-      <button
-        type="button"
-        onClick={() => setOpen((value) => !value)}
-        className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-ink-50/60"
-      >
-        <h2 className="text-base font-semibold text-ink-900">{title}</h2>
-        <span className="text-ink-500" aria-hidden="true">
-          {open ? (
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="m18 15-6-6-6 6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          ) : (
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
-        </span>
-      </button>
-      {open && <div className="border-t border-ink-200/80 px-5 py-5">{children}</div>}
-    </section>
-  );
-}
 
 export function ProjectOwnerDetailsSettings({
   projectId,
@@ -221,7 +166,7 @@ export function ProjectOwnerDetailsSettings({
 
   return (
     <form action={action} className="space-y-6">
-      <Collapsible title="Building Consent Number(s)">
+      <Collapsible title="Building Consent Number(s)" variant="raised">
         <label className="block">
           <span className="mb-1 block text-sm text-ink-500">Building consent number(s)</span>
           <textarea
@@ -229,19 +174,19 @@ export function ProjectOwnerDetailsSettings({
             rows={1}
             defaultValue={initialValues.buildingConsentNumbers}
             placeholder="e.g. BCN-12345, BCN-12346"
-            className="w-full rounded border border-ink-700/20 px-3 py-2"
+            className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
           />
         </label>
       </Collapsible>
 
-      <Collapsible title="Client Details">
+      <Collapsible title="Client Details" variant="raised">
         <div className="grid gap-4 md:grid-cols-2">
           <label className="block">
             <span className="mb-1 block text-sm text-ink-500">Preferred form of address</span>
             <select
               name="owner_preferred_form_of_address"
               defaultValue={initialValues.ownerPreferredFormOfAddress}
-              className="w-full rounded border border-ink-700/20 px-3 py-2"
+              className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
             >
               <option value="">—</option>
               <option value="Mr">Mr</option>
@@ -258,7 +203,7 @@ export function ProjectOwnerDetailsSettings({
               type="text"
               name="owner_full_name"
               defaultValue={initialValues.ownerFullName}
-              className="w-full rounded border border-ink-700/20 px-3 py-2"
+              className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
             />
             <span className="mt-1 block text-xs text-ink-500">Include preferred form of address if an individual.</span>
           </label>
@@ -269,7 +214,7 @@ export function ProjectOwnerDetailsSettings({
               type="text"
               name="owner_contact_person_full_name"
               defaultValue={initialValues.ownerContactPersonFullName}
-              className="w-full rounded border border-ink-700/20 bg-slate-50 px-3 py-2"
+              className="w-full rounded-sm border border-ink-700/20 bg-slate-50 px-3 py-2"
             />
             <span className="mt-1 block text-xs text-ink-500">Not required if client is an individual.</span>
           </label>
@@ -280,7 +225,7 @@ export function ProjectOwnerDetailsSettings({
               name="owner_mailing_address"
               rows={3}
               defaultValue={initialValues.ownerMailingAddress}
-              className="w-full rounded border border-ink-700/20 px-3 py-2"
+              className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
             />
           </label>
 
@@ -302,7 +247,7 @@ export function ProjectOwnerDetailsSettings({
                 rows={3}
                 defaultValue={initialValues.ownerStreetAddress}
                 required={streetAddressDifferent}
-                className="w-full rounded border border-ink-700/20 px-3 py-2"
+                className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
               />
             </label>
           )}
@@ -313,23 +258,23 @@ export function ProjectOwnerDetailsSettings({
           <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
             <label className="block">
               <span className="mb-1 block text-xs text-ink-500">Landline</span>
-              <input type="text" name="owner_phone_landline" defaultValue={initialValues.ownerPhoneLandline} className="w-full rounded border border-ink-700/20 px-2 py-2" />
+              <input type="text" name="owner_phone_landline" defaultValue={initialValues.ownerPhoneLandline} className="w-full rounded-sm border border-ink-700/20 px-2 py-2" />
             </label>
             <label className="block">
               <span className="mb-1 block text-xs text-ink-500">Mobile</span>
-              <input type="text" name="owner_phone_mobile" defaultValue={initialValues.ownerPhoneMobile} className="w-full rounded border border-ink-700/20 px-2 py-2" />
+              <input type="text" name="owner_phone_mobile" defaultValue={initialValues.ownerPhoneMobile} className="w-full rounded-sm border border-ink-700/20 px-2 py-2" />
             </label>
             <label className="block">
               <span className="mb-1 block text-xs text-ink-500">Daytime</span>
-              <input type="text" name="owner_phone_daytime" defaultValue={initialValues.ownerPhoneDaytime} className="w-full rounded border border-ink-700/20 px-2 py-2" />
+              <input type="text" name="owner_phone_daytime" defaultValue={initialValues.ownerPhoneDaytime} className="w-full rounded-sm border border-ink-700/20 px-2 py-2" />
             </label>
             <label className="block">
               <span className="mb-1 block text-xs text-ink-500">After hours</span>
-              <input type="text" name="owner_phone_after_hours" defaultValue={initialValues.ownerPhoneAfterHours} className="w-full rounded border border-ink-700/20 px-2 py-2" />
+              <input type="text" name="owner_phone_after_hours" defaultValue={initialValues.ownerPhoneAfterHours} className="w-full rounded-sm border border-ink-700/20 px-2 py-2" />
             </label>
             <label className="block">
               <span className="mb-1 block text-xs text-ink-500">Fax</span>
-              <input type="text" name="owner_phone_fax" defaultValue={initialValues.ownerPhoneFax} className="w-full rounded border border-ink-700/20 px-2 py-2" />
+              <input type="text" name="owner_phone_fax" defaultValue={initialValues.ownerPhoneFax} className="w-full rounded-sm border border-ink-700/20 px-2 py-2" />
             </label>
           </div>
         </div>
@@ -337,12 +282,12 @@ export function ProjectOwnerDetailsSettings({
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="block">
             <span className="mb-1 block text-sm text-ink-500">Email address</span>
-            <input type="email" name="owner_email_address" defaultValue={initialValues.ownerEmailAddress} className="w-full rounded border border-ink-700/20 px-3 py-2" />
+            <input type="email" name="owner_email_address" defaultValue={initialValues.ownerEmailAddress} className="w-full rounded-sm border border-ink-700/20 px-3 py-2" />
           </label>
 
           <label className="block">
             <span className="mb-1 block text-sm text-ink-500">Website</span>
-            <input type="url" name="owner_website_url" defaultValue={initialValues.ownerWebsiteUrl} className="w-full rounded border border-ink-700/20 bg-slate-50 px-3 py-2" />
+            <input type="url" name="owner_website_url" defaultValue={initialValues.ownerWebsiteUrl} className="w-full rounded-sm border border-ink-700/20 bg-slate-50 px-3 py-2" />
           </label>
         </div>
 
@@ -354,7 +299,7 @@ export function ProjectOwnerDetailsSettings({
               name="owner_evidence_of_ownership_type"
               required
               defaultValue={initialValues.ownerEvidenceOfOwnershipType}
-              className="w-full rounded border border-ink-700/20 px-3 py-2"
+              className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
             >
               <option value="">Select one</option>
               <option value="Certificate of title">Certificate of title</option>
@@ -388,7 +333,7 @@ export function ProjectOwnerDetailsSettings({
             </button>
 
             {ownershipEvidenceFile && (
-              <div className="mt-3 rounded border border-ink-200 bg-white p-3 text-sm">
+              <div className="mt-3 rounded-sm border border-ink-200 bg-white p-3 text-sm">
                 <div className="font-medium text-ink-900">{ownershipEvidenceFile.filename}</div>
                 <div className="mt-1 text-xs text-ink-500">
                   {formatFileSize(ownershipEvidenceFile.sizeBytes)} · Uploaded {formatUploadedDate(ownershipEvidenceFile.uploadedAt)}

@@ -40,6 +40,13 @@ export function AgentTrigger({
     };
   }, [tab, projectId, available]);
 
+  useEffect(
+    () => () => {
+      if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
+    },
+    [],
+  );
+
   if (!available) return null;
 
   const cfg = TAB_AGENT_CONFIG[tab];

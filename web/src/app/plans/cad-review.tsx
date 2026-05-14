@@ -174,7 +174,7 @@ export function CadReview({ cad }: { cad: Cad }) {
                     className={`px-2 py-0.5 text-[11px] rounded-sm border ${
                       activeView === v.name
                         ? "bg-ink-900 text-white border-ink-900"
-                        : "border-ink-700/15 text-ink-700"
+                        : "border-ink-700/10 text-ink-700"
                     }`}
                   >
                     {v.name}
@@ -354,7 +354,7 @@ export function CadReview({ cad }: { cad: Cad }) {
         </ul>
 
         {resolvedFlags.length > 0 && (
-          <div className="pt-4 border-t border-ink-700/15">
+          <div className="pt-4 border-t border-ink-700/10">
             <h4 className="text-[11px] uppercase tracking-wide text-ink-500 mb-2">
               Resolved ({resolvedFlags.length})
             </h4>

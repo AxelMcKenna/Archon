@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { ChevronDown, FileText } from "lucide-react";
 
 type ProjectStage =
   | "ASSESSMENT"
@@ -183,19 +184,10 @@ export function ProjectsPageClient({ projects }: { projects: ProjectListItem[] }
                   </option>
                 ))}
               </select>
-              <svg
+              <ChevronDown
                 className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="m6 9 6 6 6-6"
-                />
-              </svg>
+                aria-hidden
+              />
             </label>
           </div>
         </section>
@@ -282,14 +274,7 @@ function EmptyState() {
     <section className="overflow-hidden rounded-md bg-surface-raised px-6 py-16 text-center shadow-depth">
       <div className="mx-auto flex max-w-md flex-col items-center">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-ink-50 text-ink-500 shadow-inset">
-          <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M3.75 7.5A2.25 2.25 0 0 1 6 5.25h12A2.25 2.25 0 0 1 20.25 7.5v9A2.25 2.25 0 0 1 18 18.75H6A2.25 2.25 0 0 1 3.75 16.5v-9ZM8.25 9.75h7.5m-7.5 4.5h4.5"
-            />
-          </svg>
+          <FileText className="h-8 w-8" strokeWidth={1.5} aria-hidden />
         </div>
         <h2 className="mt-6 text-2xl font-semibold tracking-[-0.02em] text-ink-900">
           No projects yet

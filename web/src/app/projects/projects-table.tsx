@@ -126,7 +126,7 @@ function Filter({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-sm border border-ink-700/15 px-2 py-1 text-ink-900"
+        className="rounded-sm border border-ink-700/10 px-2 py-1 text-ink-900"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>{o.label}</option>

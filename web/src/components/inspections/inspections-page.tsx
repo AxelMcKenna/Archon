@@ -11,6 +11,8 @@ import {
   type InspectionRecord,
 } from "./model";
 import { useInspections } from "./use-inspections";
+import { StatusPill, type Tone } from "@/components/ui/status-pill";
+import { MetricCard } from "@/components/ui/metric-card";
 
 interface InspectionsPageProps {
   projectId: string;
@@ -293,7 +295,7 @@ export function InspectionsPage({
                                       type="checkbox"
                                       checked={Boolean(inspection.checklist[requirement])}
                                       onChange={(event) => updateChecklist(inspection, requirement, event.target.checked)}
-                                      className="mt-0.5 h-4 w-4 rounded border-ink-700/30 accent-ink-900"
+                                      className="mt-0.5 h-4 w-4 rounded-sm border-ink-700/30 accent-ink-900"
                                     />
                                     <span className="leading-relaxed text-ink-700">{requirement}</span>
                                   </label>
@@ -380,31 +382,17 @@ export function InspectionsPage({
   );
 }
 
-function MetricCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md bg-surface-raised px-3.5 py-2.5 shadow-depth">
-      <p className="text-[10px] uppercase tracking-[0.22em] text-ink-500">{label}</p>
-      <p className="mt-1 text-[22px] leading-none font-semibold tracking-[-0.02em] tabular-nums text-ink-900">{value}</p>
-    </div>
-  );
-}
+const inspectionTone: Record<EditableInspectionStatus, Tone> = {
+  "Not Conducted": "neutral",
+  Passed: "success",
+  Failed: "danger",
+};
 
 export function StatusBadge({ status }: { status: EditableInspectionStatus }) {
-  const styles: Record<EditableInspectionStatus, string> = {
-    "Not Conducted": "bg-ink-50 text-ink-700 ring-ink-200/70",
-    Passed: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-    Failed: "bg-red-50 text-red-700 ring-red-200",
-  };
-  const labels: Record<EditableInspectionStatus, string> = {
-    "Not Conducted": "Not Conducted",
-    Passed: "Passed",
-    Failed: "Failed",
-  };
-
   return (
-    <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.18em] ring-1 ${styles[status]}`}>
-      {labels[status]}
-    </span>
+    <StatusPill tone={inspectionTone[status]} variant="ring">
+      {status}
+    </StatusPill>
   );
 }
 

@@ -255,7 +255,7 @@ export function RiskGraph3D({
         />
         {hoveredNode && (
           <div
-            className="pointer-events-none absolute z-10 rounded-sm border border-ink-200/80 bg-white/95 px-2.5 py-1.5 text-xs shadow-depth backdrop-blur"
+            className="pointer-events-none absolute z-10 rounded-sm border border-ink-200/70 bg-white/95 px-2.5 py-1.5 text-xs shadow-depth backdrop-blur"
             style={{
               left: `${hoveredNode.x}px`,
               top: `${hoveredNode.y}px`,

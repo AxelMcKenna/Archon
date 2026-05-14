@@ -78,7 +78,7 @@ export function UploadPlanInline({ projects }: { projects: Project[] }) {
         <select
           value={projectId}
           onChange={(e) => setProjectId(e.target.value)}
-          className="w-full rounded-sm border border-ink-700/15 px-2 py-2"
+          className="w-full rounded-sm border border-ink-700/10 px-2 py-2"
         >
           {projects.map((p) => {
             const bca = taxonomy.bcas.find((b) => b.id === p.bca)?.name ?? p.bca;

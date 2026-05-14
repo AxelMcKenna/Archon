@@ -55,7 +55,7 @@ export default async function Settings() {
           {!projects || projects.length === 0 ? (
             <p className="mt-5 text-sm text-ink-500">No projects yet.</p>
           ) : (
-            <ul className="mt-5 divide-y divide-ink-200/60 border-t border-ink-200/60">
+            <ul className="mt-5 divide-y divide-ink-200/60 border-t border-ink-200/70">
               {projects.map((p) => {
                 const label = p.application_ref?.trim() || p.address;
                 const typeLabel = projectTypeLabels[p.project_type] ?? p.project_type;

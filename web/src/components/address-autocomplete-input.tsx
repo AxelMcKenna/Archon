@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Suggestion {
   display_name: string;
@@ -21,7 +21,6 @@ export function AddressAutocompleteInput({
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const requestIdRef = useRef(0);
 
   useEffect(() => {
     const query = value.trim();
@@ -31,29 +30,32 @@ export function AddressAutocompleteInput({
       return;
     }
 
+    const controller = new AbortController();
     const timeout = setTimeout(async () => {
-      requestIdRef.current += 1;
-      const requestId = requestIdRef.current;
       setIsLoading(true);
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "/api/backend";
         const response = await fetch(
           `${apiUrl}/address-suggest?q=${encodeURIComponent(query)}&limit=8`,
-          { method: "GET" }
+          { method: "GET", signal: controller.signal },
         );
         if (!response.ok) return;
         const data = (await response.json()) as { suggestions?: Suggestion[] };
-        if (requestId !== requestIdRef.current) return;
         const next = data.suggestions ?? [];
-        console.info("address_suggest response", { query, count: next.length, next });
         setSuggestions(next);
         setIsOpen(next.length > 0);
+      } catch (error) {
+        if ((error as { name?: string })?.name === "AbortError") return;
+        throw error;
       } finally {
-        if (requestId === requestIdRef.current) setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     }, ADDRESS_AUTOCOMPLETE_DEBOUNCE_MS);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
   }, [value]);
 
   return (

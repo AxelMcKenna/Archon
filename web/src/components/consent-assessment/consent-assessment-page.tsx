@@ -10,6 +10,7 @@ import { isManualDocument } from "./model";
 import { DEFAULT_COUNCIL_SUBMISSION_URL } from "./submission-defaults";
 import { formatSubmissionDate, groupDocumentsBySubmission } from "./submission-groups";
 import { useConsentAssessment, type ProjectIntake } from "./use-consent-assessment";
+import { MetricCard } from "@/components/ui/metric-card";
 
 interface ConsentAssessmentPageProps {
   projectId: string;
@@ -226,9 +227,9 @@ export function ConsentAssessmentPage({
             </div>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <MetricCard label="Required documents" value={String(completion.total)} />
-            <MetricCard label="Completed" value={String(completion.completed)} />
-            <MetricCard label="Remaining" value={String(completion.remaining.length)} />
+            <MetricCard variant="outlined" label="Required documents" value={String(completion.total)} />
+            <MetricCard variant="outlined" label="Completed" value={String(completion.completed)} />
+            <MetricCard variant="outlined" label="Remaining" value={String(completion.remaining.length)} />
           </div>
         </div>
 
@@ -773,15 +774,6 @@ export function ConsentAssessmentPage({
           </div>
         )}
       </section>
-    </div>
-  );
-}
-
-function MetricCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-sm border border-ink-700/10 bg-surface-raised px-4 py-3 shadow-sm">
-      <div className="text-xs font-medium uppercase tracking-[0.14em] text-ink-500">{label}</div>
-      <div className="mt-2 text-2xl font-semibold tracking-tight text-ink-900">{value}</div>
     </div>
   );
 }

@@ -6,17 +6,12 @@ import { useMemo, useState } from "react";
 import type { CccDocumentStatus } from "@/lib/ccc";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { StatusPill } from "@/components/ui/status-pill";
 
 interface Props {
   projectId: string;
   requiredItems: CccDocumentStatus[];
   conditionalItems: CccDocumentStatus[];
-}
-
-function badgeTone(type: "required" | "if_applicable") {
-  return type === "required"
-    ? "bg-red-100 text-red-800 border-red-200"
-    : "bg-amber-100 text-amber-800 border-amber-200";
 }
 
 export function CccDocumentsWorkflow({
@@ -114,11 +109,9 @@ export function CccDocumentsWorkflow({
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-sm font-semibold text-ink-900">{item.label}</h3>
-                    <span
-                      className={`rounded-full border px-2 py-0.5 text-xs ${badgeTone(item.requirementType)}`}
-                    >
+                    <StatusPill tone={item.requirementType === "required" ? "danger" : "warning"}>
                       {item.requirementType === "required" ? "Required" : "If Applicable"}
-                    </span>
+                    </StatusPill>
                     {complete ? (
                       <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-800">
                         Complete

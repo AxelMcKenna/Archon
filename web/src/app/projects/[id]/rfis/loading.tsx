@@ -1,8 +1,4 @@
-import {
-  Skeleton,
-  SkeletonHeader,
-  SkeletonListRow,
-} from "@/components/skeleton";
+import { Skeleton, SkeletonHeader, SkeletonListPanel, SkeletonPanel } from "@/components/skeleton";
 
 export default function Loading() {
   return (
@@ -10,20 +6,11 @@ export default function Loading() {
       <header className="space-y-1.5">
         <SkeletonHeader eyebrowWidth="w-44" titleWidth="w-24" />
       </header>
-
-      <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-depth p-8 space-y-4">
+      <SkeletonPanel>
         <Skeleton className="h-3 w-36" />
         <Skeleton className="h-32 w-full" />
-      </section>
-
-      <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-depth p-8 space-y-4">
-        <Skeleton className="h-3 w-28" />
-        <ul className="divide-y divide-ink-200/70 rounded-sm bg-surface-raised ring-1 ring-ink-700/10 overflow-hidden">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <SkeletonListRow key={i} />
-          ))}
-        </ul>
-      </section>
+      </SkeletonPanel>
+      <SkeletonListPanel headingWidth="w-28" />
     </div>
   );
 }

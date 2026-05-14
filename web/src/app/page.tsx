@@ -1,17 +1,23 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { NeuralSphere } from "@/components/neural-sphere";
+import { NeuralSphere } from "@/components/neural-sphere-lazy";
 
 export default function Home() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-surface-canvas text-ink-900">
       {/* Top bar */}
-      <header className="relative z-20 flex w-full items-center px-10 py-6">
+      <header className="relative z-20 flex w-full items-center justify-between px-10 py-6">
         <Link
           href="/"
           className="font-display uppercase font-bold tracking-[0.16em] text-[22px] text-ink-900 transition-colors hover:text-ink-700"
         >
           Atlas
+        </Link>
+        <Link
+          href="/login"
+          className="font-display uppercase tracking-[0.14em] text-[14px] text-ink-700 transition-colors hover:text-ink-900"
+        >
+          Sign in
         </Link>
       </header>
 

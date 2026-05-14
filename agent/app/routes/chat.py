@@ -14,6 +14,7 @@ from sse_starlette.sse import EventSourceResponse
 from app.agent_loop import run_agent
 from app.conversations import STORE
 from app.rate_limit import limiter
+from app.supabase_client import CURRENT_USER_TOKEN, extract_token
 
 router = APIRouter()
 
@@ -43,6 +44,7 @@ class ChatRequest(BaseModel):
 @router.post("")
 @limiter.limit("20/minute")
 async def chat(request: Request, req: ChatRequest) -> EventSourceResponse:
+    token = extract_token(request)
     conversation_id = req.conversation_id or str(uuid.uuid4())
     history: list[dict[str, Any]] = STORE.get(conversation_id)
 
@@ -69,6 +71,7 @@ async def chat(request: Request, req: ChatRequest) -> EventSourceResponse:
             "event": "conversation",
             "data": json.dumps({"conversation_id": conversation_id}),
         }
+        ctx_token = CURRENT_USER_TOKEN.set(token)
         try:
             async for event in run_agent(
                 history=history,
@@ -85,6 +88,7 @@ async def chat(request: Request, req: ChatRequest) -> EventSourceResponse:
             }
         finally:
             STORE.put(conversation_id, history)
+            CURRENT_USER_TOKEN.reset(ctx_token)
 
     # text/plain instead of text/event-stream — Safari's fetch() drops body
     # chunks for text/event-stream over chunked transfer; text/plain streams

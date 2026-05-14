@@ -145,7 +145,7 @@ export function UploadRfiInline({
               setProjectId(e.target.value);
               setPlanId("");
             }}
-            className="w-full rounded-sm border border-ink-700/15 px-2 py-2"
+            className="w-full rounded-sm border border-ink-700/10 px-2 py-2"
           >
             {projects.map((p) => {
               const bca = taxonomy.bcas.find((b) => b.id === p.bca)?.name ?? p.bca;
@@ -197,7 +197,7 @@ export function UploadRfiInline({
           <select
             value={planId}
             onChange={(e) => setPlanId(e.target.value)}
-            className="w-full rounded-sm border border-ink-700/15 px-2 py-2 text-sm"
+            className="w-full rounded-sm border border-ink-700/10 px-2 py-2 text-sm"
           >
             <option value="">— pick the plan this RFI is about —</option>
             {projectPlans.map((p) => (

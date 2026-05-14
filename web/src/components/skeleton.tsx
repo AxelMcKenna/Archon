@@ -51,3 +51,30 @@ export function SkeletonListRow() {
     </li>
   );
 }
+
+export function SkeletonPanel({ children }: { children: React.ReactNode }) {
+  return (
+    <section className="rounded-sm bg-surface-raised ring-1 ring-ink-700/10 shadow-depth p-8 space-y-4">
+      {children}
+    </section>
+  );
+}
+
+export function SkeletonListPanel({
+  headingWidth = "w-32",
+  rows = 4,
+}: {
+  headingWidth?: string;
+  rows?: number;
+}) {
+  return (
+    <SkeletonPanel>
+      <Skeleton className={`h-3 ${headingWidth}`} />
+      <ul className="divide-y divide-ink-200/70 rounded-sm bg-surface-raised ring-1 ring-ink-700/10 overflow-hidden">
+        {Array.from({ length: rows }).map((_, i) => (
+          <SkeletonListRow key={i} />
+        ))}
+      </ul>
+    </SkeletonPanel>
+  );
+}

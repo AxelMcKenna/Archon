@@ -335,7 +335,7 @@ export function InspectionDetailPage({
                       type="checkbox"
                       checked={Boolean(inspection.checklist[requirement])}
                       onChange={(event) => updateChecklist(requirement, event.target.checked)}
-                      className="h-4 w-4 rounded border-ink-700/30 accent-ink-900"
+                      className="h-4 w-4 rounded-sm border-ink-700/30 accent-ink-900"
                     />
                     <span className="sr-only">Checklist item completed</span>
                   </label>

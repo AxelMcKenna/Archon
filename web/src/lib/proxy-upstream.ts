@@ -1,5 +1,9 @@
 // Server-side reverse proxy helper. Forwards a Next.js request to an upstream
-// HTTP service and streams the response back, preserving SSE.
+// HTTP service and streams the response back, preserving SSE. Injects the
+// caller's Supabase access token as a Bearer Authorization header so the
+// upstream FastAPI service can run as that user under RLS.
+
+import { getAccessToken } from "@/lib/supabase/server";
 
 const HOP_BY_HOP_REQ = new Set([
   "host",
@@ -37,6 +41,13 @@ export async function proxyToUpstream(
   req.headers.forEach((value, key) => {
     if (!HOP_BY_HOP_REQ.has(key.toLowerCase())) headers.set(key, value);
   });
+
+  const token = await getAccessToken();
+  if (token) {
+    headers.set("authorization", `Bearer ${token}`);
+  } else {
+    return new Response("unauthorized", { status: 401 });
+  }
 
   const init: RequestInit & { duplex?: "half" } = {
     method: req.method,
