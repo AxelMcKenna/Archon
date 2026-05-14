@@ -13,7 +13,7 @@ import contextlib
 
 from fastapi import Depends, HTTPException, Request, status
 from supabase import Client, create_client
-from supabase.lib.client_options import ClientOptions
+from supabase.lib.client_options import SyncClientOptions as ClientOptions
 
 from app.config import get_settings
 
