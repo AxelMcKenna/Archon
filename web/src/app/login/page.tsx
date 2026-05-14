@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { Route } from "next";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
 
@@ -25,7 +26,7 @@ export default function LoginPage() {
       setError(error.message);
       return;
     }
-    router.replace(next);
+    router.replace(next as Route);
     router.refresh();
   }
 

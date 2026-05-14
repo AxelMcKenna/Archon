@@ -1,6 +1,8 @@
 import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
+
+type CookieSet = { name: string; value: string; options?: CookieOptions };
 
 function requireEnv(name: string, value: string | undefined) {
   if (!value) throw new Error(`Missing Supabase environment variable: ${name}`);
@@ -26,7 +28,7 @@ export async function getSupabaseServer() {
       getAll() {
         return cookieStore.getAll();
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet: CookieSet[]) {
         try {
           cookiesToSet.forEach(({ name, value, options }) =>
             cookieStore.set(name, value, options),
