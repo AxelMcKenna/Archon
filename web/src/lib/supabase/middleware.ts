@@ -33,16 +33,18 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isPublic = PUBLIC_PREFIXES.some((p) => path.startsWith(p));
 
-  // Signed-in users hitting the landing or login page jump straight to the app.
-  if (data.user && (path === "/" || path === "/login")) {
+  // Signed-in users hitting the login page jump straight to the app.
+  // The landing page stays public for everyone so it can be shared, screenshotted,
+  // and iterated on without forcing a sign-out.
+  if (data.user && path === "/login") {
     const dash = request.nextUrl.clone();
     dash.pathname = "/dashboard";
     dash.search = "";
     return NextResponse.redirect(dash);
   }
 
-  // Everything except the explicit public prefixes requires an account.
-  if (!data.user && !isPublic) {
+  // Everything except the explicit public prefixes (and "/") requires an account.
+  if (!data.user && !isPublic && path !== "/") {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", path + request.nextUrl.search);

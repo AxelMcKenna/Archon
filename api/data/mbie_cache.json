@@ -1,5 +1,5 @@
 {
-  "scrapedAt": "2026-05-09T10:01:38.390811+00:00",
+  "scrapedAt": "2026-05-14T04:08:21.237067+00:00",
   "data": {
     "Hurunui": {
       "bca": "Hurunui",
@@ -7,15 +7,7 @@
       "medianProcessingDaysBuildingConsents": 11.0,
       "medianProcessingDaysResidential": 13.0,
       "medianTotalElapsedDays": 44.0,
-      "scrapedAt": "2026-05-09T10:01:38.369149+00:00"
-    },
-    "Christchurch City": {
-      "bca": "Christchurch City",
-      "medianProcessingDaysAllApplications": 12.0,
-      "medianProcessingDaysBuildingConsents": 14.0,
-      "medianProcessingDaysResidential": 13.0,
-      "medianTotalElapsedDays": 17.0,
-      "scrapedAt": "2026-05-09T10:01:38.369149+00:00"
+      "scrapedAt": "2026-05-14T04:08:21.226295+00:00"
     },
     "Waimakariri": {
       "bca": "Waimakariri",
@@ -23,7 +15,7 @@
       "medianProcessingDaysBuildingConsents": 15.0,
       "medianProcessingDaysResidential": 11.0,
       "medianTotalElapsedDays": 18.0,
-      "scrapedAt": "2026-05-09T10:01:38.369149+00:00"
+      "scrapedAt": "2026-05-14T04:08:21.226295+00:00"
     },
     "Selwyn": {
       "bca": "Selwyn",
@@ -31,7 +23,7 @@
       "medianProcessingDaysBuildingConsents": 10.0,
       "medianProcessingDaysResidential": 8.0,
       "medianTotalElapsedDays": 10.0,
-      "scrapedAt": "2026-05-09T10:01:38.369149+00:00"
+      "scrapedAt": "2026-05-14T04:08:21.226295+00:00"
     },
     "Ashburton": {
       "bca": "Ashburton",
@@ -39,7 +31,15 @@
       "medianProcessingDaysBuildingConsents": 16.0,
       "medianProcessingDaysResidential": 12.0,
       "medianTotalElapsedDays": 17.0,
-      "scrapedAt": "2026-05-09T10:01:38.369149+00:00"
+      "scrapedAt": "2026-05-14T04:08:21.226295+00:00"
+    },
+    "Christchurch City": {
+      "bca": "Christchurch City",
+      "medianProcessingDaysAllApplications": 12.0,
+      "medianProcessingDaysBuildingConsents": 14.0,
+      "medianProcessingDaysResidential": 13.0,
+      "medianTotalElapsedDays": 17.0,
+      "scrapedAt": "2026-05-14T04:08:21.226295+00:00"
     }
   }
 }

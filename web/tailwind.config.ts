@@ -7,7 +7,7 @@ const config: Config = {
       colors: {
         ink: {
           900: "#0b0e14",
-          800: "#13182233",
+          800: "#131822",
           700: "#1f2530",
           600: "#334155",
           500: "#4a5568",
@@ -19,9 +19,9 @@ const config: Config = {
           50: "#f7f9fb",
         },
         surface: {
-          canvas: "#FAFAF7",
-          raised: "#FAFAF7",
-          sunken: "#F0EFE9",
+          canvas: "#FFFFFF",
+          raised: "#FFFFFF",
+          sunken: "#EEF2F8",
           elevated: "#FFFFFF",
         },
         accent: { DEFAULT: "#0f766e", soft: "#ccfbf1" },
@@ -51,18 +51,6 @@ const config: Config = {
         },
         cyan: {
           500: "#06b6d4",
-        },
-        tan: {
-          50: "#faf6ef",
-          100: "#f3ebd9",
-          200: "#e6d4ac",
-          300: "#d6b87f",
-          400: "#c19a5b",
-          500: "#a98148",
-          600: "#8a6738",
-          700: "#6b4f2c",
-          800: "#4d3920",
-          900: "#332615",
         },
       },
       fontFamily: {
