@@ -29,7 +29,24 @@ def get_extractor(source_kind: str) -> Extractor:
         from app.ingestion.extractors.test_extractor import TestExtractor
 
         return TestExtractor()
+    if source_kind == "mbie_acceptable_solution":
+        from app.ingestion.extractors.mbie_acceptable_solution import (
+            MbieAcceptableSolutionExtractor,
+        )
+
+        return MbieAcceptableSolutionExtractor()
+    if source_kind == "council_guidance":
+        from app.ingestion.extractors.council_guidance import (
+            CouncilGuidanceExtractor,
+        )
+
+        return CouncilGuidanceExtractor()
+    if source_kind == "supplier_datasheet":
+        from app.ingestion.extractors.supplier_datasheet import (
+            SupplierDatasheetExtractor,
+        )
+
+        return SupplierDatasheetExtractor()
     raise KeyError(
-        f"no extractor registered for source_kind={source_kind!r}; "
-        "phase 1 only ships the 'test' extractor"
+        f"no extractor registered for source_kind={source_kind!r}"
     )
