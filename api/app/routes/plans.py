@@ -19,6 +19,10 @@ from app.plans.overlay import get_page_info, render_overlay_pdf, render_page
 from app.plans.stats import compute_bbox_stats
 from app.rate_limit import limiter
 from app.services.plan_pipeline import upload_and_analyse as run_pipeline
+from app.services.value_engineering_pipeline import (
+    get_latest_value_engineering,
+    run_value_engineering,
+)
 from app.storage import PLANS_BUCKET, download, signed_url
 from app.utils.safe_filename import safe_filename
 
@@ -209,6 +213,43 @@ async def overlay_pdf(
             "Cache-Control": "no-store",
         },
     )
+
+
+@router.post("/{plan_id}/value-engineering")
+@limiter.limit("10/minute")
+async def trigger_value_engineering(
+    request: Request,
+    plan_id: str,
+    db: Client = Depends(get_db),
+) -> dict[str, Any]:
+    try:
+        result = run_value_engineering(db, plan_id=plan_id)
+    except LookupError as e:
+        raise HTTPException(404, str(e)) from e
+    except ValueError as e:
+        raise HTTPException(409, str(e)) from e
+    except Exception as e:
+        raise HTTPException(500, f"value engineering failed: {e}") from e
+    return {
+        "ve_id": result.ve_id,
+        "plan_id": result.plan_id,
+        "opportunities_count": result.opportunities_count,
+        "processing_ms": result.processing_ms,
+        "cost_usd": result.cost_usd,
+        "cached": result.cached,
+        "truncated": result.truncated,
+    }
+
+
+@router.get("/{plan_id}/value-engineering")
+async def get_value_engineering(
+    plan_id: str,
+    db: Client = Depends(get_db),
+) -> dict[str, Any] | None:
+    row = get_latest_value_engineering(db, plan_id=plan_id)
+    if not row:
+        return None
+    return row
 
 
 @router.delete("/{plan_id}")

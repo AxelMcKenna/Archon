@@ -5,6 +5,7 @@ import { getSupabaseServer } from "@/lib/supabase/server";
 import { UploadPlanInline } from "@/app/plans/upload-plan-inline";
 import { PlanReview } from "@/app/plans/plan-review";
 import { CadReview } from "@/app/plans/cad-review";
+import { ValueEngineeringReview } from "@/app/plans/value-engineering-review";
 import { DeleteRowButton } from "@/app/plans/delete-row-button";
 
 export const dynamic = "force-dynamic";
@@ -152,6 +153,24 @@ export default async function ProjectDrawings({
               cad={selected as unknown as Parameters<typeof CadReview>[0]["cad"]}
             />
           )}
+        </section>
+      )}
+
+      {selected && selected.format === "pdf" && selected.status === "analysed" && (
+        <section className="space-y-4 pt-8 border-t border-ink-200/70">
+          <div className="space-y-1.5">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
+              Cost optimisation
+            </p>
+            <h2 className="text-xl font-semibold tracking-tight text-ink-900">
+              Value engineering
+            </h2>
+            <p className="text-sm text-ink-500 max-w-2xl leading-relaxed">
+              Surface over-specified materials and code-compliant cheaper
+              alternatives. Separate from the RFI flagger above.
+            </p>
+          </div>
+          <ValueEngineeringReview planId={selected.id} />
         </section>
       )}
     </div>
