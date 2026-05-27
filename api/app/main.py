@@ -22,6 +22,7 @@ from app.routes import health as health_routes
 from app.routes import letters as letters_routes
 from app.routes import plans as plans_routes
 from app.routes import risk as risk_routes
+from app.ingestion import routes as ingest_routes
 
 app = FastAPI(title="ATLAS RFI API", version="0.1.0")
 app.state.limiter = limiter
@@ -76,6 +77,7 @@ app.include_router(
 app.include_router(documents_routes.router, prefix="/api/resolve-documents", tags=["documents"])
 app.include_router(forecasting_routes.router, prefix="/api", tags=["forecasting"])
 app.include_router(form_templates_routes.router, prefix="/api/templates", tags=["templates"])
+app.include_router(ingest_routes.router, prefix="/admin/ingest", tags=["admin-ingest"])
 
 # /debug/env leaks env-shape info. Only mount it outside production.
 if get_settings().env != "prod":

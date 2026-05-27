@@ -1,0 +1,44 @@
+# VE ingestion source registry.
+#
+# The only file you should edit to add a new source URL. Each top-level
+# key is a source_kind that matches an extractor under
+# app/ingestion/extractors/. The 'test' kind exists only to exercise
+# the plumbing end-to-end without touching real sources.
+#
+# Per-host etiquette:
+#   rate_limit_seconds — minimum sleep between requests to the same host
+#   user_agent          — sent on every request; override per kind if
+#                          a particular host requires it
+#
+# Per-document:
+#   source_key          — stable id; never reuse for a different doc
+#   url                 — direct PDF or HTML URL
+#   content_type        — optional; falls back to response Content-Type
+#   bca / vendor / etc. — extractor-specific tags carried through
+
+test:
+  rate_limit_seconds: 1
+  user_agent: "Atlas-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+  documents:
+    - source_key: "test:smoke"
+      url: "https://example.com/"
+      content_type: "text/html"
+      label: "Phase 1 plumbing smoke test"
+
+mbie_acceptable_solution:
+  rate_limit_seconds: 2
+  user_agent: "Atlas-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+  documents: []
+  # Populated in Phase 2 with E2/AS1, B1/AS1, B2/AS1, H1/AS1, F2/AS1 PDFs
+
+council_guidance:
+  rate_limit_seconds: 3
+  user_agent: "Atlas-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+  documents: []
+  # Populated in Phase 3 with CCC, SDC, WDC guidance PDFs
+
+supplier_datasheet:
+  rate_limit_seconds: 5
+  user_agent: "Atlas-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+  documents: []
+  # Populated in Phase 3 with James Hardie, CHH, Tasman, Pink Batts, etc.

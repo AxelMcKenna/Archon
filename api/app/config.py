@@ -54,6 +54,11 @@ class Settings(BaseSettings):
     # wheels available).
     plan_ocr_refiner_enabled: bool = True
 
+    # Shared secret for admin-only ingestion endpoints (POST /admin/ingest/*).
+    # Empty default forces the route to 500 in deployments that haven't
+    # explicitly set it, so we don't accidentally expose an open trigger.
+    admin_ingest_token: str = ""
+
     env: str = "dev"
 
 
