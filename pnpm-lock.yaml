@@ -16,7 +16,7 @@ importers:
 
   web:
     dependencies:
-      '@atlas/shared':
+      '@archon/shared':
         specifier: workspace:*
         version: link:../shared
       '@supabase/ssr':

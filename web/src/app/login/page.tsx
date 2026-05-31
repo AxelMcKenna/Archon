@@ -58,7 +58,7 @@ function LoginForm() {
               href="/"
               className="font-display uppercase font-bold tracking-[0.16em] text-[22px] text-ink-900 transition-colors hover:text-ink-700"
             >
-              Atlas
+              Archon
             </Link>
             <div className="mt-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-ink-500">
               <span className="h-px w-6 bg-accent/50" />

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { taxonomy } from "@atlas/shared";
+import { taxonomy } from "@archon/shared";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { UploadRfiInline } from "@/app/plans/upload-rfi-inline";
 import { LetterReview } from "@/app/projects/[id]/rfi/[letterId]/letter-review";

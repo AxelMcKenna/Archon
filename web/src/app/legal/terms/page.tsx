@@ -1,4 +1,4 @@
-export const metadata = { title: "Terms — Atlas" };
+export const metadata = { title: "Terms — Archon" };
 
 export default function TermsPage() {
   return (
@@ -6,9 +6,9 @@ export default function TermsPage() {
       <h1 className="text-2xl font-semibold mb-2">Terms of service</h1>
       <p className="text-ink-500 text-sm">Last updated: 8 May 2026</p>
 
-      <h2 className="mt-6 font-semibold text-lg">What Atlas is</h2>
+      <h2 className="mt-6 font-semibold text-lg">What Archon is</h2>
       <p className="text-sm">
-        Atlas helps applicants prepare and respond to Building Consent
+        Archon helps applicants prepare and respond to Building Consent
         Authority Requests for Information. It is a drafting and document-
         assembly tool. It does not lodge applications with councils on your
         behalf.
@@ -16,7 +16,7 @@ export default function TermsPage() {
 
       <h2 className="mt-6 font-semibold text-lg">Not a substitute for professional advice</h2>
       <p className="text-sm">
-        Drafts produced by Atlas are a starting point. You — or a Licensed
+        Drafts produced by Archon are a starting point. You — or a Licensed
         Building Practitioner, architect, or engineer working on your project —
         remain responsible for the technical correctness of every response. We
         do not warrant that classifications or drafts are correct.
@@ -30,7 +30,7 @@ export default function TermsPage() {
 
       <h2 className="mt-6 font-semibold text-lg">Limitation of liability</h2>
       <p className="text-sm">
-        To the extent permitted by law, Atlas's liability for any claim
+        To the extent permitted by law, Archon's liability for any claim
         arising out of use of the service is limited to fees paid in the 12
         months preceding the claim.
       </p>

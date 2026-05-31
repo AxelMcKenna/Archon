@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { taxonomy } from "@atlas/shared";
+import { taxonomy } from "@archon/shared";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { UploadDrawingPanel } from "@/app/plans/upload-drawing-panel";
 import { PlanReview } from "@/app/plans/plan-review";

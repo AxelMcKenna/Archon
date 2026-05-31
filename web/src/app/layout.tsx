@@ -24,7 +24,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Atlas — Construction Management",
+  title: "Archon — Construction Management",
   description: "AI-powered construction management — consents, RFIs, inspections.",
 };
 

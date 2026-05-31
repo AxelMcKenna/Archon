@@ -95,7 +95,7 @@ wheels = [
 ]
 
 [[package]]
-name = "atlas-api"
+name = "archon-api"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

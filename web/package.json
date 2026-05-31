@@ -1,5 +1,5 @@
 {
-  "name": "@atlas/web",
+  "name": "@archon/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,7 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@atlas/shared": "workspace:*",
+    "@archon/shared": "workspace:*",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.46.1",
     "lucide-react": "^0.460.0",

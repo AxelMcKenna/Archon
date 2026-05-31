@@ -102,8 +102,8 @@ def call_openrouter_tool(
         "Content-Type": "application/json",
         # OpenRouter asks for a referer/title for usage analytics; harmless
         # but useful when reading their dashboard.
-        "HTTP-Referer": settings.openrouter_referer or "https://atlas.local",
-        "X-Title": "ATLAS",
+        "HTTP-Referer": settings.openrouter_referer or "https://archon.local",
+        "X-Title": "ARCHON",
     }
 
     def _once() -> OpenRouterResult:

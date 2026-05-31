@@ -1,7 +1,7 @@
 [project]
-name = "atlas-agent"
+name = "archon-agent"
 version = "0.1.0"
-description = "ATLAS Project Copilot — agentic orchestration over the existing FastAPI AI endpoints"
+description = "ARCHON Project Copilot — agentic orchestration over the existing FastAPI AI endpoints"
 requires-python = ">=3.12"
 dependencies = [
   "fastapi>=0.115",

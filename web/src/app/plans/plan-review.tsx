@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { API_BASE, apiFetch } from "@/lib/api";
-import { taxonomy } from "@atlas/shared";
+import { taxonomy } from "@archon/shared";
 import { isStalled } from "@/lib/job-status";
 
 type Confidence = "high" | "medium" | "low";

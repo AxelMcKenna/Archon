@@ -1,4 +1,4 @@
-project_id = "atlas-rfi"
+project_id = "archon-rfi"
 
 [api]
 enabled = true

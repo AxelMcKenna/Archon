@@ -3,8 +3,8 @@ import { LegalShell } from "@/components/legal-shell";
 import { legal } from "@/lib/legal-config";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — Atlas",
-  description: "The terms governing your use of the Atlas platform.",
+  title: "Terms of Service — Archon",
+  description: "The terms governing your use of the Archon platform.",
 };
 
 export default function TermsPage() {
@@ -12,11 +12,11 @@ export default function TermsPage() {
     <LegalShell
       title="Terms of Service"
       activePath="/terms"
-      intro={`These terms are a binding agreement between you (and the organisation you represent) and ${legal.entity} governing your use of the Atlas platform. By creating an account or using Atlas, you agree to these terms.`}
+      intro={`These terms are a binding agreement between you (and the organisation you represent) and ${legal.entity} governing your use of the Archon platform. By creating an account or using Archon, you agree to these terms.`}
     >
       <h2>1. The agreement</h2>
       <p>
-        &quot;Atlas&quot;, &quot;we&quot;, or &quot;us&quot; means {legal.entity}.
+        &quot;Archon&quot;, &quot;we&quot;, or &quot;us&quot; means {legal.entity}.
         &quot;You&quot; or &quot;Customer&quot; means the person or organisation
         using the service. If you accept these terms on behalf of an organisation,
         you warrant that you have authority to bind it.
@@ -33,12 +33,12 @@ export default function TermsPage() {
           You must notify us promptly of any unauthorised use at{" "}
           <a href={`mailto:${legal.supportEmail}`}>{legal.supportEmail}</a>.
         </li>
-        <li>You must be at least 16 years old to use Atlas.</li>
+        <li>You must be at least 16 years old to use Archon.</li>
       </ul>
 
       <h2>3. Acceptable use</h2>
       <p>
-        Your use of Atlas must comply with our{" "}
+        Your use of Archon must comply with our{" "}
         <a href="/acceptable-use">Acceptable Use Policy</a>, which is incorporated
         into these terms. We may suspend or terminate access for material or
         repeated breaches.
@@ -57,7 +57,7 @@ export default function TermsPage() {
 
       <h2>5. AI features &amp; professional-advice disclaimer</h2>
       <p>
-        Atlas uses automated AI systems to analyse plans, interpret RFIs, identify
+        Archon uses automated AI systems to analyse plans, interpret RFIs, identify
         potential compliance issues, and draft responses. <strong>This output is
         provided for assistance only.</strong> It may be inaccurate, incomplete, or
         out of date, and it does not constitute legal, engineering, architectural,
@@ -66,7 +66,7 @@ export default function TermsPage() {
       <p>
         You must independently verify all AI output and rely on the judgement of
         appropriately qualified and licensed professionals. Nothing produced by
-        Atlas is a determination, approval, or assurance of compliance with the New
+        Archon is a determination, approval, or assurance of compliance with the New
         Zealand Building Code, any standard, or any consent condition, and it does
         not replace the assessment of a Building Consent Authority or other
         regulator. You are solely responsible for any decisions made or documents
@@ -75,7 +75,7 @@ export default function TermsPage() {
 
       <h2>6. Our intellectual property</h2>
       <p>
-        The Atlas platform, software, and all related intellectual property are and
+        The Archon platform, software, and all related intellectual property are and
         remain owned by us and our licensors. We grant you a limited,
         non-exclusive, non-transferable right to use the service during your
         subscription, subject to these terms. You may not copy, reverse-engineer,
@@ -92,7 +92,7 @@ export default function TermsPage() {
 
       <h2>8. Third-party services</h2>
       <p>
-        Atlas integrates with third-party services (including our hosting,
+        Archon integrates with third-party services (including our hosting,
         database, authentication, and AI providers). We are not responsible for
         third-party services, and your use of them may be subject to their own
         terms.
@@ -135,7 +135,7 @@ export default function TermsPage() {
 
       <h2>13. Term &amp; termination</h2>
       <p>
-        These terms apply while you use the service. You may stop using Atlas and
+        These terms apply while you use the service. You may stop using Archon and
         close your account at any time. We may suspend or terminate access if you
         materially breach these terms, fail to pay, or where required by law. On
         termination, your right to use the service ends; we will make Customer Data

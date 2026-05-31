@@ -1,4 +1,4 @@
-# Synthetic RFI Corpus — ATLAS
+# Synthetic RFI Corpus — ARCHON
 
 **Purpose**: Bootstrap classifier + draft-response training before real RFI samples arrive from design partners.
 

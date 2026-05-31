@@ -26,7 +26,7 @@ from app.ingestion.scraping import fetcher
 
 log = logging.getLogger(__name__)
 
-USER_AGENT = "Atlas-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+USER_AGENT = "Archon-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
 DEFAULT_RATE_SECONDS = 1.5
 
 
@@ -151,7 +151,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--backend",
         choices=("supabase", "sqlite"),
         default="supabase",
-        help="where to write materials (default: supabase ATLAS project)",
+        help="where to write materials (default: supabase ARCHON project)",
     )
     p.add_argument(
         "--db",

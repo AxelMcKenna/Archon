@@ -18,7 +18,7 @@
 
 test:
   rate_limit_seconds: 1
-  user_agent: "Atlas-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+  user_agent: "Archon-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
   documents:
     - source_key: "test:smoke"
       url: "https://example.com/"
@@ -27,7 +27,7 @@ test:
 
 mbie_acceptable_solution:
   rate_limit_seconds: 2
-  user_agent: "Atlas-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+  user_agent: "Archon-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
   # IMPORTANT: MBIE amendment versions change the URL path. URLs below
   # verified against building.govt.nz landing pages on 2026-05-27.
   # When MBIE bumps an amendment, update the URL here — content_hash
@@ -147,7 +147,7 @@ mbie_acceptable_solution:
 
 council_guidance:
   rate_limit_seconds: 3
-  user_agent: "Atlas-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+  user_agent: "Archon-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
   # Council guidance URLs are less stable than MBIE's. The councils
   # restructure their websites periodically; if a URL 404s, search the
   # council site for the current location and update here. Each entry
@@ -172,7 +172,7 @@ council_guidance:
 
 supplier_datasheet:
   rate_limit_seconds: 5
-  user_agent: "Atlas-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+  user_agent: "Archon-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
   # Manufacturer datasheet URLs are the least stable of the three source
   # kinds — suppliers redesign their sites frequently and rotate PDFs.
   # Verify each URL before the first ingest run. Each entry carries a

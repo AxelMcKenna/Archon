@@ -6,14 +6,14 @@
  * tailored templates, not legal advice.
  */
 export const legal = {
-  product: "Atlas",
+  product: "Archon",
   /** Registered legal entity that operates the service. */
-  entity: "[Atlas Technologies Limited]",
+  entity: "[Archon Technologies Limited]",
   /** NZ Companies Office number, if registered. */
   companyNumber: "[NZBN / Company No.]",
-  website: "https://atlas.build",
-  contactEmail: "privacy@atlas.build",
-  supportEmail: "support@atlas.build",
+  website: "https://archon.co.nz",
+  contactEmail: "privacy@archon.co.nz",
+  supportEmail: "support@archon.co.nz",
   address: "[Registered office address], Auckland, New Zealand",
   jurisdiction: "New Zealand",
   governingLaw: "New Zealand",

@@ -26,7 +26,7 @@ export default async function Home() {
           href="/"
           className="font-display uppercase font-bold tracking-[0.16em] text-[22px] text-ink-900 transition-colors hover:text-ink-700"
         >
-          Atlas
+          Archon
         </Link>
         <Link
           href={isSignedIn ? "/dashboard" : "/login"}
@@ -43,7 +43,7 @@ export default async function Home() {
           <Reveal className="col-span-12 md:col-span-7 lg:col-span-6">
             <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-ink-500">
               <span className="h-px w-8 bg-accent/50" />
-              Atlas - Construction Management
+              Archon - Construction Management
             </div>
             <h1
               className="mt-5 uppercase font-medium leading-[0.95] tracking-[0.02em] text-[44px] sm:text-[60px] lg:text-[76px] text-ink-900"
@@ -268,7 +268,7 @@ export default async function Home() {
                   before lodgement.
                 </h2>
                 <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
-                  Drop in your drawing set. Atlas reads every sheet, runs each
+                  Drop in your drawing set. Archon reads every sheet, runs each
                   room against the NZBC, and lands each finding on the exact
                   region of the page – with the clause it breaches.
                 </p>
@@ -964,7 +964,7 @@ export default async function Home() {
                 Draft the reply.
               </h2>
               <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
-                Drop in any council RFI. Atlas reads it like a senior
+                Drop in any council RFI. Archon reads it like a senior
                 consultant – interprets each ask, locates the answer across
                 your drawings, specs, and consent, and writes a council-ready
                 response.
@@ -995,7 +995,7 @@ export default async function Home() {
                 <div className="flex items-center justify-between border-b border-ink-100 px-5 py-3">
                   <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-ink-500">
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
-                    Atlas agent · Bayswater Townhouses
+                    Archon agent · Bayswater Townhouses
                   </div>
                   <div className="font-mono tabular-nums text-[10px] text-ink-400">
                     session 4f2a
@@ -1044,7 +1044,7 @@ export default async function Home() {
 
                   <div className="flex items-center justify-between border-t border-ink-100 pt-4">
                     <div className="text-[11px] text-ink-500">
-                      Atlas drafted a response citing D1/AS1 §5.1.
+                      Archon drafted a response citing D1/AS1 §5.1.
                     </div>
                     <button
                       type="button"
@@ -1117,7 +1117,7 @@ export default async function Home() {
 
             <Reveal delay={120} className="col-span-12 mt-10 md:col-span-4 md:col-start-9 md:mt-0 md:self-end md:pb-6">
               <p className="max-w-sm text-[15px] leading-relaxed text-ink-600">
-                Bring your projects, your drawings, and your RFIs. Atlas turns
+                Bring your projects, your drawings, and your RFIs. Archon turns
                 them into a coordinated, queryable workspace – so your crew
                 can build.
               </p>

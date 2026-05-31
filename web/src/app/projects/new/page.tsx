@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
-import { taxonomy } from "@atlas/shared";
+import { taxonomy } from "@archon/shared";
 import { ProjectCreateButton } from "@/components/project-create-button";
 import { AddressAutocompleteInput } from "@/components/address-autocomplete-input";
 import { bootstrapConsentAssessment } from "@/lib/consent-assessment-bootstrap";

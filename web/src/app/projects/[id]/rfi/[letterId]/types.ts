@@ -1,4 +1,4 @@
-import type { ExtractedEntities } from "@atlas/shared";
+import type { ExtractedEntities } from "@archon/shared";
 
 export type ReconLog = {
   id: string;

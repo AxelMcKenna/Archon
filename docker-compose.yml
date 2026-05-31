@@ -3,8 +3,8 @@ services:
     build:
       context: .
       dockerfile: api/Dockerfile
-    image: atlas-api:latest
-    container_name: atlas-api
+    image: archon-api:latest
+    container_name: archon-api
     restart: unless-stopped
     env_file:
       - api/.env
@@ -15,8 +15,8 @@ services:
     build:
       context: .
       dockerfile: llm-gateway/Dockerfile
-    image: atlas-agent:latest
-    container_name: atlas-llm-gateway
+    image: archon-agent:latest
+    container_name: archon-llm-gateway
     restart: unless-stopped
     env_file:
       - llm-gateway/.env

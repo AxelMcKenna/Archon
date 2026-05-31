@@ -30,7 +30,7 @@ from app.routes import risk as risk_routes
 
 log = logging.getLogger("app")
 
-app = FastAPI(title="ATLAS RFI API", version="0.1.0")
+app = FastAPI(title="ARCHON RFI API", version="0.1.0")
 app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
 
@@ -82,12 +82,12 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "https://atlas-web.vercel.app",
+        "https://archon-web.vercel.app",
     ],
     allow_origin_regex=(
         r"http://(localhost|127\.0\.0\.1)(:\d+)?"
-        r"|https://atlas-web-[a-z0-9-]+-axel-mckennas-projects\.vercel\.app"
-        r"|https://atlas-[a-z0-9]+-axel-mckennas-projects\.vercel\.app"
+        r"|https://archon-web-[a-z0-9-]+-axel-mckennas-projects\.vercel\.app"
+        r"|https://archon-[a-z0-9]+-axel-mckennas-projects\.vercel\.app"
     ),
     allow_credentials=True,
     allow_methods=["*"],
