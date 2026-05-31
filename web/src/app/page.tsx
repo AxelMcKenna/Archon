@@ -43,7 +43,7 @@ export default async function Home() {
           <Reveal className="col-span-12 md:col-span-7 lg:col-span-6">
             <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-ink-500">
               <span className="h-px w-8 bg-accent/50" />
-              Archon - Construction Management
+              Archon · Construction Management
             </div>
             <h1
               className="mt-5 uppercase font-medium leading-[0.95] tracking-[0.02em] text-[44px] sm:text-[60px] lg:text-[76px] text-ink-900"
@@ -56,9 +56,9 @@ export default async function Home() {
               by AI.
             </h1>
             <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
-              The intelligence behind modern builds. Fluent in every consent,
-              every clause, every condition. Alert to every RFI, every
-              inspection, every blocker – so your crew can build.
+              The intelligence behind modern builds. It knows every consent,
+              clause, and condition on your project, and watches every RFI,
+              inspection, and blocker so your crew can keep building.
             </p>
             <div className="mt-7 flex items-center gap-5">
               <Link
@@ -110,7 +110,7 @@ export default async function Home() {
             <Reveal className="col-span-12 md:col-span-5">
               <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
                 <span className="h-px w-8 bg-accent/50" />
-                01 – Project Management
+                01 · Project Management
               </div>
               <h2
                 className="mt-5 font-medium leading-[1.02] tracking-[0.01em] text-[40px] md:text-[56px] text-ink-900"
@@ -122,8 +122,8 @@ export default async function Home() {
               </h2>
               <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
                 Track every build from lodgement to sign-off. Addresses, BCA
-                references, consent status, and inspections – surfaced in a
-                single, queryable workspace.
+                references, consent status, and inspections all live in one
+                queryable workspace.
               </p>
               <ul className="mt-6 space-y-2 text-[13px] text-ink-700">
                 <li className="flex items-start gap-2">
@@ -257,7 +257,7 @@ export default async function Home() {
               <Reveal className="col-span-12 md:col-span-7">
                 <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
                   <span className="h-px w-8 bg-accent/50" />
-                  02 – Plan Analysis
+                  02 · Plan Analysis
                 </div>
                 <h2
                   className="mt-5 font-medium leading-[1.02] tracking-[0.01em] text-[40px] md:text-[56px] text-ink-900"
@@ -269,8 +269,8 @@ export default async function Home() {
                 </h2>
                 <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
                   Drop in your drawing set. Archon reads every sheet, runs each
-                  room against the NZBC, and lands each finding on the exact
-                  region of the page – with the clause it breaches.
+                  room against the NZBC, and pins each finding to the exact
+                  region of the page, with the clause it breaches.
                 </p>
               </Reveal>
               <Reveal delay={120} className="col-span-12 md:col-span-5 mt-6 md:mt-0 md:pt-20">
@@ -953,7 +953,7 @@ export default async function Home() {
             <Reveal className="order-1 col-span-12 md:order-1 md:col-span-5">
               <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
                 <span className="h-px w-8 bg-accent/50" />
-                03 – RFI Auto-response
+                03 · RFI Auto-response
               </div>
               <h2
                 className="mt-5 font-medium leading-[1.02] tracking-[0.01em] text-[40px] md:text-[56px] text-ink-900"
@@ -965,7 +965,7 @@ export default async function Home() {
               </h2>
               <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
                 Drop in any council RFI. Archon reads it like a senior
-                consultant – interprets each ask, locates the answer across
+                consultant. It interprets each ask, locates the answer across
                 your drawings, specs, and consent, and writes a council-ready
                 response.
               </p>
@@ -1061,7 +1061,7 @@ export default async function Home() {
             <Reveal className="order-1 col-span-12 md:order-2 md:col-span-5">
               <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
                 <span className="h-px w-8 bg-accent/50" />
-                04 – AI co-pilot
+                04 · AI co-pilot
               </div>
               <h2
                 className="mt-5 font-medium leading-[1.02] tracking-[0.01em] text-[40px] md:text-[56px] text-ink-900"
@@ -1069,7 +1069,7 @@ export default async function Home() {
               >
                 Ask the drawing.
                 <br />
-                Draft the reply.
+                Get the answer.
               </h2>
               <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
                 A conversational agent that knows your project, grounds every
@@ -1118,8 +1118,8 @@ export default async function Home() {
             <Reveal delay={120} className="col-span-12 mt-10 md:col-span-4 md:col-start-9 md:mt-0 md:self-end md:pb-6">
               <p className="max-w-sm text-[15px] leading-relaxed text-ink-600">
                 Bring your projects, your drawings, and your RFIs. Archon turns
-                them into a coordinated, queryable workspace – so your crew
-                can build.
+                them into a coordinated, queryable workspace so your crew can
+                build.
               </p>
               <div className="mt-8 flex items-center gap-5">
                 <Link
