@@ -13,10 +13,6 @@ class Settings(BaseSettings):
     supabase_service_role_key: str = ""
     supabase_anon_key: str = ""
 
-    # ── Anthropic (consent assessment / legacy) ──────────────────────────
-    anthropic_api_key: str = ""
-    anthropic_model: str = "claude-opus-4-7"
-
     # ── Address checklist / geocoding ────────────────────────────────────
     geoapify_api_key: str = ""
 
@@ -30,6 +26,15 @@ class Settings(BaseSettings):
     openrouter_model: str = "openai/gpt-5"
     openrouter_verifier_model: str = "openai/gpt-4o-mini"
     openrouter_referer: str = ""
+
+    # Retry/backoff for LLM provider calls. Transient failures (429/5xx/
+    # network blips/flaky tool calls) are retried with exponential backoff
+    # before the call is allowed to fail.
+    llm_max_attempts: int = 3
+    # On exhausting retries against the primary provider, fail over to the
+    # other provider (OpenRouter <-> Gemini) when its API key is configured.
+    # Survives a single-provider outage at the cost of a model swap.
+    llm_provider_fallback: bool = True
 
     # Per-touchpoint provider toggle. Values: gemini | openrouter
     plan_analyser_provider: Provider = "gemini"

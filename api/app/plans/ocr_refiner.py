@@ -19,7 +19,7 @@ import re
 from functools import lru_cache
 from typing import Any
 
-import fitz  # PyMuPDF — already in deps for plan_bbox_refiner
+import fitz  # PyMuPDF — already in deps for app.plans.bbox_refiner
 import Levenshtein
 import numpy as np
 from PIL import Image

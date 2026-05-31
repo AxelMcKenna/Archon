@@ -73,7 +73,7 @@ def _cache_key(item: RfiItem, bca: str, project_type: str, prompt_version: str) 
     return h.hexdigest()
 
 
-# In-memory cache (process-local). Real cache lives in DB / redis in prod.
+# In-memory cache (process-local). Real cache lives in DB / redis in prod. TODO: set redis up
 _AI_CACHE: dict[str, AiPrediction] = {}
 
 

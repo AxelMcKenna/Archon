@@ -10,7 +10,7 @@ if (typeof window !== "undefined") {
 
 const DEBUG = typeof window !== "undefined" && (window as { __AGENT_DEBUG__?: boolean }).__AGENT_DEBUG__ !== false;
 const dlog = (...args: unknown[]) => {
-  if (DEBUG) console.log("[agent-client]", ...args);
+  if (DEBUG) console.log("[llm-gateway-client]", ...args);
 };
 
 export type AgentRole = "user" | "assistant";
@@ -41,16 +41,16 @@ export async function resetConversation(conversationId: string): Promise<void> {
 }
 
 /**
- * POSTs to the agent /chat endpoint and yields parsed SSE events.
+ * POSTs to the llm-gateway /chat endpoint and yields parsed SSE events.
  * Throws if `NEXT_PUBLIC_AGENT_URL` is unset or the service is unreachable —
- * callers should treat any throw as "agent unavailable" and degrade gracefully.
+ * callers should treat any throw as "llm-gateway unavailable" and degrade gracefully.
  */
 export async function* streamAgent(
   body: AgentRequest,
   signal?: AbortSignal,
 ): AsyncGenerator<AgentEvent> {
   if (!AGENT_BASE) {
-    throw new Error("agent service not configured");
+    throw new Error("llm-gateway service not configured");
   }
   dlog("POST /chat", { url: `${AGENT_BASE}/chat`, body });
   const res = await fetch(`${AGENT_BASE}/chat`, {
@@ -61,7 +61,12 @@ export async function* streamAgent(
   });
   dlog("response", { status: res.status, ok: res.ok, hasBody: !!res.body });
   if (!res.ok || !res.body) {
-    throw new Error(`agent ${res.status}: ${await res.text().catch(() => "")}`);
+    // Never surface the raw upstream body to the UI or logs: an error page
+    // (e.g. a 404 HTML response) can embed sensitive data such as the session
+    // token in its serialized payload. Log only the status; show generic text.
+    const detail = await res.text().catch(() => "");
+    dlog("agent request failed", { status: res.status, bodyLength: detail.length });
+    throw new Error(`The assistant is unavailable (error ${res.status}). Please try again.`);
   }
 
   // Keep a clone so we can fall back to .text() if streaming yields nothing (Safari quirk).

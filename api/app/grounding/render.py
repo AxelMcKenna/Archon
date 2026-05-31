@@ -169,7 +169,7 @@ def render_covering_letter(
             "",
             "Yours faithfully,",
             "",
-            "[Applicant / agent name]",
+            "[Applicant / llm-gateway name]",
         ]
     )
     return "\n".join(lines)

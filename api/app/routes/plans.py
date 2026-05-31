@@ -7,6 +7,8 @@ in ``app.plans.stats``.
 
 from __future__ import annotations
 
+import asyncio
+import logging
 from typing import Any
 from uuid import UUID
 
@@ -27,6 +29,7 @@ from app.storage import PLANS_BUCKET, download, signed_url
 from app.utils.safe_filename import safe_filename
 
 router = APIRouter()
+log = logging.getLogger(__name__)
 
 ALLOWED_MEDIA = {"application/pdf", "image/jpeg", "image/png"}
 MAX_BYTES = 50 * 1024 * 1024
@@ -38,6 +41,7 @@ async def upload_and_analyse(
     request: Request,
     file: UploadFile = File(...),
     project_id: UUID = Form(...),
+    analyse: bool = Form(True),
     db: Client = Depends(get_db),
 ) -> dict[str, Any]:
     if file.content_type not in ALLOWED_MEDIA:
@@ -58,16 +62,19 @@ async def upload_and_analyse(
         raise HTTPException(404, "project not found")
 
     try:
-        result = run_pipeline(
+        result = await asyncio.to_thread(
+            run_pipeline,
             db=db,
             project_id=str(project_id),
             project=proj,
             filename=safe_filename(file.filename, default="plan.pdf"),
             content_type=file.content_type,
             payload=payload,
+            analyse=analyse,
         )
     except Exception as e:
-        raise HTTPException(500, f"analysis failed: {e}") from e
+        log.exception("plan analysis failed (project_id=%s)", project_id)
+        raise HTTPException(500, "analysis failed") from e
 
     return {
         "plan_id": result.plan_id,
@@ -129,8 +136,11 @@ def _load_plan_for_render(
     )
     if not row:
         raise HTTPException(404, "plan not found")
-    if row.get("status") != "analysed":
-        raise HTTPException(409, f"plan not analysed (status={row.get('status')})")
+    # Rendering page images / overlays only needs the stored file, not a
+    # completed RFI analysis — VE overlays run on plans that were never
+    # RFI-analysed. Missing analysis just yields an empty flag set.
+    if not row.get("storage_path"):
+        raise HTTPException(409, "plan has no stored file to render")
     file_bytes = download(db, bucket=PLANS_BUCKET, path=row["storage_path"])
     return row, file_bytes
 
@@ -223,16 +233,17 @@ async def trigger_value_engineering(
     db: Client = Depends(get_db),
 ) -> dict[str, Any]:
     try:
-        result = run_value_engineering(db, plan_id=plan_id)
+        result = await asyncio.to_thread(run_value_engineering, db, plan_id=plan_id)
     except LookupError as e:
         raise HTTPException(404, str(e)) from e
     except ValueError as e:
         raise HTTPException(409, str(e)) from e
     except Exception as e:
-        raise HTTPException(500, f"value engineering failed: {e}") from e
+        log.exception("value engineering failed (plan_id=%s)", plan_id)
+        raise HTTPException(500, "value engineering failed") from e
     return {
         "ve_id": result.ve_id,
-        "plan_id": result.plan_id,
+        "plan_id": result.source_id,
         "opportunities_count": result.opportunities_count,
         "processing_ms": result.processing_ms,
         "cost_usd": result.cost_usd,
@@ -250,6 +261,53 @@ async def get_value_engineering(
     if not row:
         return None
     return row
+
+
+def _opportunities_to_flags(opportunities: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Shape VE opportunities into the overlay renderer's flag contract.
+
+    Cost-impact bands map to ``ve_*`` severity keys (emerald) and the model
+    bbox is passed through. Opportunities without a bbox are dropped so the
+    pin numbering matches only the localised items.
+    """
+    flags: list[dict[str, Any]] = []
+    for o in opportunities:
+        bbox = o.get("bbox")
+        if not (isinstance(bbox, (list, tuple)) and len(bbox) == 4):
+            continue
+        impact = str(o.get("cost_impact") or "medium")
+        flags.append(
+            {
+                "page": int(o.get("page") or 1),
+                "bbox": bbox,
+                "severity": f"ve_{impact}",
+            }
+        )
+    return flags
+
+
+@router.get("/{plan_id}/value-engineering/overlay.pdf")
+async def value_engineering_overlay_pdf(
+    plan_id: str,
+    db: Client = Depends(get_db),
+) -> Response:
+    row, file_bytes = _load_plan_for_render(db, plan_id)
+    ve = get_latest_value_engineering(db, plan_id=plan_id)
+    opportunities = (ve or {}).get("opportunities") or []
+    pdf = render_overlay_pdf(
+        file_bytes=file_bytes,
+        media_type=row["mime_type"],
+        flags=_opportunities_to_flags(opportunities),
+    )
+    base = (row.get("filename") or "plan").rsplit(".", 1)[0]
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{base}-value-engineering.pdf"',
+            "Cache-Control": "no-store",
+        },
+    )
 
 
 @router.delete("/{plan_id}")

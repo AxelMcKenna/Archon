@@ -29,33 +29,38 @@ export default async function ProjectRfis({
   const pipelineFailed = pipeline === "failed";
   const supabase = await getSupabaseServer();
 
-  const { data: project } = await supabase
-    .from("projects")
-    .select("id, address, bca, project_type")
-    .eq("id", projectId)
-    .single();
+  // project / letters / plans / cads are independent — fetch them together
+  // rather than awaiting the project first (it only gates the notFound check).
+  const [
+    { data: project },
+    { data: lettersRaw },
+    { data: plansRaw },
+    { data: cadsRaw },
+  ] = await Promise.all([
+    supabase
+      .from("projects")
+      .select("id, address, bca, project_type")
+      .eq("id", projectId)
+      .single(),
+    supabase
+      .from("rfi_letters")
+      .select(
+        "id, project_id, rfi_number, issue_date, status, created_at, extraction_metadata",
+      )
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("plan_uploads")
+      .select("id, project_id, filename, status, created_at")
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("cad_uploads")
+      .select("id, project_id, filename, status, created_at")
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false }),
+  ]);
   if (!project) notFound();
-
-  const [{ data: lettersRaw }, { data: plansRaw }, { data: cadsRaw }] =
-    await Promise.all([
-      supabase
-        .from("rfi_letters")
-        .select(
-          "id, project_id, rfi_number, issue_date, status, created_at, extraction_metadata",
-        )
-        .eq("project_id", projectId)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("plan_uploads")
-        .select("id, project_id, filename, status, created_at")
-        .eq("project_id", projectId)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("cad_uploads")
-        .select("id, project_id, filename, status, created_at")
-        .eq("project_id", projectId)
-        .order("created_at", { ascending: false }),
-    ]);
 
   const letters = (lettersRaw ?? []) as unknown as LetterRow[];
   const pdfRows = (plansRaw ?? []) as Array<{
@@ -132,24 +137,23 @@ export default async function ProjectRfis({
         .order("ordering");
 
       const itemIds = (items ?? []).map((i) => i.id);
-      const { data: log } = itemIds.length
-        ? await supabase.from("reconciliation_log").select("*").in("rfi_item_id", itemIds)
-        : { data: [] };
-      const { data: drafts } = itemIds.length
-        ? await supabase.from("responses").select("*").in("rfi_item_id", itemIds)
-        : { data: [] };
-      const { data: atts } = itemIds.length
-        ? await supabase.from("attachments").select("*").in("rfi_item_id", itemIds)
-        : { data: [] };
-      const { data: ev } = itemIds.length
-        ? await supabase
-            .from("rfi_item_plan_evidence")
-            .select(
-              "rfi_item_id, source, confidence, rationale, evidence, " +
-                "flag_index, plan_upload_id, cad_upload_id",
-            )
-            .in("rfi_item_id", itemIds)
-        : { data: [] };
+      // log / drafts / atts / ev all key off the same itemIds and don't depend
+      // on each other — run them concurrently instead of four serial awaits.
+      const [{ data: log }, { data: drafts }, { data: atts }, { data: ev }] =
+        itemIds.length
+          ? await Promise.all([
+              supabase.from("reconciliation_log").select("*").in("rfi_item_id", itemIds),
+              supabase.from("responses").select("*").in("rfi_item_id", itemIds),
+              supabase.from("attachments").select("*").in("rfi_item_id", itemIds),
+              supabase
+                .from("rfi_item_plan_evidence")
+                .select(
+                  "rfi_item_id, source, confidence, rationale, evidence, " +
+                    "flag_index, plan_upload_id, cad_upload_id",
+                )
+                .in("rfi_item_id", itemIds),
+            ])
+          : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];
 
       const logBy = new Map((log ?? []).map((l) => [l.rfi_item_id, l]));
       const draftBy = new Map((drafts ?? []).map((d) => [d.rfi_item_id, d]));

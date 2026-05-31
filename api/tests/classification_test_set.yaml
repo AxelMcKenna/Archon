@@ -3,7 +3,7 @@
 # Each item: raw_text + ground-truth primary category + severity.
 #
 # Distribution roughly mirrors BRANZ findings:
-#   B1 ~30%, E2 ~20%, docs ~25%, others ~25%.
+#   B1 ~30%, E2 ~20%, wiki ~25%, others ~25%.
 
 cases:
   # ─── B1 — Structure ──────────────────────────────────────────────────

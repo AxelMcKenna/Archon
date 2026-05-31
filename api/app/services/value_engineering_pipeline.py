@@ -1,8 +1,9 @@
 """Value-engineering pipeline.
 
-Runs after a plan has been uploaded + RFI-analysed. Looks up the plan
-row, downloads the source file, calls ``analyse_value_engineering``,
-and persists the result to ``plan_value_engineering``.
+Runs over an uploaded drawing and persists the result to
+``plan_value_engineering``. The source can be a PDF plan (``plan_uploads``)
+or a DXF CAD upload (``cad_uploads``); VE re-renders the file and runs its
+own vision pass, so it does not depend on RFI analysis having completed.
 
 Caching: if a prior VE run exists for the same (content_hash, version,
 provider, model) it's cloned into a new row with ``cost_usd = 0`` so
@@ -11,38 +12,54 @@ the user gets instant results on re-trigger.
 
 from __future__ import annotations
 
-import hashlib
-import time
+from collections.abc import Callable
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import Any
 from uuid import uuid4
 
 from supabase import Client
 
 from app.config import get_settings
-from app.storage import PLANS_BUCKET, download
-from app.value_engineering import (
+from app.services.analysis_runner import (
+    content_hash as hash_bytes,
+)
+from app.services.analysis_runner import (
+    find_cached_row,
+    prompt_fingerprint,
+    run_and_persist,
+)
+from app.storage import CAD_BUCKET, PLANS_BUCKET, download
+from app.vision.core.invoker import analyser_provider_model
+from app.vision.core.prompts import load_prompt
+from app.vision.value_engineering import (
     VALUE_ENGINEERING_VERSION,
     analyse_value_engineering,
+    analyse_value_engineering_cad,
 )
+from app.vision.value_engineering.schema import ACTIVE_PROMPT
+
+# (payload, prompt_version, metrics, extras)
+AnalyseFn = Callable[[], tuple[dict[str, Any], str, Any, dict[str, Any]]]
+
+_CACHED_SELECT = "opportunities, summary, processing_ms, image_count, dpi_breakdown"
+
+
+@lru_cache
+def _cache_version() -> str:
+    """Cache-key version that invalidates on any analyser or prompt edit."""
+    return prompt_fingerprint(VALUE_ENGINEERING_VERSION, (ACTIVE_PROMPT,))
 
 
 @dataclass
 class ValueEngineeringResult:
     ve_id: str
-    plan_id: str
+    source_id: str
     opportunities_count: int
     processing_ms: int
     cost_usd: float
     truncated: bool
     cached: bool
-
-
-def _resolve_provider_model() -> tuple[str, str]:
-    s = get_settings()
-    provider = s.plan_analyser_provider
-    model = s.openrouter_model if provider == "openrouter" else s.gemini_model
-    return provider, model
 
 
 def _load_plan_row(db: Client, plan_id: str) -> dict[str, Any]:
@@ -59,33 +76,42 @@ def _load_plan_row(db: Client, plan_id: str) -> dict[str, Any]:
     )
     if not row:
         raise LookupError(f"plan {plan_id} not found")
-    if row.get("status") != "analysed":
-        raise ValueError(
-            f"plan not ready for VE (status={row.get('status')!r}); "
-            "wait for RFI analysis to finish first"
-        )
+    # VE is self-contained: it re-renders the PDF and runs its own vision
+    # pass, so it does not depend on RFI analysis having completed. It only
+    # needs a stored file to download.
+    if not row.get("storage_path"):
+        raise ValueError("plan has no stored file to analyse")
+    if row.get("status") == "deleted":
+        raise ValueError("plan has been deleted")
     return row
 
 
-def _find_cached_row(
-    db: Client,
-    *,
-    content_hash: str,
-    provider: str,
-    model_id: str,
-    prompt_version: str,
-) -> dict[str, Any] | None:
+def _load_cad_row(db: Client, cad_id: str) -> dict[str, Any]:
+    row = (
+        db.table("cad_uploads")
+        .select(
+            "id, project_id, storage_path, status, content_hash, "
+            "projects(bca, project_type, description)"
+        )
+        .eq("id", cad_id)
+        .maybe_single()
+        .execute()
+        .data
+    )
+    if not row:
+        raise LookupError(f"cad {cad_id} not found")
+    if not row.get("storage_path"):
+        raise ValueError("cad has no stored file to analyse")
+    if row.get("status") == "deleted":
+        raise ValueError("cad has been deleted")
+    return row
+
+
+def _get_latest(db: Client, *, id_field: str, source_id: str) -> dict[str, Any] | None:
     rows = (
         db.table("plan_value_engineering")
-        .select(
-            "opportunities, summary, processing_ms, image_count, dpi_breakdown"
-        )
-        .eq("content_hash", content_hash)
-        .eq("analyser_version", VALUE_ENGINEERING_VERSION)
-        .eq("prompt_version", prompt_version)
-        .eq("provider", provider)
-        .eq("model_id", model_id)
-        .eq("status", "analysed")
+        .select("*")
+        .eq(id_field, source_id)
         .order("created_at", desc=True)
         .limit(1)
         .execute()
@@ -97,16 +123,105 @@ def _find_cached_row(
 def get_latest_value_engineering(
     db: Client, *, plan_id: str
 ) -> dict[str, Any] | None:
-    rows = (
-        db.table("plan_value_engineering")
-        .select("*")
-        .eq("plan_upload_id", plan_id)
-        .order("created_at", desc=True)
-        .limit(1)
-        .execute()
-        .data
+    return _get_latest(db, id_field="plan_upload_id", source_id=plan_id)
+
+
+def get_latest_value_engineering_cad(
+    db: Client, *, cad_id: str
+) -> dict[str, Any] | None:
+    return _get_latest(db, id_field="cad_upload_id", source_id=cad_id)
+
+
+def _run_and_persist(
+    db: Client,
+    *,
+    id_field: str,
+    source_id: str,
+    project_id: str,
+    content_hash: str,
+    analyse: AnalyseFn,
+) -> ValueEngineeringResult:
+    provider, model_id = analyser_provider_model(get_settings())
+    _, prompt_version = load_prompt(ACTIVE_PROMPT)
+    analyser_version = _cache_version()
+
+    cached = find_cached_row(
+        db,
+        table="plan_value_engineering",
+        select=_CACHED_SELECT,
+        filters={
+            "content_hash": content_hash,
+            "analyser_version": analyser_version,
+            "prompt_version": prompt_version,
+            "provider": provider,
+            "model_id": model_id,
+        },
+        newest_first=True,
     )
-    return rows[0] if rows else None
+
+    ve_id = str(uuid4())
+    common_row: dict[str, Any] = {
+        "id": ve_id,
+        id_field: source_id,
+        "project_id": project_id,
+        # analyser_version doubles as the cache key — fingerprint the prompt so
+        # a prompt-body edit invalidates prior cached rows (prompt_version stays
+        # the human-readable frontmatter version).
+        "analyser_version": analyser_version,
+        "prompt_version": prompt_version,
+        "provider": provider,
+        "model_id": model_id,
+        "content_hash": content_hash,
+    }
+
+    def clone_fields(c: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "opportunities": c.get("opportunities") or [],
+            "summary": c.get("summary"),
+            "image_count": c.get("image_count"),
+            "dpi_breakdown": c.get("dpi_breakdown"),
+        }
+
+    def analysed_fields(
+        payload: dict[str, Any], _pv: str, _metrics: Any, extras: dict[str, Any]
+    ) -> dict[str, Any]:
+        # Leave analyser_version untouched — base_row already holds the cache
+        # fingerprint; overwriting it with the bare semantic version would
+        # break the cache key on the persisted row.
+        return {
+            "opportunities": payload["opportunities"],
+            "summary": payload["summary"],
+            "image_count": extras["image_count"],
+            "dpi_breakdown": extras["dpi_breakdown"],
+        }
+
+    outcome = run_and_persist(
+        db,
+        table="plan_value_engineering",
+        row_id=ve_id,
+        base_row=common_row,
+        cached_row=cached,
+        analyse=analyse,
+        clone_fields=clone_fields,
+        analysed_fields=analysed_fields,
+    )
+
+    if cached:
+        opportunities = cached.get("opportunities") or []
+        truncated = False
+    else:
+        opportunities = outcome.payload["opportunities"]
+        truncated = bool(outcome.payload.get("truncated", False))
+
+    return ValueEngineeringResult(
+        ve_id=ve_id,
+        source_id=source_id,
+        opportunities_count=len(opportunities),
+        processing_ms=outcome.processing_ms,
+        cost_usd=outcome.cost_usd,
+        truncated=truncated,
+        cached=outcome.cached,
+    )
 
 
 def run_value_engineering(
@@ -114,100 +229,53 @@ def run_value_engineering(
 ) -> ValueEngineeringResult:
     plan = _load_plan_row(db, plan_id)
     project = plan["projects"] or {}
-    storage_path = plan["storage_path"]
-    mime_type = plan["mime_type"] or "application/pdf"
+    file_bytes = download(db, bucket=PLANS_BUCKET, path=plan["storage_path"])
+    content_hash = plan.get("content_hash") or hash_bytes(file_bytes)
+    media_type = plan["mime_type"] or "application/pdf"
 
-    file_bytes = download(db, bucket=PLANS_BUCKET, path=storage_path)
-    content_hash = plan.get("content_hash") or hashlib.sha256(file_bytes).hexdigest()
-    provider, model_id = _resolve_provider_model()
-
-    # Load prompt version once for cache lookup parity.
-    from app.value_engineering.prompt import ACTIVE_PROMPT, load_prompt
-
-    _, prompt_version = load_prompt(ACTIVE_PROMPT)
-
-    cached = _find_cached_row(
-        db,
-        content_hash=content_hash,
-        provider=provider,
-        model_id=model_id,
-        prompt_version=prompt_version,
-    )
-
-    ve_id = str(uuid4())
-    common_row: dict[str, Any] = {
-        "id": ve_id,
-        "plan_upload_id": plan_id,
-        "project_id": plan["project_id"],
-        "analyser_version": VALUE_ENGINEERING_VERSION,
-        "prompt_version": prompt_version,
-        "provider": provider,
-        "model_id": model_id,
-        "content_hash": content_hash,
-    }
-
-    if cached:
-        t0 = time.monotonic()
-        opportunities = cached.get("opportunities") or []
-        db.table("plan_value_engineering").insert(
-            {
-                **common_row,
-                "status": "analysed",
-                "opportunities": opportunities,
-                "summary": cached.get("summary"),
-                "processing_ms": int((time.monotonic() - t0) * 1000),
-                "cost_usd": 0,
-                "image_count": cached.get("image_count"),
-                "dpi_breakdown": cached.get("dpi_breakdown"),
-            }
-        ).execute()
-        return ValueEngineeringResult(
-            ve_id=ve_id,
-            plan_id=plan_id,
-            opportunities_count=len(opportunities),
-            processing_ms=int((time.monotonic() - t0) * 1000),
-            cost_usd=0.0,
-            truncated=False,
-            cached=True,
-        )
-
-    db.table("plan_value_engineering").insert(
-        {**common_row, "status": "analysing"}
-    ).execute()
-
-    try:
-        payload, prompt_version, metrics, extras = analyse_value_engineering(
+    def analyse() -> tuple[dict[str, Any], str, Any, dict[str, Any]]:
+        return analyse_value_engineering(
             file_bytes=file_bytes,
-            media_type=mime_type,
+            media_type=media_type,
             bca=project.get("bca") or "",
             project_type=project.get("project_type") or "",
             project_description=project.get("description") or "",
         )
-    except Exception as e:
-        db.table("plan_value_engineering").update(
-            {"status": "failed", "error": str(e)[:500]}
-        ).eq("id", ve_id).execute()
-        raise
 
-    db.table("plan_value_engineering").update(
-        {
-            "status": "analysed",
-            "opportunities": payload["opportunities"],
-            "summary": payload["summary"],
-            "processing_ms": metrics.processing_ms,
-            "cost_usd": round(metrics.cost_usd, 6),
-            "analyser_version": extras["analyser_version"],
-            "image_count": extras["image_count"],
-            "dpi_breakdown": extras["dpi_breakdown"],
-        }
-    ).eq("id", ve_id).execute()
+    return _run_and_persist(
+        db,
+        id_field="plan_upload_id",
+        source_id=plan_id,
+        project_id=plan["project_id"],
+        content_hash=content_hash,
+        analyse=analyse,
+    )
 
-    return ValueEngineeringResult(
-        ve_id=ve_id,
-        plan_id=plan_id,
-        opportunities_count=len(payload["opportunities"]),
-        processing_ms=metrics.processing_ms,
-        cost_usd=round(metrics.cost_usd, 6),
-        truncated=bool(payload.get("truncated", False)),
-        cached=False,
+
+def run_value_engineering_cad(
+    db: Client, *, cad_id: str
+) -> ValueEngineeringResult:
+    cad = _load_cad_row(db, cad_id)
+    project = cad["projects"] or {}
+    dxf_bytes = download(db, bucket=CAD_BUCKET, path=cad["storage_path"])
+    content_hash = cad.get("content_hash") or hash_bytes(dxf_bytes)
+
+    def analyse() -> tuple[dict[str, Any], str, Any, dict[str, Any]]:
+        # Handle-grounded CAD VE: opportunities carry target_handles +
+        # geometrically-projected per-view image_bboxes so the UI can overlay
+        # them on the DXF views, exactly like the RFI CAD path.
+        return analyse_value_engineering_cad(
+            dxf_bytes=dxf_bytes,
+            bca=project.get("bca") or "",
+            project_type=project.get("project_type") or "",
+            project_description=project.get("description") or "",
+        )
+
+    return _run_and_persist(
+        db,
+        id_field="cad_upload_id",
+        source_id=cad_id,
+        project_id=cad["project_id"],
+        content_hash=content_hash,
+        analyse=analyse,
     )

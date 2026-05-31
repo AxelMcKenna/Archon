@@ -40,9 +40,13 @@ const nextConfig = {
   typedRoutes: true,
   outputFileTracingRoot: monorepoRoot,
   experimental: {
+    // Client-side Router Cache lifetimes. Revisiting an already-seen tab within
+    // these windows is instant — served from cache with no server round-trip or
+    // skeleton. Safe to keep generous because mutations call router.refresh(),
+    // which invalidates the cache, so users never act on stale data they edited.
     staleTimes: {
-      dynamic: 30,
-      static: 180,
+      dynamic: 300,
+      static: 300,
     },
   },
   env: {

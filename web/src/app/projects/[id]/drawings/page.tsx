@@ -2,11 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { taxonomy } from "@atlas/shared";
 import { getSupabaseServer } from "@/lib/supabase/server";
-import { UploadPlanInline } from "@/app/plans/upload-plan-inline";
+import { UploadDrawingPanel } from "@/app/plans/upload-drawing-panel";
 import { PlanReview } from "@/app/plans/plan-review";
 import { CadReview } from "@/app/plans/cad-review";
-import { ValueEngineeringReview } from "@/app/plans/value-engineering-review";
 import { DeleteRowButton } from "@/app/plans/delete-row-button";
+import { DrawingsSubnav } from "@/components/drawings-subnav";
+import { effectiveStatus } from "@/lib/job-status";
 
 export const dynamic = "force-dynamic";
 
@@ -87,12 +88,15 @@ export default async function ProjectDrawings({
       .order("created_at", { ascending: false }),
   ]);
 
-  const pdfRows: PdfRow[] = ((plansRaw ?? []) as unknown as object[]).map(
-    (r) => ({ format: "pdf", ...r }) as unknown as PdfRow,
-  );
-  const cadRows: CadRow[] = ((cadsRaw ?? []) as unknown as object[]).map(
-    (r) => ({ format: "dxf", ...r }) as unknown as CadRow,
-  );
+  // Drawings uploaded from the value-engineering page are stored without an
+  // RFI analysis (status 'uploaded'). They belong to the VE page only, so the
+  // RFI flagger list filters them out.
+  const pdfRows: PdfRow[] = ((plansRaw ?? []) as unknown as object[])
+    .map((r) => ({ format: "pdf", ...r }) as unknown as PdfRow)
+    .filter((r) => r.status !== "uploaded");
+  const cadRows: CadRow[] = ((cadsRaw ?? []) as unknown as object[])
+    .map((r) => ({ format: "dxf", ...r }) as unknown as CadRow)
+    .filter((r) => r.status !== "uploaded");
   const rows: Row[] = [...pdfRows, ...cadRows].sort((a, b) =>
     a.created_at < b.created_at ? 1 : -1,
   );
@@ -114,12 +118,14 @@ export default async function ProjectDrawings({
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
+    <>
+      <DrawingsSubnav projectId={projectId} />
+      <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
       <header className="space-y-1.5">
         <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
           Pre-flight
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">Drawings</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink-900">RFI flagger</h1>
         <p className="text-sm text-ink-500 max-w-2xl leading-relaxed">
           Pre-flight a building plan or CAD drawing against likely council RFIs
           before lodgement. Upload a PDF for flagged redlines, or a DXF for
@@ -127,12 +133,7 @@ export default async function ProjectDrawings({
         </p>
       </header>
 
-      <section className="rounded-sm bg-surface-raised shadow-depth p-8 space-y-4">
-        <h2 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
-          Analyse a drawing
-        </h2>
-        <UploadPlanInline projects={projectsForUpload} />
-      </section>
+      <UploadDrawingPanel projects={projectsForUpload} />
 
       <section className="rounded-sm bg-surface-raised shadow-depth p-8 space-y-4">
         <h2 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
@@ -155,25 +156,8 @@ export default async function ProjectDrawings({
           )}
         </section>
       )}
-
-      {selected && selected.format === "pdf" && selected.status === "analysed" && (
-        <section className="space-y-4 pt-8 border-t border-ink-200/70">
-          <div className="space-y-1.5">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
-              Cost optimisation
-            </p>
-            <h2 className="text-xl font-semibold tracking-tight text-ink-900">
-              Value engineering
-            </h2>
-            <p className="text-sm text-ink-500 max-w-2xl leading-relaxed">
-              Surface over-specified materials and code-compliant cheaper
-              alternatives. Separate from the RFI flagger above.
-            </p>
-          </div>
-          <ValueEngineeringReview planId={selected.id} />
-        </section>
-      )}
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -206,6 +190,8 @@ function RowsList({
           r.format === "dxf"
             ? flags.filter((f) => "proposed_change" in f && f.proposed_change).length
             : 0;
+        const displayStatus = effectiveStatus(r.status, r.created_at);
+        const stalled = displayStatus === "stalled";
         const href = {
           pathname: `/projects/${projectId}/drawings`,
           query: r.format === "pdf" ? { plan: r.id } : { cad: r.id },
@@ -234,7 +220,9 @@ function RowsList({
                     ? `${flags.length} flags (${must} must / ${nice} nice)${
                         r.format === "dxf" ? ` · ${fixable} fixable` : ""
                       }`
-                    : r.status}
+                    : stalled
+                      ? "Analysis stalled — re-upload to retry"
+                      : displayStatus}
                 </p>
               </div>
               <span
@@ -243,12 +231,14 @@ function RowsList({
                     ? must > 0
                       ? "bg-red-100 text-red-800"
                       : "bg-emerald-100 text-emerald-800"
-                    : r.status === "failed"
+                    : displayStatus === "failed"
                       ? "bg-red-100 text-red-800"
-                      : "bg-ink-100 text-ink-700"
+                      : stalled
+                        ? "bg-amber-100 text-amber-800"
+                        : "bg-ink-100 text-ink-700"
                 }`}
               >
-                {r.status}
+                {displayStatus}
               </span>
             </Link>
             <DeleteRowButton format={r.format} id={r.id} filename={r.filename} />

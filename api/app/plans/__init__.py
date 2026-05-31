@@ -2,24 +2,25 @@
 
 Split into submodules by responsibility:
 
-- ``prompt``     — prompt loading + templating
-- ``render``     — PDF → PNG rendering, tiling, adaptive DPI
-- ``vote``       — cross-run consensus voting + dedup
-- ``bbox``       — tile-local → page-relative bbox normalisation
-- ``vision``     — vision + verification LLM calls (tool schemas live here)
-- ``analyzer``   — top-level ``analyse_plan`` entry point
+- ``analyzer``    — top-level ``analyse_plan`` entry point.
+- ``vote``        — cross-run consensus voting + dedup.
+- ``bbox``        — tile-local → page-relative bbox normalisation.
+- ``bbox_refiner``— text-layer snap for vision-emitted bboxes.
+- ``ocr_refiner`` — OCR fallback for bboxes the text layer didn't find.
+- ``overlay``     — annotated-PDF rendering with bbox pins.
+- ``flags_store`` — persistence into ``plan_flags``.
+- ``prompt``      — plan-specific taxonomy block.
 
-Public surface is re-exported from this package and from the back-compat
-shim ``app.plan_analyzer``.
+Vision-side pieces (rendering, tool schemas, LLM calls) live under
+``app.vision.plans`` and ``app.vision.core``.
 """
 
 from app.plans.analyzer import ANALYSER_VERSION, ANALYSIS_VERSION, analyse_plan
-from app.plans.render import MAX_IMAGE_BYTES, MAX_IMAGES, RenderedImage
+from app.vision.core.renderer import MAX_IMAGE_BYTES, RenderedImage
 
 __all__ = [
     "ANALYSER_VERSION",
     "ANALYSIS_VERSION",
-    "MAX_IMAGES",
     "MAX_IMAGE_BYTES",
     "RenderedImage",
     "analyse_plan",

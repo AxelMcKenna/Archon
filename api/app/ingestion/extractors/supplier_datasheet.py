@@ -25,10 +25,10 @@ from app.ingestion.extractors.llm import (
     prompt_version,
 )
 from app.ingestion.models import KBCandidate, VeIngestDocument
-from app.ingestion.registry import get_kind
+from app.ingestion.scraping.registry import get_kind
 from app.llm.gemini import call_gemini_tool
 from app.llm.openrouter import call_openrouter_tool
-from app.plans.render import caption_str, render_pages
+from app.vision.core.renderer import caption_str, render_pages
 
 log = logging.getLogger(__name__)
 

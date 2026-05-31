@@ -1,8 +1,8 @@
 /**
- * Per-tab agent configuration: opener question and suggestion chips.
+ * Per-tab llm-gateway configuration: opener question and suggestion chips.
  *
- * Each suggestion is grounded in the actual tool the agent will invoke:
- *   - get_project_workflow → cross-domain status (RFIs, docs, plans, inspections)
+ * Each suggestion is grounded in the actual tool the llm-gateway will invoke:
+ *   - get_project_workflow → cross-domain status (RFIs, wiki, plans, inspections)
  *   - get_forecast → cost / duration / risk dimensions
  *   - read_tab → per-tab list reads
  *   - get_plan_flags → full flag list with severity/category/page-refs

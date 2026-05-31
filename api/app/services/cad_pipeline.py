@@ -34,6 +34,7 @@ def upload_and_analyse(
     project: dict[str, Any],
     filename: str,
     payload: bytes,
+    analyse: bool = True,
 ) -> CadAnalysisResult:
     cad_id = str(uuid4())
     storage_path = upload_cad(
@@ -45,6 +46,29 @@ def upload_and_analyse(
         data=payload,
     )
     content_hash = hashlib.sha256(payload).hexdigest()
+
+    # Store-only path (e.g. uploads from the value-engineering page): persist
+    # the file so VE can re-render it, but skip the RFI flagger entirely. The
+    # row stays at status 'uploaded' and never enters the RFI flagger list.
+    if not analyse:
+        db.table("cad_uploads").insert(
+            {
+                "id": cad_id,
+                "project_id": project_id,
+                "filename": filename,
+                "storage_path": storage_path,
+                "size_bytes": len(payload),
+                "content_hash": content_hash,
+                "status": "uploaded",
+            }
+        ).execute()
+        return CadAnalysisResult(
+            cad_id=cad_id,
+            flags_count=0,
+            entity_count=0,
+            views=[],
+            processing_ms=0,
+        )
 
     db.table("cad_uploads").insert(
         {

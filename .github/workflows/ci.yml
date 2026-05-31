@@ -1,4 +1,4 @@
-# Per-PR checks: api lint + tests, agent lint.
+# Per-PR checks: api lint + tests, llm-gateway lint.
 
 name: ci
 
@@ -36,7 +36,7 @@ jobs:
         run: uv run pytest --no-header -q --ignore=tests/test_classification_accuracy.py
 
   agent:
-    name: agent · ruff
+    name: llm-gateway · ruff
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,14 +48,14 @@ jobs:
       - name: Install uv
         run: pip install uv
 
-      - name: Install agent deps
-        working-directory: agent
+      - name: Install llm-gateway deps
+        working-directory: llm-gateway
         run: uv sync --frozen
 
       - name: Ruff
-        working-directory: agent
+        working-directory: llm-gateway
         run: uv run ruff check .
 
       - name: Import smoke test
-        working-directory: agent
+        working-directory: llm-gateway
         run: uv run python -c "from app.main import app; from app.agent_loop import run_agent; print('ok')"

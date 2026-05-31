@@ -14,11 +14,11 @@ services:
   agent:
     build:
       context: .
-      dockerfile: agent/Dockerfile
+      dockerfile: llm-gateway/Dockerfile
     image: atlas-agent:latest
-    container_name: atlas-agent
+    container_name: atlas-llm-gateway
     restart: unless-stopped
     env_file:
-      - agent/.env
+      - llm-gateway/.env
     ports:
       - "8001:8001"

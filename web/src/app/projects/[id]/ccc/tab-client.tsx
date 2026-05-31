@@ -619,9 +619,9 @@ export function CccTabClient({
         if (contentType.includes("application/json")) {
           const payload = (await response.json()) as { error?: string };
           serverMessage = payload.error ?? "";
-        } else {
-          serverMessage = await response.text();
         }
+        // Non-JSON bodies (e.g. an HTML error page) are not surfaced: they can
+        // embed sensitive data such as the session token in their payload.
         throw new Error(serverMessage || "Unable to generate B-011 download.");
       }
       const blob = await response.blob();
@@ -695,9 +695,9 @@ export function CccTabClient({
         if (contentType.includes("application/json")) {
           const errorPayload = (await response.json()) as { error?: string };
           serverMessage = errorPayload.error ?? "";
-        } else {
-          serverMessage = await response.text();
         }
+        // Non-JSON bodies (e.g. an HTML error page) are not surfaced: they can
+        // embed sensitive data such as the session token in their payload.
         throw new Error(serverMessage || "Unable to generate CCC package zip.");
       }
 

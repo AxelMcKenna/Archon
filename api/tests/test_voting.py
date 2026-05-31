@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.plan_analyzer import _vote_flags
+from app.plans.vote import vote_flags as _vote_flags
 
 
 def _f(area: str, *, page: int = 1, category: str = "cat", confidence: str = "medium",

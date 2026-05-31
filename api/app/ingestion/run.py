@@ -15,7 +15,7 @@ from dataclasses import asdict
 
 from app.auth import get_service_db
 from app.ingestion.pipeline import run_source
-from app.ingestion.registry import known_kinds
+from app.ingestion.scraping.registry import known_kinds
 
 
 def _build_parser() -> argparse.ArgumentParser:

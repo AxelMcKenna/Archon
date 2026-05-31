@@ -31,6 +31,10 @@ _RECT_VISUAL_PAD_PX = 8
 _SEV_COLOURS: dict[str, tuple[tuple[int, int, int], tuple[int, int, int]]] = {
     "must_resolve": ((220, 38, 38), (220, 38, 38)),     # red
     "nice_to_have": ((217, 119, 6), (217, 119, 6)),     # amber
+    # Value-engineering cost-impact bands — emerald (savings, not risk).
+    "ve_high": ((5, 150, 105), (5, 150, 105)),          # emerald-600
+    "ve_medium": ((16, 185, 129), (16, 185, 129)),      # emerald-500
+    "ve_low": ((52, 211, 153), (52, 211, 153)),         # emerald-400
 }
 
 

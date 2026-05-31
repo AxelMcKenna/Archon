@@ -73,18 +73,18 @@ def insert_extraction_audit(
     canonical: CanonicalRfi,
     metrics: Metrics,
 ) -> None:
-    extractor = canonical.rfi_letter.extraction.extractor
-    version = canonical.rfi_letter.extraction.extractor_version
-    client.table("rfi_extractions").insert(
-        {
-            "rfi_letter_id": letter_id,
-            "extractor": extractor,
-            "extractor_version": version,
-            "raw_output": canonical.model_dump(mode="json"),
-            "processing_ms": metrics.processing_ms,
-            "cost_usd": round(metrics.cost_usd, 6),
-        }
-    ).execute()
+    meta = canonical.rfi_letter.extraction
+    row: dict[str, Any] = {
+        "rfi_letter_id": letter_id,
+        "extractor": meta.extractor,
+        "extractor_version": meta.extractor_version,
+        "raw_output": canonical.model_dump(mode="json"),
+        "processing_ms": metrics.processing_ms,
+        "cost_usd": round(metrics.cost_usd, 6),
+    }
+    if meta.prompt_version is not None:
+        row["prompt_version"] = meta.prompt_version
+    client.table("rfi_extractions").insert(row).execute()
 
 
 def fetch_letter(client: Client, letter_id: str) -> dict[str, Any] | None:

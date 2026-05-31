@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { API_BASE, apiFetch } from "@/lib/api";
+import { isStalled } from "@/lib/job-status";
+import { CadOverlayImage } from "@/app/plans/cad-overlay-image";
 
 type ProposedChange =
   | { op: "move_entity"; handle: string; dx: number; dy: number }
@@ -56,6 +58,7 @@ type Cad = {
   id: string;
   filename: string;
   status: string;
+  created_at?: string | null;
   analysis: {
     flags?: Flag[];
     views?: ViewInfo[];
@@ -150,8 +153,21 @@ export function CadReview({ cad }: { cad: Cad }) {
   }
 
   const activeViewInfo = views.find((v) => v.name === activeView) ?? views[0];
+  const stalled = isStalled(cad.status, cad.created_at);
 
   return (
+    <>
+    {(cad.status === "failed" || stalled) && (
+      <p className={`rounded-sm border p-3 text-sm mt-6 ${
+        stalled
+          ? "bg-amber-50 border-amber-200 text-amber-800"
+          : "bg-red-50 border-red-200 text-red-700"
+      }`}>
+        {stalled
+          ? "Analysis stalled — it didn't finish. Delete this drawing and re-upload to try again."
+          : "Analysis failed. Try re-uploading."}
+      </p>
+    )}
     <section className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 mt-6">
       <div className="rounded-sm border border-ink-700/10 bg-ink-700/5 flex flex-col">
         <div className="px-4 py-2 text-xs uppercase tracking-wide text-ink-500 border-b border-ink-700/10 flex items-center justify-between gap-2">
@@ -193,69 +209,26 @@ export function CadReview({ cad }: { cad: Cad }) {
           </div>
         </div>
         <div className="flex-1 p-4">
-          <div
-            className="relative w-full bg-surface-raised border border-ink-700/10 rounded-sm shadow-sm overflow-hidden"
-            style={
+          <CadOverlayImage
+            cadId={cad.id}
+            activeView={activeView}
+            items={numbered.map((f) => ({
+              n: f._n,
+              imageBboxes: f.image_bboxes,
+              borderClass: SEV_BORDER[f.severity],
+              pinClass: SEV_PIN[f.severity],
+              title: f.rule_cited,
+            }))}
+            activeN={activeFlag}
+            onSelect={setActiveFlag}
+            showOverlays={showOverlays}
+            revisedVersion={revVersion}
+            aspectRatio={
               activeViewInfo
-                ? { aspectRatio: `${activeViewInfo.width} / ${activeViewInfo.height}` }
+                ? activeViewInfo.width / activeViewInfo.height
                 : undefined
             }
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={
-                revVersion > 0
-                  ? `${API_BASE}/cad/${cad.id}/views/${encodeURIComponent(activeView)}.png?revised=1&v=${revVersion}`
-                  : `${API_BASE}/cad/${cad.id}/views/${encodeURIComponent(activeView)}.png`
-              }
-              alt={activeView}
-              className="absolute inset-0 w-full h-full object-contain"
-            />
-            <div
-              className={`absolute inset-0 pointer-events-none ${
-                showOverlays ? "" : "hidden"
-              }`}
-            >
-              {numbered.map((f) => {
-                const bb = f.image_bboxes?.[activeView];
-                if (!bb) return null;
-                const [x0, y0, x1, y1] = bb;
-                const left = `${x0 * 100}%`;
-                const top = `${y0 * 100}%`;
-                const width = `${Math.max(0, x1 - x0) * 100}%`;
-                const height = `${Math.max(0, y1 - y0) * 100}%`;
-                const isActive = activeFlag === f._n;
-                return (
-                  <button
-                    type="button"
-                    key={f._n}
-                    onClick={() => setActiveFlag(f._n)}
-                    style={{ left, top, width, height }}
-                    className="absolute pointer-events-auto cursor-pointer focus:outline-none"
-                    title={f.rule_cited}
-                  >
-                    {/* Visual rectangle inflated 6px outward so the bbox
-                        frames the content with breathing room instead of
-                        clipping it. Click target stays on the data bbox. */}
-                    <span
-                      className={`absolute -inset-[6px] ${SEV_BORDER[f.severity]} ${
-                        isActive
-                          ? "bg-yellow-300/30 ring-2 ring-yellow-500 border-[3px]"
-                          : "bg-transparent border-2"
-                      } pointer-events-none`}
-                    />
-                    <span
-                      className={`absolute -top-3 -left-3 ${
-                        SEV_PIN[f.severity]
-                      } text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow ring-2 ring-white pointer-events-none`}
-                    >
-                      {f._n}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          />
         </div>
       </div>
 
@@ -385,5 +358,6 @@ export function CadReview({ cad }: { cad: Cad }) {
         </div>
       </aside>
     </section>
+    </>
   );
 }

@@ -14,7 +14,7 @@ update plan_uploads
  where analysis_version is null
    and analyser_version is not null;
 
--- Per-prompt-version eval results, populated by the regression runner.
+-- Per-prompt-version vision-eval results, populated by the regression runner.
 create table if not exists prompt_eval_runs (
   id uuid primary key default gen_random_uuid(),
   prompt_version text not null,

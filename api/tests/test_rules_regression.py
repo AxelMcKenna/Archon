@@ -2,7 +2,7 @@
 
 Reads /api/tests/rules_regression.yaml and asserts that each case's expected
 category appears in the rules engine output. CI must run this on every change
-to /api/rules/rfi_classification.yaml.
+to /api/data/rfi_classification.yaml.
 """
 
 from __future__ import annotations

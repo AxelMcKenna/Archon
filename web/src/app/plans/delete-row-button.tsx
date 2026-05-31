@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
+import { useToast } from "@/components/ui/toast";
 
 export function DeleteRowButton({
   format,
@@ -14,6 +15,7 @@ export function DeleteRowButton({
   filename: string;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [busy, setBusy] = useState(false);
 
   async function onDelete(e: React.MouseEvent) {
@@ -24,11 +26,12 @@ export function DeleteRowButton({
     try {
       const path = format === "pdf" ? `/plans/${id}` : `/cad/${id}`;
       await apiFetch(path, { method: "DELETE" });
+      toast.success(`Deleted ${filename}.`);
       // Drop the ?plan= or ?cad= param if it points at the deleted row.
       router.push("/plans");
       router.refresh();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Delete failed");
+      toast.error(err instanceof Error ? err.message : "Delete failed.");
     } finally {
       setBusy(false);
     }

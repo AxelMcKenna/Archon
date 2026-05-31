@@ -60,16 +60,21 @@ function normalizeSettingsSnapshot(value: unknown): Partial<ProjectSettingsValue
 export default async function ProjectOverview({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await getSupabaseServer();
-  const { data: project } = await supabase.from("projects").select("*").eq("id", id).single();
-  if (!project) notFound();
 
+  // Fetch everything the page needs in one parallel batch — none of these
+  // depend on each other, so running them concurrently (rather than awaiting
+  // the project first and the attachments last) removes two serial round-trips
+  // from the critical path.
   const [
+    { data: project },
     { count: drawingCount },
     { count: cadCount },
     { count: letterCount },
     { data: assessmentRow },
     { data: settingsSnapshotRows },
+    { data: richAttachments, error: richAttachmentsError },
   ] = await Promise.all([
+    supabase.from("projects").select("*").eq("id", id).single(),
     supabase
       .from("plan_uploads")
       .select("*", { count: "exact", head: true })
@@ -94,7 +99,13 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
       .eq("action", "project_settings_snapshot")
       .order("created_at", { ascending: false })
       .limit(1),
+    supabase
+      .from("attachments")
+      .select("id, filename, storage_path, uploaded_at, size_bytes, mime_type, linked_requirement_key")
+      .eq("project_id", id)
+      .order("uploaded_at", { ascending: false }),
   ]);
+  if (!project) notFound();
   const forecastPayload =
     (assessmentRow as { forecast_context?: Record<string, unknown> | null } | null)
       ?.forecast_context ?? null;
@@ -107,11 +118,8 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
       }
     : initialSettings;
 
-  const { data: richAttachments, error: richAttachmentsError } = await supabase
-    .from("attachments")
-    .select("id, filename, storage_path, uploaded_at, size_bytes, mime_type, linked_requirement_key")
-    .eq("project_id", id)
-    .order("uploaded_at", { ascending: false });
+  // richAttachments was fetched in the parallel batch above; the columns below
+  // only run as a fallback if that select errored (older schema variants).
   const { data: basicAttachments, error: basicAttachmentsError } = richAttachmentsError
     ? await supabase
         .from("attachments")

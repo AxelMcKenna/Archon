@@ -2,7 +2,7 @@
 
 Three-stage pipeline:
 
-  1. Clause chunking — reuse ``app.mbie.extract_clauses`` to split the
+  1. Clause chunking — reuse ``app.ingestion.mbie.extract_clauses`` to split the
      PDF into structured clause chunks (clause_number, heading, text,
      page). That code already handles the heading regexes for MBIE's
      numeric-clause format.
@@ -24,8 +24,8 @@ from dataclasses import dataclass
 from typing import Any
 
 from app.ingestion.extractors.llm import call_cleanup
+from app.ingestion.mbie import extract_clauses, replace_clauses
 from app.ingestion.models import KBCandidate, VeIngestDocument
-from app.mbie import extract_clauses
 
 log = logging.getLogger(__name__)
 
@@ -137,6 +137,52 @@ def _build_kb_candidate(
     )
 
 
+def _code_clause_from_document_id(document_id: str) -> str:
+    """``E2/AS1`` → ``E2``. The verifier joins on this to find relevant
+    Acceptable Solution clauses for a flag's category."""
+    return document_id.split("/", 1)[0].upper() if "/" in document_id else document_id
+
+
+def _persist_clauses_to_mbie_table(
+    *,
+    doc: VeIngestDocument,
+    document_id: str,
+    chunks: list,
+) -> None:
+    """Side-effect: also write the chunked clauses to ``mbie_clauses``
+    for the verifier's RFI-grounding pass. Same source bytes feed both
+    targets (VE substitution candidates *and* verifier compliance
+    lookups), so we materialise both from one extraction pass.
+
+    Failures here never break the VE extraction — the verifier just
+    won't have this document's clauses to ground against.
+    """
+    try:
+        # Local imports keep extractor module-level imports lean.
+        from app.auth import get_service_db
+
+        db = get_service_db()
+        inserted = replace_clauses(
+            db,
+            document_id=document_id,
+            code_clause=_code_clause_from_document_id(document_id),
+            chunks=chunks,
+            source_url=doc.source_url,
+            ingest_document_id=doc.id or None,
+        )
+        log.info(
+            "mbie: persisted %s clauses to mbie_clauses for %s",
+            inserted,
+            document_id,
+        )
+    except Exception as e:  # noqa: BLE001
+        log.warning(
+            "mbie: failed to persist clauses to mbie_clauses for %s: %s",
+            document_id,
+            e,
+        )
+
+
 class MbieAcceptableSolutionExtractor:
     name = "mbie_acceptable_solution"
     version = "1.0.0"
@@ -151,6 +197,14 @@ class MbieAcceptableSolutionExtractor:
             return []
 
         document_id = _document_id_from_source_key(doc.source_key)
+
+        # Side-effect: populate mbie_clauses for the verifier. Run first
+        # so even if the VE LLM cleanup pass below times out or errors,
+        # the verifier grounding corpus is still updated.
+        _persist_clauses_to_mbie_table(
+            doc=doc, document_id=document_id, chunks=clauses
+        )
+
         candidates_total: list[KBCandidate] = []
         llm_calls = 0
 

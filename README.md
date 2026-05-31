@@ -46,7 +46,7 @@ cd web && pnpm install && pnpm dev
 cd api && uv sync && uv run uvicorn app.main:app --reload
 
 # Agent (port 8001)
-cd agent && uv sync && uv run uvicorn app.main:app --reload --port 8001
+cd llm-gateway && uv sync && uv run uvicorn app.main:app --reload --port 8001
 
 # Supabase (local)
 cd supabase && supabase start
@@ -66,6 +66,6 @@ Each service reads its own `.env` (`api/.env`, `agent/.env`).
 
 ## Docs
 
-- [`docs/architecture.md`](docs/architecture.md) — system + AI pipeline diagrams (Mermaid).
-- [`docs/plan-overlay.md`](docs/plan-overlay.md) — pre-lodgement plan analyser, bbox grounding pipeline, overlay rendering, inline UI, known limitations.
-- [`eval/plan-flagger/README.md`](eval/plan-flagger/README.md) — plan-flagger evaluation harness.
+- [`docs/architecture.md`](wiki/architecture.md) — system + AI pipeline diagrams (Mermaid).
+- [`docs/plan-overlay.md`](wiki/plan-overlay.md) — pre-lodgement plan analyser, bbox grounding pipeline, overlay rendering, inline UI, known limitations.
+- [`eval/plan-flagger/README.md`](vision-eval/plan-flagger/README.md) — plan-flagger evaluation harness.

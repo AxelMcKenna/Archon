@@ -1,5 +1,5 @@
 /**
- * Per-tab summary readers — mirror the agent's `read_tab` Python tool so the
+ * Per-tab summary readers — mirror the llm-gateway's `read_tab` Python tool so the
  * sphere can compute its own intent/badge without invoking the LLM.
  *
  * Returns a TabSummary the AgentTrigger uses to:

@@ -1,11 +1,11 @@
-# Plan flagger regression eval.
+# Plan flagger regression vision-eval.
 #
-# Advisory mode: runs the eval suite on PRs that touch the analyser code
+# Advisory mode: runs the vision-eval suite on PRs that touch the analyser code
 # or prompts and posts the metrics as a PR comment. Does NOT block merge
-# while the eval set is synthetic. Flip EVAL_BLOCKING to "1" once ≥20
-# real labelled plans land in eval/plan-flagger/real/.
+# while the vision-eval set is synthetic. Flip EVAL_BLOCKING to "1" once ≥20
+# real labelled plans land in vision-eval/plan-flagger/real/.
 
-name: plan-eval
+name: plan-vision-eval
 
 on:
   pull_request:
@@ -13,10 +13,10 @@ on:
       - "api/prompts/plan_analyser_*.md"
       - "api/prompts/plan_verification_*.md"
       - "api/app/plans/**"
-      - "api/app/plan_analyzer.py"
+      - "api/app/vision/plans/**"
       - "api/app/extractors/plan_text.py"
       - "api/app/extractors/doc_rules.py"
-      - "eval/plan-flagger/**"
+      - "vision-eval/plan-flagger/**"
 
 jobs:
   eval:
@@ -38,11 +38,11 @@ jobs:
         working-directory: api
         run: uv sync --frozen --no-dev
 
-      - name: Run regression eval
-        id: eval
+      - name: Run regression vision-eval
+        id: vision-eval
         working-directory: ${{ github.workspace }}
         run: |
-          api/.venv/bin/python eval/plan-flagger/run.py --report-format=json > eval-report.json
+          api/.venv/bin/python vision-eval/plan-flagger/run.py --report-format=json > eval-report.json
           cat eval-report.json
 
       - name: Comment PR with metrics
@@ -76,10 +76,10 @@ jobs:
         run: |
           api/.venv/bin/python - <<'PY'
           import json, sys
-          # Compare against a baseline committed at eval/plan-flagger/baseline.json.
+          # Compare against a baseline committed at vision-eval/plan-flagger/baseline.json.
           # Block if precision/recall drop >5pp or hallucination rises >3pp.
           try:
-              base = json.load(open('eval/plan-flagger/baseline.json'))
+              base = json.load(open('vision-eval/plan-flagger/baseline.json'))
           except FileNotFoundError:
               print('no baseline.json — skipping gate')
               sys.exit(0)

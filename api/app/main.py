@@ -1,10 +1,15 @@
+import logging
+
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.config import get_settings
+from app.ingestion import routes as ingest_routes
 from app.rate_limit import limiter
 from app.routes import address_checklist as address_checklist_routes
 from app.routes import address_suggest as address_suggest_routes
@@ -22,7 +27,8 @@ from app.routes import health as health_routes
 from app.routes import letters as letters_routes
 from app.routes import plans as plans_routes
 from app.routes import risk as risk_routes
-from app.ingestion import routes as ingest_routes
+
+log = logging.getLogger("app")
 
 app = FastAPI(title="ATLAS RFI API", version="0.1.0")
 app.state.limiter = limiter
@@ -34,6 +40,40 @@ async def _rate_limited(request: Request, exc: RateLimitExceeded) -> JSONRespons
     return JSONResponse(
         status_code=429,
         content={"error": "rate limit exceeded", "detail": str(exc.detail)},
+    )
+
+
+@app.exception_handler(StarletteHTTPException)
+async def _http_exception(request: Request, exc: StarletteHTTPException) -> JSONResponse:
+    # Mirror the detail into an ``error`` key so the web client (which reads
+    # ``error``/``message``) and legacy callers (which read ``detail``) both
+    # get a usable message from a single consistent shape.
+    detail = exc.detail if isinstance(exc.detail, str) else "request failed"
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": detail, "detail": exc.detail},
+        headers=getattr(exc, "headers", None),
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def _validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
+    # Keep FastAPI's structured ``detail`` list (the client formats it) and add
+    # a flat ``error`` summary for clients that only read a single string.
+    return JSONResponse(
+        status_code=422,
+        content={"error": "validation error", "detail": exc.errors()},
+    )
+
+
+@app.exception_handler(Exception)
+async def _unhandled_exception(request: Request, exc: Exception) -> JSONResponse:
+    # Catch-all: log the full traceback server-side, but never leak it to the
+    # client. Returns a consistent ``{"error": ...}`` shape with a 500 status.
+    log.exception("unhandled exception on %s %s", request.method, request.url.path)
+    return JSONResponse(
+        status_code=500,
+        content={"error": "internal server error"},
     )
 
 

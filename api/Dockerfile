@@ -23,7 +23,6 @@ RUN uv sync --frozen --no-install-project --no-dev
 
 COPY api/app ./app
 COPY api/prompts ./prompts
-COPY api/rules ./rules
 COPY api/data ./data
 COPY api/scripts ./scripts
 COPY shared /shared

@@ -1,6 +1,6 @@
 """Council guidance PDF extractor (CCC / SDC / WDC).
 
-Council guidance docs are shorter and less structured than MBIE
+Council guidance wiki are shorter and less structured than MBIE
 Acceptable Solutions — typically a few dozen pages of free prose with
 sectional headings rather than the numeric-clause hierarchy MBIE uses.
 
@@ -32,7 +32,7 @@ import pdfplumber
 from app.ingestion.extractors.llm import call_cleanup
 from app.ingestion.extractors.mbie_acceptable_solution import _TRIGGER_RE
 from app.ingestion.models import KBCandidate, VeIngestDocument
-from app.ingestion.registry import get_kind
+from app.ingestion.scraping.registry import get_kind
 
 log = logging.getLogger(__name__)
 

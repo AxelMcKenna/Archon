@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from app.extractors.claude_vision import extract_via_vision
 from app.extractors.metrics import Metrics
 from app.extractors.pdf_native import extract_native_pdf, has_text_layer
 from app.models import CanonicalRfi
+from app.vision.rfi import extract_via_vision
 
 
 def extract_document(

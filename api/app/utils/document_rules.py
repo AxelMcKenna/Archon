@@ -1,6 +1,7 @@
 """Document requirement rules engine.
 
-Maps zones and overlays to required documents based on document_rules.json
+Maps zones and overlays to required documents based on
+``api/data/document_requirements.json``.
 """
 
 import json
@@ -8,8 +9,8 @@ from pathlib import Path
 
 
 def load_rules() -> dict:
-    """Load document rules from shared package."""
-    rules_path = Path(__file__).parent.parent.parent.parent / "shared" / "document_rules.json"
+    """Load document requirements (zone/overlay → required docs)."""
+    rules_path = Path(__file__).resolve().parents[2] / "data" / "document_requirements.json"
     with open(rules_path) as f:
         return json.load(f)
 

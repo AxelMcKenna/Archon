@@ -1,0 +1,205 @@
+# VE ingestion source registry.
+#
+# The only file you should edit to add a new source URL. Each top-level
+# key is a source_kind that matches an extractor under
+# app/ingestion/extractors/. The 'test' kind exists only to exercise
+# the plumbing end-to-end without touching real sources.
+#
+# Per-host etiquette:
+#   rate_limit_seconds — minimum sleep between requests to the same host
+#   user_agent          — sent on every request; override per kind if
+#                          a particular host requires it
+#
+# Per-document:
+#   source_key          — stable id; never reuse for a different doc
+#   url                 — direct PDF or HTML URL
+#   content_type        — optional; falls back to response Content-Type
+#   bca / vendor / etc. — extractor-specific tags carried through
+
+test:
+  rate_limit_seconds: 1
+  user_agent: "Atlas-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+  documents:
+    - source_key: "test:smoke"
+      url: "https://example.com/"
+      content_type: "text/html"
+      label: "Phase 1 plumbing smoke test"
+
+mbie_acceptable_solution:
+  rate_limit_seconds: 2
+  user_agent: "Atlas-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+  # IMPORTANT: MBIE amendment versions change the URL path. URLs below
+  # verified against building.govt.nz landing pages on 2026-05-27.
+  # When MBIE bumps an amendment, update the URL here — content_hash
+  # dedup means we'll automatically re-extract.
+  #
+  # MISSING — landing pages couldn't be auto-scraped, add manually:
+  #   C/AS1, C/AS2, C/VM2 (fire protection — split across C1-C6 subpages)
+  #   F9/AS1 (residential pool barriers)
+  #   G13/AS1, G13/AS2, G13/VM4 (foul water)
+  documents:
+    # B — Stability
+    - source_key: "mbie:b1_as1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/b-stability/b1-structure/asvm/b1-structure-as1-second-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "B1"
+      label: "B1/AS1 — Structure (2nd ed)"
+    - source_key: "mbie:b1_as3"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/b-stability/b1-structure/asvm/b1-structure-as3-second-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "B1"
+      label: "B1/AS3 — Structure"
+    - source_key: "mbie:b1_vm1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/b-stability/b1-structure/asvm/b1-structure-vm1-second-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "B1"
+      label: "B1/VM1 — Structure"
+    - source_key: "mbie:b1_vm2"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/b-stability/b1-structure/asvm/b1-structure-vm2-second-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "B1"
+      label: "B1/VM2 — Structure"
+    - source_key: "mbie:b2_as1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/b-stability/b2-durability/asvm/b2-durability-as1-third-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "B2"
+      label: "B2/AS1 — Durability (3rd ed)"
+    - source_key: "mbie:b2_vm1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/b-stability/b2-durability/asvm/b2-durability-vm1-third-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "B2"
+      label: "B2/VM1 — Durability"
+    # D — Access (combined AS+VM PDF on the MBIE page)
+    - source_key: "mbie:d1_asvm"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/d-access/d1-access-routes/asvm/d1-access-routes-2nd-edition-amendment6.pdf"
+      content_type: "application/pdf"
+      code_clause: "D1"
+      label: "D1/AS1+VM1 — Access routes"
+    # E — Moisture
+    - source_key: "mbie:e1_asvm"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/e-moisture/e1-surface-water/asvm/e1-surface-water-1st-edition-amendment-12.pdf"
+      content_type: "application/pdf"
+      code_clause: "E1"
+      label: "E1/AS1+VM1 — Surface water"
+    - source_key: "mbie:e2_as1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/e-moisture/e2-external-moisture/asvm/e2-external-moisture-as1-fourth-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "E2"
+      label: "E2/AS1 — External moisture (4th ed)"
+    - source_key: "mbie:e2_vm1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/e-moisture/e2-external-moisture/asvm/e2-external-moisture-vm1-fourth-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "E2"
+      label: "E2/VM1 — External moisture"
+    - source_key: "mbie:e3_as1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/e-moisture/e3-internal-moisture/asvm/e3-internal-moisture-2nd-edition-amendment7.pdf"
+      content_type: "application/pdf"
+      code_clause: "E3"
+      label: "E3/AS1 — Internal moisture"
+    - source_key: "mbie:e3_as2"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/e-moisture/e3-internal-moisture/asvm/e3-internal-moisture-as2-1st-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "E3"
+      label: "E3/AS2 — Internal moisture"
+    # F — Safety of users
+    - source_key: "mbie:f2_as1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/f-safety-of-users/f2-hazardous-building-materials/asvm/f2-hazardous-building-materials-1st-edition-amendment3.pdf"
+      content_type: "application/pdf"
+      code_clause: "F2"
+      label: "F2/AS1 — Hazardous building materials"
+    - source_key: "mbie:f4_as1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/f-safety-of-users/f4-safety-from-falling/asvm/f4-safety-from-falling-3rd-edition-amendment2.pdf"
+      content_type: "application/pdf"
+      code_clause: "F4"
+      label: "F4/AS1 — Safety from falling"
+    # G — Services & facilities
+    - source_key: "mbie:g1_as1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g1-personal-hygiene/asvm/G1-personal-hygiene-2nd-edition-amendment-6.pdf"
+      content_type: "application/pdf"
+      code_clause: "G1"
+      label: "G1/AS1 — Personal hygiene"
+    - source_key: "mbie:g4_as1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g4-ventilation/asvm/g4-ventilation-as1-fifth-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "G4"
+      label: "G4/AS1 — Ventilation"
+    - source_key: "mbie:g4_vm1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g4-ventilation/asvm/g4-ventilation-vm1-fifth-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "G4"
+      label: "G4/VM1 — Ventilation"
+    - source_key: "mbie:g12_as1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g12-water-supplies/asvm/g12-water-supplies-3rd-edition-amendment-14.pdf"
+      content_type: "application/pdf"
+      code_clause: "G12"
+      label: "G12/AS1 — Water supplies"
+    # H — Energy efficiency
+    - source_key: "mbie:h1_as1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/h1-energy-efficiency/asvm/h1-energy-efficiency-as1-sixth-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "H1"
+      label: "H1/AS1 — Energy efficiency (6th ed)"
+    - source_key: "mbie:h1_vm1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/h1-energy-efficiency/asvm/h1-energy-efficiency-vm1-sixth-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "H1"
+      label: "H1/VM1 — Energy efficiency"
+
+council_guidance:
+  rate_limit_seconds: 3
+  user_agent: "Atlas-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+  # Council guidance URLs are less stable than MBIE's. The councils
+  # restructure their websites periodically; if a URL 404s, search the
+  # council site for the current location and update here. Each entry
+  # carries a `bca` tag that propagates to ve_knowledge_base.bca_specific
+  # so VE retrieval can filter recommendations by the project's council.
+  documents:
+    - source_key: "ccc:avoiding_rfis"
+      url: "https://ccc.govt.nz/assets/Documents/Consents-and-Licences/building-consents/Avoiding-RFIs.pdf"
+      content_type: "application/pdf"
+      bca: "ccc"
+      label: "CCC — Avoiding RFIs"
+    - source_key: "sdc:residential_guidance"
+      url: "https://www.selwyn.govt.nz/__data/assets/pdf_file/0007/residential-building-consent-guide.pdf"
+      content_type: "application/pdf"
+      bca: "sdc"
+      label: "SDC — Residential building consent guide"
+    - source_key: "wdc:validation_qa"
+      url: "https://www.waimakariri.govt.nz/__data/assets/pdf_file/building/validation-quality-assurance.pdf"
+      content_type: "application/pdf"
+      bca: "wdc"
+      label: "WDC — Validation Quality Assurance"
+
+supplier_datasheet:
+  rate_limit_seconds: 5
+  user_agent: "Atlas-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+  # Manufacturer datasheet URLs are the least stable of the three source
+  # kinds — suppliers redesign their sites frequently and rotate PDFs.
+  # Verify each URL before the first ingest run. Each entry carries a
+  # `vendor` tag that propagates to ve_knowledge_base via subcategory.
+  documents:
+    - source_key: "james_hardie:linea_weatherboard_tds"
+      url: "https://www.jameshardie.co.nz/getmedia/linea-weatherboard-technical-data-sheet.pdf"
+      content_type: "application/pdf"
+      vendor: "james_hardie"
+      label: "James Hardie — Linea Weatherboard"
+    - source_key: "james_hardie:hardieplank_tds"
+      url: "https://www.jameshardie.co.nz/getmedia/hardieplank-technical-data-sheet.pdf"
+      content_type: "application/pdf"
+      vendor: "james_hardie"
+      label: "James Hardie — HardiePlank"
+    - source_key: "carter_holt:lvl_specifier_guide"
+      url: "https://www.chhwoodproducts.co.nz/lvl/specifier-guide.pdf"
+      content_type: "application/pdf"
+      vendor: "carter_holt_harvey"
+      label: "Carter Holt Harvey — LVL Specifier Guide"
+    - source_key: "tasman:pink_batts_product_guide"
+      url: "https://www.tasmanbuildingproducts.co.nz/insulation/pink-batts-product-guide.pdf"
+      content_type: "application/pdf"
+      vendor: "tasman"
+      label: "Tasman / Pink Batts — Product guide"
+    - source_key: "resene:exterior_paint_specifier"
+      url: "https://www.resene.co.nz/archspec/datasheets/exterior-paint-specifier.pdf"
+      content_type: "application/pdf"
+      vendor: "resene"
+      label: "Resene — Exterior paint specifier"

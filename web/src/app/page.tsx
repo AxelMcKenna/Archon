@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { ArrowUpRight, ChevronDown } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { NeuralSphere } from "@/components/neural-sphere-lazy";
+import { Reveal } from "@/components/reveal";
+import { SiteFooter } from "@/components/site-footer";
 import { getSupabaseServer } from "@/lib/supabase/server";
 
 export default async function Home() {
@@ -12,6 +14,12 @@ export default async function Home() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-surface-canvas text-ink-900">
+      {/* Page-wide atmosphere — soft accent glows + faint grain over the flat canvas */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute left-1/2 top-[58%] h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-accent/[0.05] blur-[140px]" />
+      </div>
+      <div aria-hidden className="grain pointer-events-none fixed inset-0 -z-10" />
+
       {/* Top bar */}
       <header className="relative z-20 flex w-full items-center justify-between px-10 py-6">
         <Link
@@ -32,8 +40,9 @@ export default async function Home() {
       <section className="relative mx-auto max-w-[1440px] px-8 pt-12 md:pt-20 pb-24">
         <div className="grid w-full grid-cols-12 gap-x-10 items-center">
           {/* Left column – text */}
-          <div className="col-span-12 md:col-span-7 lg:col-span-6">
-            <div className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
+          <Reveal className="col-span-12 md:col-span-7 lg:col-span-6">
+            <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-ink-500">
+              <span className="h-px w-8 bg-accent/50" />
               Atlas - Construction Management
             </div>
             <h1
@@ -60,35 +69,47 @@ export default async function Home() {
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
               <div className="flex items-center gap-2 text-[11px] text-ink-500">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent ai-glow" />
                 Indexing 1,284 consent conditions in real time
               </div>
             </div>
-          </div>
+          </Reveal>
 
           {/* Right column – sphere, centered against text */}
-          <div className="relative col-span-12 md:col-span-5 lg:col-span-6 mt-12 md:mt-0 flex items-center justify-center">
+          <Reveal
+            delay={120}
+            className="relative col-span-12 md:col-span-5 lg:col-span-6 mt-12 md:mt-0 flex items-center justify-center"
+          >
             <div className="relative w-full md:-mr-6 lg:-mr-12">
               <NeuralSphere intent="thinking" className="h-[400px] w-full md:h-[500px] lg:h-[580px]" />
             </div>
-          </div>
+          </Reveal>
         </div>
 
-        {/* Scroll cue */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-6 hidden md:flex flex-col items-center gap-1.5 text-ink-400">
-          <span className="font-display uppercase tracking-[0.22em] text-[10px]">
-            Discover
+        {/* Scroll cue — vertical hairline with a gliding accent segment */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-8 hidden md:flex flex-col items-center gap-3 text-ink-400">
+          <span className="font-display uppercase tracking-[0.34em] text-[10px]">
+            Scroll
           </span>
-          <ChevronDown className="h-4 w-4 animate-bounce" />
+          <span className="relative h-12 w-px overflow-hidden bg-ink-200">
+            <span className="scroll-cue absolute inset-x-0 top-0 h-4 bg-accent" />
+          </span>
         </div>
+
+        {/* Soft fade easing the hero into the content below */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-surface-canvas"
+        />
       </section>
 
       <main>
         {/* 01 – Project Management */}
         <section className="relative border-t border-ink-100 py-24 md:py-32">
           <div className="mx-auto grid max-w-[1440px] grid-cols-12 items-center gap-x-10 px-8">
-            <div className="col-span-12 md:col-span-5">
-              <div className="text-[11px] uppercase tracking-[0.22em] text-accent">
+            <Reveal className="col-span-12 md:col-span-5">
+              <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
+                <span className="h-px w-8 bg-accent/50" />
                 01 – Project Management
               </div>
               <h2
@@ -118,10 +139,10 @@ export default async function Home() {
                   Timeline view across inspections and milestones
                 </li>
               </ul>
-            </div>
+            </Reveal>
 
-            <div className="col-span-12 md:col-span-7 mt-12 md:mt-0">
-              <div className="rounded-lg bg-surface-elevated shadow-depth">
+            <Reveal delay={120} className="col-span-12 md:col-span-7 mt-12 md:mt-0">
+              <div className="rounded-lg bg-surface-elevated shadow-depth transition-shadow duration-500 hover:shadow-depth-hover">
                 <div className="flex items-center justify-between border-b border-ink-100 px-5 py-3">
                   <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-ink-500">
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
@@ -183,11 +204,12 @@ export default async function Home() {
                         <div className="h-1 flex-1 overflow-hidden rounded-full bg-ink-100">
                           <div
                             className={
-                              row.tone === "red"
+                              "bar-fill " +
+                              (row.tone === "red"
                                 ? "h-full bg-red-500"
                                 : row.tone === "amber"
                                 ? "h-full bg-orange-500"
-                                : "h-full bg-accent"
+                                : "h-full bg-accent")
                             }
                             style={{ width: `${row.pct}%` }}
                           />
@@ -224,7 +246,7 @@ export default async function Home() {
                   ))}
                 </div>
               </div>
-            </div>
+            </Reveal>
           </div>
         </section>
 
@@ -232,8 +254,9 @@ export default async function Home() {
         <section className="relative border-t border-ink-100 bg-surface-sunken py-24 md:py-32">
           <div className="mx-auto max-w-[1440px] px-8">
             <div className="grid grid-cols-12 gap-x-10">
-              <div className="col-span-12 md:col-span-7">
-                <div className="text-[11px] uppercase tracking-[0.22em] text-accent">
+              <Reveal className="col-span-12 md:col-span-7">
+                <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
+                  <span className="h-px w-8 bg-accent/50" />
                   02 – Plan Analysis
                 </div>
                 <h2
@@ -249,8 +272,8 @@ export default async function Home() {
                   room against the NZBC, and lands each finding on the exact
                   region of the page – with the clause it breaches.
                 </p>
-              </div>
-              <div className="col-span-12 md:col-span-5 mt-6 md:mt-0 md:pt-20">
+              </Reveal>
+              <Reveal delay={120} className="col-span-12 md:col-span-5 mt-6 md:mt-0 md:pt-20">
                 <ul className="space-y-2 text-[13px] text-ink-700">
                   <li className="flex items-start gap-2">
                     <span className="mt-1.5 inline-block h-1 w-1 rounded-full bg-accent" />
@@ -265,11 +288,14 @@ export default async function Home() {
                     Findings link to exact bbox regions on the plan
                   </li>
                 </ul>
-              </div>
+              </Reveal>
             </div>
 
             {/* Full-width product window */}
-            <div className="mt-12 md:mt-16 overflow-hidden rounded-lg bg-surface-elevated shadow-depth">
+            <Reveal
+              delay={160}
+              className="mt-12 md:mt-16 overflow-hidden rounded-lg bg-surface-elevated shadow-depth"
+            >
               {/* Sheet metadata bar */}
               <div className="flex items-center justify-between border-b border-ink-100 bg-surface-canvas px-5 py-2 font-mono tabular-nums text-[11.5px] uppercase tracking-[0.16em] text-ink-500">
                 <span>
@@ -777,15 +803,15 @@ export default async function Home() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Reveal>
           </div>
         </section>
 
         {/* 03 – RFI Auto-response */}
         <section className="relative border-t border-ink-100 py-24 md:py-32">
           <div className="mx-auto grid max-w-[1440px] grid-cols-12 items-center gap-x-10 px-8">
-            <div className="order-2 col-span-12 md:order-2 md:col-span-7 mt-12 md:mt-0">
-              <div className="rounded-lg bg-surface-elevated shadow-depth">
+            <Reveal delay={120} className="order-2 col-span-12 md:order-2 md:col-span-7 mt-12 md:mt-0">
+              <div className="rounded-lg bg-surface-elevated shadow-depth transition-shadow duration-500 hover:shadow-depth-hover">
                 <div className="flex items-center justify-between border-b border-ink-100 px-5 py-3">
                   <div className="flex items-center gap-2">
                     <div className="font-mono tabular-nums text-[11px] text-ink-500">
@@ -922,10 +948,11 @@ export default async function Home() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Reveal>
 
-            <div className="order-1 col-span-12 md:order-1 md:col-span-5">
-              <div className="text-[11px] uppercase tracking-[0.22em] text-accent">
+            <Reveal className="order-1 col-span-12 md:order-1 md:col-span-5">
+              <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
+                <span className="h-px w-8 bg-accent/50" />
                 03 – RFI Auto-response
               </div>
               <h2
@@ -956,15 +983,15 @@ export default async function Home() {
                   Drafts a council-ready reply with full citations
                 </li>
               </ul>
-            </div>
+            </Reveal>
           </div>
         </section>
 
-        {/* 04 – AI co-pilot (CAD overlay + agent + drafting) */}
+        {/* 04 – AI co-pilot (CAD overlay + llm-gateway + drafting) */}
         <section className="relative border-t border-ink-100 bg-surface-sunken py-24 md:py-32">
           <div className="mx-auto grid max-w-[1440px] grid-cols-12 items-center gap-x-10 px-8">
-            <div className="order-2 col-span-12 md:order-1 md:col-span-7 mt-12 md:mt-0">
-              <div className="rounded-lg bg-surface-elevated shadow-depth">
+            <Reveal delay={120} className="order-2 col-span-12 md:order-1 md:col-span-7 mt-12 md:mt-0">
+              <div className="rounded-lg bg-surface-elevated shadow-depth transition-shadow duration-500 hover:shadow-depth-hover">
                 <div className="flex items-center justify-between border-b border-ink-100 px-5 py-3">
                   <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-ink-500">
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
@@ -1029,10 +1056,11 @@ export default async function Home() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Reveal>
 
-            <div className="order-1 col-span-12 md:order-2 md:col-span-5">
-              <div className="text-[11px] uppercase tracking-[0.22em] text-accent">
+            <Reveal className="order-1 col-span-12 md:order-2 md:col-span-5">
+              <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
+                <span className="h-px w-8 bg-accent/50" />
                 04 – AI co-pilot
               </div>
               <h2
@@ -1062,15 +1090,20 @@ export default async function Home() {
                   One-click drafted RFI responses
                 </li>
               </ul>
-            </div>
+            </Reveal>
           </div>
         </section>
 
         {/* Closing CTA */}
-        <section className="relative border-t border-ink-100 py-24 md:py-32">
+        <section className="relative overflow-hidden border-t border-ink-100 py-24 md:py-32">
+          <div
+            aria-hidden
+            className="glow-drift pointer-events-none absolute left-1/2 top-0 -z-10 h-[420px] w-[680px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-accent/[0.07] blur-[120px]"
+          />
           <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-x-10 px-8">
-            <div className="col-span-12 md:col-span-8">
-              <div className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
+            <Reveal className="col-span-12 md:col-span-8">
+              <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-ink-500">
+                <span className="h-px w-8 bg-accent/50" />
                 Built for the people who actually build
               </div>
               <h2
@@ -1080,9 +1113,9 @@ export default async function Home() {
                 Build with{" "}
                 <span className="text-accent">intelligence</span>.
               </h2>
-            </div>
+            </Reveal>
 
-            <div className="col-span-12 mt-10 md:col-span-4 md:col-start-9 md:mt-0 md:self-end md:pb-6">
+            <Reveal delay={120} className="col-span-12 mt-10 md:col-span-4 md:col-start-9 md:mt-0 md:self-end md:pb-6">
               <p className="max-w-sm text-[15px] leading-relaxed text-ink-600">
                 Bring your projects, your drawings, and your RFIs. Atlas turns
                 them into a coordinated, queryable workspace – so your crew
@@ -1105,11 +1138,12 @@ export default async function Home() {
                   </Link>
                 )}
               </div>
-            </div>
+            </Reveal>
           </div>
         </section>
       </main>
 
+      <SiteFooter />
     </div>
   );
 }

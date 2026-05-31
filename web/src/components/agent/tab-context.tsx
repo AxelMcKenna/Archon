@@ -18,6 +18,7 @@ const TabContext = createContext<TabContextValue>({
 const TAB_FROM_PATH: Array<[RegExp, string]> = [
   [/^\/projects\/[^/]+\/application-prep/, "application-prep"],
   [/^\/projects\/[^/]+\/drawings/, "drawings"],
+  [/^\/projects\/[^/]+\/value-engineering/, "drawings"],
   [/^\/projects\/[^/]+\/rfis/, "rfis"],
   [/^\/projects\/[^/]+\/inspections/, "inspections"],
   [/^\/projects\/[^/]+\/documents/, "documents"],
@@ -26,7 +27,7 @@ const TAB_FROM_PATH: Array<[RegExp, string]> = [
 ];
 
 /**
- * Pathname-derived agent context. Pure read of `usePathname()` — no fetching,
+ * Pathname-derived llm-gateway context. Pure read of `usePathname()` — no fetching,
  * no mutable state, no side effects. Tabs that don't import `useTabContext`
  * are completely unaffected by this provider.
  */

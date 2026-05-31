@@ -1,7 +1,7 @@
 """Seed bca_corpus with synthetic RFI items per BCA.
 
 Distribution mirrors BRANZ findings:
-  B1 ~30%, E2 ~22%, docs ~25%, others ~23%.
+  B1 ~30%, E2 ~22%, wiki ~25%, others ~23%.
 
 Run:
     uv run python -m scripts.seed_bca_corpus

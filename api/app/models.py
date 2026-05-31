@@ -40,6 +40,7 @@ class RfiItem(BaseModel):
 class ExtractionMeta(BaseModel):
     extractor: ExtractorKind
     extractor_version: str
+    prompt_version: str | None = None
     processed_at: datetime
     warnings: list[str] = Field(default_factory=list)
 

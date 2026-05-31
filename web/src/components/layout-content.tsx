@@ -8,8 +8,20 @@ import { AgentPanel } from "@/components/agent/agent-panel";
 import { AgentProvider } from "@/components/agent/agent-provider";
 import { AgentTrigger } from "@/components/agent/agent-trigger";
 import { TabContextProvider } from "@/components/agent/tab-context";
+import { SiteFooter } from "@/components/site-footer";
 
 type NavItem = { name: string; href: Route };
+
+// Routes that render fullbleed with their own chrome (no app header/footer).
+const FULLBLEED_PREFIXES = [
+  "/login",
+  "/auth",
+  "/privacy",
+  "/terms",
+  "/cookies",
+  "/acceptable-use",
+  "/subprocessors",
+];
 
 const PRIMARY_NAV: NavItem[] = [
   { name: "Dashboard", href: "/dashboard" as Route },
@@ -30,11 +42,10 @@ export function LayoutContent({
 }) {
   const pathname = usePathname();
 
-  // Landing page and auth pages render fullbleed without the app chrome.
+  // Landing page, auth pages, and legal pages render fullbleed (own chrome).
   if (
     pathname === "/" ||
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/auth")
+    FULLBLEED_PREFIXES.some((p) => pathname.startsWith(p))
   ) {
     return <>{children}</>;
   }
@@ -88,6 +99,7 @@ export function LayoutContent({
             )}
             {children}
           </main>
+          <SiteFooter />
         </div>
         <AgentPanel />
       </AgentProvider>

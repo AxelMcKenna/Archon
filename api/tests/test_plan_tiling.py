@@ -6,12 +6,16 @@ import io
 
 from PIL import Image
 
-from app.plan_analyzer import (
+from app.plans.vote import dedup_flags as _dedup_flags
+from app.vision.core.renderer import (
     MAX_IMAGE_BYTES,
     RenderedImage,
-    _dedup_flags,
-    _png_bytes,
-    _tile_image,
+)
+from app.vision.core.renderer import (
+    png_bytes as _png_bytes,
+)
+from app.vision.core.renderer import (
+    tile_image as _tile_image,
 )
 
 

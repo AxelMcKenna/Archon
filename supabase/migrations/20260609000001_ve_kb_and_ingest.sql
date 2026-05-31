@@ -1,7 +1,7 @@
 -- VE knowledge base + ingestion document registry.
 --
 -- Two tables shipped together because they reference each other:
---   ve_ingest_documents: raw fetched docs (PDFs, HTML) from public sources
+--   ve_ingest_documents: raw fetched wiki (PDFs, HTML) from public sources
 --   ve_knowledge_base:   curated substitution patterns; rows can cite a
 --                        ve_ingest_documents row to record provenance
 --

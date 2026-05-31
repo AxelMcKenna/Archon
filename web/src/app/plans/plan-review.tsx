@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { API_BASE, apiFetch } from "@/lib/api";
 import { taxonomy } from "@atlas/shared";
+import { isStalled } from "@/lib/job-status";
 
 type Confidence = "high" | "medium" | "low";
 
@@ -25,6 +26,7 @@ type Plan = {
   id: string;
   filename: string;
   status: string;
+  created_at?: string | null;
   analyser_version: string | null;
   analysis_version?: string | null;
   prompt_version: string | null;
@@ -116,6 +118,12 @@ export function PlanReview({ plan }: { plan: Plan }) {
         {plan.status === "failed" && (
           <p className="rounded-sm bg-red-50 border border-red-200 p-3 text-sm text-red-700">
             Analysis failed. Try re-uploading.
+          </p>
+        )}
+        {isStalled(plan.status, plan.created_at) && (
+          <p className="rounded-sm bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
+            Analysis stalled — it didn&apos;t finish. Delete this drawing and
+            re-upload to try again.
           </p>
         )}
         {truncated && (
@@ -309,18 +317,27 @@ function PageView({
   showOverlays: boolean;
   onSelectFlag: (id: number) => void;
 }) {
+  const [loaded, setLoaded] = useState(false);
   return (
     <div
       className="relative w-full bg-surface-raised border border-ink-700/10 rounded-sm shadow-sm"
       style={{ aspectRatio: `${info.width} / ${info.height}` }}
     >
+      {!loaded && (
+        <div className="absolute inset-0 animate-pulse bg-ink-700/5" />
+      )}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={`${API_BASE}/plans/${planId}/pages/${info.page}.png`}
         alt={`Plan page ${info.page}`}
-        className="absolute inset-0 w-full h-full object-contain"
+        onLoad={() => setLoaded(true)}
+        className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${
+          loaded ? "opacity-100" : "opacity-0"
+        }`}
       />
-      {showOverlays && (
+      {/* Overlays only after the drawing has painted, so the boxes never
+          float over a blank/loading page. */}
+      {showOverlays && loaded && (
         <div className="absolute inset-0">
           {flags.map((f) => (
             <BboxOverlay

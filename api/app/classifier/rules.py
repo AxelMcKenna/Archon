@@ -1,6 +1,6 @@
 """Pure-Python rules engine (FR-2.4 — FR-2.10).
 
-- Loads `/api/rules/rfi_classification.yaml`
+- Loads `/api/data/rfi_classification.yaml`
 - Stateless: input = canonical RFI item, output = ranked RuleHit list
 - Supports two matcher types: `entity` and `regex`
 - Honours `hard_assertion`: a matched hard rule overrides AI in reconciliation
@@ -24,7 +24,7 @@ from app.models import (
     SeverityT,
 )
 
-DEFAULT_RULES_PATH = Path(__file__).parent.parent.parent / "rules" / "rfi_classification.yaml"
+DEFAULT_RULES_PATH = Path(__file__).resolve().parents[2] / "data" / "rfi_classification.yaml"
 
 
 @dataclass(frozen=True)

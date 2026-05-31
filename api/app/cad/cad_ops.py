@@ -1,6 +1,6 @@
 """Validate and apply proposed-change ops to a DXF.
 
-The op verbs are defined in `shared/cad_ops.schema.json`. The Pydantic
+The op verbs are defined in `api/data/cad_ops.schema.json`. The Pydantic
 models here are the runtime gate — anything outside this set is rejected
 before it ever touches ezdxf.
 """

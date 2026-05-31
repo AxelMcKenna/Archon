@@ -6,6 +6,8 @@ Thin HTTP layer. Pipeline orchestration lives in
 
 from __future__ import annotations
 
+import asyncio
+import logging
 from typing import Any
 from uuid import UUID
 
@@ -25,10 +27,15 @@ from app.services.cad_pipeline import (
 from app.services.cad_pipeline import (
     upload_and_analyse as run_upload_pipeline,
 )
+from app.services.value_engineering_pipeline import (
+    get_latest_value_engineering_cad,
+    run_value_engineering_cad,
+)
 from app.storage import CAD_BUCKET, download, signed_url
 from app.utils.safe_filename import safe_filename
 
 router = APIRouter()
+log = logging.getLogger(__name__)
 
 ALLOWED_EXT = {".dxf"}
 MAX_BYTES = 50 * 1024 * 1024
@@ -40,6 +47,7 @@ async def upload_and_analyse_cad(
     request: Request,
     file: UploadFile = File(...),
     project_id: UUID = Form(...),
+    analyse: bool = Form(True),
     db: Client = Depends(get_db),
 ) -> dict[str, Any]:
     fname = (file.filename or "drawing.dxf").lower()
@@ -61,15 +69,18 @@ async def upload_and_analyse_cad(
         raise HTTPException(404, "project not found")
 
     try:
-        result = run_upload_pipeline(
+        result = await asyncio.to_thread(
+            run_upload_pipeline,
             db=db,
             project_id=str(project_id),
             project=proj,
             filename=safe_filename(file.filename, default="drawing.dxf"),
             payload=payload,
+            analyse=analyse,
         )
     except Exception as e:
-        raise HTTPException(500, f"analysis failed: {e}") from e
+        log.exception("cad analysis failed (project_id=%s)", project_id)
+        raise HTTPException(500, "analysis failed") from e
 
     return {
         "cad_id": result.cad_id,
@@ -219,3 +230,37 @@ async def delete_cad(cad_id: str, db: Client = Depends(get_db)) -> dict[str, str
     db.storage.from_(CAD_BUCKET).remove([row["storage_path"]])
     db.table("cad_uploads").delete().eq("id", cad_id).execute()
     return {"status": "deleted"}
+
+
+@router.post("/{cad_id}/value-engineering")
+@limiter.limit("10/minute")
+async def trigger_cad_value_engineering(
+    request: Request,
+    cad_id: str,
+    db: Client = Depends(get_db),
+) -> dict[str, Any]:
+    try:
+        result = run_value_engineering_cad(db, cad_id=cad_id)
+    except LookupError as e:
+        raise HTTPException(404, str(e)) from e
+    except ValueError as e:
+        raise HTTPException(409, str(e)) from e
+    except Exception as e:
+        raise HTTPException(500, f"value engineering failed: {e}") from e
+    return {
+        "ve_id": result.ve_id,
+        "cad_id": result.source_id,
+        "opportunities_count": result.opportunities_count,
+        "processing_ms": result.processing_ms,
+        "cost_usd": result.cost_usd,
+        "cached": result.cached,
+        "truncated": result.truncated,
+    }
+
+
+@router.get("/{cad_id}/value-engineering")
+async def get_cad_value_engineering(
+    cad_id: str,
+    db: Client = Depends(get_db),
+) -> dict[str, Any] | None:
+    return get_latest_value_engineering_cad(db, cad_id=cad_id)

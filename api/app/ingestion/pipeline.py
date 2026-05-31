@@ -1,6 +1,6 @@
 """End-to-end orchestration for one ingestion run.
 
-Glues fetcher + storage + extractor for every URL in a source kind.
+Glues scraping + persistence + extractor for every URL in a source kind.
 This is the only module the CLI and the admin route call into.
 """
 
@@ -10,10 +10,11 @@ import logging
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from app.ingestion import fetcher, storage
+from app.ingestion import persistence
 from app.ingestion.extractors import get_extractor
 from app.ingestion.models import IngestRunSummary, VeIngestDocument
-from app.ingestion.registry import SourceDoc, SourceKindConfig, get_kind
+from app.ingestion.scraping import fetcher
+from app.ingestion.scraping.registry import SourceDoc, SourceKindConfig, get_kind
 
 if TYPE_CHECKING:
     from supabase import Client
@@ -34,7 +35,7 @@ def _process_one_doc(
     force: bool,
     dry_run: bool,
 ) -> None:
-    prior = storage.find_latest_doc_for_source_key(
+    prior = persistence.find_latest_doc_for_source_key(
         db, source_key=doc_cfg.source_key
     )
     etag = prior.get("etag") if prior and not force else None
@@ -69,7 +70,7 @@ def _process_one_doc(
     summary.fetched += 1
 
     if not force:
-        existing = storage.find_doc_by_hash(
+        existing = persistence.find_doc_by_hash(
             db,
             source_key=doc_cfg.source_key,
             content_hash=result.content_hash,
@@ -92,14 +93,14 @@ def _process_one_doc(
         return
 
     content_type = result.content_type or doc_cfg.content_type
-    storage_path = storage.upload_raw(
+    storage_path = persistence.upload_raw(
         db,
         source_kind=kind_cfg.kind,
         content_hash=result.content_hash,
         content_type=content_type,
         data=result.bytes,
     )
-    doc: VeIngestDocument = storage.insert_ingest_document(
+    doc: VeIngestDocument = persistence.insert_ingest_document(
         db,
         source_kind=kind_cfg.kind,
         source_key=doc_cfg.source_key,
@@ -116,7 +117,7 @@ def _process_one_doc(
         extractor = get_extractor(kind_cfg.kind)
         candidates = extractor.extract(doc_bytes=result.bytes, doc=doc)
     except Exception as e:  # noqa: BLE001
-        storage.mark_extraction_status(
+        persistence.mark_extraction_status(
             db, doc_id=doc.id, status="failed", error=str(e)
         )
         summary.errors.append(
@@ -131,14 +132,14 @@ def _process_one_doc(
     summary.extracted_candidates += len(candidates)
     inserted = 0
     for cand in candidates:
-        kb_id = storage.insert_kb_candidate(
+        kb_id = persistence.insert_kb_candidate(
             db, candidate=cand, ingest_document_id=doc.id
         )
         if kb_id:
             inserted += 1
     summary.inserted_kb_rows += inserted
 
-    storage.mark_extraction_status(
+    persistence.mark_extraction_status(
         db,
         doc_id=doc.id,
         status="extracted",

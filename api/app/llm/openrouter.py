@@ -8,7 +8,7 @@ payload shape stays identical to the other providers.
 Two entrypoints:
 
   - ``call_openrouter_tool``        — sync (kept for sync callers like
-    plan_analyzer's ThreadPoolExecutor pool).
+    the plan analyser's ThreadPoolExecutor pool).
   - ``call_openrouter_tool_async``  — awaitable wrapper for use from
     FastAPI handlers; runs the sync function on a worker thread so the
     event loop stays free for other requests.
@@ -25,6 +25,7 @@ from typing import Any
 import httpx
 
 from app.config import get_settings
+from app.llm.retry import TransientLLMError, call_with_retries
 
 _OR_BASE_URL = "https://openrouter.ai/api/v1"
 
@@ -105,49 +106,61 @@ def call_openrouter_tool(
         "X-Title": "ATLAS",
     }
 
-    with httpx.Client(timeout=120.0) as client:
-        resp = client.post(
-            f"{_OR_BASE_URL}/chat/completions", headers=headers, json=body
-        )
-    if resp.status_code >= 400:
-        raise RuntimeError(
-            f"OpenRouter call failed ({resp.status_code}): {resp.text[:500]}"
-        )
-    data = resp.json()
+    def _once() -> OpenRouterResult:
+        with httpx.Client(timeout=120.0) as client:
+            resp = client.post(
+                f"{_OR_BASE_URL}/chat/completions", headers=headers, json=body
+            )
+        if resp.status_code >= 400:
+            # 429/5xx are provider-transient; let the retry layer see them.
+            err = (
+                TransientLLMError
+                if resp.status_code in {408, 409, 425, 429} or resp.status_code >= 500
+                else RuntimeError
+            )
+            raise err(
+                f"OpenRouter call failed ({resp.status_code}): {resp.text[:500]}"
+            )
+        data = resp.json()
 
-    choices = data.get("choices") or []
-    if not choices:
-        raise RuntimeError(f"OpenRouter returned no choices: {data}")
-    msg = choices[0].get("message") or {}
-    tool_calls = msg.get("tool_calls") or []
-    target = next(
-        (
-            tc
-            for tc in tool_calls
-            if tc.get("function", {}).get("name") == tool_name
-        ),
-        None,
-    )
-    if target is None:
-        raise RuntimeError(
-            f"OpenRouter did not return a tool call for {tool_name}: {msg}"
+        choices = data.get("choices") or []
+        if not choices:
+            # Empty/flaky completion — worth another shot.
+            raise TransientLLMError(f"OpenRouter returned no choices: {data}")
+        msg = choices[0].get("message") or {}
+        tool_calls = msg.get("tool_calls") or []
+        target = next(
+            (
+                tc
+                for tc in tool_calls
+                if tc.get("function", {}).get("name") == tool_name
+            ),
+            None,
         )
-    raw_args = target["function"].get("arguments") or "{}"
-    try:
-        payload = (
-            raw_args
-            if isinstance(raw_args, dict)
-            else json.loads(raw_args)
-        )
-    except json.JSONDecodeError as e:
-        raise RuntimeError(f"OpenRouter tool args were not valid JSON: {e}") from e
+        if target is None:
+            raise TransientLLMError(
+                f"OpenRouter did not return a tool call for {tool_name}: {msg}"
+            )
+        raw_args = target["function"].get("arguments") or "{}"
+        try:
+            payload = (
+                raw_args
+                if isinstance(raw_args, dict)
+                else json.loads(raw_args)
+            )
+        except json.JSONDecodeError as e:
+            raise RuntimeError(f"OpenRouter tool args were not valid JSON: {e}") from e
 
-    usage = data.get("usage") or {}
-    return OpenRouterResult(
-        payload=payload,
-        input_tokens=int(usage.get("prompt_tokens", 0) or 0),
-        output_tokens=int(usage.get("completion_tokens", 0) or 0),
-        model=str(data.get("model") or model_id),
+        usage = data.get("usage") or {}
+        return OpenRouterResult(
+            payload=payload,
+            input_tokens=int(usage.get("prompt_tokens", 0) or 0),
+            output_tokens=int(usage.get("completion_tokens", 0) or 0),
+            model=str(data.get("model") or model_id),
+        )
+
+    return call_with_retries(
+        _once, label=f"openrouter:{model_id}", max_attempts=settings.llm_max_attempts
     )
 
 

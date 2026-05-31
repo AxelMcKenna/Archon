@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { InspectionSchedule } from "@/lib/inspections";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
+import { useToast } from "@/components/ui/toast";
 import {
   type InspectionPdf,
   type InspectionRecord,
@@ -33,8 +34,20 @@ export function useInspections(
   initialSavedRecords: Record<string, InspectionRecord> = EMPTY_RECORDS,
 ) {
   const supabase = useMemo(() => getSupabaseBrowser(), []);
+  const toast = useToast();
   const [savedRecords, setSavedRecords] = useState<Record<string, InspectionRecord>>(initialSavedRecords);
   const [hasHydrated, setHasHydrated] = useState(false);
+
+  // Persist + surface real DB failures. A genuine write error here used to be
+  // swallowed (console.error only), silently losing the user's edits. The
+  // missing-tables fallback path stays quiet — it is an expected degraded mode.
+  const persist = useCallback(
+    (records: InspectionRecord[]) =>
+      persistInspectionRecords(projectId, records, supabase, (message) =>
+        toast.error(`Couldn't save inspections: ${message}`),
+      ),
+    [projectId, supabase, toast],
+  );
 
   useEffect(() => {
     const localRecords = readFromStorage<Record<string, InspectionRecord>>(getStorageKey(projectId));
@@ -47,7 +60,7 @@ export function useInspections(
       const nextRecords = withSeededGeneratedRecords(schedule, localRecords);
       setSavedRecords(nextRecords);
       setHasHydrated(true);
-      void persistInspectionRecords(projectId, Object.values(nextRecords), supabase);
+      void persist(Object.values(nextRecords));
       return;
     }
 
@@ -56,8 +69,8 @@ export function useInspections(
 
     setSavedRecords(nextRecords);
     setHasHydrated(true);
-    void persistInspectionRecords(projectId, seededRecords, supabase);
-  }, [initialSavedRecords, projectId, schedule, supabase]);
+    void persist(seededRecords);
+  }, [initialSavedRecords, projectId, schedule, persist]);
 
   const inspections = useMemo(
     () => buildInspectionRecords(schedule, savedRecords),
@@ -93,7 +106,7 @@ export function useInspections(
     }
 
     setSavedRecords(nextRecords);
-    return persistInspectionRecords(projectId, recordsToPersist, supabase);
+    return persist(recordsToPersist);
   }
 
   function addManualInspection(inspectionTypeId?: string) {
@@ -104,7 +117,7 @@ export function useInspections(
     };
 
     setSavedRecords(nextRecords);
-    void persistInspectionRecords(projectId, [manualInspection], supabase);
+    void persist([manualInspection]);
 
     return manualInspection;
   }
@@ -138,7 +151,7 @@ export function useInspections(
     });
 
     setSavedRecords(nextRecords);
-    void persistInspectionRecords(projectId, recordsToPersist, supabase);
+    void persist(recordsToPersist);
   }
 
   function deleteInspection(inspectionId: string) {
@@ -156,7 +169,7 @@ export function useInspections(
     };
 
     setSavedRecords(nextRecords);
-    void persistInspectionRecords(projectId, [nextRecord], supabase);
+    void persist([nextRecord]);
   }
 
   async function uploadInspectionPdf(inspectionId: string, file: File) {
@@ -164,7 +177,7 @@ export function useInspections(
     if (!inspection) return null;
 
     const existingRecord = savedRecords[inspectionId] ?? inspection;
-    await persistInspectionRecords(projectId, [existingRecord], supabase);
+    await persist([existingRecord]);
 
     const now = new Date().toISOString();
     const pdfId = `inspection-pdf-${crypto.randomUUID()}`;
@@ -261,6 +274,7 @@ async function persistInspectionRecords(
   projectId: string,
   records: InspectionRecord[],
   supabase: ReturnType<typeof getSupabaseBrowser>,
+  onError?: (message: string) => void,
 ) {
   if (records.length === 0) return true;
 
@@ -273,6 +287,7 @@ async function persistInspectionRecords(
     if (isMissingInspectionTables(recordError)) return false;
 
     console.error("Unable to persist inspections", recordError);
+    onError?.(recordError.message || "Unable to save inspection changes.");
     return false;
   }
 
@@ -286,6 +301,7 @@ async function persistInspectionRecords(
       if (isMissingInspectionTables(deleteError)) return false;
 
       console.error("Unable to clear inspection checklist", deleteError);
+      onError?.(deleteError.message || "Unable to save inspection checklist.");
       return false;
     }
 
@@ -310,6 +326,7 @@ async function persistInspectionRecords(
           rowCount: record.requirements.length,
         },
       );
+      onError?.(checklistError.message || "Unable to save inspection checklist.");
       return false;
     }
 

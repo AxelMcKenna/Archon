@@ -16,7 +16,7 @@ from fastapi import APIRouter, Header, HTTPException, Query
 from app.auth import get_service_db
 from app.config import get_settings
 from app.ingestion.pipeline import run_source
-from app.ingestion.registry import known_kinds
+from app.ingestion.scraping.registry import known_kinds
 
 router = APIRouter()
 

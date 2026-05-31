@@ -141,10 +141,11 @@ export async function saveConsentAssessment(
       return;
     }
     console.warn("[consent-assessment] save failed", error.message);
-    return;
+    throw new Error(error.message || "Failed to save consent assessment.");
   }
 
   console.warn("[consent-assessment] save failed", fullSave.error.message);
+  throw new Error(fullSave.error.message || "Failed to save consent assessment.");
 }
 
 export async function loadForecastContext(

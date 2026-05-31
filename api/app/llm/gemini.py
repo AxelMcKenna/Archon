@@ -16,6 +16,7 @@ from google import genai
 from google.genai import types
 
 from app.config import get_settings
+from app.llm.retry import TransientLLMError, call_with_retries
 
 
 @dataclass
@@ -112,28 +113,37 @@ def call_gemini_tool(
         temperature=temperature,
     )
 
-    response = client.models.generate_content(
-        model=model_id,
-        contents=[types.Content(role="user", parts=parts)],
-        config=config,
-    )
+    def _once() -> GeminiResult:
+        response = client.models.generate_content(
+            model=model_id,
+            contents=[types.Content(role="user", parts=parts)],
+            config=config,
+        )
 
-    payload: dict[str, Any] = {}
-    candidates = response.candidates or []
-    if candidates and candidates[0].content and candidates[0].content.parts:
-        for part in candidates[0].content.parts:
-            fc = getattr(part, "function_call", None)
-            if fc and fc.name == tool_name:
-                payload = dict(fc.args or {})
-                break
-    if not payload:
-        raise RuntimeError(f"Gemini did not return a function call for {tool_name}")
+        payload: dict[str, Any] = {}
+        candidates = response.candidates or []
+        if candidates and candidates[0].content and candidates[0].content.parts:
+            for part in candidates[0].content.parts:
+                fc = getattr(part, "function_call", None)
+                if fc and fc.name == tool_name:
+                    payload = dict(fc.args or {})
+                    break
+        if not payload:
+            # Empty/flaky completion (often a transient safety-block or
+            # truncation) — worth another attempt.
+            raise TransientLLMError(
+                f"Gemini did not return a function call for {tool_name}"
+            )
 
-    usage = response.usage_metadata
-    return GeminiResult(
-        payload=payload,
-        input_tokens=int(getattr(usage, "prompt_token_count", 0) or 0),
-        output_tokens=int(getattr(usage, "candidates_token_count", 0) or 0),
+        usage = response.usage_metadata
+        return GeminiResult(
+            payload=payload,
+            input_tokens=int(getattr(usage, "prompt_token_count", 0) or 0),
+            output_tokens=int(getattr(usage, "candidates_token_count", 0) or 0),
+        )
+
+    return call_with_retries(
+        _once, label=f"gemini:{model_id}", max_attempts=settings.llm_max_attempts
     )
 
 
