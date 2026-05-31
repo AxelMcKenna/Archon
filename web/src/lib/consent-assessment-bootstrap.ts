@@ -52,11 +52,29 @@ export async function bootstrapConsentAssessment(
   intake: BootstrapIntake,
 ): Promise<void> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "/api/backend";
+    // Runs server-side, so it must hit the absolute upstream base
+    // (API_BASE_URL — the same one the /api/backend proxy uses), not the
+    // browser-relative proxy path which fails in a server fetch. Also forward
+    // the caller's JWT so auth-gated endpoints (resolve-documents) don't 401.
+    const apiUrl = (
+      process.env.API_BASE_URL ||
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      ""
+    ).replace(/\/$/, "");
+    if (!apiUrl) {
+      console.warn("[consent-bootstrap] no API base URL configured");
+      return;
+    }
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const authHeaders: Record<string, string> = session?.access_token
+      ? { Authorization: `Bearer ${session.access_token}` }
+      : {};
 
     const checklistResp = await fetch(`${apiUrl}/address-to-checklist`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeaders },
       body: JSON.stringify({ address, city: "", postalcode: "" }),
     });
     if (!checklistResp.ok) {
@@ -89,7 +107,7 @@ export async function bootstrapConsentAssessment(
 
     const resolveResp = await fetch(`${apiUrl}/api/resolve-documents`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeaders },
       body: JSON.stringify({ zoneCategory, activeOverlays, projectDetails }),
     });
 
