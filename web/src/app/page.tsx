@@ -42,7 +42,6 @@ export default async function Home() {
           {/* Left column – text */}
           <Reveal className="col-span-12 md:col-span-7 lg:col-span-6">
             <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-ink-500">
-              <span className="h-px w-8 bg-accent/50" />
               Archon · Construction Management
             </div>
             <h1
@@ -109,7 +108,6 @@ export default async function Home() {
           <div className="mx-auto grid max-w-[1440px] grid-cols-12 items-center gap-x-10 px-8">
             <Reveal className="col-span-12 md:col-span-5">
               <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
-                <span className="h-px w-8 bg-accent/50" />
                 01 · Project Management
               </div>
               <h2
@@ -221,17 +219,17 @@ export default async function Home() {
                       <div className="col-span-3 flex justify-end">
                         <span
                           className={
-                            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-[0.14em] " +
+                            "inline-flex items-center gap-1.5 text-[12px] " +
                             (row.tone === "red"
-                              ? "bg-red-50 text-red-700"
+                              ? "text-red-600"
                               : row.tone === "amber"
-                              ? "bg-orange-50 text-orange-700"
-                              : "bg-accent-soft text-accent")
+                              ? "text-orange-600"
+                              : "text-ink-600")
                           }
                         >
                           <span
                             className={
-                              "inline-block h-1 w-1 rounded-full " +
+                              "inline-block h-1.5 w-1.5 rounded-full " +
                               (row.tone === "red"
                                 ? "bg-red-500"
                                 : row.tone === "amber"
@@ -256,7 +254,6 @@ export default async function Home() {
             <div className="grid grid-cols-12 gap-x-10">
               <Reveal className="col-span-12 md:col-span-7">
                 <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
-                  <span className="h-px w-8 bg-accent/50" />
                   02 · Plan Analysis
                 </div>
                 <h2
@@ -952,7 +949,6 @@ export default async function Home() {
 
             <Reveal className="order-1 col-span-12 md:order-1 md:col-span-5">
               <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
-                <span className="h-px w-8 bg-accent/50" />
                 03 · RFI Auto-response
               </div>
               <h2
@@ -1060,7 +1056,6 @@ export default async function Home() {
 
             <Reveal className="order-1 col-span-12 md:order-2 md:col-span-5">
               <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
-                <span className="h-px w-8 bg-accent/50" />
                 04 · AI co-pilot
               </div>
               <h2
@@ -1103,7 +1098,6 @@ export default async function Home() {
           <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-x-10 px-8">
             <Reveal className="col-span-12 md:col-span-8">
               <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-ink-500">
-                <span className="h-px w-8 bg-accent/50" />
                 Built for the people who actually build
               </div>
               <h2
