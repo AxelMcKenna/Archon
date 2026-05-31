@@ -11,10 +11,10 @@ COPY --from=ghcr.io/astral-sh/uv:0.11.12 /uv /usr/local/bin/uv
 WORKDIR /app
 
 # Build:  docker build -t atlas-llm-gateway:latest -f llm-gateway/Dockerfile .
-COPY agent/pyproject.toml ./
+COPY llm-gateway/pyproject.toml ./
 RUN uv sync --no-install-project --no-dev
 
-COPY agent/app ./app
+COPY llm-gateway/app ./app
 
 EXPOSE 8001
 
