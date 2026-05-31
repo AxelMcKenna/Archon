@@ -10,6 +10,13 @@ async function createProject(formData: FormData) {
   "use server";
   const supabase = await getSupabaseServer();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
   const address = String(formData.get("address") ?? "").trim();
   const bca = String(formData.get("bca") ?? "").trim();
   const projectType = String(formData.get("project_type") ?? "").trim();
@@ -38,6 +45,7 @@ async function createProject(formData: FormData) {
   }
 
   const inserted = await insertProjectCompatible(supabase, {
+      user_id: user.id,
       address,
       bca,
       project_type: projectType,
