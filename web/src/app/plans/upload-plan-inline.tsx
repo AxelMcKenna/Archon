@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { apiUpload } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
+import { getSupabaseBrowser } from "@/lib/supabase/client";
 import { taxonomy } from "@archon/shared";
 import { AiThinking } from "@/components/ai-thinking";
 
@@ -49,13 +50,50 @@ export function UploadPlanInline({
     setBusy(true);
     setError(null);
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("project_id", project.id);
-      if (!analyseRfi) fd.append("analyse", "false");
+      // Direct-to-storage upload: the file goes straight to Supabase Storage
+      // over HTTPS via a backend-issued signed URL, sidestepping the Vercel
+      // proxy's ~4.5MB serverless body limit. Only small JSON calls
+      // (upload-url, ingest) traverse the proxy.
       const dxf = isDxf(file.name);
-      const endpoint = dxf ? "/cad" : "/plans";
-      const res = await apiUpload<AnalyseResponse>(endpoint, fd);
+      const contentType = file.type || (dxf ? "application/dxf" : "application/octet-stream");
+
+      const urlEndpoint = dxf ? "/cad/upload-url" : "/plans/upload-url";
+      const signed = await apiFetch<{
+        plan_id?: string;
+        cad_id?: string;
+        bucket: string;
+        path: string;
+        token: string;
+      }>(urlEndpoint, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          project_id: project.id,
+          filename: file.name,
+          ...(dxf ? {} : { content_type: contentType }),
+        }),
+      });
+
+      const supabase = getSupabaseBrowser();
+      const { error: uploadError } = await supabase.storage
+        .from(signed.bucket)
+        .uploadToSignedUrl(signed.path, signed.token, file, { contentType });
+      if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
+
+      const uploadedId = dxf ? signed.cad_id : signed.plan_id;
+      const ingestEndpoint = dxf ? "/cad/ingest" : "/plans/ingest";
+      const res = await apiFetch<AnalyseResponse>(ingestEndpoint, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          project_id: project.id,
+          [dxf ? "cad_id" : "plan_id"]: uploadedId,
+          storage_path: signed.path,
+          filename: file.name,
+          ...(dxf ? {} : { content_type: contentType }),
+          analyse: analyseRfi,
+        }),
+      });
       const id = dxf ? res.cad_id : res.plan_id;
       if (onUploaded && id) {
         onUploaded(id, dxf ? "dxf" : "pdf");

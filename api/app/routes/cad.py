@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from typing import Any
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import Response
@@ -31,7 +31,7 @@ from app.services.value_engineering_pipeline import (
     get_latest_value_engineering_cad,
     run_value_engineering_cad,
 )
-from app.storage import CAD_BUCKET, download, signed_url
+from app.storage import CAD_BUCKET, download, signed_upload_url, signed_url
 from app.utils.safe_filename import safe_filename
 
 router = APIRouter()
@@ -80,6 +80,97 @@ async def upload_and_analyse_cad(
         )
     except Exception as e:
         log.exception("cad analysis failed (project_id=%s)", project_id)
+        raise HTTPException(500, "analysis failed") from e
+
+    return {
+        "cad_id": result.cad_id,
+        "flags_count": result.flags_count,
+        "entity_count": result.entity_count,
+        "views": result.views,
+        "processing_ms": result.processing_ms,
+    }
+
+
+def _load_cad_project(db: Client, project_id: UUID) -> dict[str, Any]:
+    proj = (
+        db.table("projects")
+        .select("id, bca, project_type, description")
+        .eq("id", str(project_id))
+        .single()
+        .execute()
+        .data
+    )
+    if not proj:
+        raise HTTPException(404, "project not found")
+    return proj
+
+
+class CadUploadUrlRequest(BaseModel):
+    project_id: UUID
+    filename: str
+
+
+class CadIngestRequest(BaseModel):
+    project_id: UUID
+    cad_id: UUID
+    storage_path: str
+    filename: str
+    analyse: bool = True
+
+
+@router.post("/upload-url")
+@limiter.limit("20/minute")
+async def create_cad_upload_url(
+    request: Request,
+    body: CadUploadUrlRequest,
+    db: Client = Depends(get_db),
+) -> dict[str, Any]:
+    """Signed Storage upload URL for a DXF — browser uploads directly,
+    bypassing the Vercel proxy body limit."""
+    if not body.filename.lower().endswith(".dxf"):
+        raise HTTPException(415, "only .dxf is supported")
+    _load_cad_project(db, body.project_id)  # RLS ownership check
+    cad_id = uuid4()
+    fname = safe_filename(body.filename, default="drawing.dxf")
+    path = f"{body.project_id}/{cad_id}/{fname}"
+    signed = signed_upload_url(db, bucket=CAD_BUCKET, path=path)
+    return {
+        "cad_id": str(cad_id),
+        "bucket": CAD_BUCKET,
+        "path": path,
+        "filename": fname,
+        "token": signed["token"],
+    }
+
+
+@router.post("/ingest")
+@limiter.limit("10/minute")
+async def ingest_uploaded_cad(
+    request: Request,
+    body: CadIngestRequest,
+    db: Client = Depends(get_db),
+) -> dict[str, Any]:
+    """Analyse a DXF the browser already uploaded via /cad/upload-url."""
+    if not body.filename.lower().endswith(".dxf"):
+        raise HTTPException(415, "only .dxf is supported")
+    expected_prefix = f"{body.project_id}/{body.cad_id}/"
+    if not body.storage_path.startswith(expected_prefix):
+        raise HTTPException(400, "storage_path does not match project/cad")
+    proj = _load_cad_project(db, body.project_id)
+
+    try:
+        result = await asyncio.to_thread(
+            run_upload_pipeline,
+            db=db,
+            project_id=str(body.project_id),
+            project=proj,
+            filename=safe_filename(body.filename, default="drawing.dxf"),
+            storage_path=body.storage_path,
+            cad_id=str(body.cad_id),
+            analyse=body.analyse,
+        )
+    except Exception as e:
+        log.exception("cad ingest failed (project_id=%s)", body.project_id)
         raise HTTPException(500, "analysis failed") from e
 
     return {

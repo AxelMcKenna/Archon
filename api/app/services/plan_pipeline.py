@@ -31,7 +31,7 @@ from app.services.analysis_runner import (
     prompt_fingerprint,
     run_and_persist,
 )
-from app.storage import upload_plan
+from app.storage import PLANS_BUCKET, download, upload_plan
 from app.vision.core.invoker import analyser_provider_model
 from app.vision.plans.schema import ACTIVE_ANALYSIS_PROMPT, ACTIVE_VERIFICATION_PROMPT
 
@@ -71,21 +71,34 @@ def upload_and_analyse(
     project: dict[str, Any],
     filename: str,
     content_type: str,
-    payload: bytes,
+    payload: bytes | None = None,
+    storage_path: str | None = None,
+    plan_id: str | None = None,
     analyse: bool = True,
 ) -> PlanAnalysisResult:
-    digest = hash_bytes(payload)
     provider, model_id = resolve_provider_model()
 
-    plan_id = str(uuid4())
-    storage_path = upload_plan(
-        db,
-        project_id=project_id,
-        plan_id=plan_id,
-        filename=filename,
-        content_type=content_type,
-        data=payload,
-    )
+    if storage_path is not None:
+        # Direct-to-storage path: the browser already uploaded the file to a
+        # backend-issued signed URL, so we download the bytes rather than
+        # re-uploading them through this (size-limited) request.
+        if not plan_id:
+            raise ValueError("plan_id is required when storage_path is provided")
+        payload = download(db, bucket=PLANS_BUCKET, path=storage_path)
+    else:
+        if payload is None:
+            raise ValueError("either payload or storage_path must be provided")
+        plan_id = str(uuid4())
+        storage_path = upload_plan(
+            db,
+            project_id=project_id,
+            plan_id=plan_id,
+            filename=filename,
+            content_type=content_type,
+            data=payload,
+        )
+
+    digest = hash_bytes(payload)
 
     # Store-only path (e.g. uploads from the value-engineering page): persist
     # the file so VE can re-render it, but skip the RFI flagger entirely. The
