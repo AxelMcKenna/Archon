@@ -32,12 +32,28 @@ mbie_acceptable_solution:
   # verified against building.govt.nz landing pages on 2026-05-27.
   # When MBIE bumps an amendment, update the URL here — content_hash
   # dedup means we'll automatically re-extract.
-  #
-  # MISSING — landing pages couldn't be auto-scraped, add manually:
-  #   C/AS1, C/AS2, C/VM2 (fire protection — split across C1-C6 subpages)
-  #   F9/AS1 (residential pool barriers)
-  #   G13/AS1, G13/AS2, G13/VM4 (foul water)
   documents:
+    # C — Protection from fire. C/AS1 covers Risk Group SH (single household
+    # units / small buildings); C/AS2 covers all other risk groups; C/VM2 is
+    # the performance framework most fire Alternative Solutions run on. All
+    # three persist under code_clause "C" — the umbrella category
+    # building_code:C resolves to a single-letter family key (see
+    # match_mbie_clauses).
+    - source_key: "mbie:c_as1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/c-protection-from-fire/asvm/cas1-protection-from-fire-second-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "C"
+      label: "C/AS1 — Protection from fire (Risk Group SH)"
+    - source_key: "mbie:c_as2"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/c-protection-from-fire/asvm/c-protection-from-fire-as2-second-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "C"
+      label: "C/AS2 — Protection from fire (other risk groups)"
+    - source_key: "mbie:c_vm2"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/c-protection-from-fire/asvm/c-protection-from-fire-vm2-second-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "C"
+      label: "C/VM2 — Framework for Fire Safety Design"
     # B — Stability
     - source_key: "mbie:b1_as1"
       url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/b-stability/b1-structure/asvm/b1-structure-as1-second-edition.pdf"
@@ -112,6 +128,12 @@ mbie_acceptable_solution:
       content_type: "application/pdf"
       code_clause: "F4"
       label: "F4/AS1 — Safety from falling"
+    # F9/AS1+AS2 ship as one combined PDF (pool barriers + small-pool covers).
+    - source_key: "mbie:f9_as1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/f-safety-of-users/f9-restricting-access-residential-pools/asvm/f9-restricting-access-to-residential-pools.pdf"
+      content_type: "application/pdf"
+      code_clause: "F9"
+      label: "F9/AS1+AS2 — Restricting access to residential pools"
     # G — Services & facilities
     - source_key: "mbie:g1_as1"
       url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g1-personal-hygiene/asvm/G1-personal-hygiene-2nd-edition-amendment-6.pdf"
@@ -133,6 +155,13 @@ mbie_acceptable_solution:
       content_type: "application/pdf"
       code_clause: "G12"
       label: "G12/AS1 — Water supplies"
+    # G13/AS1+AS2+VM4 ship as one combined PDF (foul water: above- and
+    # below-ground sanitary plumbing + on-site disposal verification).
+    - source_key: "mbie:g13_as1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g13-foul-water/asvm/g13-foul-water-2nd-edition-amendment-10.pdf"
+      content_type: "application/pdf"
+      code_clause: "G13"
+      label: "G13/AS1+AS2+VM4 — Foul water"
     # H — Energy efficiency
     - source_key: "mbie:h1_as1"
       url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/h1-energy-efficiency/asvm/h1-energy-efficiency-as1-sixth-edition.pdf"

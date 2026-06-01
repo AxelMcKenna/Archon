@@ -43,7 +43,14 @@ class ClauseHit:
 
 def code_clause_for_category(category: str | None) -> str | None:
     """``building_code:E2:cladding`` → ``E2``. Returns None for
-    non-building-code categories (e.g. ``documentation:plans``)."""
+    non-building-code categories (e.g. ``documentation:plans``).
+
+    The result may be a *specific* clause (``E2``, ``B1``, ``G12``) or a
+    single-letter *family* key (``C``, ``D``, ``F``, ``G``) when the flag
+    was only categorised to the top-level Building Code clause. The
+    ``match_mbie_clauses`` RPC treats a single-letter key as a prefix match
+    so a family key (e.g. ``F``) still finds its sub-clauses (``F2``,
+    ``F4``) — without that, umbrella categories matched no clauses at all."""
     if not category or not category.startswith("building_code:"):
         return None
     parts = category.split(":", 2)
