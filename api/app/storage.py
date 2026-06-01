@@ -106,5 +106,14 @@ def signed_url(client: Client, *, bucket: str, path: str, expires_in: int = 3600
     return res["signedURL"]
 
 
+def signed_upload_url(client: Client, *, bucket: str, path: str) -> dict[str, str]:
+    """Mint a one-shot, path-scoped upload token so the browser can PUT a file
+    straight to Supabase Storage over HTTPS — bypassing the Vercel proxy's
+    ~4.5MB serverless body limit. Returns ``{token, path}`` (the only fields
+    the browser's ``uploadToSignedUrl`` needs)."""
+    res = client.storage.from_(bucket).create_signed_upload_url(path)
+    return {"token": res["token"], "path": res.get("path", path)}
+
+
 def download(client: Client, *, bucket: str, path: str) -> bytes:
     return client.storage.from_(bucket).download(path)

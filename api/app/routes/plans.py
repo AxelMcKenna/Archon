@@ -10,10 +10,11 @@ from __future__ import annotations
 import asyncio
 import logging
 from typing import Any
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import Response
+from pydantic import BaseModel
 from supabase import Client
 
 from app.auth import get_db
@@ -25,7 +26,7 @@ from app.services.value_engineering_pipeline import (
     get_latest_value_engineering,
     run_value_engineering,
 )
-from app.storage import PLANS_BUCKET, download, signed_url
+from app.storage import PLANS_BUCKET, download, signed_upload_url, signed_url
 from app.utils.safe_filename import safe_filename
 
 router = APIRouter()
@@ -74,6 +75,105 @@ async def upload_and_analyse(
         )
     except Exception as e:
         log.exception("plan analysis failed (project_id=%s)", project_id)
+        raise HTTPException(500, "analysis failed") from e
+
+    return {
+        "plan_id": result.plan_id,
+        "flags_count": result.flags_count,
+        "processing_ms": result.processing_ms,
+        "cost_usd": result.cost_usd,
+        "truncated": result.truncated,
+        "verification": result.verification,
+        "cached": result.cached,
+    }
+
+
+def _load_project(db: Client, project_id: UUID) -> dict[str, Any]:
+    proj = (
+        db.table("projects")
+        .select("id, bca, project_type, description")
+        .eq("id", str(project_id))
+        .single()
+        .execute()
+        .data
+    )
+    if not proj:
+        raise HTTPException(404, "project not found")
+    return proj
+
+
+class UploadUrlRequest(BaseModel):
+    project_id: UUID
+    filename: str
+    content_type: str
+
+
+class IngestRequest(BaseModel):
+    project_id: UUID
+    plan_id: UUID
+    storage_path: str
+    filename: str
+    content_type: str
+    analyse: bool = True
+
+
+@router.post("/upload-url")
+@limiter.limit("20/minute")
+async def create_upload_url(
+    request: Request,
+    body: UploadUrlRequest,
+    db: Client = Depends(get_db),
+) -> dict[str, Any]:
+    """Issue a signed Supabase Storage upload URL so the browser can upload the
+    file directly (HTTPS, no Vercel proxy body limit). The path embeds the
+    plan_id; ``/ingest`` later validates the file lands under this prefix."""
+    if body.content_type not in ALLOWED_MEDIA:
+        raise HTTPException(415, f"unsupported media type: {body.content_type}")
+    _load_project(db, body.project_id)  # RLS-enforced ownership check
+    plan_id = uuid4()
+    fname = safe_filename(body.filename, default="plan.pdf")
+    path = f"{body.project_id}/{plan_id}/{fname}"
+    signed = signed_upload_url(db, bucket=PLANS_BUCKET, path=path)
+    return {
+        "plan_id": str(plan_id),
+        "bucket": PLANS_BUCKET,
+        "path": path,
+        "filename": fname,
+        "token": signed["token"],
+    }
+
+
+@router.post("/ingest")
+@limiter.limit("10/minute")
+async def ingest_uploaded(
+    request: Request,
+    body: IngestRequest,
+    db: Client = Depends(get_db),
+) -> dict[str, Any]:
+    """Analyse a file the browser already uploaded to storage via /upload-url."""
+    if body.content_type not in ALLOWED_MEDIA:
+        raise HTTPException(415, f"unsupported media type: {body.content_type}")
+    # Reject paths that don't belong to this project+plan — the signed token is
+    # path-scoped, but defend in depth so a caller can't analyse another row's file.
+    expected_prefix = f"{body.project_id}/{body.plan_id}/"
+    if not body.storage_path.startswith(expected_prefix):
+        raise HTTPException(400, "storage_path does not match project/plan")
+    proj = _load_project(db, body.project_id)
+
+    try:
+        result = await asyncio.to_thread(
+            run_pipeline,
+            db=db,
+            project_id=str(body.project_id),
+            project=proj,
+            filename=safe_filename(body.filename, default="plan.pdf"),
+            content_type=body.content_type,
+            storage_path=body.storage_path,
+            plan_id=str(body.plan_id),
+            analyse=body.analyse,
+        )
+    except Exception as e:
+        log.exception("plan ingest failed (project_id=%s)", body.project_id)
         raise HTTPException(500, "analysis failed") from e
 
     return {

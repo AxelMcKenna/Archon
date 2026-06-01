@@ -26,7 +26,7 @@ from app.ingestion.scraping import fetcher
 
 log = logging.getLogger(__name__)
 
-USER_AGENT = "Atlas-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+USER_AGENT = "Archon-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
 DEFAULT_RATE_SECONDS = 1.5
 
 
@@ -96,6 +96,10 @@ def crawl(
             log.warning("crawl: no Product JSON-LD at %s", d.url)
             continue
 
+        # Per ArchiPro's Terms of Use (cl. 5.1), their imagery is copyrighted
+        # ArchiPro Content and carries no VE value — we don't retain image URLs.
+        rec.image = None
+
         content_hash = res.content_hash or hashlib.sha256(res.bytes).hexdigest()
         store.upsert(
             rec, now_iso=_utc_iso(), source_lastmod=d.lastmod, content_hash=content_hash
@@ -151,7 +155,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--backend",
         choices=("supabase", "sqlite"),
         default="supabase",
-        help="where to write materials (default: supabase ATLAS project)",
+        help="where to write materials (default: supabase ARCHON project)",
     )
     p.add_argument(
         "--db",

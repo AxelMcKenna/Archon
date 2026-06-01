@@ -33,18 +33,28 @@ def upload_and_analyse(
     project_id: str,
     project: dict[str, Any],
     filename: str,
-    payload: bytes,
+    payload: bytes | None = None,
+    storage_path: str | None = None,
+    cad_id: str | None = None,
     analyse: bool = True,
 ) -> CadAnalysisResult:
-    cad_id = str(uuid4())
-    storage_path = upload_cad(
-        db,
-        project_id=project_id,
-        cad_id=cad_id,
-        filename=filename,
-        content_type="application/dxf",
-        data=payload,
-    )
+    if storage_path is not None:
+        # Direct-to-storage path: file already uploaded to a signed URL.
+        if not cad_id:
+            raise ValueError("cad_id is required when storage_path is provided")
+        payload = download(db, bucket=CAD_BUCKET, path=storage_path)
+    else:
+        if payload is None:
+            raise ValueError("either payload or storage_path must be provided")
+        cad_id = str(uuid4())
+        storage_path = upload_cad(
+            db,
+            project_id=project_id,
+            cad_id=cad_id,
+            filename=filename,
+            content_type="application/dxf",
+            data=payload,
+        )
     content_hash = hashlib.sha256(payload).hexdigest()
 
     # Store-only path (e.g. uploads from the value-engineering page): persist

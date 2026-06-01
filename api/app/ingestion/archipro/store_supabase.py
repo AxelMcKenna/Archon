@@ -1,6 +1,6 @@
 """Supabase-backed materials store — the crawl's production sink.
 
-Writes straight into ``public.archipro_materials`` in the ATLAS project
+Writes straight into ``public.archipro_materials`` in the ARCHON project
 via the service-role client (same client the rest of the ingestion layer
 uses). Mirrors the :class:`MaterialsStore` interface so the crawler is
 storage-agnostic.
