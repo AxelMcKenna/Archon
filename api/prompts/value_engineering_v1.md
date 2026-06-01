@@ -1,6 +1,6 @@
 ---
 prompt_key: value_engineering
-version: "1.0.0"
+version: "1.1.0"
 model: gemini-3.1-pro-preview
 ---
 
@@ -62,6 +62,16 @@ cheaper alternative.
 - **Skip ornamental and consultant-specified items.** If something is
   marked "by structural engineer" or "by specialist", don't VE it —
   that's a separate conversation.
+- **Add `material_keywords` for the proposed alternative.** When the
+  alternative is a purchasable material or product, set `material_keywords`
+  to a short retail search phrase for it — material, grade and size, the
+  way you'd search a hardware retailer (e.g. `"SG8 H1.2 90x45 kiln dried
+  radiata framing"`, `"R2.6 ceiling insulation batts"`, `"standard
+  plasterboard 10mm"`). Keep it under ~10 words; no full sentences, no
+  brand unless the spec is brand-specific. Omit it for non-material
+  opportunities (e.g. `detail_simplification`) where no SKU applies. A
+  separate step uses this to attach an indicative NZ retail price — it is
+  not a dollar figure you provide.
 - **Tile awareness.** Populate the `tile` field if you found the item
   on a tiled image; use `full` (or omit) for full-page images.
 - **Localise with `bbox` when you can.** Normalised `[x0, y0, x1, y1]`
@@ -113,6 +123,7 @@ opportunity object:
   "confidence": "high",
   "rationale": "H3.2 treatment is for in-ground/exterior wet exposure; internal dry partitions only require H1.2. LVL studs are not load-required for typical internal non-loadbearing walls.",
   "code_considerations": "Confirm none of these partitions are loadbearing under the bracing schedule; confirm H1.2 vs untreated by NZS 3640 zone.",
+  "material_keywords": "SG8 H1.2 90x45 kiln dried radiata framing",
   "bbox": [0.55, 0.20, 0.92, 0.48]
 }
 ```

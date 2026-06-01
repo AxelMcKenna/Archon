@@ -32,7 +32,9 @@ perfectly on-brand with the app.
 
 ## Color palette
 
+
 The brand is built on three pillars: **white**, **teal**, and **charcoal**.
+
 
 ### Primary — Teal (brand)
 | Token | Hex | Use |

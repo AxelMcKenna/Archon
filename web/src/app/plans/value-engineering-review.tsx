@@ -26,6 +26,20 @@ type Opportunity = {
   confidence: Confidence;
   rationale: string;
   code_considerations?: string;
+  // Short retail search terms the model emitted for the alternative.
+  material_keywords?: string;
+  // Indicative NZ retail price for the proposed alternative, matched
+  // against the Bunnings catalogue post-analysis (app.services.ve_pricing).
+  price_reference?: {
+    source: string;
+    name: string | null;
+    price: number;
+    unit_price: number | null;
+    unit_of_measure: string | null;
+    currency: string;
+    sku: string | null;
+    url: string | null;
+  } | null;
   // PDF localisation: a single normalised bbox on the cited page.
   bbox?: [number, number, number, number] | null;
   // DXF localisation: handle-grounded per-view boxes + the cited handles
@@ -630,6 +644,43 @@ function OpportunityGroup({
   );
 }
 
+function PriceReference({
+  ref_,
+}: {
+  ref_: NonNullable<Opportunity["price_reference"]>;
+}) {
+  const money = (n: number) =>
+    `$${n.toLocaleString("en-NZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const unit =
+    ref_.unit_price != null && ref_.unit_of_measure
+      ? ` · ${money(ref_.unit_price)}/${ref_.unit_of_measure}`
+      : "";
+  const body = (
+    <>
+      <span className="font-semibold">{money(ref_.price)}</span>
+      {unit}
+      {ref_.name && <span className="text-ink-500"> · {ref_.name}</span>}
+    </>
+  );
+  return (
+    <p className="mt-1.5 pt-1.5 border-t border-emerald-200/60 text-[11px] text-ink-700">
+      <span className="text-ink-500">Indicative retail: </span>
+      {ref_.url ? (
+        <a
+          href={ref_.url}
+          target="_blank"
+          rel="noreferrer"
+          className="hover:underline"
+        >
+          {body}
+        </a>
+      ) : (
+        body
+      )}
+    </p>
+  );
+}
+
 function OpportunityCard({
   o,
   active,
@@ -698,6 +749,7 @@ function OpportunityCard({
             Proposed alternative
           </p>
           <p>{o.proposed_alternative}</p>
+          {o.price_reference && <PriceReference ref_={o.price_reference} />}
         </div>
       </div>
       <p className="text-sm">{o.rationale}</p>
