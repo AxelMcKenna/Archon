@@ -29,6 +29,7 @@ from app.services.analysis_runner import (
     prompt_fingerprint,
     run_and_persist,
 )
+from app.services.ve_pricing import enrich_opportunities
 from app.storage import CAD_BUCKET, PLANS_BUCKET, download
 from app.vision.core.invoker import analyser_provider_model
 from app.vision.core.prompts import load_prompt
@@ -234,13 +235,17 @@ def run_value_engineering(
     media_type = plan["mime_type"] or "application/pdf"
 
     def analyse() -> tuple[dict[str, Any], str, Any, dict[str, Any]]:
-        return analyse_value_engineering(
+        result = analyse_value_engineering(
             file_bytes=file_bytes,
             media_type=media_type,
             bca=project.get("bca") or "",
             project_type=project.get("project_type") or "",
             project_description=project.get("description") or "",
         )
+        # Attach indicative Bunnings retail prices before persist so they're
+        # cached alongside the analysis (and cloned on re-trigger). Best-effort.
+        enrich_opportunities(db, result[0].get("opportunities") or [])
+        return result
 
     return _run_and_persist(
         db,
@@ -264,12 +269,14 @@ def run_value_engineering_cad(
         # Handle-grounded CAD VE: opportunities carry target_handles +
         # geometrically-projected per-view image_bboxes so the UI can overlay
         # them on the DXF views, exactly like the RFI CAD path.
-        return analyse_value_engineering_cad(
+        result = analyse_value_engineering_cad(
             dxf_bytes=dxf_bytes,
             bca=project.get("bca") or "",
             project_type=project.get("project_type") or "",
             project_description=project.get("description") or "",
         )
+        enrich_opportunities(db, result[0].get("opportunities") or [])
+        return result
 
     return _run_and_persist(
         db,

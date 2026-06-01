@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { LegalShell } from "@/components/legal-shell";
 
 export const metadata: Metadata = {
-  title: "Cookie Policy — Atlas",
-  description: "How and why Atlas uses cookies and similar technologies.",
+  title: "Cookie Policy — Archon",
+  description: "How and why Archon uses cookies and similar technologies.",
 };
 
 export default function CookiesPage() {
@@ -11,7 +11,7 @@ export default function CookiesPage() {
     <LegalShell
       title="Cookie Policy"
       activePath="/cookies"
-      intro="This policy explains how Atlas uses cookies and similar technologies, and the choices available to you."
+      intro="This policy explains how Archon uses cookies and similar technologies, and the choices available to you."
     >
       <h2>1. What cookies are</h2>
       <p>
@@ -22,7 +22,7 @@ export default function CookiesPage() {
 
       <h2>2. How we use them</h2>
       <p>
-        Atlas keeps cookie use to a minimum. We primarily use{" "}
+        Archon keeps cookie use to a minimum. We primarily use{" "}
         <strong>strictly necessary</strong> cookies required to authenticate you
         and operate the platform securely. Our authentication and session cookies
         are set by our auth provider, Supabase.
@@ -69,7 +69,7 @@ export default function CookiesPage() {
       <p>
         Most browsers let you block or delete cookies through their settings.
         Because our authentication cookies are strictly necessary, blocking them
-        will prevent you from signing in and using Atlas.
+        will prevent you from signing in and using Archon.
       </p>
 
       <h2>5. Changes</h2>

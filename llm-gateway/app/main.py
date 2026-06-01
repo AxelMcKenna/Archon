@@ -10,7 +10,7 @@ from app.routes import chat as chat_routes
 
 settings = get_settings()
 
-app = FastAPI(title="ATLAS Agent", version="0.1.0")
+app = FastAPI(title="ARCHON Agent", version="0.1.0")
 app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
 
@@ -28,8 +28,8 @@ app.add_middleware(
     allow_origins=settings.allowed_origins_list,
     allow_origin_regex=(
         r"http://(localhost|127\.0\.0\.1)(:\d+)?"
-        r"|https://atlas-web-[a-z0-9-]+-axel-mckennas-projects\.vercel\.app"
-        r"|https://atlas-[a-z0-9]+-axel-mckennas-projects\.vercel\.app"
+        r"|https://archon-web-[a-z0-9-]+-axel-mckennas-projects\.vercel\.app"
+        r"|https://archon-[a-z0-9]+-axel-mckennas-projects\.vercel\.app"
     ),
     allow_credentials=True,
     allow_methods=["*"],

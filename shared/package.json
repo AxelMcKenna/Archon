@@ -1,5 +1,5 @@
 {
-  "name": "@atlas/shared",
+  "name": "@archon/shared",
   "version": "0.1.0",
   "private": true,
   "main": "index.ts",

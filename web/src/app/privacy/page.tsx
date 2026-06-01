@@ -3,8 +3,8 @@ import { LegalShell } from "@/components/legal-shell";
 import { legal } from "@/lib/legal-config";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Atlas",
-  description: "How Atlas collects, uses, stores, and protects your information.",
+  title: "Privacy Policy — Archon",
+  description: "How Archon collects, uses, stores, and protects your information.",
 };
 
 export default function PrivacyPage() {
@@ -12,11 +12,11 @@ export default function PrivacyPage() {
     <LegalShell
       title="Privacy Policy"
       activePath="/privacy"
-      intro={`This policy explains how ${legal.entity} ("Atlas", "we", "us") collects, uses, discloses, and protects personal information when you use the Atlas platform and website. We are committed to handling your information in accordance with the New Zealand Privacy Act 2020 and the Information Privacy Principles (IPPs).`}
+      intro={`This policy explains how ${legal.entity} ("Archon", "we", "us") collects, uses, discloses, and protects personal information when you use the Archon platform and website. We are committed to handling your information in accordance with the New Zealand Privacy Act 2020 and the Information Privacy Principles (IPPs).`}
     >
       <h2>1. Who we are</h2>
       <p>
-        Atlas is operated by {legal.entity}, {legal.address}. For the purposes of
+        Archon is operated by {legal.entity}, {legal.address}. For the purposes of
         the Privacy Act 2020, we are the agency responsible for the personal
         information described in this policy. Where the EU/UK GDPR applies, we act
         as a <strong>data controller</strong> for account and website data, and as
@@ -60,7 +60,7 @@ export default function PrivacyPage() {
 
       <h2>3. How we use your information</h2>
       <ul>
-        <li>To provide, maintain, and improve the Atlas platform.</li>
+        <li>To provide, maintain, and improve the Archon platform.</li>
         <li>To authenticate you and keep your account secure.</li>
         <li>
           To analyse plans and RFIs and generate findings, drafts, and citations
@@ -86,7 +86,7 @@ export default function PrivacyPage() {
 
       <h2>5. AI processing</h2>
       <p>
-        Atlas uses third-party large language models to read drawings, interpret
+        Archon uses third-party large language models to read drawings, interpret
         council RFIs, and draft responses. When you use these features, the
         relevant project content is transmitted to our AI sub-processors solely to
         generate output for you. We do <strong>not</strong> permit these
@@ -164,7 +164,7 @@ export default function PrivacyPage() {
 
       <h2>11. Children</h2>
       <p>
-        Atlas is a business tool not directed at children and is not intended for
+        Archon is a business tool not directed at children and is not intended for
         anyone under 16. We do not knowingly collect personal information from
         children.
       </p>

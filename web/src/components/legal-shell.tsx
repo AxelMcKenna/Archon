@@ -32,7 +32,7 @@ export function LegalShell({
           href="/"
           className="font-display uppercase font-bold tracking-[0.16em] text-[22px] text-ink-900 transition-colors hover:text-ink-700"
         >
-          Atlas
+          Archon
         </Link>
         <Link
           href="/"

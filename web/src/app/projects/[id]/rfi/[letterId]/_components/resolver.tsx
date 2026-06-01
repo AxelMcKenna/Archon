@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { taxonomy } from "@atlas/shared";
+import { taxonomy } from "@archon/shared";
 import type { ReconLog } from "../types";
 
 export function Resolver({

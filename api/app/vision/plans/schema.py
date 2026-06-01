@@ -60,7 +60,9 @@ VERIFICATION_TOOL_SCHEMA: dict[str, Any] = {
     "description": (
         "Verify each flag against the drawing and any supplied "
         "Acceptable Solution clauses. Drop flags that are ungrounded "
-        "OR that the drawing visibly satisfies per AS."
+        "OR that the drawing visibly satisfies per AS. For surviving "
+        "flags, note whether an Alternative Solution pathway could "
+        "resolve the issue instead of the Acceptable Solution."
     ),
     "input_schema": {
         "type": "object",
@@ -81,6 +83,31 @@ VERIFICATION_TOOL_SCHEMA: dict[str, Any] = {
                                 "one of the supplied Acceptable Solution "
                                 "clauses for this flag — the pipeline "
                                 "drops the flag in that case."
+                            ),
+                        },
+                        "alt_solution_available": {
+                            "type": "boolean",
+                            "description": (
+                                "True when the flagged detail deviates from "
+                                "the Acceptable Solution but could plausibly "
+                                "comply with the Building Code via an "
+                                "Alternative Solution (Building Act s19(1)(b)) "
+                                "rather than the prescriptive AS path. Does "
+                                "NOT drop the flag — the RFI still stands "
+                                "because the council needs supporting evidence."
+                            ),
+                        },
+                        "alt_solution_pathway": {
+                            "type": "string",
+                            "maxLength": 400,
+                            "description": (
+                                "When alt_solution_available is true, a brief "
+                                "description of the Alternative Solution route "
+                                "and the supporting evidence a designer would "
+                                "supply (e.g. producer statement PS1, test "
+                                "report to the relevant standard, specific "
+                                "engineering design, expert opinion). Cite the "
+                                "Building Code performance clause being met."
                             ),
                         },
                         "verification_note": {"type": "string", "maxLength": 200},

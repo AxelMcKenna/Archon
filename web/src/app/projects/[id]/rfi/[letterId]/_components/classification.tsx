@@ -1,6 +1,6 @@
 "use client";
 
-import { taxonomy } from "@atlas/shared";
+import { taxonomy } from "@archon/shared";
 import { SEV_DOT, STATE_LABEL, STATE_STYLE } from "../constants";
 import type { ReconLog } from "../types";
 import { Resolver } from "./resolver";

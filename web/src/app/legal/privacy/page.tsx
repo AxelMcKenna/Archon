@@ -1,4 +1,4 @@
-export const metadata = { title: "Privacy — Atlas" };
+export const metadata = { title: "Privacy — Archon" };
 
 export default function PrivacyPage() {
   return (
@@ -42,7 +42,7 @@ export default function PrivacyPage() {
         <li>Correction — fix anything that's wrong.</li>
         <li>Deletion — delete your account and all associated data.</li>
       </ul>
-      <p className="text-sm mt-2">Email <a href="mailto:privacy@atlas.nz" className="underline">privacy@atlas.nz</a> for any of the above.</p>
+      <p className="text-sm mt-2">Email <a href="mailto:privacy@archon.co.nz" className="underline">privacy@archon.co.nz</a> for any of the above.</p>
     </article>
   );
 }

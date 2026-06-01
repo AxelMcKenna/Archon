@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
-import { taxonomy } from "@atlas/shared";
+import { taxonomy } from "@archon/shared";
 import { ProjectCreateButton } from "@/components/project-create-button";
 import { AddressAutocompleteInput } from "@/components/address-autocomplete-input";
 import { bootstrapConsentAssessment } from "@/lib/consent-assessment-bootstrap";
@@ -9,6 +9,13 @@ import { ProjectDetailFlagsFields } from "./project-detail-flags-fields";
 async function createProject(formData: FormData) {
   "use server";
   const supabase = await getSupabaseServer();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
 
   const address = String(formData.get("address") ?? "").trim();
   const bca = String(formData.get("bca") ?? "").trim();
@@ -38,6 +45,7 @@ async function createProject(formData: FormData) {
   }
 
   const inserted = await insertProjectCompatible(supabase, {
+      user_id: user.id,
       address,
       bca,
       project_type: projectType,

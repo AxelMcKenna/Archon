@@ -26,7 +26,7 @@ export default async function Home() {
           href="/"
           className="font-display uppercase font-bold tracking-[0.16em] text-[22px] text-ink-900 transition-colors hover:text-ink-700"
         >
-          Atlas
+          Archon
         </Link>
         <Link
           href={isSignedIn ? "/dashboard" : "/login"}
@@ -42,8 +42,7 @@ export default async function Home() {
           {/* Left column – text */}
           <Reveal className="col-span-12 md:col-span-7 lg:col-span-6">
             <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-ink-500">
-              <span className="h-px w-8 bg-accent/50" />
-              Atlas - Construction Management
+              Archon · Construction Management
             </div>
             <h1
               className="mt-5 uppercase font-medium leading-[0.95] tracking-[0.02em] text-[44px] sm:text-[60px] lg:text-[76px] text-ink-900"
@@ -56,9 +55,9 @@ export default async function Home() {
               by AI.
             </h1>
             <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
-              The intelligence behind modern builds. Fluent in every consent,
-              every clause, every condition. Alert to every RFI, every
-              inspection, every blocker – so your crew can build.
+              The intelligence behind modern builds. It knows every consent,
+              clause, and condition on your project, and watches every RFI,
+              inspection, and blocker so your crew can keep building.
             </p>
             <div className="mt-7 flex items-center gap-5">
               <Link
@@ -109,8 +108,7 @@ export default async function Home() {
           <div className="mx-auto grid max-w-[1440px] grid-cols-12 items-center gap-x-10 px-8">
             <Reveal className="col-span-12 md:col-span-5">
               <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
-                <span className="h-px w-8 bg-accent/50" />
-                01 – Project Management
+                01 · Project Management
               </div>
               <h2
                 className="mt-5 font-medium leading-[1.02] tracking-[0.01em] text-[40px] md:text-[56px] text-ink-900"
@@ -122,8 +120,8 @@ export default async function Home() {
               </h2>
               <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
                 Track every build from lodgement to sign-off. Addresses, BCA
-                references, consent status, and inspections – surfaced in a
-                single, queryable workspace.
+                references, consent status, and inspections all live in one
+                queryable workspace.
               </p>
               <ul className="mt-6 space-y-2 text-[13px] text-ink-700">
                 <li className="flex items-start gap-2">
@@ -221,17 +219,17 @@ export default async function Home() {
                       <div className="col-span-3 flex justify-end">
                         <span
                           className={
-                            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-[0.14em] " +
+                            "inline-flex items-center gap-1.5 text-[12px] " +
                             (row.tone === "red"
-                              ? "bg-red-50 text-red-700"
+                              ? "text-red-600"
                               : row.tone === "amber"
-                              ? "bg-orange-50 text-orange-700"
-                              : "bg-accent-soft text-accent")
+                              ? "text-orange-600"
+                              : "text-ink-600")
                           }
                         >
                           <span
                             className={
-                              "inline-block h-1 w-1 rounded-full " +
+                              "inline-block h-1.5 w-1.5 rounded-full " +
                               (row.tone === "red"
                                 ? "bg-red-500"
                                 : row.tone === "amber"
@@ -256,8 +254,7 @@ export default async function Home() {
             <div className="grid grid-cols-12 gap-x-10">
               <Reveal className="col-span-12 md:col-span-7">
                 <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
-                  <span className="h-px w-8 bg-accent/50" />
-                  02 – Plan Analysis
+                  02 · Plan Analysis
                 </div>
                 <h2
                   className="mt-5 font-medium leading-[1.02] tracking-[0.01em] text-[40px] md:text-[56px] text-ink-900"
@@ -268,9 +265,9 @@ export default async function Home() {
                   before lodgement.
                 </h2>
                 <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
-                  Drop in your drawing set. Atlas reads every sheet, runs each
-                  room against the NZBC, and lands each finding on the exact
-                  region of the page – with the clause it breaches.
+                  Drop in your drawing set. Archon reads every sheet, runs each
+                  room against the NZBC, and pins each finding to the exact
+                  region of the page, with the clause it breaches.
                 </p>
               </Reveal>
               <Reveal delay={120} className="col-span-12 md:col-span-5 mt-6 md:mt-0 md:pt-20">
@@ -952,8 +949,7 @@ export default async function Home() {
 
             <Reveal className="order-1 col-span-12 md:order-1 md:col-span-5">
               <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
-                <span className="h-px w-8 bg-accent/50" />
-                03 – RFI Auto-response
+                03 · RFI Auto-response
               </div>
               <h2
                 className="mt-5 font-medium leading-[1.02] tracking-[0.01em] text-[40px] md:text-[56px] text-ink-900"
@@ -964,8 +960,8 @@ export default async function Home() {
                 Draft the reply.
               </h2>
               <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
-                Drop in any council RFI. Atlas reads it like a senior
-                consultant – interprets each ask, locates the answer across
+                Drop in any council RFI. Archon reads it like a senior
+                consultant. It interprets each ask, locates the answer across
                 your drawings, specs, and consent, and writes a council-ready
                 response.
               </p>
@@ -995,7 +991,7 @@ export default async function Home() {
                 <div className="flex items-center justify-between border-b border-ink-100 px-5 py-3">
                   <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-ink-500">
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
-                    Atlas agent · Bayswater Townhouses
+                    Archon agent · Bayswater Townhouses
                   </div>
                   <div className="font-mono tabular-nums text-[10px] text-ink-400">
                     session 4f2a
@@ -1044,7 +1040,7 @@ export default async function Home() {
 
                   <div className="flex items-center justify-between border-t border-ink-100 pt-4">
                     <div className="text-[11px] text-ink-500">
-                      Atlas drafted a response citing D1/AS1 §5.1.
+                      Archon drafted a response citing D1/AS1 §5.1.
                     </div>
                     <button
                       type="button"
@@ -1060,8 +1056,7 @@ export default async function Home() {
 
             <Reveal className="order-1 col-span-12 md:order-2 md:col-span-5">
               <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
-                <span className="h-px w-8 bg-accent/50" />
-                04 – AI co-pilot
+                04 · AI co-pilot
               </div>
               <h2
                 className="mt-5 font-medium leading-[1.02] tracking-[0.01em] text-[40px] md:text-[56px] text-ink-900"
@@ -1069,7 +1064,7 @@ export default async function Home() {
               >
                 Ask the drawing.
                 <br />
-                Draft the reply.
+                Get the answer.
               </h2>
               <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
                 A conversational agent that knows your project, grounds every
@@ -1098,36 +1093,36 @@ export default async function Home() {
         <section className="relative overflow-hidden border-t border-ink-100 py-24 md:py-32">
           <div
             aria-hidden
-            className="glow-drift pointer-events-none absolute left-1/2 top-0 -z-10 h-[420px] w-[680px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-accent/[0.07] blur-[120px]"
+            className="glow-drift pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[520px] w-[820px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/[0.08] blur-[130px]"
           />
-          <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-x-10 px-8">
-            <Reveal className="col-span-12 md:col-span-8">
-              <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-ink-500">
-                <span className="h-px w-8 bg-accent/50" />
+          <div className="mx-auto max-w-[1440px] px-8">
+            <Reveal className="relative mx-auto max-w-[860px] overflow-hidden rounded-2xl border border-ink-150 bg-surface-elevated px-8 py-14 text-center shadow-depth md:px-16 md:py-20">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent"
+              />
+              <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-ink-500">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent ai-glow" />
                 Built for the people who actually build
               </div>
               <h2
-                className="mt-5 font-medium leading-[1.02] tracking-[0.01em] text-[40px] md:text-[60px] lg:text-[72px] text-ink-900"
+                className="mx-auto mt-6 max-w-[14ch] font-medium leading-[1.02] tracking-[0.01em] text-[40px] md:text-[60px] lg:text-[68px] text-ink-900"
                 style={{ fontFamily: "var(--font-dm-sans)" }}
               >
                 Build with{" "}
                 <span className="text-accent">intelligence</span>.
               </h2>
-            </Reveal>
-
-            <Reveal delay={120} className="col-span-12 mt-10 md:col-span-4 md:col-start-9 md:mt-0 md:self-end md:pb-6">
-              <p className="max-w-sm text-[15px] leading-relaxed text-ink-600">
-                Bring your projects, your drawings, and your RFIs. Atlas turns
-                them into a coordinated, queryable workspace – so your crew
-                can build.
+              <p className="mx-auto mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
+                Bring your projects, drawings, and RFIs. Archon turns them into a
+                coordinated, queryable workspace so your crew can keep building.
               </p>
-              <div className="mt-8 flex items-center gap-5">
+              <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-5">
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-5 py-2.5 text-[13px] font-medium text-white shadow-depth hover:shadow-depth-hover transition-shadow"
+                  className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-6 py-3 text-[14px] font-medium text-white shadow-depth hover:shadow-depth-hover transition-shadow"
                 >
                   {isSignedIn ? "Open app" : "Launch the platform"}
-                  <ArrowUpRight className="h-3.5 w-3.5" />
+                  <ArrowUpRight className="h-4 w-4" />
                 </Link>
                 {!isSignedIn && (
                   <Link
@@ -1137,6 +1132,20 @@ export default async function Home() {
                     Sign in
                   </Link>
                 )}
+              </div>
+              <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[11.5px] text-ink-500">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="inline-block h-1 w-1 rounded-full bg-accent" />
+                  NZBC &amp; council-ready
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="inline-block h-1 w-1 rounded-full bg-accent" />
+                  No card to start
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="inline-block h-1 w-1 rounded-full bg-accent" />
+                  Ready in minutes
+                </span>
               </div>
             </Reveal>
           </div>

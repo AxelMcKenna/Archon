@@ -65,7 +65,7 @@ export function LayoutContent({
                 href="/dashboard"
                 className="font-display uppercase font-bold tracking-[0.16em] text-[22px] text-ink-900 transition-colors hover:text-ink-700"
               >
-                Atlas
+                Archon
               </Link>
               <nav className="flex items-center gap-10">
                 <NavList items={PRIMARY_NAV} pathname={pathname} />

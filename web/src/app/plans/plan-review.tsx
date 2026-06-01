@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { API_BASE, apiFetch } from "@/lib/api";
-import { taxonomy } from "@atlas/shared";
+import { taxonomy } from "@archon/shared";
 import { isStalled } from "@/lib/job-status";
 
 type Confidence = "high" | "medium" | "low";
@@ -20,6 +20,8 @@ type Flag = {
   bbox?: [number, number, number, number] | null;
   bbox_source?: "model" | "tile_fallback" | "text_layer" | "ocr";
   bbox_match_ratio?: number;
+  alt_solution_available?: boolean;
+  alt_solution_pathway?: string | null;
 };
 
 type Plan = {
@@ -539,6 +541,17 @@ function FlagCard({
         <span className="font-medium">Recommended action:</span>{" "}
         {f.recommended_action}
       </p>
+      {f.alt_solution_available && (
+        <div className="mt-3 rounded-sm border border-sky-200 bg-sky-50/70 p-2.5">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-sky-700">
+            Alternative Solution pathway
+          </p>
+          <p className="mt-1 text-xs text-sky-900">
+            {f.alt_solution_pathway?.trim() ||
+              "This deviates from the Acceptable Solution but may comply via an Alternative Solution with supporting evidence (e.g. producer statement, test report, or specific engineering design)."}
+          </p>
+        </div>
+      )}
     </article>
   );
 }

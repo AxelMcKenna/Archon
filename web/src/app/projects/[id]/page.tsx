@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
-import { taxonomy } from "@atlas/shared";
+import { taxonomy } from "@archon/shared";
 import { ForecastingClient } from "./forecasting-client";
 import { buildProjectSettingsValues } from "@/lib/project-details";
 import type { ProjectSettingsValues } from "@/lib/project-details";

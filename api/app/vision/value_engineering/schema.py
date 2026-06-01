@@ -6,7 +6,7 @@ from typing import Any
 
 from app.vision.core.localization import page_tile_bbox_props, to_cad_schema
 
-VALUE_ENGINEERING_VERSION = "1.0.0"
+VALUE_ENGINEERING_VERSION = "1.1.0"
 ACTIVE_PROMPT = "value_engineering_v1.md"
 
 OPPORTUNITY_TOOL_SCHEMA: dict[str, Any] = {
@@ -68,6 +68,16 @@ OPPORTUNITY_TOOL_SCHEMA: dict[str, Any] = {
                         "code_considerations": {
                             "type": "string",
                             "maxLength": 400,
+                        },
+                        # Short retail search terms for the proposed alternative,
+                        # used to look up an indicative Bunnings price post-hoc
+                        # (see app.services.ve_pricing). Keep them generic and
+                        # product-like — material, grade, size — not full
+                        # sentences. Optional: omit for non-material items
+                        # (e.g. detail simplification) where no SKU applies.
+                        "material_keywords": {
+                            "type": "string",
+                            "maxLength": 120,
                         },
                     },
                 },

@@ -3,8 +3,8 @@ import { LegalShell } from "@/components/legal-shell";
 import { legal } from "@/lib/legal-config";
 
 export const metadata: Metadata = {
-  title: "Sub-processors — Atlas",
-  description: "Third-party sub-processors Atlas uses to deliver the service.",
+  title: "Sub-processors — Archon",
+  description: "Third-party sub-processors Archon uses to deliver the service.",
 };
 
 // ⚠️ Keep this list accurate. Add/remove rows as your stack changes, and update
@@ -41,7 +41,7 @@ export default function SubprocessorsPage() {
     <LegalShell
       title="Sub-processors"
       activePath="/subprocessors"
-      intro={`To deliver Atlas, ${legal.entity} engages the third-party service providers below to process data on our behalf. Each is bound by contractual obligations consistent with our Privacy Policy.`}
+      intro={`To deliver Archon, ${legal.entity} engages the third-party service providers below to process data on our behalf. Each is bound by contractual obligations consistent with our Privacy Policy.`}
     >
       <h2>Current sub-processors</h2>
       <table>
