@@ -73,12 +73,29 @@ def _is_heading(line: str) -> tuple[str, str] | None:
     return None
 
 
-def extract_clauses(
-    pdf_bytes: bytes,
+def page_texts_native(pdf_bytes: bytes) -> list[str]:
+    """Per-page text via the PDF's own text layer (pdfplumber).
+
+    Returns one string per page (empty string for pages with no
+    extractable text). Reliable for the well-behaved MBIE PDFs; useless
+    for documents whose text layer encodes glyphs into the private-use
+    area (see ``app.ingestion.mbie.extract`` for the OCR fallback that
+    handles those).
+    """
+    with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+        return [(page.extract_text() or "") for page in pdf.pages]
+
+
+def chunk_page_texts(
+    page_texts: list[str],
     *,
     min_body_chars: int = 40,
 ) -> list[ClauseChunk]:
-    """Parse a PDF into clause chunks.
+    """Chunk a list of per-page text strings into clauses.
+
+    Source-agnostic: ``page_texts`` may come from the native text layer
+    (``page_texts_native``) or from OCR (``app.ingestion.mbie.ocr``), so
+    the same clause-heading logic serves both paths.
 
     ``min_body_chars`` drops degenerate chunks where the heading was
     detected but the body is empty (typical for ToC entries that match
@@ -87,39 +104,37 @@ def extract_clauses(
     chunks: list[ClauseChunk] = []
     current: dict | None = None
 
-    with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
-        for page_idx, page in enumerate(pdf.pages, start=1):
-            text = page.extract_text() or ""
-            for raw_line in text.splitlines():
-                line = _normalise_line(raw_line)
-                if not line:
-                    continue
-                heading_match = _is_heading(line)
-                if heading_match is not None:
-                    if current is not None:
-                        body = current["body"].strip()
-                        if len(body) >= min_body_chars:
-                            chunks.append(
-                                ClauseChunk(
-                                    clause_number=current["clause_number"],
-                                    heading=current["heading"],
-                                    text=body,
-                                    page=current["page"],
-                                )
+    for page_idx, text in enumerate(page_texts, start=1):
+        for raw_line in (text or "").splitlines():
+            line = _normalise_line(raw_line)
+            if not line:
+                continue
+            heading_match = _is_heading(line)
+            if heading_match is not None:
+                if current is not None:
+                    body = current["body"].strip()
+                    if len(body) >= min_body_chars:
+                        chunks.append(
+                            ClauseChunk(
+                                clause_number=current["clause_number"],
+                                heading=current["heading"],
+                                text=body,
+                                page=current["page"],
                             )
-                    clause_number, heading = heading_match
-                    current = {
-                        "clause_number": clause_number,
-                        "heading": heading,
-                        "body": "",
-                        "page": page_idx,
-                    }
-                    continue
-                if current is None:
-                    # Preamble before the first heading — skip rather than
-                    # bucket into an "intro" clause that won't be looked up.
-                    continue
-                current["body"] += line + " "
+                        )
+                clause_number, heading = heading_match
+                current = {
+                    "clause_number": clause_number,
+                    "heading": heading,
+                    "body": "",
+                    "page": page_idx,
+                }
+                continue
+            if current is None:
+                # Preamble before the first heading — skip rather than
+                # bucket into an "intro" clause that won't be looked up.
+                continue
+            current["body"] += line + " "
 
     # Flush the trailing chunk.
     if current is not None:
@@ -135,3 +150,19 @@ def extract_clauses(
             )
 
     return chunks
+
+
+def extract_clauses(
+    pdf_bytes: bytes,
+    *,
+    min_body_chars: int = 40,
+) -> list[ClauseChunk]:
+    """Parse a PDF into clause chunks via its native text layer.
+
+    Thin wrapper kept for back-compat; new callers that want the OCR
+    fallback for broken-text-layer PDFs should use
+    ``app.ingestion.mbie.extract.extract_clauses_robust``.
+    """
+    return chunk_page_texts(
+        page_texts_native(pdf_bytes), min_body_chars=min_body_chars
+    )

@@ -24,7 +24,12 @@ from dataclasses import dataclass
 from typing import Any
 
 from app.ingestion.extractors.llm import call_cleanup
-from app.ingestion.mbie import extract_clauses, replace_clauses
+from app.ingestion.mbie import (
+    extract_clauses_robust,
+    has_substantial_text,
+    page_texts_native,
+    replace_clauses,
+)
 from app.ingestion.models import KBCandidate, VeIngestDocument
 
 log = logging.getLogger(__name__)
@@ -191,12 +196,35 @@ class MbieAcceptableSolutionExtractor:
         self, *, doc_bytes: bytes, doc: VeIngestDocument
     ) -> list[KBCandidate]:
         try:
-            clauses = extract_clauses(doc_bytes)
+            clauses, method = extract_clauses_robust(doc_bytes)
         except Exception as e:  # noqa: BLE001
             log.warning("mbie: clause extraction failed for %s: %s", doc.source_key, e)
             return []
 
         document_id = _document_id_from_source_key(doc.source_key)
+        if method == "ocr":
+            log.info("mbie: %s extracted via OCR fallback", document_id)
+
+        # Zero-clause guard: a document with real body text that yields no
+        # clauses is a parse failure (obfuscated font, layout we don't
+        # handle). Log loudly and DON'T persist — an empty replace would
+        # wipe any clauses a prior run got right. This is the check that
+        # would have surfaced C/AS1 landing zero clauses instead of it
+        # passing silently.
+        if not clauses:
+            try:
+                substantial = has_substantial_text(page_texts_native(doc_bytes))
+            except Exception:  # noqa: BLE001
+                substantial = False
+            if substantial:
+                log.error(
+                    "mbie: %s produced 0 clauses despite substantial text — "
+                    "parse failure, skipping persist to preserve existing rows",
+                    document_id,
+                )
+            else:
+                log.warning("mbie: %s produced 0 clauses (no body text?)", document_id)
+            return []
 
         # Side-effect: populate mbie_clauses for the verifier. Run first
         # so even if the VE LLM cleanup pass below times out or errors,
