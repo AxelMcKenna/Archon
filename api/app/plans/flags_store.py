@@ -46,6 +46,8 @@ def _flag_to_row(
         "bbox_source": flag.get("bbox_source"),
         "verified": bool(flag.get("verified", True)),
         "verification_note": flag.get("verification_note"),
+        "alt_solution_available": bool(flag.get("alt_solution_available", False)),
+        "alt_solution_pathway": flag.get("alt_solution_pathway"),
         "pass_index": flag.get("pass_index"),
     }
 

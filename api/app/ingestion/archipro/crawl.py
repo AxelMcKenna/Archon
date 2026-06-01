@@ -96,6 +96,10 @@ def crawl(
             log.warning("crawl: no Product JSON-LD at %s", d.url)
             continue
 
+        # Per ArchiPro's Terms of Use (cl. 5.1), their imagery is copyrighted
+        # ArchiPro Content and carries no VE value — we don't retain image URLs.
+        rec.image = None
+
         content_hash = res.content_hash or hashlib.sha256(res.bytes).hexdigest()
         store.upsert(
             rec, now_iso=_utc_iso(), source_lastmod=d.lastmod, content_hash=content_hash

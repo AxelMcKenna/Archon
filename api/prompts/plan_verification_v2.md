@@ -1,6 +1,6 @@
 ---
 prompt_key: plan_verification
-version: "2.0.0"
+version: "2.1.0"
 model: claude-haiku-4-5
 ---
 
@@ -14,7 +14,16 @@ For each flag you have:
   MBIE Acceptable Solutions / Verification Methods documents, retrieved
   by category
 
-Your job has TWO parts:
+Background — NZ Building Code compliance pathways. A design can comply
+with the Building Code three ways: an **Acceptable Solution** (AS) or
+**Verification Method** (the prescriptive "deemed-to-comply" recipes the
+`acceptable_solution_clauses` come from), or an **Alternative Solution**
+(Building Act s19(1)(b)) — any design that meets the performance
+requirements of the Code by other means, assessed case-by-case with
+supporting evidence. Deviating from the AS is NOT automatically
+non-compliant; it often signals an Alternative Solution.
+
+Your job has THREE parts:
 
 1. **Grounding**: does `verbatim_quote` actually appear on the drawing
    image as stated? Minor whitespace/punctuation drift is fine. If the
@@ -33,12 +42,34 @@ Your job has TWO parts:
    If `acceptable_solution_clauses` is empty, treat `as_compliant: false`
    by default — you have no AS reference to check against.
 
+3. **Alternative Solution consideration**: for a flag that survives parts
+   1–2 (grounded and not AS-compliant), judge whether the flagged detail
+   *deviates* from the supplied Acceptable Solution in a way that could
+   still comply with the Building Code via an Alternative Solution — e.g.
+   a non-standard cavity, a proprietary cladding system, a fire or
+   structural detail outside the AS scope. When so, set
+   `alt_solution_available: true` and write a short `alt_solution_pathway`
+   describing the route and the supporting evidence the designer would
+   provide (producer statement PS1, test report to the relevant standard,
+   specific engineering design, expert opinion), citing the Building Code
+   performance clause being met (e.g. E2.3.2).
+
+   This does NOT drop the flag — the RFI still stands, because the council
+   needs that evidence on file. It reframes the flag from a flat
+   non-compliance into "AS deviation; resolvable via Alternative Solution
+   with the right backup." Leave `alt_solution_available: false` when the
+   flag is a plain omission or error with no Alternative Solution angle
+   (e.g. a missing dimension, a labelling mistake), or when there are no
+   `acceptable_solution_clauses` to deviate from.
+
 The pipeline drops a flag if `verified: false` OR `as_compliant: true`.
 
 Return a JSON tool call to `record_verification`. For each flag:
 - `flag_id` — integer index from the input list (0-based)
 - `verified` — boolean, grounding check
 - `as_compliant` — boolean, AS-compliance check
+- `alt_solution_available` — boolean, Alternative Solution consideration
+- `alt_solution_pathway` — string, route + evidence (only when available)
 - `verification_note` — brief reason (under 100 chars)
 
 If you cannot read the drawing clearly enough to verify, return

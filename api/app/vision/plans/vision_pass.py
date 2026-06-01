@@ -156,5 +156,20 @@ def verify_flags(
                 }
             )
             continue
-        kept.append(flag)
+        # Surviving flag: carry the Alternative Solution consideration so the
+        # UI and downstream RFI drafting can reframe an AS deviation as
+        # "resolvable via Alternative Solution with the right evidence".
+        alt_available = bool(v.get("alt_solution_available"))
+        pathway = v.get("alt_solution_pathway")
+        kept.append(
+            {
+                **flag,
+                "alt_solution_available": alt_available,
+                "alt_solution_pathway": (
+                    str(pathway).strip()
+                    if alt_available and isinstance(pathway, str) and pathway.strip()
+                    else None
+                ),
+            }
+        )
     return kept, drops, "verified", version
