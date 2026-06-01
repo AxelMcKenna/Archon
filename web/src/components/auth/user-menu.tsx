@@ -11,7 +11,7 @@ export async function UserMenu() {
     return (
       <Link
         href="/login"
-        className="font-display uppercase tracking-[0.14em] text-[13px] text-ink-700 transition-colors hover:text-ink-900"
+        className="font-display uppercase tracking-[0.14em] text-[13px] text-ink-300 transition-colors hover:text-accent"
       >
         Sign in
       </Link>
@@ -28,14 +28,14 @@ export async function UserMenu() {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="hidden font-display uppercase tracking-[0.14em] text-[13px] leading-none text-ink-700 md:inline">
+      <span className="hidden font-display uppercase tracking-[0.14em] text-[13px] leading-none text-ink-200 md:inline">
         {displayName}
       </span>
-      <span aria-hidden className="hidden h-3.5 w-px bg-ink-900/15 md:inline-block" />
+      <span aria-hidden className="hidden h-3.5 w-px bg-white/10 md:inline-block" />
       <form action="/auth/signout" method="post" className="leading-none">
         <button
           type="submit"
-          className="font-display uppercase tracking-[0.14em] text-[13px] leading-none text-ink-500 transition-colors hover:text-ink-900"
+          className="font-display uppercase tracking-[0.14em] text-[13px] leading-none text-ink-400 transition-colors hover:text-accent"
         >
           Sign out
         </button>
