@@ -28,11 +28,6 @@ const PRIMARY_NAV: NavItem[] = [
   { name: "Projects", href: "/projects" as Route },
 ];
 
-const SECONDARY_NAV: NavItem[] = [
-  { name: "Settings", href: "/settings" as Route },
-  { name: "Help", href: "/help" as Route },
-];
-
 export function LayoutContent({
   children,
   userMenu,
@@ -59,22 +54,16 @@ export function LayoutContent({
     <TabContextProvider>
       <AgentProvider>
         <div className="min-h-screen bg-surface-canvas flex flex-col">
-          <header className="sticky top-0 z-30 border-b border-accent/25 bg-ink-900/90 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_10px_30px_-16px_rgba(11,14,20,0.7)]">
+          <header className="sticky top-0 z-30 border-b border-accent/25 bg-ink-900">
             <div className="flex w-full items-center justify-between px-10 py-6">
               <Link
                 href="/dashboard"
-                className="group inline-flex items-center gap-2.5 font-display uppercase font-bold tracking-[0.16em] text-[22px] text-ink-50 transition-colors hover:text-accent"
+                className="font-display uppercase font-bold tracking-[0.16em] text-[22px] text-ink-50 transition-colors hover:text-accent"
               >
-                <span
-                  aria-hidden
-                  className="h-3.5 w-3.5 rounded-sm bg-accent shadow-[0_0_12px_rgba(15,118,110,0.6)] transition-transform group-hover:scale-110"
-                />
                 Archon
               </Link>
-              <nav className="flex items-center gap-10">
+              <nav className="flex items-center gap-8">
                 <NavList items={PRIMARY_NAV} pathname={pathname} />
-                <span aria-hidden className="h-4 w-px bg-white/10" />
-                <NavList items={SECONDARY_NAV} pathname={pathname} />
                 {userMenu && (
                   <>
                     <span aria-hidden className="h-4 w-px bg-white/10" />
@@ -137,7 +126,7 @@ function NavList({
               {isActive && (
                 <span
                   aria-hidden
-                  className="absolute -bottom-2 left-0 right-0 h-[2px] bg-accent shadow-[0_0_10px_rgba(15,118,110,0.7)]"
+                  className="absolute -bottom-2 left-0 right-0 h-[2px] bg-accent"
                 />
               )}
             </Link>

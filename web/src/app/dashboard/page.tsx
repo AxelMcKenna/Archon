@@ -109,15 +109,6 @@ export default async function Dashboard() {
               Live state across projects, drawings and RFI letters.
             </p>
           </div>
-          <div className="hidden sm:flex items-center gap-2 rounded-md bg-surface-raised px-3 py-1.5 shadow-depth">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            </span>
-            <span className="text-[11px] tracking-tight text-ink-700">
-              live · synced
-            </span>
-          </div>
         </header>
 
         <section>

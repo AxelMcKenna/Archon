@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getSupabaseServer } from "@/lib/supabase/server";
+import { ProfileMenu } from "@/components/auth/profile-menu";
 
 export async function UserMenu() {
   const supabase = await getSupabaseServer();
@@ -11,7 +12,7 @@ export async function UserMenu() {
     return (
       <Link
         href="/login"
-        className="font-display uppercase tracking-[0.14em] text-[13px] text-ink-300 transition-colors hover:text-accent"
+        className="font-display uppercase tracking-[0.14em] text-[14px] font-medium text-ink-400 transition-colors hover:text-ink-50"
       >
         Sign in
       </Link>
@@ -26,20 +27,5 @@ export async function UserMenu() {
 
   const displayName = profile?.username || user.email || "Account";
 
-  return (
-    <div className="flex items-center gap-3">
-      <span className="hidden font-display uppercase tracking-[0.14em] text-[13px] leading-none text-ink-200 md:inline">
-        {displayName}
-      </span>
-      <span aria-hidden className="hidden h-3.5 w-px bg-white/10 md:inline-block" />
-      <form action="/auth/signout" method="post" className="leading-none">
-        <button
-          type="submit"
-          className="font-display uppercase tracking-[0.14em] text-[13px] leading-none text-ink-400 transition-colors hover:text-accent"
-        >
-          Sign out
-        </button>
-      </form>
-    </div>
-  );
+  return <ProfileMenu displayName={displayName} />;
 }
