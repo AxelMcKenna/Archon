@@ -48,6 +48,11 @@ def _flag_to_row(
         "verification_note": flag.get("verification_note"),
         "alt_solution_available": bool(flag.get("alt_solution_available", False)),
         "alt_solution_pathway": flag.get("alt_solution_pathway"),
+        "mbie_clauses_considered": (
+            flag.get("mbie_clauses_considered")
+            if isinstance(flag.get("mbie_clauses_considered"), list)
+            else None
+        ),
         "pass_index": flag.get("pass_index"),
     }
 

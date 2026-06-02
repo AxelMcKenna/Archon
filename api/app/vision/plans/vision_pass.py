@@ -9,7 +9,12 @@ from typing import Any
 from app.auth import get_service_db
 from app.config import get_settings
 from app.extractors.metrics import Metrics
-from app.mbie.retriever import format_hits_for_prompt, retrieve_for_flag
+from app.mbie.retriever import (
+    _build_query,
+    format_hits_for_prompt,
+    hit_provenance,
+    retrieve_for_flag,
+)
 from app.vision.core.invoker import invoke_tool, run_tool_pass
 from app.vision.core.prompts import fill, load_prompt
 from app.vision.core.renderer import RenderedImage, caption_str
@@ -42,26 +47,31 @@ def run_single_vision_pass(
 
 def _retrieve_mbie_context(
     flags: list[dict[str, Any]],
-) -> list[str]:
-    """Per-flag MBIE clause retrieval. Returns a parallel list of
-    formatted clause strings (empty string when nothing found or when
-    retrieval blows up — we never let MBIE issues break verification).
+) -> tuple[list[str], list[list[dict[str, Any]]]]:
+    """Per-flag MBIE clause retrieval. Returns two parallel lists:
+    formatted clause strings for the verifier prompt, and structured
+    provenance (which clauses each flag was checked against) for
+    persistence. Both default to empty when nothing is found or retrieval
+    blows up — we never let MBIE issues break verification.
     """
     try:
         db = get_service_db()
     except Exception as exc:  # noqa: BLE001
         log.warning("MBIE retrieval skipped (no service db): %s", exc)
-        return ["" for _ in flags]
+        return (["" for _ in flags], [[] for _ in flags])
 
-    out: list[str] = []
+    blocks: list[str] = []
+    provenance: list[list[dict[str, Any]]] = []
     for f in flags:
         try:
             hits = retrieve_for_flag(db, flag=f)
-            out.append(format_hits_for_prompt(hits))
+            blocks.append(format_hits_for_prompt(hits, query=_build_query(f)))
+            provenance.append(hit_provenance(hits))
         except Exception as exc:  # noqa: BLE001
             log.warning("MBIE retrieval failed for one flag: %s", exc)
-            out.append("")
-    return out
+            blocks.append("")
+            provenance.append([])
+    return blocks, provenance
 
 
 def verify_flags(
@@ -84,7 +94,7 @@ def verify_flags(
         return [], [], "verified", load_prompt(ACTIVE_VERIFICATION_PROMPT)[1]
 
     template, version = load_prompt(ACTIVE_VERIFICATION_PROMPT)
-    mbie_blocks = _retrieve_mbie_context(flags)
+    mbie_blocks, mbie_provenance = _retrieve_mbie_context(flags)
     flags_block = json.dumps(
         [
             {
@@ -137,13 +147,29 @@ def verify_flags(
     kept: list[dict[str, Any]] = []
     drops: list[dict[str, Any]] = []
     for idx, flag in enumerate(flags):
+        # Clauses this flag was checked against — attached to kept *and*
+        # dropped flags so an AS-compliant drop or an alt-solution annotation
+        # is auditable back to the exact clauses that drove the verdict.
+        prov = mbie_provenance[idx]
         v = verifications.get(idx)
         if v is None:
-            drops.append({**flag, "verification_note": "no verdict from verifier"})
+            drops.append(
+                {
+                    **flag,
+                    "verification_note": "no verdict from verifier",
+                    "mbie_clauses_considered": prov,
+                }
+            )
             continue
         note = v.get("verification_note", "")
         if not v.get("verified"):
-            drops.append({**flag, "verification_note": note or "ungrounded"})
+            drops.append(
+                {
+                    **flag,
+                    "verification_note": note or "ungrounded",
+                    "mbie_clauses_considered": prov,
+                }
+            )
             continue
         if v.get("as_compliant"):
             drops.append(
@@ -153,6 +179,7 @@ def verify_flags(
                         f"AS-compliant: {note}" if note else "AS-compliant"
                     ),
                     "dropped_reason": "as_compliant",
+                    "mbie_clauses_considered": prov,
                 }
             )
             continue
@@ -170,6 +197,7 @@ def verify_flags(
                     if alt_available and isinstance(pathway, str) and pathway.strip()
                     else None
                 ),
+                "mbie_clauses_considered": prov,
             }
         )
     return kept, drops, "verified", version

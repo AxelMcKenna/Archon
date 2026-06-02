@@ -22,6 +22,23 @@ type Flag = {
   bbox_match_ratio?: number;
   alt_solution_available?: boolean;
   alt_solution_pathway?: string | null;
+  mbie_clauses_considered?: ClauseRef[] | null;
+};
+
+type ClauseRef = {
+  document_id?: string;
+  clause_number?: string | null;
+  heading?: string | null;
+  source_url?: string | null;
+};
+
+// A flag the verifier removed. We only surface AS-compliant drops — flags the
+// model judged the drawing already satisfies — so a single verifier call can't
+// silently hide a real compliance issue. (Ungrounded drops are fabricated
+// quotes and stay hidden.)
+type Drop = Flag & {
+  verification_note?: string | null;
+  dropped_reason?: string | null;
 };
 
 type Plan = {
@@ -42,6 +59,9 @@ type Plan = {
     truncated?: boolean;
     verification?: "verified" | "skipped";
   } | null;
+  // Sibling column on plan_uploads (not nested in analysis); the GET
+  // endpoint returns the whole row.
+  verification_drops?: Drop[] | null;
 };
 
 type PageInfo = { page: number; width: number; height: number };
@@ -74,7 +94,19 @@ function priorityScore(flag: Flag): number {
 export function PlanReview({ plan }: { plan: Plan }) {
   const [showAll, setShowAll] = useState(false);
   const [showLowConfidence, setShowLowConfidence] = useState(false);
+  const [showResolved, setShowResolved] = useState(false);
   const [activeFlagId, setActiveFlagId] = useState<number | null>(null);
+
+  // AS-compliant suppressions: flags the verifier dropped because the drawing
+  // visibly satisfies an Acceptable Solution. Surfaced (collapsed) so the
+  // suppression is transparent and auditable, never silent.
+  const resolved = useMemo(
+    () =>
+      (plan.verification_drops ?? []).filter(
+        (d) => d.dropped_reason === "as_compliant",
+      ),
+    [plan.verification_drops],
+  );
 
   const flags = plan.analysis?.flags ?? [];
   // Stable global numbering so the pin number on the canvas matches the
@@ -208,7 +240,62 @@ export function PlanReview({ plan }: { plan: Plan }) {
             )}
           </div>
         )}
+
+        {resolved.length > 0 && (
+          <div className="rounded-sm border border-emerald-200 bg-emerald-50/40">
+            <button
+              type="button"
+              onClick={() => setShowResolved((v) => !v)}
+              className="w-full px-4 py-2 text-left text-sm flex justify-between items-center"
+            >
+              <span className="text-emerald-800">
+                Auto-resolved as compliant ({resolved.length})
+              </span>
+              <span className="text-xs text-emerald-700">
+                {showResolved ? "Hide" : "Show"}
+              </span>
+            </button>
+            {showResolved && (
+              <div className="border-t border-emerald-200 p-3 space-y-3">
+                <p className="text-xs text-ink-500">
+                  The verifier judged the drawing already satisfies an Acceptable
+                  Solution for these, so they were removed from the flag list.
+                  Review if you disagree.
+                </p>
+                {resolved.map((d, i) => (
+                  <ResolvedCard key={`res-${i}`} drop={d} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </section>
+    </div>
+  );
+}
+
+function ResolvedCard({ drop }: { drop: Drop }) {
+  const clauses = drop.mbie_clauses_considered ?? [];
+  return (
+    <div className="rounded-sm border border-emerald-200 bg-white p-3 text-sm">
+      <p className="font-medium text-ink-800">{drop.area}</p>
+      {drop.reason && <p className="text-ink-600 mt-1">{drop.reason}</p>}
+      {drop.verification_note && (
+        <p className="text-xs text-emerald-700 mt-2">{drop.verification_note}</p>
+      )}
+      {clauses.length > 0 && (
+        <p className="text-xs text-ink-500 mt-2">
+          Checked against:{" "}
+          {clauses
+            .map((c) =>
+              [c.document_id, c.clause_number ? `§${c.clause_number}` : null]
+                .filter(Boolean)
+                .join(" "),
+            )
+            .filter(Boolean)
+            .join(", ")}
+        </p>
+      )}
     </div>
   );
 }

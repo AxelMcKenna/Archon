@@ -139,9 +139,65 @@ def retrieve_for_flag(
     ]
 
 
-def format_hits_for_prompt(hits: list[ClauseHit], *, max_chars: int = 800) -> str:
+def hit_provenance(hits: list[ClauseHit]) -> list[dict[str, Any]]:
+    """Compact, persistable record of which clauses a flag was checked
+    against. Deterministic (no LLM): attached to every kept and dropped
+    flag so an AS-compliant drop or an Alternative-Solution annotation can
+    be audited back to the exact clauses that drove it."""
+    return [
+        {
+            "document_id": h.document_id,
+            "clause_number": h.clause_number,
+            "heading": h.heading,
+            "page": h.page,
+            "source_url": h.source_url,
+        }
+        for h in hits
+    ]
+
+
+def _window_around_query(body: str, query: str | None, max_chars: int) -> str:
+    """Trim ``body`` to ``max_chars``, keeping the part that matched.
+
+    Head-truncation drops the tail — but FTS/dense can match a clause on a
+    passage that lives past ``max_chars``, leaving the verifier a snippet
+    that omits the very text that made the clause relevant. So when a query
+    token is found deeper in the body, window around it instead."""
+    if len(body) <= max_chars:
+        return body
+
+    pos = -1
+    if query:
+        tokens = sorted(
+            {t.lower() for t in re.findall(r"[A-Za-z0-9]{4,}", query)},
+            key=len,
+            reverse=True,
+        )
+        low = body.lower()
+        for tok in tokens:
+            pos = low.find(tok)
+            if pos != -1:
+                break
+
+    if pos <= max_chars - 1:  # match is in the head (or none found) → head-trim
+        return body[: max_chars - 1].rstrip() + "…"
+
+    # Centre the window on the match, clamped to the body bounds.
+    start = max(0, pos - max_chars // 3)
+    end = min(len(body), start + max_chars - 2)
+    start = max(0, end - (max_chars - 2))  # re-expand if we hit the tail
+    snippet = body[start:end].strip()
+    prefix = "…" if start > 0 else ""
+    suffix = "…" if end < len(body) else ""
+    return f"{prefix}{snippet}{suffix}"
+
+
+def format_hits_for_prompt(
+    hits: list[ClauseHit], *, query: str | None = None, max_chars: int = 800
+) -> str:
     """Compact human/LLM-readable rendering for inclusion in the
-    verifier prompt. Trims each clause body to keep total context bounded."""
+    verifier prompt. Trims each clause body (query-aware) to keep total
+    context bounded while preserving the passage that matched."""
     if not hits:
         return ""
     out: list[str] = []
@@ -149,8 +205,6 @@ def format_hits_for_prompt(hits: list[ClauseHit], *, max_chars: int = 800) -> st
         head = f"{h.document_id} §{h.clause_number or '?'}"
         if h.heading:
             head += f" — {h.heading}"
-        body = h.text
-        if len(body) > max_chars:
-            body = body[: max_chars - 1].rstrip() + "…"
+        body = _window_around_query(h.text, query, max_chars)
         out.append(f"- {head}\n  {body}")
     return "\n".join(out)
