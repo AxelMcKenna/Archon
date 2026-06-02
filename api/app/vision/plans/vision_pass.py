@@ -171,7 +171,12 @@ def verify_flags(
                 }
             )
             continue
-        if v.get("as_compliant"):
+        # Coherence guardrail: an AS-compliant *drop* silently removes a flag
+        # from the user's view, so it must be grounded. If the verifier claims
+        # as_compliant but no Acceptable-Solution clause was retrieved, there is
+        # nothing the drawing could be "compliant" against — keep the flag
+        # rather than trust an ungrounded drop from the cheap verifier model.
+        if v.get("as_compliant") and prov:
             drops.append(
                 {
                     **flag,
@@ -183,21 +188,28 @@ def verify_flags(
                 }
             )
             continue
+        if v.get("as_compliant") and not prov:
+            log.info(
+                "as_compliant overridden (no clauses retrieved) for flag %s", idx
+            )
+            note = (note + "; ") if note else ""
+            note += "as_compliant claimed but no AS clause retrieved — kept"
         # Surviving flag: carry the Alternative Solution consideration so the
         # UI and downstream RFI drafting can reframe an AS deviation as
         # "resolvable via Alternative Solution with the right evidence".
         alt_available = bool(v.get("alt_solution_available"))
         pathway = v.get("alt_solution_pathway")
-        kept.append(
-            {
-                **flag,
-                "alt_solution_available": alt_available,
-                "alt_solution_pathway": (
-                    str(pathway).strip()
-                    if alt_available and isinstance(pathway, str) and pathway.strip()
-                    else None
-                ),
-                "mbie_clauses_considered": prov,
-            }
-        )
+        kept_flag = {
+            **flag,
+            "alt_solution_available": alt_available,
+            "alt_solution_pathway": (
+                str(pathway).strip()
+                if alt_available and isinstance(pathway, str) and pathway.strip()
+                else None
+            ),
+            "mbie_clauses_considered": prov,
+        }
+        if note:
+            kept_flag["verification_note"] = note
+        kept.append(kept_flag)
     return kept, drops, "verified", version

@@ -1,0 +1,91 @@
+# Labelled retrieval-eval set: (flag → expected MBIE clause).
+#
+# Each label is a realistic plan flag plus the clause we expect retrieval to
+# surface. Anchors were pulled from the live corpus (prod ARCHON), so a hit is
+# a real clause, not a circular self-reference. A label counts as "hit@k" when
+# any of the top-k retrieved clauses comes from `expect.document_id` AND its
+# text contains `expect.clause_contains` (case-insensitive) — tolerant of
+# clause-number drift while still pinning the right document + topic.
+#
+# Grow this set whenever a real flag retrieves the wrong clause: add the flag
+# and the clause it *should* have found, then re-run the harness.
+
+labels:
+  - id: e2_cavity
+    category: building_code:E2
+    verbatim_quote: "20mm drained cavity behind cladding"
+    reason: "Cavity depth behind weatherboard not dimensioned"
+    recommended_action: "Confirm drained cavity per E2/AS1"
+    expect: { document_id: "E2/AS1", clause_contains: "drained cavity" }
+
+  - id: e2_flashing
+    category: building_code:E2:cladding
+    verbatim_quote: "head flashing to window penetration"
+    reason: "Flashing detail at framed penetration unclear"
+    recommended_action: "Provide flashing detail to framed penetration"
+    expect: { document_id: "E2/AS1", clause_contains: "flashing" }
+
+  - id: b1_bracing
+    category: building_code:B1
+    verbatim_quote: "wall bracing rating"
+    reason: "Bracing demand and capacity not shown"
+    recommended_action: "Provide bracing calculations and ratings"
+    expect: { document_id: "B1/AS1", clause_contains: "bracing" }
+
+  - id: c_fire_egress
+    category: building_code:C
+    verbatim_quote: "escape route stairway capacity"
+    reason: "Escape route width / stairway capacity not demonstrated"
+    recommended_action: "Show escape route capacity"
+    expect: { document_id: "C/AS2", clause_contains: "escape route" }
+
+  - id: d1_stair
+    category: building_code:D1
+    verbatim_quote: "stairway rise between landings"
+    reason: "Stair geometry (rise between landings) not dimensioned"
+    recommended_action: "Dimension stair rise and landings"
+    expect: { document_id: "D1/ASVM", clause_contains: "landing" }
+
+  - id: e1_surface_water
+    category: building_code:E1
+    verbatim_quote: "surface water gradient to disposal"
+    reason: "Surface water disposal gradient not shown"
+    recommended_action: "Show surface water transport gradient"
+    expect: { document_id: "E1/ASVM", clause_contains: "surface water" }
+
+  - id: e3_internal_moisture
+    category: building_code:E3
+    verbatim_quote: "impervious wall lining at sink"
+    reason: "Impervious lining behind wet-area fixtures not specified"
+    recommended_action: "Specify impervious wall lining to wet areas"
+    expect: { document_id: "E3/AS1", clause_contains: "impervious" }
+
+  - id: g12_hot_water
+    category: building_code:G12
+    verbatim_quote: "hot water working pressure"
+    reason: "Hot water system pressure rating not stated"
+    recommended_action: "State hot water working pressure"
+    expect: { document_id: "G12/AS1", clause_contains: "hot water" }
+
+  - id: g13_foul_water
+    category: building_code:G13
+    verbatim_quote: "foul water sanitary plumbing"
+    reason: "Foul water / sanitary plumbing layout not provided"
+    recommended_action: "Provide sanitary plumbing layout"
+    expect: { document_id: "G13/AS1", clause_contains: "foul water" }
+
+  - id: g4_ventilation
+    category: building_code:G4
+    verbatim_quote: "mechanical ventilation rate"
+    reason: "Ventilation rate to habitable space not shown"
+    recommended_action: "Show ventilation rate / air purity compliance"
+    # Any G4 clause on mechanical ventilation is valid (AS1 or VM1); the family
+    # filter already scopes to G4, so don't over-pin the document.
+    expect: { clause_contains: "mechanical ventilation" }
+
+  - id: h1_insulation
+    category: building_code:H1
+    verbatim_quote: "thermal zone insulation"
+    reason: "Thermal envelope zoning / insulation not specified"
+    recommended_action: "Specify thermal zones and insulation"
+    expect: { document_id: "H1/VM1", clause_contains: "thermal" }

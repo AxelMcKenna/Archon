@@ -13,8 +13,9 @@ from app.vision.core.renderer import RenderedImage
 import app.vision.plans.vision_pass as vp
 
 
-def _run(monkeypatch, flags, verifications):
-    prov = [[{"document_id": "E2/AS1", "clause_number": "9.1.1"}] for _ in flags]
+def _run(monkeypatch, flags, verifications, *, prov=None):
+    if prov is None:
+        prov = [[{"document_id": "E2/AS1", "clause_number": "9.1.1"}] for _ in flags]
     monkeypatch.setattr(
         vp, "_retrieve_mbie_context", lambda f: (["clause text" for _ in f], prov)
     )
@@ -62,6 +63,19 @@ def test_as_compliant_drop_carries_provenance_and_reason(monkeypatch):
     assert d["mbie_clauses_considered"] == [
         {"document_id": "E2/AS1", "clause_number": "9.1.1"}
     ]
+
+
+def test_as_compliant_without_clauses_is_kept_not_dropped(monkeypatch):
+    # The verifier claims compliance but no AS clause was retrieved — there is
+    # nothing to be compliant against, so the flag must NOT be silently dropped.
+    flags = [{"category": "building_code:E2", "verbatim_quote": "35mm cavity"}]
+    kept, drops, _, _ = _run(
+        monkeypatch, flags,
+        [{"flag_id": 0, "verified": True, "as_compliant": True}],
+        prov=[[]],
+    )
+    assert not drops and len(kept) == 1
+    assert "no AS clause retrieved" in (kept[0].get("verification_note") or "")
 
 
 def test_ungrounded_drop_carries_provenance(monkeypatch):

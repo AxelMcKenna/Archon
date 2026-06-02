@@ -85,13 +85,30 @@ def retrieve_for_flag(
     *,
     flag: dict[str, Any],
     k: int = _DEFAULT_K,
+    mode: str = "hybrid",
 ) -> list[ClauseHit]:
+    """Retrieve the top-k MBIE clauses for ``flag``.
+
+    ``mode`` selects the retrieval arm:
+      - ``"hybrid"`` (default, production): dense + FTS fused by RRF, with the
+        documented degradation chain.
+      - ``"sparse"``: FTS-only (``match_mbie_clauses``), no embedding call.
+    The retrieval-quality harness uses ``mode`` to compare arms; ops can force
+    ``"sparse"`` to keep working during an embedding outage.
+    """
     code_clause = code_clause_for_category(flag.get("category"))
     if not code_clause:
         return []
     query = _build_query(flag)
     if not query:
         return []
+
+    if mode == "sparse":
+        resp = db.rpc(
+            "match_mbie_clauses",
+            {"p_code_clause": code_clause, "p_query": query, "p_limit": k},
+        ).execute()
+        return _rows_to_hits(resp.data or [])
 
     # Embed the query for the dense arm (best-effort). On any embedding
     # failure we pass None — the hybrid RPC then degrades to sparse-only —
@@ -125,6 +142,10 @@ def retrieve_for_flag(
             {"p_code_clause": code_clause, "p_query": query, "p_limit": k},
         ).execute()
         rows = resp.data or []
+    return _rows_to_hits(rows)
+
+
+def _rows_to_hits(rows: list[dict[str, Any]]) -> list[ClauseHit]:
     return [
         ClauseHit(
             document_id=r.get("document_id", ""),
