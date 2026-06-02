@@ -9,6 +9,7 @@ from typing import Any
 from app.auth import get_service_db
 from app.config import get_settings
 from app.extractors.metrics import Metrics
+from app.mbie.pathway import unverified_citations
 from app.mbie.retriever import (
     _build_query,
     format_hits_for_prompt,
@@ -199,13 +200,20 @@ def verify_flags(
         # "resolvable via Alternative Solution with the right evidence".
         alt_available = bool(v.get("alt_solution_available"))
         pathway = v.get("alt_solution_pathway")
+        pathway_str = (
+            str(pathway).strip()
+            if alt_available and isinstance(pathway, str) and pathway.strip()
+            else None
+        )
         kept_flag = {
             **flag,
             "alt_solution_available": alt_available,
-            "alt_solution_pathway": (
-                str(pathway).strip()
-                if alt_available and isinstance(pathway, str) and pathway.strip()
-                else None
+            "alt_solution_pathway": pathway_str,
+            # Flag any Building Code clause the verifier cited that isn't a real
+            # clause — the pathway is ungrounded model text, so don't present
+            # fabricated clause refs as fact.
+            "alt_solution_pathway_unverified": (
+                unverified_citations(pathway_str) or None
             ),
             "mbie_clauses_considered": prov,
         }

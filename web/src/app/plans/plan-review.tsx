@@ -22,6 +22,7 @@ type Flag = {
   bbox_match_ratio?: number;
   alt_solution_available?: boolean;
   alt_solution_pathway?: string | null;
+  alt_solution_pathway_unverified?: string[] | null;
   mbie_clauses_considered?: ClauseRef[] | null;
 };
 
@@ -637,6 +638,15 @@ function FlagCard({
             {f.alt_solution_pathway?.trim() ||
               "This deviates from the Acceptable Solution but may comply via an Alternative Solution with supporting evidence (e.g. producer statement, test report, or specific engineering design)."}
           </p>
+          {f.alt_solution_pathway_unverified &&
+            f.alt_solution_pathway_unverified.length > 0 && (
+              <p className="mt-1.5 text-[11px] text-amber-700">
+                ⚠ Unverified clause reference
+                {f.alt_solution_pathway_unverified.length > 1 ? "s" : ""}:{" "}
+                {f.alt_solution_pathway_unverified.join(", ")} — not a recognised
+                Building Code clause; confirm before relying on it.
+              </p>
+            )}
         </div>
       )}
     </article>
