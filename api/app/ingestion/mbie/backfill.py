@@ -110,22 +110,66 @@ def backfill(db: Client, source_keys: list[str] | None = None) -> list[BackfillR
     return results
 
 
+def _vec_literal(vec: list[float]) -> str:
+    """pgvector text input form: '[0.1,0.2,...]'."""
+    return "[" + ",".join(f"{x:.7g}" for x in vec) + "]"
+
+
+def _clause_embed_text(row: dict) -> str:
+    parts = [row.get("clause_number") or "", row.get("heading") or "",
+             row.get("text") or ""]
+    return " ".join(p for p in parts if p).strip()
+
+
+def embed_missing(db: Client, *, document_id: str | None = None, page: int = 400) -> int:
+    """Populate `embedding` for mbie_clauses rows that lack one (dense, via
+    OpenRouter). Re-querying `embedding is null` naturally paginates as we
+    fill them. Returns the number embedded."""
+    from app.llm.embeddings import embed_texts
+
+    total = 0
+    while True:
+        q = (
+            db.table("mbie_clauses")
+            .select("id,clause_number,heading,text")
+            .is_("embedding", "null")
+        )
+        if document_id:
+            q = q.eq("document_id", document_id)
+        rows = q.limit(page).execute().data or []
+        if not rows:
+            break
+        vecs = embed_texts([_clause_embed_text(r) for r in rows])
+        for r, v in zip(rows, vecs, strict=True):
+            db.table("mbie_clauses").update({"embedding": _vec_literal(v)}).eq(
+                "id", r["id"]
+            ).execute()
+        total += len(rows)
+        log.info("embed_missing: embedded %d (running %d)", len(rows), total)
+    return total
+
+
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="python -m app.ingestion.mbie.backfill",
-        description="Re-chunk mbie_clauses from stored bytes (no network/LLM).",
+        description="Re-chunk and/or embed mbie_clauses (no full pipeline run).",
     )
-    g = p.add_mutually_exclusive_group(required=True)
-    g.add_argument("--source-key", action="append", dest="source_keys",
-                   help="source_key to backfill (repeatable), e.g. mbie:c_as1")
-    g.add_argument("--all", action="store_true",
-                   help="backfill every configured mbie_acceptable_solution doc")
+    p.add_argument("--source-key", action="append", dest="source_keys",
+                   help="re-chunk this source_key from stored bytes (repeatable)")
+    p.add_argument("--all", action="store_true",
+                   help="re-chunk every configured mbie_acceptable_solution doc")
+    p.add_argument("--embed", action="store_true",
+                   help="populate dense embeddings for clauses missing one")
     p.add_argument("-v", "--verbose", action="store_true")
     return p
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
+    if not (args.all or args.source_keys or args.embed):
+        print("nothing to do: pass --all, --source-key, and/or --embed",
+              file=sys.stderr)
+        return 2
     logging.basicConfig(
         level=logging.INFO if args.verbose else logging.WARNING,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
@@ -138,15 +182,22 @@ def main(argv: list[str] | None = None) -> int:
         print(f"failed to build supabase client: {e}", file=sys.stderr)
         return 2
 
-    results = backfill(db, None if args.all else args.source_keys)
-    failed = [r for r in results if r.status == "failed"]
-    for r in results:
-        print(f"  {r.status:7} {r.document_id:12} {r.clauses:4} clauses "
-              f"[{r.method or '-'}] {r.note}")
-    print(f"\n{len(results)} docs: "
-          f"{sum(1 for r in results if r.status=='ok')} ok, "
-          f"{sum(1 for r in results if r.status=='skipped')} skipped, "
-          f"{len(failed)} failed")
+    failed: list[BackfillResult] = []
+    if args.all or args.source_keys:
+        results = backfill(db, None if args.all else args.source_keys)
+        failed = [r for r in results if r.status == "failed"]
+        for r in results:
+            print(f"  {r.status:7} {r.document_id:12} {r.clauses:4} clauses "
+                  f"[{r.method or '-'}] {r.note}")
+        print(f"\n{len(results)} docs: "
+              f"{sum(1 for r in results if r.status=='ok')} ok, "
+              f"{sum(1 for r in results if r.status=='skipped')} skipped, "
+              f"{len(failed)} failed")
+
+    if args.embed:
+        n = embed_missing(db)
+        print(f"embedded {n} clause(s)")
+
     return 1 if failed else 0
 
 

@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     openrouter_model: str = "openai/gpt-5"
     openrouter_verifier_model: str = "openai/gpt-4o-mini"
     openrouter_referer: str = ""
+    # Dense embeddings for RFI clause grounding (hybrid retrieval). Dimension
+    # must match the mbie_clauses.embedding column + the migration's vector(N).
+    openrouter_embedding_model: str = "openai/text-embedding-3-small"
+    embedding_dim: int = 1536
 
     # Retry/backoff for LLM provider calls. Transient failures (429/5xx/
     # network blips/flaky tool calls) are retried with exponential backoff

@@ -21,13 +21,20 @@ falls back to plain grounding verification.
 
 from __future__ import annotations
 
+import logging
 import re
 from dataclasses import dataclass
 from typing import Any
 
 from supabase import Client
 
+log = logging.getLogger(__name__)
+
 _DEFAULT_K = 3
+
+
+def _vec_literal(vec: list[float]) -> str:
+    return "[" + ",".join(f"{x:.7g}" for x in vec) + "]"
 
 
 @dataclass
@@ -85,11 +92,39 @@ def retrieve_for_flag(
     query = _build_query(flag)
     if not query:
         return []
-    resp = db.rpc(
-        "match_mbie_clauses",
-        {"p_code_clause": code_clause, "p_query": query, "p_limit": k},
-    ).execute()
-    rows = resp.data or []
+
+    # Embed the query for the dense arm (best-effort). On any embedding
+    # failure we pass None — the hybrid RPC then degrades to sparse-only —
+    # and on RPC failure we fall back to the FTS-only RPC, so neither an
+    # embedding outage nor a missing hybrid function can break verification.
+    embedding_literal: str | None = None
+    try:
+        from app.llm.embeddings import embed_query
+
+        vec = embed_query(query)
+        if vec:
+            embedding_literal = _vec_literal(vec)
+    except Exception as exc:  # noqa: BLE001
+        log.warning("query embedding failed; sparse-only retrieval: %s", exc)
+
+    try:
+        resp = db.rpc(
+            "match_mbie_clauses_hybrid",
+            {
+                "p_code_clause": code_clause,
+                "p_query": query,
+                "p_embedding": embedding_literal,
+                "p_limit": k,
+            },
+        ).execute()
+        rows = resp.data or []
+    except Exception as exc:  # noqa: BLE001
+        log.warning("hybrid retrieval failed; falling back to FTS: %s", exc)
+        resp = db.rpc(
+            "match_mbie_clauses",
+            {"p_code_clause": code_clause, "p_query": query, "p_limit": k},
+        ).execute()
+        rows = resp.data or []
     return [
         ClauseHit(
             document_id=r.get("document_id", ""),

@@ -180,6 +180,17 @@ def _persist_clauses_to_mbie_table(
             inserted,
             document_id,
         )
+        # Populate dense embeddings for the rows just written so hybrid
+        # retrieval works without a separate backfill. Lazy import avoids a
+        # module cycle (backfill imports this extractor for its id helpers);
+        # best-effort — embedding outages must not fail ingestion.
+        try:
+            from app.ingestion.mbie.backfill import embed_missing
+
+            n_emb = embed_missing(db, document_id=document_id)
+            log.info("mbie: embedded %s clauses for %s", n_emb, document_id)
+        except Exception as e:  # noqa: BLE001
+            log.warning("mbie: embedding clauses failed for %s: %s", document_id, e)
     except Exception as e:  # noqa: BLE001
         log.warning(
             "mbie: failed to persist clauses to mbie_clauses for %s: %s",
