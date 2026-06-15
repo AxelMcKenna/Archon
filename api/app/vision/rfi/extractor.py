@@ -23,7 +23,6 @@ from app.vision.core.renderer import RenderedImage, caption_str, render_pages
 from app.vision.rfi.schema import (
     ACTIVE_PROMPT,
     EXTRACTOR_VERSION,
-    MAX_RFI_PAGES,
     RFI_TOOL_SCHEMA,
 )
 
@@ -44,7 +43,9 @@ def extract_via_vision(
     prompt, prompt_version = load_prompt(ACTIVE_PROMPT)
 
     if media_type == "application/pdf":
-        rendered, _, _ = render_pages(file_bytes, max_images=MAX_RFI_PAGES)
+        # Page count is hard-capped at the upload boundary (MAX_RFI_PAGES),
+        # so render every page here without truncating.
+        rendered, _, _ = render_pages(file_bytes)
         image_pngs = [img.png for img in rendered]
         captions: list[str] | None = [caption_str(img) for img in rendered]
     else:

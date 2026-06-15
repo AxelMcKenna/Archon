@@ -7,8 +7,9 @@ from typing import Any
 EXTRACTOR_VERSION = "1.0.0"
 ACTIVE_PROMPT = "rfi_extract_v1.md"
 
-# Cap pages to limit vision spend on pathological uploads. RFI letters are
-# almost always 1-3 pages — the cap is a safety net, not a normal path.
+# Hard cap on RFI page count, enforced at the upload boundary. Uploads over
+# this are rejected (422) rather than silently truncated. RFI letters are
+# almost always 1-3 pages; this limits vision spend on pathological uploads.
 MAX_RFI_PAGES = 20
 
 RFI_TOOL_SCHEMA: dict[str, Any] = {

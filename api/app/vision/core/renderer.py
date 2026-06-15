@@ -123,6 +123,12 @@ def _render_one_page(
     )
 
 
+def count_pdf_pages(pdf_bytes: bytes) -> int:
+    """Page count for a PDF, without rendering any page."""
+    with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+        return len(pdf.pages)
+
+
 def iter_sheets(
     pdf_bytes: bytes,
 ) -> Iterator[tuple[RenderedSheet, dict[str, int]]]:

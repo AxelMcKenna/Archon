@@ -14,6 +14,8 @@ from app.persistence import insert_extraction_audit, insert_letter
 from app.rate_limit import limiter
 from app.storage import upload_rfi_original
 from app.utils.safe_filename import safe_filename
+from app.vision.core.renderer import count_pdf_pages
+from app.vision.rfi.schema import MAX_RFI_PAGES
 
 router = APIRouter()
 
@@ -39,6 +41,12 @@ async def extract(
     payload = await file.read()
     if len(payload) > MAX_BYTES:
         raise HTTPException(413, "file exceeds 25MB")
+    if file.content_type == "application/pdf":
+        pages = count_pdf_pages(payload)
+        if pages > MAX_RFI_PAGES:
+            raise HTTPException(
+                422, f"PDF has {pages} pages; the limit is {MAX_RFI_PAGES}"
+            )
 
     letter_uuid = uuid4()
     filename = safe_filename(file.filename, default="rfi.pdf")
