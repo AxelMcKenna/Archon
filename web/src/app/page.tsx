@@ -1,9 +1,36 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Link2 } from "lucide-react";
 import { NeuralSphere } from "@/components/neural-sphere-lazy";
 import { Reveal } from "@/components/reveal";
 import { SiteFooter } from "@/components/site-footer";
+import { WaitlistForm } from "@/components/waitlist-form";
 import { getSupabaseServer } from "@/lib/supabase/server";
+
+/* One status-pill language shared across every demo container — soft-tinted
+   fill, a leading tone dot, and consistent Inter / uppercase / tracking so the
+   project-status, findings, and RFI chips all read as the same component. */
+const PILL_TONES: Record<string, { fill: string; dot: string }> = {
+  accent: { fill: "bg-accent-soft text-accent", dot: "bg-accent" },
+  amber: { fill: "bg-orange-100 text-orange-700", dot: "bg-orange-500" },
+  red: { fill: "bg-red-100 text-red-700", dot: "bg-red-500" },
+  neutral: { fill: "bg-ink-100 text-ink-600", dot: "bg-ink-400" },
+};
+
+function StatusPill({ tone, children }: { tone: string; children: ReactNode }) {
+  const t = PILL_TONES[tone] ?? PILL_TONES.neutral;
+  return (
+    <span
+      className={
+        "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 font-sans text-[10.5px] font-medium uppercase tracking-[0.12em] " +
+        t.fill
+      }
+    >
+      <span className={"inline-block h-1.5 w-1.5 rounded-full " + t.dot} />
+      {children}
+    </span>
+  );
+}
 
 export default async function Home() {
   const supabase = await getSupabaseServer();
@@ -26,7 +53,7 @@ export default async function Home() {
           href="/"
           className="font-display uppercase font-bold tracking-[0.16em] text-[22px] text-ink-900 transition-colors hover:text-ink-700"
         >
-          Archon
+          Arro
         </Link>
         <Link
           href={isSignedIn ? "/dashboard" : "/login"}
@@ -42,7 +69,7 @@ export default async function Home() {
           {/* Left column – text */}
           <Reveal className="col-span-12 md:col-span-7 lg:col-span-6">
             <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-ink-500">
-              Archon · Construction Management
+              Arro · Construction Management
             </div>
             <h1
               className="mt-5 uppercase font-medium leading-[0.95] tracking-[0.02em] text-[44px] sm:text-[60px] lg:text-[76px] text-ink-900"
@@ -217,28 +244,7 @@ export default async function Home() {
                         </div>
                       </div>
                       <div className="col-span-3 flex justify-end">
-                        <span
-                          className={
-                            "inline-flex items-center gap-1.5 text-[12px] " +
-                            (row.tone === "red"
-                              ? "text-red-600"
-                              : row.tone === "amber"
-                              ? "text-orange-600"
-                              : "text-ink-600")
-                          }
-                        >
-                          <span
-                            className={
-                              "inline-block h-1.5 w-1.5 rounded-full " +
-                              (row.tone === "red"
-                                ? "bg-red-500"
-                                : row.tone === "amber"
-                                ? "bg-orange-500"
-                                : "bg-accent")
-                            }
-                          />
-                          {row.status}
-                        </span>
+                        <StatusPill tone={row.tone}>{row.status}</StatusPill>
                       </div>
                     </div>
                   ))}
@@ -265,7 +271,7 @@ export default async function Home() {
                   before lodgement.
                 </h2>
                 <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
-                  Drop in your drawing set. Archon reads every sheet, runs each
+                  Drop in your drawing set. Arro reads every sheet, runs each
                   room against the NZBC, and pins each finding to the exact
                   region of the page, with the clause it breaches.
                 </p>
@@ -294,11 +300,19 @@ export default async function Home() {
               className="mt-12 md:mt-16 overflow-hidden rounded-lg bg-surface-elevated shadow-depth"
             >
               {/* Sheet metadata bar */}
-              <div className="flex items-center justify-between border-b border-ink-100 bg-surface-canvas px-5 py-2 font-mono tabular-nums text-[11.5px] uppercase tracking-[0.16em] text-ink-500">
-                <span>
-                  A-101 · Ground floor plan · Rev. C · 26.05.2026
+              <div className="flex items-center justify-between border-b border-ink-100 bg-surface-canvas px-5 py-2.5">
+                <div className="flex items-center gap-2.5">
+                  <span className="font-mono tabular-nums text-[11px] text-ink-700">
+                    A-101
+                  </span>
+                  <span className="text-ink-300">·</span>
+                  <span className="uppercase tracking-[0.18em] text-[11px] text-ink-500">
+                    Ground floor plan
+                  </span>
+                </div>
+                <span className="font-mono tabular-nums text-[11px] text-ink-400">
+                  1:100 @ A1
                 </span>
-                <span>1 : 100 @ A1</span>
               </div>
 
               {/* Drawing + Findings */}
@@ -694,11 +708,11 @@ export default async function Home() {
                 {/* Findings panel */}
                 <div className="col-span-12 lg:col-span-4">
                   <div className="flex items-center justify-between border-b border-ink-100 px-4 py-2.5">
-                    <div className="font-display uppercase tracking-[0.16em] text-[11.5px] text-ink-500">
+                    <div className="uppercase tracking-[0.18em] text-[11px] text-ink-500">
                       Findings
                     </div>
-                    <div className="inline-flex items-center gap-1 font-mono tabular-nums text-[11.5px] text-ink-500">
-                      <span className="rounded-full bg-ink-100 px-1.5 py-0.5 text-ink-700">
+                    <div className="inline-flex items-center gap-1.5 text-[11px] text-ink-500">
+                      <span className="rounded-full bg-ink-100 px-1.5 py-0.5 font-mono tabular-nums text-ink-700">
                         7
                       </span>
                       on this sheet
@@ -766,26 +780,15 @@ export default async function Home() {
                       <div key={f.code} className="px-4 py-3">
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono tabular-nums text-[11.5px] text-ink-700">
+                            <span className="font-mono tabular-nums text-[11px] text-ink-700">
                               {f.code}
                             </span>
-                            <span className="text-[11.5px] text-ink-400">·</span>
-                            <span className="font-display uppercase tracking-[0.16em] text-[11.5px] text-ink-500">
+                            <span className="text-[11px] text-ink-300">·</span>
+                            <span className="uppercase tracking-[0.18em] text-[11px] text-ink-500">
                               {f.room}
                             </span>
                           </div>
-                          <span
-                            className={
-                              "inline-flex items-center rounded-[2px] px-1.5 py-px font-mono text-[11px] font-medium uppercase tracking-wide text-white " +
-                              (f.tone === "red"
-                                ? "bg-red-500"
-                                : f.tone === "amber"
-                                ? "bg-orange-500"
-                                : "bg-accent")
-                            }
-                          >
-                            {f.sev}
-                          </span>
+                          <StatusPill tone={f.tone}>{f.sev}</StatusPill>
                         </div>
                         <div className="mt-1.5 text-[12.5px] leading-snug text-ink-800">
                           {f.text}
@@ -815,10 +818,10 @@ export default async function Home() {
                       RFI-104
                     </div>
                     <div className="text-[12px] text-ink-700">
-                      Council response – Bayswater Townhouses
+                      Council response · Bayswater Townhouses
                     </div>
                   </div>
-                  <div className="text-[11.5px] uppercase tracking-[0.16em] text-ink-400">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-ink-400">
                     Received 2d ago
                   </div>
                 </div>
@@ -857,48 +860,41 @@ export default async function Home() {
                         text: "Clarify intended use of basement Room 02 and occupancy load.",
                         source: "Consent · §3.1",
                       },
-                    ].map((c) => (
+                    ].map((c, i) => (
                       <div
                         key={c.ref}
-                        className="rounded-md border border-ink-200 bg-surface-sunken px-3 py-2.5"
+                        className="rounded-md border border-ink-200 bg-surface-sunken px-3 py-2.5 transition-colors duration-300 hover:border-accent/40"
                       >
                         <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono tabular-nums text-[11.5px] uppercase tracking-[0.16em] text-ink-900">
-                                {c.ref}
-                              </span>
-                              <span className="text-[11.5px] text-ink-600">·</span>
-                              <span className="font-display uppercase tracking-[0.16em] text-[11.5px] text-ink-900">
-                                {c.topic}
-                              </span>
-                            </div>
-                            <div className="mt-0.5 text-[12.5px] text-ink-900">
-                              {c.text}
+                          <div className="flex items-start gap-2.5">
+                            <span className="mt-px font-mono tabular-nums text-[11px] text-ink-300">
+                              {String(i + 1).padStart(2, "0")}
+                            </span>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono tabular-nums text-[11px] text-ink-900">
+                                  {c.ref}
+                                </span>
+                                <span className="text-[11px] text-ink-300">·</span>
+                                <span className="uppercase tracking-[0.18em] text-[11px] text-ink-700">
+                                  {c.topic}
+                                </span>
+                              </div>
+                              <div className="mt-0.5 text-[12.5px] text-ink-900">
+                                {c.text}
+                              </div>
+                              <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] text-ink-500">
+                                <Link2 className="h-3 w-3 text-ink-400" />
+                                <span>Sourced from</span>
+                                <span className="font-mono tabular-nums text-ink-700">
+                                  {c.source}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                          <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 text-[11.5px] uppercase tracking-[0.16em] text-accent">
-                            <svg
-                              width="8"
-                              height="8"
-                              viewBox="0 0 8 8"
-                              className="text-accent"
-                            >
-                              <path
-                                d="M1.5 4.2 L3.2 5.9 L6.5 2.3"
-                                stroke="currentColor"
-                                strokeWidth="1.4"
-                                fill="none"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                            Drafted
+                          <span className="shrink-0">
+                            <StatusPill tone="accent">Drafted</StatusPill>
                           </span>
-                        </div>
-                        <div className="mt-1.5 inline-flex items-center gap-1 font-mono tabular-nums text-[11.5px] text-ink-900">
-                          <span className="inline-block h-1 w-1 rounded-full bg-ink-500" />
-                          Sourced from {c.source}
                         </div>
                       </div>
                     ))}
@@ -906,9 +902,11 @@ export default async function Home() {
 
                   {/* Drafted response preview */}
                   <div className="mt-4 rounded-md border border-ink-200 bg-surface-sunken">
-                    <div className="flex items-center justify-between border-b border-ink-200 px-3 py-2 font-display uppercase tracking-[0.16em] text-[11.5px] text-ink-900">
-                      <span>Drafted response</span>
-                      <span className="font-mono tabular-nums normal-case tracking-normal text-[11.5px] text-ink-700">
+                    <div className="flex items-center justify-between border-b border-ink-200 px-3 py-2">
+                      <span className="uppercase tracking-[0.18em] text-[11px] text-ink-700">
+                        Drafted response
+                      </span>
+                      <span className="font-mono tabular-nums text-[11px] text-ink-500">
                         Letter draft v3
                       </span>
                     </div>
@@ -960,7 +958,7 @@ export default async function Home() {
                 Draft the reply.
               </h2>
               <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
-                Drop in any council RFI. Archon reads it like a senior
+                Drop in any council RFI. Arro reads it like a senior
                 consultant. It interprets each ask, locates the answer across
                 your drawings, specs, and consent, and writes a council-ready
                 response.
@@ -991,7 +989,7 @@ export default async function Home() {
                 <div className="flex items-center justify-between border-b border-ink-100 px-5 py-3">
                   <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-ink-500">
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
-                    Archon agent · Bayswater Townhouses
+                    Arro agent · Bayswater Townhouses
                   </div>
                   <div className="font-mono tabular-nums text-[10px] text-ink-400">
                     session 4f2a
@@ -1040,7 +1038,7 @@ export default async function Home() {
 
                   <div className="flex items-center justify-between border-t border-ink-100 pt-4">
                     <div className="text-[11px] text-ink-500">
-                      Archon drafted a response citing D1/AS1 §5.1.
+                      Arro drafted a response citing D1/AS1 §5.1.
                     </div>
                     <button
                       type="button"
@@ -1062,9 +1060,9 @@ export default async function Home() {
                 className="mt-5 font-medium leading-[1.02] tracking-[0.01em] text-[40px] md:text-[56px] text-ink-900"
                 style={{ fontFamily: "var(--font-dm-sans)" }}
               >
-                Ask the drawing.
+                Ask anything.
                 <br />
-                Get the answer.
+                Grounded in the drawing.
               </h2>
               <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
                 A conversational agent that knows your project, grounds every
@@ -1096,56 +1094,46 @@ export default async function Home() {
             className="glow-drift pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[520px] w-[820px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/[0.08] blur-[130px]"
           />
           <div className="mx-auto max-w-[1440px] px-8">
-            <Reveal className="relative mx-auto max-w-[860px] overflow-hidden rounded-2xl border border-ink-150 bg-surface-elevated px-8 py-14 text-center shadow-depth md:px-16 md:py-20">
+            <Reveal className="relative overflow-hidden rounded-lg border border-ink-150 bg-surface-elevated px-8 py-14 shadow-depth md:px-16 md:py-20">
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent"
               />
-              <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-ink-500">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent ai-glow" />
-                Built for the people who actually build
-              </div>
-              <h2
-                className="mx-auto mt-6 max-w-[14ch] font-medium leading-[1.02] tracking-[0.01em] text-[40px] md:text-[60px] lg:text-[68px] text-ink-900"
-                style={{ fontFamily: "var(--font-dm-sans)" }}
-              >
-                Build with{" "}
-                <span className="text-accent">intelligence</span>.
-              </h2>
-              <p className="mx-auto mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
-                Bring your projects, drawings, and RFIs. Archon turns them into a
-                coordinated, queryable workspace so your crew can keep building.
-              </p>
-              <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-5">
-                <Link
-                  href="/dashboard"
-                  className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-6 py-3 text-[14px] font-medium text-white shadow-depth hover:shadow-depth-hover transition-shadow"
-                >
-                  {isSignedIn ? "Open app" : "Launch the platform"}
-                  <ArrowUpRight className="h-4 w-4" />
-                </Link>
-                {!isSignedIn && (
-                  <Link
-                    href="/login"
-                    className="font-display uppercase tracking-[0.14em] text-[12px] text-ink-700 hover:text-ink-900"
+              <div className="grid grid-cols-12 items-center gap-x-10 gap-y-10">
+                <div className="col-span-12 md:col-span-7">
+                  <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-ink-500">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent ai-glow" />
+                    Now onboarding early teams
+                  </div>
+                  <h2
+                    className="mt-6 max-w-[16ch] font-medium leading-[1.02] tracking-[0.01em] text-[40px] md:text-[56px] lg:text-[60px] text-ink-900"
+                    style={{ fontFamily: "var(--font-dm-sans)" }}
                   >
-                    Sign in
-                  </Link>
-                )}
-              </div>
-              <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[11.5px] text-ink-500">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="inline-block h-1 w-1 rounded-full bg-accent" />
-                  NZBC &amp; council-ready
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="inline-block h-1 w-1 rounded-full bg-accent" />
-                  No card to start
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="inline-block h-1 w-1 rounded-full bg-accent" />
-                  Ready in minutes
-                </span>
+                    Join the{" "}
+                    <span className="text-accent">waitlist</span>.
+                  </h2>
+                  <p className="mt-6 max-w-md text-[15px] leading-relaxed text-ink-600">
+                    Be first to bring your projects, drawings, and RFIs into Arro.
+                    Drop your email and we&apos;ll reach out as we open up access.
+                  </p>
+                </div>
+                <div className="col-span-12 md:col-span-5">
+                  <WaitlistForm />
+                  <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-[11.5px] text-ink-500">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="inline-block h-1 w-1 rounded-full bg-accent" />
+                      NZBC &amp; council-ready
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="inline-block h-1 w-1 rounded-full bg-accent" />
+                      No spam, ever
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="inline-block h-1 w-1 rounded-full bg-accent" />
+                      Early access
+                    </span>
+                  </div>
+                </div>
               </div>
             </Reveal>
           </div>
