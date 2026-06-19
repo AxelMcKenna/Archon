@@ -18,7 +18,7 @@
 
 test:
   rate_limit_seconds: 1
-  user_agent: "Archon-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+  user_agent: "Arro-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
   documents:
     - source_key: "test:smoke"
       url: "https://example.com/"
@@ -27,7 +27,7 @@ test:
 
 mbie_acceptable_solution:
   rate_limit_seconds: 2
-  user_agent: "Archon-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+  user_agent: "Arro-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
   # IMPORTANT: MBIE amendment versions change the URL path. URLs below
   # verified against building.govt.nz landing pages on 2026-05-27.
   # When MBIE bumps an amendment, update the URL here — content_hash
@@ -91,6 +91,11 @@ mbie_acceptable_solution:
       content_type: "application/pdf"
       code_clause: "D1"
       label: "D1/AS1+VM1 — Access routes"
+    - source_key: "mbie:d2_asvm"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/d-access/d2-mechanical-installations-for-access/asvm/d2-mechanical-installations-for-access-2nd-edition-amendment7.pdf"
+      content_type: "application/pdf"
+      code_clause: "D2"
+      label: "D2/AS1+VM1 — Mechanical installations for access"
     # E — Moisture
     - source_key: "mbie:e1_asvm"
       url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/e-moisture/e1-surface-water/asvm/e1-surface-water-1st-edition-amendment-12.pdf"
@@ -117,17 +122,49 @@ mbie_acceptable_solution:
       content_type: "application/pdf"
       code_clause: "E3"
       label: "E3/AS2 — Internal moisture"
-    # F — Safety of users
+    # F — Safety of users. Most F clauses ship a single combined AS+VM
+    # booklet; F2/F4 are the AS-only exceptions and F9 ships AS1+AS2.
+    - source_key: "mbie:f1_asvm"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/f-safety-of-users/f1-hazardous-agents-on-site/asvm/f1-hazardous-agents-on-site-amendment-1.pdf"
+      content_type: "application/pdf"
+      code_clause: "F1"
+      label: "F1/AS1+VM1 — Hazardous agents on site"
     - source_key: "mbie:f2_as1"
       url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/f-safety-of-users/f2-hazardous-building-materials/asvm/f2-hazardous-building-materials-1st-edition-amendment3.pdf"
       content_type: "application/pdf"
       code_clause: "F2"
       label: "F2/AS1 — Hazardous building materials"
+    - source_key: "mbie:f3_asvm"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/f-safety-of-users/f3-hazardous-substances-and-processes/asvm/f3-hazardous-substances-and-processes-2nd-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "F3"
+      label: "F3/AS1+VM1 — Hazardous substances and processes"
     - source_key: "mbie:f4_as1"
       url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/f-safety-of-users/f4-safety-from-falling/asvm/f4-safety-from-falling-3rd-edition-amendment2.pdf"
       content_type: "application/pdf"
       code_clause: "F4"
       label: "F4/AS1 — Safety from falling"
+    - source_key: "mbie:f5_asvm"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/f-safety-of-users/f5-construction-and-demolition-hazards/asvm/f5-construction-and-demolition-hazards.pdf"
+      content_type: "application/pdf"
+      code_clause: "F5"
+      label: "F5/AS1+VM1 — Construction and demolition hazards"
+    - source_key: "mbie:f6_asvm"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/f-safety-of-users/f6-visibility-in-escape-routes/asvm/f6-visibility-escape-routes-3rd-edition-amendment4.pdf"
+      content_type: "application/pdf"
+      code_clause: "F6"
+      label: "F6/AS1+VM1 — Visibility in escape routes"
+    # F7/AS1 covers domestic smoke alarms — a frequent residential RFI driver.
+    - source_key: "mbie:f7_as1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/f-safety-of-users/f7-warning-systems/asvm/f7-as1-warning-systems-fifth-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "F7"
+      label: "F7/AS1 — Warning systems (smoke alarms)"
+    - source_key: "mbie:f8_asvm"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/f-safety-of-users/f8-signs/asvm/f8-signs-2nd-edition-amendment4.pdf"
+      content_type: "application/pdf"
+      code_clause: "F8"
+      label: "F8/AS1+VM1 — Signs"
     # F9/AS1+AS2 ship as one combined PDF (pool barriers + small-pool covers).
     - source_key: "mbie:f9_as1"
       url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/f-safety-of-users/f9-restricting-access-residential-pools/asvm/f9-restricting-access-to-residential-pools.pdf"
@@ -140,6 +177,16 @@ mbie_acceptable_solution:
       content_type: "application/pdf"
       code_clause: "G1"
       label: "G1/AS1 — Personal hygiene"
+    - source_key: "mbie:g2_asvm"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g2-laundering/asvm/g2-laundering-1st-edition-amendment3.pdf"
+      content_type: "application/pdf"
+      code_clause: "G2"
+      label: "G2/AS1+VM1 — Laundering"
+    - source_key: "mbie:g3_asvm"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g3-food-preparation-and-prevention-of-contamination/asvm/g3-food-preparation-prevention-contamination-1st-edition-amendment2.pdf"
+      content_type: "application/pdf"
+      code_clause: "G3"
+      label: "G3/AS1+VM1 — Food preparation and prevention of contamination"
     - source_key: "mbie:g4_as1"
       url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g4-ventilation/asvm/g4-ventilation-as1-fifth-edition.pdf"
       content_type: "application/pdf"
@@ -150,6 +197,53 @@ mbie_acceptable_solution:
       content_type: "application/pdf"
       code_clause: "G4"
       label: "G4/VM1 — Ventilation"
+    - source_key: "mbie:g5_asvm"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g5-interior-environment/asvm/g5-interior-environment-1st-edition-amendment-2.pdf"
+      content_type: "application/pdf"
+      code_clause: "G5"
+      label: "G5/AS1+VM1 — Interior environment"
+    - source_key: "mbie:g6_asvm"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g6-airborne-and-impact-sound/asvm/g6-airborne-and-impact-sound-1st-edition-amendment-2.pdf"
+      content_type: "application/pdf"
+      code_clause: "G6"
+      label: "G6/AS1+VM1 — Airborne and impact sound"
+    # G7 ships three discrete files (AS1, AS2, VM1), unlike the other G clauses.
+    - source_key: "mbie:g7_as1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g7-natural-light/asvm/g7-natural-light-as1-2nd-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "G7"
+      label: "G7/AS1 — Natural light"
+    - source_key: "mbie:g7_as2"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g7-natural-light/asvm/g7-natural-light-as2-1st-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "G7"
+      label: "G7/AS2 — Natural light"
+    - source_key: "mbie:g7_vm1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g7-natural-light/asvm/g7-natural-light-vm1-2nd-edition.pdf"
+      content_type: "application/pdf"
+      code_clause: "G7"
+      label: "G7/VM1 — Natural light"
+    # G8/G9 paths carry an uppercase clause prefix on MBIE's CDN — preserve it.
+    - source_key: "mbie:g8_asvm"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g8-artificial-light/asvm/G8-artificial-light-1st-edition-amendment-2.pdf"
+      content_type: "application/pdf"
+      code_clause: "G8"
+      label: "G8/AS1+VM1 — Artificial light"
+    - source_key: "mbie:g9_asvm"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g9-electricity/asvm/G9-electricity-1st-edition-amendment-7.pdf"
+      content_type: "application/pdf"
+      code_clause: "G9"
+      label: "G9/AS1+VM1 — Electricity"
+    - source_key: "mbie:g10_asvm"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g10-piped-services/asvm/g10-piped-services-1st-edition-amendment8.pdf"
+      content_type: "application/pdf"
+      code_clause: "G10"
+      label: "G10/AS1+VM1 — Piped services"
+    - source_key: "mbie:g11_asvm"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g11-gas-as-an-energy-source/asvm/g11-gas-energy-source-1st-edition-amendment6.pdf"
+      content_type: "application/pdf"
+      code_clause: "G11"
+      label: "G11/AS1+VM1 — Gas as an energy source"
     - source_key: "mbie:g12_as1"
       url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g12-water-supplies/asvm/g12-water-supplies-3rd-edition-amendment-14.pdf"
       content_type: "application/pdf"
@@ -162,6 +256,16 @@ mbie_acceptable_solution:
       content_type: "application/pdf"
       code_clause: "G13"
       label: "G13/AS1+AS2+VM4 — Foul water"
+    - source_key: "mbie:g14_asvm"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g14-industrial-liquid-waste/asvm/g14-industrial-liquid-waste-2nd-edition-amendment6.pdf"
+      content_type: "application/pdf"
+      code_clause: "G14"
+      label: "G14/AS1+VM1 — Industrial liquid waste"
+    - source_key: "mbie:g15_as1"
+      url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/g-services-and-facilities/g15-solid-waste/asvm/g15-solid-waste-amendment-3.pdf"
+      content_type: "application/pdf"
+      code_clause: "G15"
+      label: "G15/AS1 — Solid waste"
     # H — Energy efficiency
     - source_key: "mbie:h1_as1"
       url: "https://www.building.govt.nz/assets/Uploads/building-code-compliance/h1-energy-efficiency/asvm/h1-energy-efficiency-as1-sixth-edition.pdf"
@@ -176,7 +280,7 @@ mbie_acceptable_solution:
 
 council_guidance:
   rate_limit_seconds: 3
-  user_agent: "Archon-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+  user_agent: "Arro-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
   # Council guidance URLs are less stable than MBIE's. The councils
   # restructure their websites periodically; if a URL 404s, search the
   # council site for the current location and update here. Each entry
@@ -201,7 +305,7 @@ council_guidance:
 
 supplier_datasheet:
   rate_limit_seconds: 5
-  user_agent: "Archon-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+  user_agent: "Arro-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
   # Manufacturer datasheet URLs are the least stable of the three source
   # kinds — suppliers redesign their sites frequently and rotate PDFs.
   # Verify each URL before the first ingest run. Each entry carries a
