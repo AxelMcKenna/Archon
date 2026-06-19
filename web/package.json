@@ -1,5 +1,5 @@
 {
-  "name": "@archon/web",
+  "name": "@arro/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,7 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@archon/shared": "workspace:*",
+    "@arro/shared": "workspace:*",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.46.1",
     "lucide-react": "^0.460.0",
@@ -18,7 +18,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "resend": "^6.12.4"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",

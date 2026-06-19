@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
-import { taxonomy } from "@archon/shared";
+import { taxonomy } from "@arro/shared";
 import { AiThinking } from "@/components/ai-thinking";
 
 type Project = { id: string; address: string; bca: string; project_type: string };

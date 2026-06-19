@@ -46,8 +46,8 @@ def embed_texts(texts: list[str], *, model: str | None = None) -> list[list[floa
     headers = {
         "Authorization": f"Bearer {settings.openrouter_api_key}",
         "Content-Type": "application/json",
-        "HTTP-Referer": settings.openrouter_referer or "https://archon.local",
-        "X-Title": "ARCHON",
+        "HTTP-Referer": settings.openrouter_referer or "https://arro.local",
+        "X-Title": "ARRO",
     }
 
     out: list[list[float]] = []

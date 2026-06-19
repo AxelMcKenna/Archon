@@ -3,8 +3,8 @@ import { LegalShell } from "@/components/legal-shell";
 import { legal } from "@/lib/legal-config";
 
 export const metadata: Metadata = {
-  title: "Acceptable Use Policy — Archon",
-  description: "Rules for acceptable use of the Archon platform.",
+  title: "Acceptable Use Policy | Arro",
+  description: "Rules for acceptable use of the Arro platform.",
 };
 
 export default function AcceptableUsePage() {
@@ -12,12 +12,12 @@ export default function AcceptableUsePage() {
     <LegalShell
       title="Acceptable Use Policy"
       activePath="/acceptable-use"
-      intro="This policy sets out activities that are prohibited on the Archon platform. It is part of, and incorporated into, our Terms of Service."
+      intro="This policy sets out activities that are prohibited on the Arro platform. It is part of, and incorporated into, our Terms of Service."
     >
       <h2>1. Prohibited activities</h2>
       <p>You must not, and must not allow anyone else to:</p>
       <ul>
-        <li>Use Archon to break any law or infringe anyone&apos;s rights.</li>
+        <li>Use Arro to break any law or infringe anyone&apos;s rights.</li>
         <li>
           Upload content you do not have the right to upload, or that contains
           malware or harmful code.

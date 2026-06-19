@@ -8,6 +8,7 @@ header calls out.
 
     python -m app.mbie.eval.run_live
     python -m app.mbie.eval.run_live --k 1 3 5 10
+    python -m app.mbie.eval.run_live --ablate-query   # sweep query variants
 """
 
 from __future__ import annotations
@@ -18,12 +19,14 @@ from typing import Any
 
 from app.auth import get_service_db
 from app.mbie.eval.harness import EvalResult, evaluate, load_labels
-from app.mbie.retriever import retrieve_for_flag
+from app.mbie.retriever import QUERY_VARIANTS, retrieve_for_flag
 
 
-def _runner(db: Any, mode: str):
+def _runner(db: Any, mode: str, query_variant: str = "full"):
     def retrieve(flag: dict[str, Any], k: int):
-        return retrieve_for_flag(db, flag=flag, k=k, mode=mode)
+        return retrieve_for_flag(
+            db, flag=flag, k=k, mode=mode, query_variant=query_variant
+        )
 
     return retrieve
 
@@ -36,11 +39,23 @@ def _fmt(res: EvalResult, ks: tuple[int, ...]) -> str:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="MBIE retrieval-quality eval")
     ap.add_argument("--k", nargs="+", type=int, default=[1, 3, 5])
+    ap.add_argument(
+        "--ablate-query",
+        action="store_true",
+        help="sweep query variants (full/prose/quote_only) on the hybrid arm",
+    )
     args = ap.parse_args(argv)
     ks = tuple(sorted(set(args.k)))
 
     labels = load_labels()
     db = get_service_db()
+
+    if args.ablate_query:
+        print(f"labels: {len(labels)}  arm: hybrid")
+        for variant in QUERY_VARIANTS:
+            res = evaluate(_runner(db, "hybrid", variant), labels, ks=ks)
+            print(f"query={variant:<10} {_fmt(res, ks)}")
+        return 0
 
     hybrid = evaluate(_runner(db, "hybrid"), labels, ks=ks)
     sparse = evaluate(_runner(db, "sparse"), labels, ks=ks)

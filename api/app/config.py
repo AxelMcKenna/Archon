@@ -57,6 +57,28 @@ class Settings(BaseSettings):
     plan_analyser_voting_n: int = 3
     plan_analyser_voting_threshold: int = 2
 
+    # Self-consistency voting on the *verifier* — the destructive step that
+    # drops flags from the user's view. N verification passes per sheet; a flag
+    # is only dropped when >= threshold passes agree on dropping it (fail-open:
+    # a split vote keeps the flag). N=1 reproduces single-shot verification.
+    # Defaults to 1 because verification cost is per-sheet × per-flag; raise it
+    # (e.g. 3/2) when wrong drops cost more than verifier spend.
+    plan_verifier_voting_n: int = 1
+    plan_verifier_voting_threshold: int = 2
+
+    # Cross-view reconciliation: build a per-sheet ViewRecord (view type,
+    # level/datum, callouts), register views that describe the same region,
+    # and run a reconciliation pass that flags inter-view contradictions
+    # (e.g. a section FFL that disagrees with the floor-plan FFL). When False
+    # the analyser behaves exactly as before (no view object is requested, no
+    # extra passes run); set PLAN_CROSS_VIEW_ENABLED=false to revert.
+    plan_cross_view_enabled: bool = True
+    # Bounds on the reconciliation fan-out (no silent truncation — the
+    # analyser logs whatever it drops). Sets larger than this many views are
+    # capped; at most this many sets are reconciled per document.
+    plan_cross_view_max_set_size: int = 5
+    plan_cross_view_max_sets: int = 12
+
     # OCR fallback (RapidOCR/PP-OCRv4) for flags whose verbatim_quote isn't
     # in the PDF text layer — typical when CAD vectorises drawing labels.
     # Disable to skip the refinement step (e.g. local dev without OCR

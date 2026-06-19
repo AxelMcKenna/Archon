@@ -27,7 +27,7 @@ from app.ingestion.scraping import fetcher
 
 log = logging.getLogger(__name__)
 
-USER_AGENT = "Archon-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
+USER_AGENT = "Arro-VE-Ingest/0.1 (+contact: axel.mckenna7@gmail.com)"
 DEFAULT_RATE_SECONDS = 2.0
 PAGE_SIZE = 36  # Bunnings' listing page size; used only as a safety bound.
 
@@ -184,7 +184,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--backend",
         choices=("supabase", "sqlite"),
         default="supabase",
-        help="where to write materials (default: supabase ARCHON project)",
+        help="where to write materials (default: supabase ARRO project)",
     )
     p.add_argument(
         "--db",

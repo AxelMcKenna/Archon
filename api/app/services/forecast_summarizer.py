@@ -50,8 +50,8 @@ def summarize_forecast(forecast: dict[str, Any]) -> tuple[str | None, str | None
     headers = {
         "Authorization": f"Bearer {settings.openrouter_api_key}",
         "Content-Type": "application/json",
-        "HTTP-Referer": settings.openrouter_referer or "https://archon.local",
-        "X-Title": "ARCHON",
+        "HTTP-Referer": settings.openrouter_referer or "https://arro.local",
+        "X-Title": "ARRO",
     }
 
     try:

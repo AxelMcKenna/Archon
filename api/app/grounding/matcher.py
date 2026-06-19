@@ -18,6 +18,8 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
+from app.mbie.retriever import code_clause_for_category
+
 MATCHER_VERSION = "stage-a-1.0"
 MATCH_THRESHOLD = 0.35
 
@@ -148,11 +150,47 @@ def best_match(
     return best if best.score >= MATCH_THRESHOLD else None
 
 
+def _derived_rule_cited(f: dict[str, Any]) -> str | None:
+    """The clause this flag cites, in the form the matcher scores on.
+
+    DXF/CAD flags carry an explicit ``rule_cited`` (e.g. ``"NZBC F7/AS1"``).
+    The PDF analyser doesn't — it puts the clause in ``category``
+    (``"building_code:E2:cladding"`` → ``E2``). Prefer the explicit field;
+    fall back to the category-derived clause so PDF flags aren't scored with a
+    dead (always-empty) clause signal."""
+    explicit = f.get("rule_cited")
+    if explicit:
+        return explicit
+    return code_clause_for_category(f.get("category"))
+
+
+def _derived_rationale(f: dict[str, Any]) -> str | None:
+    """The descriptive text the matcher tokenises (and the drafter shows).
+
+    DXF/CAD flags carry ``rationale``; PDF flags split the same content across
+    ``reason`` and ``recommended_action``. Prefer the explicit field; fall
+    back to the PDF prose so token overlap and the drafter's evidence block see
+    the real description instead of nothing."""
+    explicit = f.get("rationale")
+    if explicit:
+        return explicit
+    prose = " ".join(
+        s.strip()
+        for s in (f.get("reason"), f.get("recommended_action"))
+        if isinstance(s, str) and s.strip()
+    )
+    return prose or None
+
+
 def parse_flags(raw_flags: list[dict[str, Any]]) -> list[FlagCandidate]:
     """Normalise the analyser's flag dicts (PDF or DXF shape) into candidates.
 
-    PDF flag fields: severity, rationale, rule_cited, verbatim_quote, page,
-      bbox.
+    The two arms emit different field names for the same concepts, so we map
+    both into one vocabulary here (see ``_derived_rule_cited`` /
+    ``_derived_rationale``):
+
+    PDF flag fields: severity, category, reason, recommended_action,
+      verbatim_quote, page, bbox.
     DXF flag fields: severity, rationale, rule_cited, verbatim_quote,
       target_handles, image_bboxes, proposed_change.
     """
@@ -161,8 +199,8 @@ def parse_flags(raw_flags: list[dict[str, Any]]) -> list[FlagCandidate]:
         out.append(
             FlagCandidate(
                 index=i,
-                rule_cited=f.get("rule_cited"),
-                rationale=f.get("rationale"),
+                rule_cited=_derived_rule_cited(f),
+                rationale=_derived_rationale(f),
                 verbatim_quote=f.get("verbatim_quote"),
                 severity=f.get("severity"),
                 target_handles=list(f.get("target_handles") or []),

@@ -44,7 +44,7 @@ WDC does **not** publish a CCC-style "Avoiding RFIs" enumerative page. Guidance 
 
 ## 3. Vetting & acceptance — three-stage RFI surface
 
-WDC has an unusual **three-gate** structure where additional information requests can occur. Each is its own surface for ARCHON to classify:
+WDC has an unusual **three-gate** structure where additional information requests can occur. Each is its own surface for ARRO to classify:
 
 ### Gate 1 — Lodgement vetting (Step 4) [2]
 - Applications vetted by Council staff for completeness on lodgement.
@@ -65,7 +65,7 @@ WDC has an unusual **three-gate** structure where additional information request
 - *"If outstanding items are found, you may be requested by the Council's Code Compliance Auditor to supply additional information or carry out additional works. A Code Compliance Certificate cannot be issued until all of the outstanding issues are resolved."* [2]
 - 20-day CCC clock with RFI suspension.
 
-> **Key signal for ARCHON**: WDC RFIs come from at least three distinct queues — BCO assessment (Step 5), Senior BO Validation (Step 6), and CCC Auditor (Step 17). These are different stages with different remediation patterns. Classifier should label which gate emitted the RFI.
+> **Key signal for ARRO**: WDC RFIs come from at least three distinct queues — BCO assessment (Step 5), Senior BO Validation (Step 6), and CCC Auditor (Step 17). These are different stages with different remediation patterns. Classifier should label which gate emitted the RFI.
 
 ## 4. Common RFI categories (derived from fact sheets)
 

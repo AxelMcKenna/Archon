@@ -1,6 +1,6 @@
 """Supabase-backed materials store — the Bunnings crawl's production sink.
 
-Writes into ``public.bunnings_materials`` in the ARCHON project via the
+Writes into ``public.bunnings_materials`` in the ARRO project via the
 service-role client. Mirrors :class:`MaterialsStore` so the crawler is
 storage-agnostic:
 

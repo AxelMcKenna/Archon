@@ -1,4 +1,4 @@
-# Synthetic RFI Corpus — ARCHON
+# Synthetic RFI Corpus — ARRO
 
 **Purpose**: Bootstrap classifier + draft-response training before real RFI samples arrive from design partners.
 

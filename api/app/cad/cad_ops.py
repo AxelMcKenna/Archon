@@ -8,6 +8,7 @@ before it ever touches ezdxf.
 from __future__ import annotations
 
 import io
+from dataclasses import dataclass
 from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, Field, ValidationError
@@ -56,6 +57,24 @@ class ChangeLayer(BaseModel):
     layer: str
 
 
+SnapKind = Literal["endpoint", "midpoint", "center", "intersection"]
+
+# Attributes a `set_attribute` op may write. Anything else is rejected.
+_SETTABLE = {"layer", "text", "height", "color"}
+
+
+class DeleteEntity(BaseModel):
+    op: Literal["delete_entity"]
+    handle: str
+
+
+class SetAttribute(BaseModel):
+    op: Literal["set_attribute"]
+    handle: str
+    key: Literal["layer", "text", "height", "color"]
+    value: str | float
+
+
 class PlaceSymbol(BaseModel):
     op: Literal["place_symbol"]
     symbol: Literal[
@@ -82,6 +101,11 @@ class PlaceSymbol(BaseModel):
         "accessible",
     ]
     anchor_handle: str | None = None
+    # Feature-relative placement (preferred): snap to a feature on the anchor
+    # entity, then push `offset_mm` perpendicular to it (into the room). Falls
+    # back to absolute (x, y) when no anchor is given.
+    snap: SnapKind | None = None
+    offset_mm: float = 0.0
     x: float | None = None
     y: float | None = None
     label: str | None = Field(default=None, max_length=80)
@@ -94,9 +118,24 @@ Op = Annotated[
     | AddDimension
     | AddTextNote
     | ChangeLayer
-    | PlaceSymbol,
+    | PlaceSymbol
+    | DeleteEntity
+    | SetAttribute,
     Field(discriminator="op"),
 ]
+
+
+@dataclass
+class OpDelta:
+    """Handles touched by an apply pass — lets the client reconcile its scene
+    without a full reload. ``added``/``removed``/``changed`` are disjoint."""
+
+    added: list[str]
+    removed: list[str]
+    changed: list[str]
+
+    def to_dict(self) -> dict[str, list[str]]:
+        return {"added": self.added, "removed": self.removed, "changed": self.changed}
 
 
 class OpEnvelope(BaseModel):
@@ -114,12 +153,39 @@ def parse_ops(raw: list[dict[str, Any]]) -> list[Op]:
     return parsed
 
 
+def _serialize(doc: Any) -> bytes:
+    out = io.StringIO()
+    doc.write(out)
+    return out.getvalue().encode("utf-8")
+
+
 def apply_ops(dxf_bytes: bytes, ops: list[Op]) -> bytes:
     """Apply ops to a DXF, return the revised DXF bytes."""
     from app.cad.cad_loader import load_dxf
 
     doc = load_dxf(dxf_bytes)
+    _apply(doc, ops)
+    return _serialize(doc)
+
+
+def apply_ops_with_delta(dxf_bytes: bytes, ops: list[Op]) -> tuple[bytes, OpDelta]:
+    """Apply ops and return (revised DXF bytes, handle delta) so a client can
+    reconcile its scene without a full reload."""
+    from app.cad.cad_loader import load_dxf
+
+    doc = load_dxf(dxf_bytes)
+    delta = _apply(doc, ops)
+    return _serialize(doc), delta
+
+
+def _apply(doc: Any, ops: list[Op]) -> OpDelta:
     msp = doc.modelspace()
+
+    # Delta tracking — snapshot handles before; added entities are diffed at
+    # the end, deletes/edits are recorded explicitly as ops execute.
+    before_handles = {e.dxf.handle for e in msp}
+    changed_handles: set[str] = set()
+    removed_handles: set[str] = set()
 
     def _by_handle(h: str):
         ent = doc.entitydb.get(h)
@@ -310,12 +376,25 @@ def apply_ops(dxf_bytes: bytes, ops: list[Op]) -> bytes:
             placed_rects.append((tx, ty_bottom, tx + tw, ty_bottom + th))
             placements[id(n)] = (tx, ty, ab[0], ab[1], h)
 
+    ext_cx = (ext_x0 + ext_x1) / 2
+    ext_cy = (ext_y0 + ext_y1) / 2
+
     for op in ops:
         if isinstance(op, MoveEntity):
             ent = _by_handle(op.handle)
             ent.translate(op.dx, op.dy, 0)
+            changed_handles.add(op.handle)
+        elif isinstance(op, DeleteEntity):
+            ent = _by_handle(op.handle)
+            msp.delete_entity(ent)
+            removed_handles.add(op.handle)
+        elif isinstance(op, SetAttribute):
+            ent = _by_handle(op.handle)
+            _set_attribute(doc, ent, op.key, op.value)
+            changed_handles.add(op.handle)
         elif isinstance(op, OffsetPolyline):
             ent = _by_handle(op.handle)
+            changed_handles.add(op.handle)
             if ent.dxftype() != "LWPOLYLINE":
                 raise ValueError(f"offset_polyline requires LWPOLYLINE, got {ent.dxftype()}")
             d = op.distance if op.side == "right" else -op.distance
@@ -330,6 +409,7 @@ def apply_ops(dxf_bytes: bytes, ops: list[Op]) -> bytes:
                 ent.dxf.xscale = op.scale_x
             if op.scale_y is not None:
                 ent.dxf.yscale = op.scale_y
+            changed_handles.add(op.handle)
         elif isinstance(op, AddDimension):
             a = _by_handle(op.from_handle)
             b = _by_handle(op.to_handle)
@@ -365,7 +445,17 @@ def apply_ops(dxf_bytes: bytes, ops: list[Op]) -> bytes:
             sym_w = unit * fp_w
             sym_h = unit * fp_h
 
-            if op.x is not None and op.y is not None:
+            if op.anchor_handle and op.snap:
+                # Feature-relative: snap to a feature on the anchor, push
+                # offset_mm perpendicular, then sibling-collision nudge.
+                anchor = _by_handle(op.anchor_handle)
+                bx, by = _resolve_anchor_snap(
+                    anchor, op.snap, op.offset_mm, (ext_cx, ext_cy)
+                )
+                ab = (bx - sym_w / 2, by - sym_h / 2, bx + sym_w / 2, by + sym_h / 2)
+                cx, cy = _find_clear(ab, sym_w, sym_h, prefer="near")
+                sx, sy = cx + sym_w / 2, cy + sym_h / 2
+            elif op.x is not None and op.y is not None:
                 # Caller-specified coordinates: trust them but still check
                 # for sibling collision and nudge if needed.
                 sx, sy = op.x, op.y
@@ -399,10 +489,75 @@ def apply_ops(dxf_bytes: bytes, ops: list[Op]) -> bytes:
             if op.layer not in doc.layers:
                 doc.layers.add(op.layer)
             ent.dxf.layer = op.layer
+            changed_handles.add(op.handle)
 
-    out = io.StringIO()
-    doc.write(out)
-    return out.getvalue().encode("utf-8")
+    after_handles = {e.dxf.handle for e in msp}
+    added = after_handles - before_handles
+    removed = removed_handles | (before_handles - after_handles)
+    changed = (changed_handles - added) - removed
+    return OpDelta(
+        added=sorted(added),
+        removed=sorted(removed),
+        changed=sorted(changed),
+    )
+
+
+def _set_attribute(doc: Any, ent: Any, key: str, value: Any) -> None:
+    """Write a whitelisted attribute onto an entity."""
+    if key == "layer":
+        layer = str(value)
+        if layer not in doc.layers:
+            doc.layers.add(layer)
+        ent.dxf.layer = layer
+    elif key == "text":
+        if ent.dxftype() == "MTEXT":
+            ent.text = str(value)
+        else:
+            ent.dxf.text = str(value)
+    elif key == "height":
+        ent.dxf.height = float(value)
+    elif key == "color":
+        ent.dxf.color = int(value)
+    else:  # pragma: no cover — guarded by the Pydantic Literal
+        raise ValueError(f"unsettable attribute {key!r}")
+
+
+def _resolve_anchor_snap(
+    entity: Any,
+    snap: str,
+    offset_mm: float,
+    center: tuple[float, float],
+) -> tuple[float, float]:
+    """Resolve a feature point on `entity` for the given snap kind, then push
+    `offset_mm` perpendicular to the entity, oriented toward the model center
+    (so a fixture lands inside the room, not in the wall)."""
+    from math import hypot
+
+    t = entity.dxftype()
+
+    # Base feature point.
+    if snap == "center" and t in ("CIRCLE", "ARC"):
+        base = (entity.dxf.center.x, entity.dxf.center.y)
+    elif snap == "midpoint" and t == "LINE":
+        s, e = entity.dxf.start, entity.dxf.end
+        base = ((s.x + e.x) / 2, (s.y + e.y) / 2)
+    elif snap == "endpoint" and t == "LINE":
+        base = (entity.dxf.start.x, entity.dxf.start.y)
+    else:
+        base = _anchor_point(entity)
+
+    # Perpendicular direction (LINE normal; default +y otherwise).
+    nx, ny = 0.0, 1.0
+    if t == "LINE":
+        s, e = entity.dxf.start, entity.dxf.end
+        dx, dy = e.x - s.x, e.y - s.y
+        L = hypot(dx, dy)
+        if L > 1e-9:
+            nx, ny = -dy / L, dx / L
+    # Orient toward the model center.
+    if (center[0] - base[0]) * nx + (center[1] - base[1]) * ny < 0:
+        nx, ny = -nx, -ny
+    return (base[0] + nx * offset_mm, base[1] + ny * offset_mm)
 
 
 def _anchor_point(entity: Any) -> tuple[float, float]:

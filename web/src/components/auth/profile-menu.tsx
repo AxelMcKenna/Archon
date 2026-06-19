@@ -37,7 +37,7 @@ export function ProfileMenu({ displayName }: { displayName: string }) {
         aria-haspopup="menu"
         aria-expanded={open}
         className={`inline-flex items-center gap-1.5 font-display uppercase tracking-[0.14em] text-[14px] font-medium transition-colors ${
-          open ? "text-ink-50" : "text-ink-400 hover:text-ink-50"
+          open ? "text-ink-900" : "text-ink-600 hover:text-ink-900"
         }`}
       >
         Profile

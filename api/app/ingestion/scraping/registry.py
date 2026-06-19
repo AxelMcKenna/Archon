@@ -16,7 +16,7 @@ import yaml
 
 SOURCES_FILE = Path(__file__).resolve().parent / "sources.yaml"
 
-DEFAULT_USER_AGENT = "Archon-VE-Ingest/0.1"
+DEFAULT_USER_AGENT = "Arro-VE-Ingest/0.1"
 
 
 @dataclass

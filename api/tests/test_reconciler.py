@@ -58,3 +58,28 @@ def test_rules_override_on_hard_assertion():
     assert f.state == "rules_override"
     assert f.primary_category == "documentation:producer_statements"
     assert f.confidence == "high"
+
+
+def test_rules_override_severity_comes_from_winning_assertion():
+    # Two hard assertions in different categories. primary_category prefers the
+    # higher-confidence one (B1), so the override severity must come from *that*
+    # hit (nice_to_have) — not from the first hard hit in list order (E2), which
+    # would pull severity from a losing assertion.
+    losing = RuleHit(
+        rule_id="r-e2",
+        category="building_code:E2",
+        confidence="medium",
+        severity="must_resolve",
+        hard_assertion=True,
+    )
+    winning = RuleHit(
+        rule_id="r-b1",
+        category="building_code:B1",
+        confidence="high",
+        severity="nice_to_have",
+        hard_assertion=True,
+    )
+    f = reconcile("i", _rules(losing, winning), _ai("documentation:other"))
+    assert f.state == "rules_override"
+    assert f.primary_category == "building_code:B1"
+    assert f.severity == "nice_to_have"

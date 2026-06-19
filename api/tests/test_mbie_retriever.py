@@ -15,6 +15,7 @@ import re
 import pytest
 
 from app.mbie.retriever import (
+    QUERY_VARIANTS,
     ClauseHit,
     _build_query,
     _window_around_query,
@@ -22,6 +23,36 @@ from app.mbie.retriever import (
     format_hits_for_prompt,
     hit_provenance,
 )
+
+
+_QV_FLAG = {
+    "verbatim_quote": "DP 4050 SHT A1.02",
+    "area": "north wall cladding",
+    "reason": "cavity batten spacing not shown",
+    "recommended_action": "confirm 35mm drained cavity per E2/AS1",
+}
+
+
+class TestQueryVariants:
+    def test_full_includes_quote_and_prose(self) -> None:
+        q = _build_query(_QV_FLAG, "full")
+        assert "4050" in q and "cavity batten spacing" in q
+
+    def test_prose_drops_the_drawing_quote(self) -> None:
+        # The quote is drawing noise (sheet/DP codes) — prose variant must omit
+        # it so it can't dilute the clause query.
+        q = _build_query(_QV_FLAG, "prose")
+        assert "4050" not in q and "cavity batten spacing" in q
+
+    def test_quote_only_is_just_the_quote(self) -> None:
+        q = _build_query(_QV_FLAG, "quote_only")
+        assert "4050" in q and "cavity batten spacing" not in q
+
+    def test_unknown_variant_falls_back_to_full(self) -> None:
+        assert _build_query(_QV_FLAG, "bogus") == _build_query(_QV_FLAG, "full")
+
+    def test_all_variants_declared(self) -> None:
+        assert set(QUERY_VARIANTS) == {"full", "prose", "quote_only"}
 
 _REPO = pathlib.Path(__file__).resolve().parents[2]
 

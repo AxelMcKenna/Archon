@@ -1,4 +1,4 @@
-import type { ProjectTypeId } from "@archon/shared";
+import type { ProjectTypeId } from "@arro/shared";
 
 export type InspectionStatus = "Upcoming" | "Not started";
 

@@ -1,6 +1,6 @@
-# Archon — Brand System
+# Arro — Brand System
 
-**Product:** Archon — Construction Management
+**Product:** Arro — Construction Management
 
 **Personality:** precise, structural, trustworthy. Construction-software-grade
 engineering meets clean SaaS — blueprint clarity, not playful startup.
@@ -87,7 +87,7 @@ The brand is built on three pillars: **white**, **teal**, and **charcoal**.
 
 ## Logo / wordmark guidance
 
-- **"Archon"** set in DM Sans 700, optionally with the "A" or a load-bearing
+- **"Arro"** set in DM Sans 700, optionally with the "A" or a load-bearing
   structural motif (column, truss, contour line).
 - Mono tagline beneath: `CONSTRUCTION MANAGEMENT` in JetBrains Mono, uppercase,
   letter-spacing `0.15em`, Charcoal 400.

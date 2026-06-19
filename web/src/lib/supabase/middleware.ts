@@ -6,6 +6,7 @@ type CookieSet = { name: string; value: string; options?: CookieOptions };
 const PUBLIC_PREFIXES = [
   "/login",
   "/auth",
+  "/api/waitlist",
   "/_next",
   "/favicon",
   "/privacy",

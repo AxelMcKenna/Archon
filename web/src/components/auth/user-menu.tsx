@@ -12,7 +12,7 @@ export async function UserMenu() {
     return (
       <Link
         href="/login"
-        className="font-display uppercase tracking-[0.14em] text-[14px] font-medium text-ink-400 transition-colors hover:text-ink-50"
+        className="font-display uppercase tracking-[0.14em] text-[14px] font-medium text-ink-600 transition-colors hover:text-ink-900"
       >
         Sign in
       </Link>

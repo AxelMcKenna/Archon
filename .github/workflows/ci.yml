@@ -31,7 +31,7 @@ jobs:
 
       - name: Run tests
         working-directory: api
-        # test_classification_accuracy is gated by ARCHON_RUN_AI=1 (costs
+        # test_classification_accuracy is gated by ARRO_RUN_AI=1 (costs
         # Anthropic credits); it skips itself without the env var.
         run: uv run pytest --no-header -q --ignore=tests/test_classification_accuracy.py
 

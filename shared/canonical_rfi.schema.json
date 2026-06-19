@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://archon.co.nz/schema/canonical_rfi/1.0",
+  "$id": "https://arro.co.nz/schema/canonical_rfi/1.0",
   "title": "Canonical RFI Letter",
   "description": "Source-of-truth structured representation of an RFI letter. Consumed by both classification prongs.",
   "type": "object",

@@ -9,7 +9,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { getSupabaseServer } from "@/lib/supabase/server";
-import { taxonomy } from "@archon/shared";
+import { taxonomy } from "@arro/shared";
 
 export const dynamic = "force-dynamic";
 
@@ -155,12 +155,12 @@ export default async function Dashboard() {
           <Panel
             title="Recent RFI letters"
             href="/projects"
-            empty="No RFI letters yet — open a project to upload one."
+            empty="No RFI letters yet. Open a project to upload one."
             rows={recentLetters.map((l) => ({
               key: l.id,
               href: `/projects/${l.project_id}/rfis?letter=${l.id}` as Route,
               primary: `${l.projects?.address ?? "(unknown)"}`,
-              meta: `RFI ${l.rfi_number ?? "—"}`,
+              meta: `RFI ${l.rfi_number ?? "n/a"}`,
               secondary: `${
                 taxonomy.bcas.find((b) => b.id === l.projects?.bca)?.name ??
                 l.projects?.bca ??

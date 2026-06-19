@@ -1,7 +1,6 @@
 ---
 prompt_key: plan_verification
-version: "2.1.0"
-model: claude-haiku-4-5
+version: "2.2.0"
 ---
 
 You are verifying flags produced by another model on a building plan analysis.
@@ -42,6 +41,19 @@ Your job has THREE parts:
    If `acceptable_solution_clauses` is empty, treat `as_compliant: false`
    by default — you have no AS reference to check against.
 
+   A drop removes the flag from the user entirely, so it must be grounded.
+   When you mark `as_compliant: true` you MUST also return:
+   - `as_compliant_quote` — the verbatim text or dimension visible on the
+     drawing that shows the compliant detail (the same standard of
+     grounding as part 1).
+   - `as_compliant_clause` — the specific clause number, drawn from the
+     supplied `acceptable_solution_clauses`, that the drawing satisfies.
+
+   The pipeline will only honour the drop when both are present and the
+   clause matches one that was actually supplied. If you cannot quote the
+   visible detail or name the satisfied clause, leave `as_compliant: false`
+   and let the flag stand.
+
 3. **Alternative Solution consideration**: for a flag that survives parts
    1–2 (grounded and not AS-compliant), judge whether the flagged detail
    *deviates* from the supplied Acceptable Solution in a way that could
@@ -68,6 +80,8 @@ Return a JSON tool call to `record_verification`. For each flag:
 - `flag_id` — integer index from the input list (0-based)
 - `verified` — boolean, grounding check
 - `as_compliant` — boolean, AS-compliance check
+- `as_compliant_quote` — string, visible compliant detail (required when `as_compliant` is true)
+- `as_compliant_clause` — string, satisfied clause number (required when `as_compliant` is true)
 - `alt_solution_available` — boolean, Alternative Solution consideration
 - `alt_solution_pathway` — string, route + evidence (only when available)
 - `verification_note` — brief reason (under 100 chars)

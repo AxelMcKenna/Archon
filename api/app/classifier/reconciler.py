@@ -19,6 +19,8 @@ from app.models import (
     RulesPrediction,
 )
 
+_CONFIDENCE_RANK = {"high": 3, "medium": 2, "low": 1}
+
 
 def _is_documentation_other(category: str | None) -> bool:
     return category == "documentation:other" or category is None
@@ -39,8 +41,20 @@ def reconcile(
     if rules.has_hard_assertion and rules_primary and rules_primary != ai_primary:
         state = "rules_override"
         final_category = rules_primary
-        # Pick severity from rules (high-confidence assertion).
-        rules_hit = next(h for h in rules.hits if h.hard_assertion)
+        # Take severity from the *same* hard assertion that won the category
+        # (rules.primary_category prefers hard assertions, highest-confidence
+        # first). Selecting the first hard hit in list order could pull
+        # severity from a different, lower-priority assertion whose category
+        # isn't even the one we're overriding to. Deterministic tie-break:
+        # highest confidence among hard hits matching the chosen category.
+        rules_hit = max(
+            (
+                h
+                for h in rules.hits
+                if h.hard_assertion and h.category == rules_primary
+            ),
+            key=lambda h: _CONFIDENCE_RANK.get(h.confidence, 0),
+        )
         final_severity = rules_hit.severity
         final_confidence = "high"
     elif rules_primary and ai_primary == rules_primary:

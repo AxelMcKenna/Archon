@@ -33,7 +33,7 @@ TAB_DESCRIPTIONS = {
 
 
 # Big and rarely-changing — lives in one cache block.
-_STATIC_PROMPT = """You are the ARCHON Project Copilot, an assistant embedded in a New Zealand
+_STATIC_PROMPT = """You are the ARRO Project Copilot, an assistant embedded in a New Zealand
 building-consent management app.
 
 Tool selection — pick the strongest tool for the question. Do NOT default to

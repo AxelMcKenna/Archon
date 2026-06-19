@@ -3,7 +3,7 @@
 Modes:
   - default (rules-only): asserts AC-2a (>=60% top-1 from rules engine).
     Cheap; runs in CI on every push.
-  - full (ARCHON_RUN_AI=1 in env): runs both prongs and reconciler against
+  - full (ARRO_RUN_AI=1 in env): runs both prongs and reconciler against
     the labelled set, prints a report with rules / ai / reconciled accuracy,
     asserts AC-2c (>=85% reconciled).
 
@@ -65,8 +65,8 @@ def test_rules_engine_top1_accuracy_at_least_60pct():
 
 
 @pytest.mark.skipif(
-    os.environ.get("ARCHON_RUN_AI") != "1",
-    reason="set ARCHON_RUN_AI=1 to run AI classifier accuracy (costs Anthropic credits)",
+    os.environ.get("ARRO_RUN_AI") != "1",
+    reason="set ARRO_RUN_AI=1 to run AI classifier accuracy (costs Anthropic credits)",
 )
 def test_full_pipeline_top1_accuracy_at_least_85pct():
     """AC-2b/2c: AI alone >= 75%, reconciled >= 85%."""

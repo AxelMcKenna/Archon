@@ -1,4 +1,4 @@
-project_id = "archon-rfi"
+project_id = "arro-rfi"
 
 [api]
 enabled = true

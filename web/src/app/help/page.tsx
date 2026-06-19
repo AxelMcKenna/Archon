@@ -15,7 +15,7 @@ export default function Help() {
             Getting Started
           </h2>
           <p className="mt-2 text-sm text-ink-600">
-            Learn the basics of using Archon.
+            Learn the basics of using Arro.
           </p>
         </section>
         <section className="rounded-sm bg-surface-raised shadow-depth p-6">

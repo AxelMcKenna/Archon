@@ -32,7 +32,10 @@ from app.plans.bbox import attach_page_bbox
 from app.plans.bbox_refiner import refine_flag_bboxes
 from app.plans.ocr_refiner import refine_via_ocr
 from app.plans.prompt import taxonomy_block
-from app.plans.vote import dedup_flags, vote_flags, vote_key
+from app.plans.reconcile import reconcile_sets
+from app.plans.registration import build_comparison_sets
+from app.plans.views import ViewRecord, build_view_record, seed_hint
+from app.plans.vote import dedup_cross_view, dedup_flags, vote_flags, vote_key
 from app.taxonomy import get_taxonomy
 from app.vision.core.prompts import fill, load_prompt
 from app.vision.core.renderer import RenderedImage, RenderedSheet, caption_str, iter_sheets
@@ -96,6 +99,24 @@ def analyse_plan(
     text_blocks.append(prompt)
     flat_prompt = "\n\n".join(text_blocks)
 
+    # Cross-view reconciliation ships dark: only PDFs, only when enabled. When
+    # on, we ask the per-sheet pass for a `view` object (appended instruction)
+    # and seed each sheet with a deterministic view-type hint.
+    cross_view_on = settings.plan_cross_view_enabled and media_type == "application/pdf"
+    tb_by_page = {tb.page: tb.sheet_number for tb in text_extraction.title_blocks}
+    reg_by_sheet = {
+        e.sheet_number: e.title for e in text_extraction.drawing_register
+    }
+
+    def _sheet_meta(page: int) -> tuple[str | None, str | None]:
+        sheet_number = tb_by_page.get(page)
+        return sheet_number, reg_by_sheet.get(sheet_number or "")
+
+    seed_by_page: dict[int, str] = {}
+    if cross_view_on:
+        addendum, _ = load_prompt("plan_view_addendum.md")
+        flat_prompt = flat_prompt + "\n\n" + addendum
+
     n = max(1, settings.plan_analyser_voting_n)
     threshold = max(1, min(settings.plan_analyser_voting_threshold, n))
     # PLAN_SHEET_CONCURRENCY tunes how many sheets are processed in parallel.
@@ -123,6 +144,10 @@ def analyse_plan(
         )
         dpi_breakdown["standard_pages"] = 1
 
+    if cross_view_on:
+        for s in sheets:
+            seed_by_page[s.page] = seed_hint(*_sheet_meta(s.page))
+
     metrics = Metrics()
     t0 = time.monotonic()
 
@@ -134,6 +159,7 @@ def analyse_plan(
         voting_threshold=threshold,
         concurrency=concurrency,
         metrics=metrics,
+        seed_by_page=seed_by_page if cross_view_on else None,
     )
 
     # Aggregate across sheets.
@@ -157,8 +183,45 @@ def analyse_plan(
 
     summary = max(summaries, key=len, default="")
 
+    # --- Phase B2/G/H: cross-view reconciliation -------------------------
+    # Build a ViewRecord per sheet, register views that describe the same
+    # region, then reconcile each set into two-citation cross-view flags.
+    cross_view_flags: list[dict[str, Any]] = []
+    view_records: list[ViewRecord] = []
+    if cross_view_on:
+        for sr in sheet_results:
+            page = sr.get("page")
+            if not page:
+                continue
+            sheet_number, title = _sheet_meta(page)
+            view_records.append(
+                build_view_record(
+                    page=page,
+                    sheet_number=sheet_number,
+                    title=title,
+                    view_payloads=sr.get("view_payloads") or [],
+                )
+            )
+        comparison_sets = build_comparison_sets(
+            view_records,
+            max_set_size=settings.plan_cross_view_max_set_size,
+            max_sets=settings.plan_cross_view_max_sets,
+        )
+        images_by_page = {s.page: s.images for s in sheets}
+        cross_view_flags = dedup_cross_view(
+            reconcile_sets(
+                comparison_sets, images_by_page=images_by_page, metrics=metrics
+            )
+        )
+        log.info(
+            "cross-view: %d views, %d comparison sets, %d flags",
+            len(view_records),
+            len(comparison_sets),
+            len(cross_view_flags),
+        )
+
     # --- Phase D: merge with rule flags ----------------------------------
-    merged_flags = attach_page_bbox(rule_flags) + all_kept
+    merged_flags = attach_page_bbox(rule_flags) + all_kept + cross_view_flags
 
     # --- Phase E: snap to PDF text layer ---------------------------------
     merged_flags = refine_flag_bboxes(
@@ -184,6 +247,7 @@ def analyse_plan(
         "verification": verification_status_final,
         "_debug_runs": runs_debug,
         "_debug_voting_threshold": threshold,
+        "cross_view_flag_count": len(cross_view_flags),
     }
 
     extras = {
@@ -192,6 +256,7 @@ def analyse_plan(
         "verification_drops": all_drops,
         "image_count": image_count,
         "dpi_breakdown": dpi_breakdown,
+        "view_records": [v.to_debug() for v in view_records],
     }
 
     return final_payload, prompt_version, metrics, extras
@@ -205,6 +270,7 @@ def _run_sheets_parallel(
     voting_threshold: int,
     concurrency: int,
     metrics: Metrics,
+    seed_by_page: dict[int, str] | None = None,
 ) -> list[dict[str, Any]]:
     """Process sheets concurrently. Returns one result dict per sheet."""
     settings = get_settings()
@@ -212,6 +278,13 @@ def _run_sheets_parallel(
     def _process(sheet: RenderedSheet) -> dict[str, Any]:
         captions = [caption_str(img) for img in sheet.images]
         image_pngs = [img.png for img in sheet.images]
+        # Per-sheet prompt: append the deterministic view-type hint when
+        # cross-view is on (seed_by_page is None otherwise).
+        sheet_prompt = prompt
+        if seed_by_page:
+            hint = seed_by_page.get(sheet.page)
+            if hint:
+                sheet_prompt = prompt + "\n\n" + hint
 
         # N vision passes on this sheet (sequential within the sheet — the
         # cross-sheet ThreadPoolExecutor already gives us parallelism, and
@@ -220,16 +293,19 @@ def _run_sheets_parallel(
         if not image_pngs:
             return {
                 "sheet_index": sheet.sheet_index,
+                "page": sheet.page,
                 "kept": [],
                 "drops": [],
                 "summary": "",
                 "runs_debug": [],
                 "verification_status": "verified",
                 "verification_version": "",
+                "view_payloads": [],
             }
 
         run_flag_lists: list[list[dict[str, Any]]] = []
         run_summaries: list[str] = []
+        view_payloads: list[dict[str, Any] | None] = []
         sheet_in_tokens = 0
         sheet_out_tokens = 0
 
@@ -239,7 +315,7 @@ def _run_sheets_parallel(
                     settings=settings,
                     images=image_pngs,
                     captions=captions,
-                    prompt=prompt,
+                    prompt=sheet_prompt,
                 )
             except Exception as exc:  # noqa: BLE001
                 log.warning(
@@ -252,6 +328,8 @@ def _run_sheets_parallel(
             run_flag_lists.append(list(payload.get("flags") or []))
             if payload.get("summary"):
                 run_summaries.append(str(payload["summary"]))
+            if isinstance(payload.get("view"), dict):
+                view_payloads.append(payload["view"])
             sheet_in_tokens += in_t
             sheet_out_tokens += out_t
 
@@ -292,12 +370,14 @@ def _run_sheets_parallel(
 
         return {
             "sheet_index": sheet.sheet_index,
+            "page": sheet.page,
             "kept": kept,
             "drops": drops,
             "summary": max(run_summaries, key=len, default=""),
             "runs_debug": sheet_runs_debug,
             "verification_status": v_status,
             "verification_version": v_version,
+            "view_payloads": view_payloads,
         }
 
     if len(sheets) == 1 or concurrency == 1:

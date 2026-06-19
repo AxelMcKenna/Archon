@@ -66,11 +66,24 @@ def code_clause_for_category(category: str | None) -> str | None:
     return parts[1].strip() or None
 
 
-def _build_query(flag: dict[str, Any]) -> str:
+# Field sets per query variant. ``verbatim_quote`` is text copied off the
+# drawing — dimensions, sheet codes, labels — which anchors cross-run voting
+# well but is largely non-semantic noise for clause retrieval. ``prose`` drops
+# it so the descriptive fields (which actually echo clause language) aren't
+# diluted. The eval harness sweeps these to make the field choice a measured
+# decision rather than an assumption.
+QUERY_VARIANTS: dict[str, tuple[str, ...]] = {
+    "full": ("verbatim_quote", "area", "reason", "recommended_action"),
+    "prose": ("reason", "recommended_action", "area"),
+    "quote_only": ("verbatim_quote",),
+}
+
+
+def _build_query(flag: dict[str, Any], variant: str = "full") -> str:
     """Free-text query string assembled from the flag's most informative
-    fields. Order is by token weight in the FTS index."""
+    fields, selected by ``variant`` (see ``QUERY_VARIANTS``)."""
     parts: list[str] = []
-    for key in ("verbatim_quote", "area", "reason", "recommended_action"):
+    for key in QUERY_VARIANTS.get(variant, QUERY_VARIANTS["full"]):
         v = flag.get(key)
         if isinstance(v, str) and v.strip():
             parts.append(v.strip())
@@ -86,6 +99,7 @@ def retrieve_for_flag(
     flag: dict[str, Any],
     k: int = _DEFAULT_K,
     mode: str = "hybrid",
+    query_variant: str = "full",
 ) -> list[ClauseHit]:
     """Retrieve the top-k MBIE clauses for ``flag``.
 
@@ -95,11 +109,15 @@ def retrieve_for_flag(
       - ``"sparse"``: FTS-only (``match_mbie_clauses``), no embedding call.
     The retrieval-quality harness uses ``mode`` to compare arms; ops can force
     ``"sparse"`` to keep working during an embedding outage.
+
+    ``query_variant`` selects which flag fields form the query (see
+    ``QUERY_VARIANTS``); production uses ``"full"`` and the harness sweeps the
+    others to measure whether drawing-quote noise helps or hurts.
     """
     code_clause = code_clause_for_category(flag.get("category"))
     if not code_clause:
         return []
-    query = _build_query(flag)
+    query = _build_query(flag, query_variant)
     if not query:
         return []
 

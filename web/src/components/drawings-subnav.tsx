@@ -10,11 +10,14 @@ interface DrawingsSubnavProps {
 
 const SECTIONS = [
   { name: "RFI flagger", href: "/drawings" },
-  { name: "Value engineering", href: "/value-engineering" },
+  // Value engineering is disabled for now — re-enable by uncommenting.
+  // { name: "Value engineering", href: "/value-engineering" },
 ] as const;
 
 export function DrawingsSubnav({ projectId }: DrawingsSubnavProps) {
   const pathname = usePathname();
+  // Hide the toggle when there's only one section (e.g. VE disabled).
+  if (SECTIONS.length < 2) return null;
   return (
     <div className="max-w-7xl mx-auto px-8 pt-6">
       <nav className="inline-flex rounded-sm bg-surface-raised shadow-depth p-1 gap-1">

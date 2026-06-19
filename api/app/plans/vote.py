@@ -65,6 +65,40 @@ def vote_key(f: dict[str, Any]) -> tuple[int, str]:
     return (page, f"a:{normalise_area(f.get('area', ''))}")
 
 
+def cross_view_key(f: dict[str, Any]) -> tuple[tuple[int, int], tuple[str, str]]:
+    """Bucket key for a cross-view flag (two citations).
+
+    Order-independent: keyed on the sorted page pair and the sorted pair of
+    quote signatures, so the same level/datum conflict surfaced from two
+    overlapping comparison sets collapses to one RFI regardless of which view
+    each call called "a".
+    """
+    cv = f.get("cross_view") or {}
+    page_a = int(f.get("page") or 0)
+    page_b = int(cv.get("page_b") or 0)
+    pages = (min(page_a, page_b), max(page_a, page_b))
+    sig_a = quote_signature(f.get("verbatim_quote"))
+    sig_b = quote_signature(cv.get("verbatim_quote_b"))
+    quotes = tuple(sorted((sig_a, sig_b)))
+    return pages, quotes  # type: ignore[return-value]
+
+
+def dedup_cross_view(flags: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Collapse duplicate cross-view flags, keeping the highest-confidence hit."""
+    seen: dict[tuple[tuple[int, int], tuple[str, str]], dict[str, Any]] = {}
+    for f in flags:
+        key = cross_view_key(f)
+        existing = seen.get(key)
+        if existing is None:
+            seen[key] = f
+            continue
+        new_rank = _CONFIDENCE_RANK.get(f.get("confidence", "low"), 0)
+        old_rank = _CONFIDENCE_RANK.get(existing.get("confidence", "low"), 0)
+        if new_rank > old_rank:
+            seen[key] = f
+    return list(seen.values())
+
+
 def vote_flags(
     runs: list[list[dict[str, Any]]], *, threshold: int
 ) -> list[dict[str, Any]]:

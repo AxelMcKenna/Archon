@@ -10,7 +10,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.11.12 /uv /usr/local/bin/uv
 
 WORKDIR /app
 
-# Build:  docker build -t archon-llm-gateway:latest -f llm-gateway/Dockerfile .
+# Build:  docker build -t arro-llm-gateway:latest -f llm-gateway/Dockerfile .
 COPY llm-gateway/pyproject.toml ./
 RUN uv sync --no-install-project --no-dev
 

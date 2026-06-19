@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch, apiUpload } from "@/lib/api";
-import { taxonomy } from "@archon/shared";
+import { taxonomy } from "@arro/shared";
 import { AiThinking } from "@/components/ai-thinking";
 
 type Project = { id: string; address: string; bca: string; project_type: string };

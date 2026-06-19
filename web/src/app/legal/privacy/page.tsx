@@ -1,4 +1,4 @@
-export const metadata = { title: "Privacy — Archon" };
+export const metadata = { title: "Privacy | Arro" };
 
 export default function PrivacyPage() {
   return (
@@ -38,11 +38,11 @@ export default function PrivacyPage() {
 
       <h2 className="mt-6 font-semibold text-lg">Your rights (NZ Privacy Act 2020)</h2>
       <ul className="list-disc pl-5 space-y-1 text-sm">
-        <li>Access — request a copy of your data.</li>
-        <li>Correction — fix anything that's wrong.</li>
-        <li>Deletion — delete your account and all associated data.</li>
+        <li>Access: request a copy of your data.</li>
+        <li>Correction: fix anything that&apos;s wrong.</li>
+        <li>Deletion: delete your account and all associated data.</li>
       </ul>
-      <p className="text-sm mt-2">Email <a href="mailto:privacy@archon.co.nz" className="underline">privacy@archon.co.nz</a> for any of the above.</p>
+      <p className="text-sm mt-2">Email <a href="mailto:arrotechnology@gmail.com" className="underline">arrotechnology@gmail.com</a> for any of the above.</p>
     </article>
   );
 }

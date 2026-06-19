@@ -3,8 +3,8 @@ services:
     build:
       context: .
       dockerfile: api/Dockerfile
-    image: archon-api:latest
-    container_name: archon-api
+    image: arro-api:latest
+    container_name: arro-api
     restart: unless-stopped
     env_file:
       - api/.env
@@ -15,8 +15,8 @@ services:
     build:
       context: .
       dockerfile: llm-gateway/Dockerfile
-    image: archon-agent:latest
-    container_name: archon-llm-gateway
+    image: arro-agent:latest
+    container_name: arro-llm-gateway
     restart: unless-stopped
     env_file:
       - llm-gateway/.env

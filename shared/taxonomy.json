@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "version_notes": "1.2 (2026-06-01): added two documentation categories surfaced by deterministic PDF text-layer rules (missing_sheets, revision_mismatch) introduced with the v2 plan flagger. 1.1 (2026-05-08): added 22 sub-categories surfaced from CCC Avoiding RFIs, SDC Specific Approvals, WDC fact sheets, and 2 MBIE determinations. Existing 1.0 IDs preserved; new categories use namespaced IDs. Added stages, canterbury overlays, BCA-specific process facts. SDC portal corrected to AlphaOne (verified from SDC processing page).",
 
   "bcas": [
@@ -153,6 +153,8 @@
     { "id": "documentation:missing_sheets", "label": "Documentation — Missing referenced sheets", "weight": 0.7, "introduced": "1.2", "notes": "Drawing register lists sheets that are not present in the upload. Detected deterministically from PDF text layer." },
     { "id": "documentation:revision_mismatch", "label": "Documentation — Revision mismatch across sheets", "weight": 0.6, "introduced": "1.2", "notes": "Sheets in the same set carry inconsistent revision letters, indicating a revision sync issue. Detected deterministically from title-block text." },
     { "id": "documentation:other", "label": "Documentation — Other", "weight": 0.4 },
+
+    { "id": "consistency:level_datum", "label": "Consistency — Level / datum across views", "weight": 0.8, "introduced": "1.3", "notes": "A floor level or datum (FFL / RL) shown on one view (e.g. a section) disagrees with the same level on another view (e.g. the floor plan). Detected by the cross-view reconciliation pass; each flag cites both views." },
 
     { "id": "process:vetting_s45", "label": "Process — Vetting / s45 completeness", "weight": 0.6, "introduced": "1.1", "notes": "SDC: vetting RFI resets the 20-day clock. CCC/WDC: incomplete applications rejected outright. Distinct from technical assessment RFIs." },
     { "id": "process:engineering_acceptance", "label": "Process — Development Engineering acceptance", "weight": 0.8, "introduced": "1.1", "notes": "SDC-only parallel process for urban multi-unit. Lawful outfall + service layout + ECOP compliance + CPEng/SQEP certification. Own 20-day clock + own RFI cycle. Hourly fees." },

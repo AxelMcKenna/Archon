@@ -52,8 +52,8 @@ async def stream_chat(
         "Authorization": f"Bearer {settings.openrouter_api_key}",
         "Content-Type": "application/json",
         "Accept": "text/event-stream",
-        "HTTP-Referer": settings.openrouter_referer or "https://archon.local",
-        "X-Title": "ARCHON-Agent",
+        "HTTP-Referer": settings.openrouter_referer or "https://arro.local",
+        "X-Title": "ARRO-Agent",
     }
 
     # Accumulators across deltas in a single response.

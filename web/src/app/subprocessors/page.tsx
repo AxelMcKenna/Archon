@@ -3,36 +3,36 @@ import { LegalShell } from "@/components/legal-shell";
 import { legal } from "@/lib/legal-config";
 
 export const metadata: Metadata = {
-  title: "Sub-processors — Archon",
-  description: "Third-party sub-processors Archon uses to deliver the service.",
+  title: "Sub-processors | Arro",
+  description: "Third-party sub-processors Arro uses to deliver the service.",
 };
 
-// ⚠️ Keep this list accurate. Add/remove rows as your stack changes, and update
+// Keep this list accurate. Add/remove rows as your stack changes, and update
 // the "Last updated" date in legal-config.ts when you do.
 const subprocessors = [
   {
     name: "Supabase",
     purpose: "Database (PostgreSQL), authentication, and file storage",
     data: "Account data, Customer Data, session tokens",
-    location: "Cloud hosting (region as configured)",
+    location: "United States",
   },
   {
-    name: "Cloud infrastructure provider",
+    name: "Google Cloud Platform",
     purpose: "Underlying compute and storage for the platform",
     data: "All hosted data",
-    location: "[Confirm region]",
+    location: "United States",
   },
   {
-    name: "AI model provider(s)",
+    name: "OpenRouter",
     purpose: "Plan analysis, RFI interpretation, and response drafting",
     data: "Project content submitted to AI features",
-    location: "United States / configured region",
+    location: "United States",
   },
   {
-    name: "Email provider",
-    purpose: "Transactional email (sign-in, notifications, support)",
-    data: "Email address, message content",
-    location: "[Confirm region]",
+    name: "Vercel",
+    purpose: "Web application hosting and content delivery",
+    data: "Request and usage data",
+    location: "United States",
   },
 ];
 
@@ -41,7 +41,7 @@ export default function SubprocessorsPage() {
     <LegalShell
       title="Sub-processors"
       activePath="/subprocessors"
-      intro={`To deliver Archon, ${legal.entity} engages the third-party service providers below to process data on our behalf. Each is bound by contractual obligations consistent with our Privacy Policy.`}
+      intro={`To deliver Arro, ${legal.entity} engages the third-party service providers below to process data on our behalf. Each is bound by contractual obligations consistent with our Privacy Policy.`}
     >
       <h2>Current sub-processors</h2>
       <table>

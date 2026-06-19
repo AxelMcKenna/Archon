@@ -1,5 +1,5 @@
 {
-  "scrapedAt": "2026-05-30T00:32:22.725162+00:00",
+  "scrapedAt": "2026-06-02T11:17:48.264430+00:00",
   "data": {
     "Christchurch City": {
       "bca": "Christchurch City",
@@ -7,15 +7,7 @@
       "medianProcessingDaysBuildingConsents": 12.0,
       "medianProcessingDaysResidential": 5.0,
       "medianTotalElapsedDays": 13.0,
-      "scrapedAt": "2026-05-30T00:32:22.707112+00:00"
-    },
-    "Selwyn": {
-      "bca": "Selwyn",
-      "medianProcessingDaysAllApplications": 7.0,
-      "medianProcessingDaysBuildingConsents": 13.0,
-      "medianProcessingDaysResidential": 7.0,
-      "medianTotalElapsedDays": 11.0,
-      "scrapedAt": "2026-05-30T00:32:22.707112+00:00"
+      "scrapedAt": "2026-06-02T11:17:48.240138+00:00"
     },
     "Hurunui": {
       "bca": "Hurunui",
@@ -23,7 +15,7 @@
       "medianProcessingDaysBuildingConsents": 13.0,
       "medianProcessingDaysResidential": 13.0,
       "medianTotalElapsedDays": 18.0,
-      "scrapedAt": "2026-05-30T00:32:22.707112+00:00"
+      "scrapedAt": "2026-06-02T11:17:48.240138+00:00"
     },
     "Ashburton": {
       "bca": "Ashburton",
@@ -31,7 +23,15 @@
       "medianProcessingDaysBuildingConsents": 15.0,
       "medianProcessingDaysResidential": 12.0,
       "medianTotalElapsedDays": 19.0,
-      "scrapedAt": "2026-05-30T00:32:22.707112+00:00"
+      "scrapedAt": "2026-06-02T11:17:48.240138+00:00"
+    },
+    "Selwyn": {
+      "bca": "Selwyn",
+      "medianProcessingDaysAllApplications": 7.0,
+      "medianProcessingDaysBuildingConsents": 13.0,
+      "medianProcessingDaysResidential": 7.0,
+      "medianTotalElapsedDays": 11.0,
+      "scrapedAt": "2026-06-02T11:17:48.240138+00:00"
     },
     "Waimakariri": {
       "bca": "Waimakariri",
@@ -39,7 +39,7 @@
       "medianProcessingDaysBuildingConsents": 13.0,
       "medianProcessingDaysResidential": 8.0,
       "medianTotalElapsedDays": 14.0,
-      "scrapedAt": "2026-05-30T00:32:22.707112+00:00"
+      "scrapedAt": "2026-06-02T11:17:48.240138+00:00"
     }
   }
 }

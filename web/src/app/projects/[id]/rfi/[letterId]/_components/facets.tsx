@@ -1,4 +1,4 @@
-import type { ExtractedEntities } from "@archon/shared";
+import type { ExtractedEntities } from "@arro/shared";
 
 export function Facets({ entities }: { entities: ExtractedEntities }) {
   const rows: Array<[string, string[]]> = [

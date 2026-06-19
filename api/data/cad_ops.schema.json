@@ -1,7 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
   "title": "CAD proposed change ops",
-  "description": "Fixed verb list. Anything outside this list is rejected at parse time.",
+  "description": "Op contract v2. Fixed verb list. Anything outside this list is rejected at parse time. Ops are the only mutation path — human or AI.",
+  "version": "ops/v2",
   "definitions": {
     "Op": {
       "oneOf": [
@@ -11,8 +12,30 @@
         { "$ref": "#/definitions/AddDimension" },
         { "$ref": "#/definitions/AddTextNote" },
         { "$ref": "#/definitions/ChangeLayer" },
-        { "$ref": "#/definitions/PlaceSymbol" }
+        { "$ref": "#/definitions/PlaceSymbol" },
+        { "$ref": "#/definitions/DeleteEntity" },
+        { "$ref": "#/definitions/SetAttribute" }
       ]
+    },
+    "DeleteEntity": {
+      "type": "object",
+      "required": ["op", "handle"],
+      "properties": {
+        "op": { "const": "delete_entity" },
+        "handle": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "SetAttribute": {
+      "type": "object",
+      "required": ["op", "handle", "key", "value"],
+      "properties": {
+        "op": { "const": "set_attribute" },
+        "handle": { "type": "string" },
+        "key": { "type": "string", "enum": ["layer", "text", "height", "color"] },
+        "value": { "type": ["string", "number"] }
+      },
+      "additionalProperties": false
     },
     "MoveEntity": {
       "type": "object",
@@ -100,7 +123,13 @@
           ]
         },
         "anchor_handle": { "type": "string" },
-        "x": { "type": "number" },
+        "snap": {
+          "type": "string",
+          "enum": ["endpoint", "midpoint", "center", "intersection"],
+          "description": "Feature-relative placement: snap to this feature on anchor_handle, then push offset_mm perpendicular (into the room). Preferred over raw x/y."
+        },
+        "offset_mm": { "type": "number", "default": 0 },
+        "x": { "type": "number", "description": "Absolute fallback when no anchor/snap." },
         "y": { "type": "number" },
         "label": { "type": "string", "maxLength": 80 }
       },

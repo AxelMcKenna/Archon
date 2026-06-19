@@ -54,19 +54,19 @@ export function LayoutContent({
     <TabContextProvider>
       <AgentProvider>
         <div className="min-h-screen bg-surface-canvas flex flex-col">
-          <header className="sticky top-0 z-30 border-b border-accent/25 bg-ink-900">
+          <header className="sticky top-0 z-30 border-b border-ink-200/70 bg-surface-canvas">
             <div className="flex w-full items-center justify-between px-10 py-6">
               <Link
                 href="/dashboard"
-                className="font-display uppercase font-bold tracking-[0.16em] text-[22px] text-ink-50 transition-colors hover:text-accent"
+                className="font-display uppercase font-bold tracking-[0.16em] text-[22px] text-ink-900 transition-colors hover:text-accent"
               >
-                Archon
+                Arro
               </Link>
               <nav className="flex items-center gap-8">
                 <NavList items={PRIMARY_NAV} pathname={pathname} />
                 {userMenu && (
                   <>
-                    <span aria-hidden className="h-4 w-px bg-white/10" />
+                    <span aria-hidden className="h-4 w-px bg-ink-200" />
                     {userMenu}
                   </>
                 )}
@@ -118,8 +118,8 @@ function NavList({
               href={tab.href}
               className={`relative font-display uppercase tracking-[0.14em] text-[14px] transition-colors ${
                 isActive
-                  ? "text-ink-50 font-semibold"
-                  : "text-ink-400 font-medium hover:text-ink-50"
+                  ? "text-ink-900 font-semibold"
+                  : "text-ink-600 font-medium hover:text-ink-900"
               }`}
             >
               {tab.name}

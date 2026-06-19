@@ -95,7 +95,7 @@ wheels = [
 ]
 
 [[package]]
-name = "archon-api"
+name = "arro-api"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

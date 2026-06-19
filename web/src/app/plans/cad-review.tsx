@@ -4,6 +4,7 @@ import { useState } from "react";
 import { API_BASE, apiFetch } from "@/lib/api";
 import { isStalled } from "@/lib/job-status";
 import { CadOverlayImage } from "@/app/plans/cad-overlay-image";
+import { CadEditor } from "@/app/plans/cad-editor";
 
 type ProposedChange =
   | { op: "move_entity"; handle: string; dx: number; dy: number }
@@ -114,10 +115,23 @@ export function CadReview({ cad }: { cad: Cad }) {
   // (the response is `Cache-Control: no-store` but a query param is
   // belt-and-braces against any intermediary cache).
   const [revVersion, setRevVersion] = useState(0);
+  const [editMode, setEditMode] = useState(false);
 
   const allNumbered = flags.map((f, i) => ({ ...f, _n: i + 1, _i: i }));
   const numbered = allNumbered.filter((f) => !resolved.has(f._i));
   const resolvedFlags = allNumbered.filter((f) => resolved.has(f._i));
+
+  // RFI flags positioned for the immersive editor (pins drawn on the drawing).
+  const editorFlags = numbered.map((f) => ({
+    n: f._n,
+    imageBbox:
+      f.image_bboxes?.["Model"] ??
+      Object.values(f.image_bboxes ?? {})[0] ??
+      null,
+    severity: f.severity,
+    title: f.rule_cited,
+    detail: f.rationale,
+  }));
 
   function toggle(i: number) {
     setApproved((prev) => {
@@ -168,16 +182,45 @@ export function CadReview({ cad }: { cad: Cad }) {
           : "Analysis failed. Try re-uploading."}
       </p>
     )}
-    <section className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 mt-6">
+    <section
+      className={
+        editMode
+          ? "w-[90vw] max-w-[90vw] ml-[calc(50%-45vw)] px-6 lg:px-10 mt-6 grid grid-cols-1 gap-6"
+          : "grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 mt-6"
+      }
+    >
       <div className="rounded-sm border border-ink-700/10 bg-ink-700/5 flex flex-col">
         <div className="px-4 py-2 text-xs uppercase tracking-wide text-ink-500 border-b border-ink-700/10 flex items-center justify-between gap-2">
           <span className="truncate">Drawing — {cad.filename}</span>
           <div className="flex items-center gap-3 normal-case tracking-normal">
+            <div className="flex gap-1">
+              <button
+                onClick={() => setEditMode(false)}
+                className={`px-2 py-0.5 text-[11px] rounded-sm border ${
+                  !editMode
+                    ? "bg-ink-900 text-white border-ink-900"
+                    : "border-ink-700/10 text-ink-700"
+                }`}
+              >
+                Review
+              </button>
+              <button
+                onClick={() => setEditMode(true)}
+                className={`px-2 py-0.5 text-[11px] rounded-sm border ${
+                  editMode
+                    ? "bg-teal-600 text-white border-teal-600"
+                    : "border-ink-700/10 text-ink-700"
+                }`}
+              >
+                Edit
+              </button>
+            </div>
             <label className="flex items-center gap-1 text-[11px] text-ink-700">
               <input
                 type="checkbox"
                 checked={showOverlays}
                 onChange={(e) => setShowOverlays(e.target.checked)}
+                disabled={editMode}
               />
               Overlays
             </label>
@@ -209,6 +252,9 @@ export function CadReview({ cad }: { cad: Cad }) {
           </div>
         </div>
         <div className="flex-1 p-4">
+          {editMode ? (
+            <CadEditor cadId={cad.id} flags={editorFlags} />
+          ) : (
           <CadOverlayImage
             cadId={cad.id}
             activeView={activeView}
@@ -229,10 +275,15 @@ export function CadReview({ cad }: { cad: Cad }) {
                 : undefined
             }
           />
+          )}
         </div>
       </div>
 
-      <aside className="flex flex-col min-h-0 overflow-hidden self-stretch">
+      <aside
+        className={`flex flex-col min-h-0 overflow-hidden self-stretch ${
+          editMode ? "hidden" : ""
+        }`}
+      >
         <div className="flex items-center justify-between shrink-0">
           <h3 className="font-semibold">
             Flags ({numbered.length}

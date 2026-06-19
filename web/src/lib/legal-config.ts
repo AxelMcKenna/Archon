@@ -1,20 +1,17 @@
 /**
  * Single source of truth for legal/company details used across the legal pages.
  *
- * ⚠️ Replace the [PLACEHOLDER] values with your real registered details before
- * publishing, and have the policies reviewed by a lawyer. These documents are
- * tailored templates, not legal advice.
+ * These documents are tailored templates, not legal advice. Have the policies
+ * reviewed by a lawyer before relying on them.
  */
 export const legal = {
-  product: "Archon",
+  product: "Arro",
   /** Registered legal entity that operates the service. */
-  entity: "[Archon Technologies Limited]",
-  /** NZ Companies Office number, if registered. */
-  companyNumber: "[NZBN / Company No.]",
-  website: "https://archon.co.nz",
-  contactEmail: "privacy@archon.co.nz",
-  supportEmail: "support@archon.co.nz",
-  address: "[Registered office address], Auckland, New Zealand",
+  entity: "Arro Technologies Limited",
+  website: "https://arro.co.nz",
+  contactEmail: "arrotechnology@gmail.com",
+  supportEmail: "arrotechnology@gmail.com",
+  address: "Auckland, New Zealand",
   jurisdiction: "New Zealand",
   governingLaw: "New Zealand",
   /** Shown on every policy. Update lastUpdated whenever you change a policy. */

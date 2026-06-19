@@ -5,7 +5,6 @@ import { NeuralSphere } from "@/components/neural-sphere-lazy";
 import { Reveal } from "@/components/reveal";
 import { SiteFooter } from "@/components/site-footer";
 import { WaitlistForm } from "@/components/waitlist-form";
-import { getSupabaseServer } from "@/lib/supabase/server";
 
 /* One status-pill language shared across every demo container — soft-tinted
    fill, a leading tone dot, and consistent Inter / uppercase / tracking so the
@@ -33,12 +32,6 @@ function StatusPill({ tone, children }: { tone: string; children: ReactNode }) {
 }
 
 export default async function Home() {
-  const supabase = await getSupabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const isSignedIn = !!user;
-
   return (
     <div className="relative min-h-screen overflow-hidden bg-surface-canvas text-ink-900">
       {/* Page-wide atmosphere — soft accent glows + faint grain over the flat canvas */}
@@ -48,31 +41,25 @@ export default async function Home() {
       <div aria-hidden className="grain pointer-events-none fixed inset-0 -z-10" />
 
       {/* Top bar */}
-      <header className="relative z-20 flex w-full items-center justify-between px-10 py-6">
+      <header className="relative z-20 flex w-full items-center px-5 py-5 sm:px-8 sm:py-6 lg:px-10">
         <Link
           href="/"
           className="font-display uppercase font-bold tracking-[0.16em] text-[22px] text-ink-900 transition-colors hover:text-ink-700"
         >
           Arro
         </Link>
-        <Link
-          href={isSignedIn ? "/dashboard" : "/login"}
-          className="font-display uppercase tracking-[0.14em] text-[14px] text-ink-700 transition-colors hover:text-ink-900"
-        >
-          {isSignedIn ? "Open app" : "Sign in"}
-        </Link>
       </header>
 
       {/* Hero */}
-      <section className="relative mx-auto max-w-[1440px] px-8 pt-12 md:pt-20 pb-24">
-        <div className="grid w-full grid-cols-12 gap-x-10 items-center">
+      <section className="relative mx-auto max-w-[1440px] px-5 sm:px-8 pt-10 md:pt-20 pb-20 md:pb-24">
+        <div className="grid w-full grid-cols-12 gap-x-0 md:gap-x-10 items-center">
           {/* Left column – text */}
           <Reveal className="col-span-12 md:col-span-7 lg:col-span-6">
             <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-ink-500">
               Arro · Construction Management
             </div>
             <h1
-              className="mt-5 uppercase font-medium leading-[0.95] tracking-[0.02em] text-[44px] sm:text-[60px] lg:text-[76px] text-ink-900"
+              className="mt-5 uppercase font-medium leading-[0.95] tracking-[0.02em] text-[40px] sm:text-[60px] lg:text-[76px] text-ink-900"
               style={{ fontFamily: "var(--font-dm-sans)" }}
             >
               Construction,
@@ -86,28 +73,19 @@ export default async function Home() {
               clause, and condition on your project, and watches every RFI,
               inspection, and blocker so your crew can keep building.
             </p>
-            <div className="mt-7 flex items-center gap-5">
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-5 py-2.5 text-[13px] font-medium text-white shadow-depth hover:shadow-depth-hover transition-shadow"
-              >
-                {isSignedIn ? "Open app" : "Launch the platform"}
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </Link>
-              <div className="flex items-center gap-2 text-[11px] text-ink-500">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent ai-glow" />
-                Indexing 1,284 consent conditions in real time
-              </div>
+            <div className="mt-7 flex items-center gap-2 text-[11px] text-ink-500">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent ai-glow" />
+              Indexing 1,284 consent conditions in real time
             </div>
           </Reveal>
 
           {/* Right column – sphere, centered against text */}
           <Reveal
             delay={120}
-            className="relative col-span-12 md:col-span-5 lg:col-span-6 mt-12 md:mt-0 flex items-center justify-center"
+            className="relative col-span-12 md:col-span-5 lg:col-span-6 mt-6 md:mt-0 flex items-center justify-center"
           >
-            <div className="relative w-full md:-mr-6 lg:-mr-12">
-              <NeuralSphere intent="thinking" className="h-[400px] w-full md:h-[500px] lg:h-[580px]" />
+            <div className="relative mx-auto w-full max-w-[420px] md:max-w-none md:-mr-6 lg:-mr-12">
+              <NeuralSphere intent="thinking" className="h-[300px] w-full sm:h-[380px] md:h-[500px] lg:h-[580px]" />
             </div>
           </Reveal>
         </div>
@@ -132,7 +110,7 @@ export default async function Home() {
       <main>
         {/* 01 – Project Management */}
         <section className="relative border-t border-ink-100 py-24 md:py-32">
-          <div className="mx-auto grid max-w-[1440px] grid-cols-12 items-center gap-x-10 px-8">
+          <div className="mx-auto grid max-w-[1440px] grid-cols-12 items-center gap-x-0 md:gap-x-10 px-5 sm:px-8">
             <Reveal className="col-span-12 md:col-span-5">
               <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
                 01 · Project Management
@@ -217,15 +195,15 @@ export default async function Home() {
                   ].map((row) => (
                     <div
                       key={row.name}
-                      className="grid grid-cols-12 items-center gap-4 px-5 py-3.5"
+                      className="flex items-center gap-3 px-5 py-3.5 sm:grid sm:grid-cols-12 sm:gap-4"
                     >
-                      <div className="col-span-5">
-                        <div className="text-[13px] font-medium text-ink-900">
+                      <div className="min-w-0 flex-1 sm:col-span-5">
+                        <div className="truncate text-[13px] font-medium text-ink-900">
                           {row.name}
                         </div>
-                        <div className="text-[11px] text-ink-500">{row.addr}</div>
+                        <div className="truncate text-[11px] text-ink-500">{row.addr}</div>
                       </div>
-                      <div className="col-span-4 flex items-center gap-2">
+                      <div className="hidden items-center gap-2 sm:col-span-4 sm:flex">
                         <div className="h-1 flex-1 overflow-hidden rounded-full bg-ink-100">
                           <div
                             className={
@@ -243,7 +221,7 @@ export default async function Home() {
                           {row.pct}%
                         </div>
                       </div>
-                      <div className="col-span-3 flex justify-end">
+                      <div className="shrink-0 sm:col-span-3 sm:flex sm:justify-end">
                         <StatusPill tone={row.tone}>{row.status}</StatusPill>
                       </div>
                     </div>
@@ -256,8 +234,8 @@ export default async function Home() {
 
         {/* 02 – Plan Analysis */}
         <section className="relative border-t border-ink-100 bg-surface-sunken py-24 md:py-32">
-          <div className="mx-auto max-w-[1440px] px-8">
-            <div className="grid grid-cols-12 gap-x-10">
+          <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
+            <div className="grid grid-cols-12 gap-x-0 md:gap-x-10">
               <Reveal className="col-span-12 md:col-span-7">
                 <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-accent">
                   02 · Plan Analysis
@@ -317,10 +295,11 @@ export default async function Home() {
 
               {/* Drawing + Findings */}
               <div className="grid grid-cols-12">
-                {/* Drawing area */}
-                <div className="col-span-12 border-r border-ink-100 lg:col-span-8">
+                {/* Drawing area — horizontal scroll on small screens so the
+                    detailed plan stays legible instead of collapsing. */}
+                <div className="col-span-12 overflow-x-auto border-b border-ink-100 lg:col-span-8 lg:border-b-0 lg:border-r">
                   <div
-                    className="relative aspect-[16/11] w-full bg-surface-canvas"
+                    className="relative aspect-[16/11] w-full min-w-[520px] bg-surface-canvas"
                     style={{
                       backgroundImage:
                         "linear-gradient(to right, rgba(15,17,21,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(15,17,21,0.04) 1px, transparent 1px)",
@@ -809,7 +788,7 @@ export default async function Home() {
 
         {/* 03 – RFI Auto-response */}
         <section className="relative border-t border-ink-100 py-24 md:py-32">
-          <div className="mx-auto grid max-w-[1440px] grid-cols-12 items-center gap-x-10 px-8">
+          <div className="mx-auto grid max-w-[1440px] grid-cols-12 items-center gap-x-0 md:gap-x-10 px-5 sm:px-8">
             <Reveal delay={120} className="order-2 col-span-12 md:order-2 md:col-span-7 mt-12 md:mt-0">
               <div className="rounded-lg bg-surface-elevated shadow-depth transition-shadow duration-500 hover:shadow-depth-hover">
                 <div className="flex items-center justify-between border-b border-ink-100 px-5 py-3">
@@ -983,7 +962,7 @@ export default async function Home() {
 
         {/* 04 – AI co-pilot (CAD overlay + llm-gateway + drafting) */}
         <section className="relative border-t border-ink-100 bg-surface-sunken py-24 md:py-32">
-          <div className="mx-auto grid max-w-[1440px] grid-cols-12 items-center gap-x-10 px-8">
+          <div className="mx-auto grid max-w-[1440px] grid-cols-12 items-center gap-x-0 md:gap-x-10 px-5 sm:px-8">
             <Reveal delay={120} className="order-2 col-span-12 md:order-1 md:col-span-7 mt-12 md:mt-0">
               <div className="rounded-lg bg-surface-elevated shadow-depth transition-shadow duration-500 hover:shadow-depth-hover">
                 <div className="flex items-center justify-between border-b border-ink-100 px-5 py-3">
@@ -1093,13 +1072,13 @@ export default async function Home() {
             aria-hidden
             className="glow-drift pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[520px] w-[820px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/[0.08] blur-[130px]"
           />
-          <div className="mx-auto max-w-[1440px] px-8">
-            <Reveal className="relative overflow-hidden rounded-lg border border-ink-150 bg-surface-elevated px-8 py-14 shadow-depth md:px-16 md:py-20">
+          <div className="mx-auto max-w-[1440px] px-5 sm:px-8">
+            <Reveal className="relative overflow-hidden rounded-lg border border-ink-150 bg-surface-elevated px-6 py-12 shadow-depth sm:px-8 sm:py-14 md:px-16 md:py-20">
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent"
               />
-              <div className="grid grid-cols-12 items-center gap-x-10 gap-y-10">
+              <div className="grid grid-cols-12 items-center gap-x-0 md:gap-x-10 gap-y-10">
                 <div className="col-span-12 md:col-span-7">
                   <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-ink-500">
                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent ai-glow" />

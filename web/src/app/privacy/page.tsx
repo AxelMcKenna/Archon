@@ -3,8 +3,8 @@ import { LegalShell } from "@/components/legal-shell";
 import { legal } from "@/lib/legal-config";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Archon",
-  description: "How Archon collects, uses, stores, and protects your information.",
+  title: "Privacy Policy | Arro",
+  description: "How Arro collects, uses, stores, and protects your information.",
 };
 
 export default function PrivacyPage() {
@@ -12,11 +12,11 @@ export default function PrivacyPage() {
     <LegalShell
       title="Privacy Policy"
       activePath="/privacy"
-      intro={`This policy explains how ${legal.entity} ("Archon", "we", "us") collects, uses, discloses, and protects personal information when you use the Archon platform and website. We are committed to handling your information in accordance with the New Zealand Privacy Act 2020 and the Information Privacy Principles (IPPs).`}
+      intro={`This policy explains how ${legal.entity} ("Arro", "we", "us") collects, uses, discloses, and protects personal information when you use the Arro platform and website. We are committed to handling your information in accordance with the New Zealand Privacy Act 2020 and the Information Privacy Principles (IPPs).`}
     >
       <h2>1. Who we are</h2>
       <p>
-        Archon is operated by {legal.entity}, {legal.address}. For the purposes of
+        Arro is operated by {legal.entity}, {legal.address}. For the purposes of
         the Privacy Act 2020, we are the agency responsible for the personal
         information described in this policy. Where the EU/UK GDPR applies, we act
         as a <strong>data controller</strong> for account and website data, and as
@@ -28,39 +28,39 @@ export default function PrivacyPage() {
       <h3>Information you provide</h3>
       <ul>
         <li>
-          <strong>Account information</strong> — name, work email, password (stored
+          <strong>Account information</strong>: name, work email, password (stored
           only as a salted hash by our authentication provider), and organisation
           details.
         </li>
         <li>
-          <strong>Project content</strong> — building consents, drawings and plans,
+          <strong>Project content</strong>: building consents, drawings and plans,
           RFIs, specifications, correspondence, and other documents you or your team
           upload. These may contain personal information about third parties (e.g.
           applicants, owners, consultants).
         </li>
         <li>
-          <strong>Communications</strong> — messages you send to support, feedback,
+          <strong>Communications</strong>: messages you send to support, feedback,
           and survey responses.
         </li>
       </ul>
       <h3>Information collected automatically</h3>
       <ul>
         <li>
-          <strong>Usage data</strong> — features used, actions taken, and timestamps.
+          <strong>Usage data</strong>: features used, actions taken, and timestamps.
         </li>
         <li>
-          <strong>Technical data</strong> — IP address, browser and device type,
+          <strong>Technical data</strong>: IP address, browser and device type,
           and log data needed to operate and secure the service.
         </li>
         <li>
-          <strong>Cookies</strong> — see our{" "}
+          <strong>Cookies</strong>: see our{" "}
           <a href="/cookies">Cookie Policy</a> for details.
         </li>
       </ul>
 
       <h2>3. How we use your information</h2>
       <ul>
-        <li>To provide, maintain, and improve the Archon platform.</li>
+        <li>To provide, maintain, and improve the Arro platform.</li>
         <li>To authenticate you and keep your account secure.</li>
         <li>
           To analyse plans and RFIs and generate findings, drafts, and citations
@@ -86,7 +86,7 @@ export default function PrivacyPage() {
 
       <h2>5. AI processing</h2>
       <p>
-        Archon uses third-party large language models to read drawings, interpret
+        Arro uses third-party large language models to read drawings, interpret
         council RFIs, and draft responses. When you use these features, the
         relevant project content is transmitted to our AI sub-processors solely to
         generate output for you. We do <strong>not</strong> permit these
@@ -104,22 +104,22 @@ export default function PrivacyPage() {
       <p>We do not sell your personal information. We share it only:</p>
       <ul>
         <li>
-          <strong>Within your organisation</strong> — with other users in your
+          <strong>Within your organisation</strong>: with other users in your
           workspace, according to the access your administrator configures.
         </li>
         <li>
-          <strong>With sub-processors</strong> — service providers who process data
+          <strong>With sub-processors</strong>: service providers who process data
           on our behalf under contract. Our database, authentication, and file
           storage are provided by <strong>Supabase</strong> (hosted on cloud
           infrastructure). See the full list on our{" "}
           <a href="/subprocessors">Sub-processors</a> page.
         </li>
         <li>
-          <strong>For legal reasons</strong> — where required by law, to respond to
+          <strong>For legal reasons</strong>: where required by law, to respond to
           lawful requests, or to protect rights, safety, and property.
         </li>
         <li>
-          <strong>In a business transfer</strong> — in connection with a merger,
+          <strong>In a business transfer</strong>: in connection with a merger,
           acquisition, or sale of assets, subject to this policy.
         </li>
       </ul>
@@ -164,7 +164,7 @@ export default function PrivacyPage() {
 
       <h2>11. Children</h2>
       <p>
-        Archon is a business tool not directed at children and is not intended for
+        Arro is a business tool not directed at children and is not intended for
         anyone under 16. We do not knowingly collect personal information from
         children.
       </p>

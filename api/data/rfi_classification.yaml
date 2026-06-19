@@ -1,4 +1,4 @@
-# ARCHON RFI classification rules
+# ARRO RFI classification rules
 # Versioned. Changes must pass /api/tests/rules_regression.yaml before merge.
 
 version: "1.1.0"

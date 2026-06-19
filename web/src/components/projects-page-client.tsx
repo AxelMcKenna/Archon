@@ -149,7 +149,7 @@ export function ProjectsPageClient({ projects }: { projects: ProjectListItem[] }
               <div className="max-w-2xl space-y-3">
                 <p className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-ink-500">
                   <span className="inline-block h-1 w-1 rounded-full bg-accent" />
-                  Archon Portfolio
+                  Arro Portfolio
                 </p>
                 <div className="space-y-2">
                   <h1 className="font-display uppercase font-medium leading-[0.95] tracking-[0.02em] text-[44px] text-ink-900 sm:text-[56px]">

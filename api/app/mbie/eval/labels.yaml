@@ -1,7 +1,7 @@
 # Labelled retrieval-eval set: (flag → expected MBIE clause).
 #
 # Each label is a realistic plan flag plus the clause we expect retrieval to
-# surface. Anchors were pulled from the live corpus (prod ARCHON), so a hit is
+# surface. Anchors were pulled from the live corpus (prod ARRO), so a hit is
 # a real clause, not a circular self-reference. A label counts as "hit@k" when
 # any of the top-k retrieved clauses comes from `expect.document_id` AND its
 # text contains `expect.clause_contains` (case-insensitive) — tolerant of

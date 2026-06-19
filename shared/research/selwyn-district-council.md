@@ -53,7 +53,7 @@ SDC's process is more elaborate than the other two Canterbury BCAs and has **two
 8. Processing RFIs may iterate; clock pauses again each time [2].
 9. Once compliant on reasonable grounds → consent documents produced, fees invoiced, consent granted on payment [1].
 
-> **Key signal for ARCHON**: Selwyn produces three RFI subtypes that should be classified separately:
+> **Key signal for ARRO**: Selwyn produces three RFI subtypes that should be classified separately:
 > - **Vetting RFI (s45)** — completeness gate; clock-resetting
 > - **Processing RFI** — Building Code compliance gate; clock-pausing
 > - **PIM RFI** — applies to PIM-only applications, must be issued within 10 days of receipt [4]
@@ -158,7 +158,7 @@ Engineering Acceptance (DE) is **a separate process from BCA processing** with i
 - Triggered by: alterations to Council infrastructure, new connections, extensions of Council infrastructure
 - For multi-unit residential: must be obtained **before lodging the building consent**
 
-> **Key signal for ARCHON**: An Engineering Acceptance RFI lives outside the BCA RFI flow. If a customer is in the urban multi-unit pathway, they will likely receive RFIs from **two separate council processes** with **two separate clocks**.
+> **Key signal for ARRO**: An Engineering Acceptance RFI lives outside the BCA RFI flow. If a customer is in the urban multi-unit pathway, they will likely receive RFIs from **two separate council processes** with **two separate clocks**.
 
 ## 8. Canterbury-specific overlays (TC zones, foundations, geotech) [10]
 
