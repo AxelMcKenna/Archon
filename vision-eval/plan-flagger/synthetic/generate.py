@@ -46,6 +46,37 @@ def _drawing_register(c: canvas.Canvas, entries: list[tuple[str, str]]) -> None:
         y -= 22
 
 
+def _ruled_table(
+    c: canvas.Canvas, *, x: float, top: float, headers: list[str], rows: list[list[str]]
+) -> None:
+    """Draw a bordered grid table so pdfplumber's extract_tables() detects it
+    (the schedule extractor in plan_text.py relies on ruled lines)."""
+    col_w = 110
+    row_h = 22
+    n_cols = len(headers)
+    n_rows = len(rows) + 1
+    width = col_w * n_cols
+    height = row_h * n_rows
+    c.setStrokeColorRGB(0, 0, 0)
+    c.setLineWidth(0.8)
+    # Horizontal lines.
+    for r in range(n_rows + 1):
+        yy = top - r * row_h
+        c.line(x, yy, x + width, yy)
+    # Vertical lines.
+    for col in range(n_cols + 1):
+        xx = x + col * col_w
+        c.line(xx, top, xx, top - height)
+    # Cell text.
+    c.setFont("Helvetica-Bold", 9)
+    for col, h in enumerate(headers):
+        c.drawString(x + col * col_w + 5, top - row_h + 7, h)
+    c.setFont("Helvetica", 9)
+    for r, row in enumerate(rows, start=1):
+        for col, cell in enumerate(row):
+            c.drawString(x + col * col_w + 5, top - (r + 1) * row_h + 7, cell)
+
+
 @dataclass
 class Plan:
     plan_id: str
@@ -187,10 +218,101 @@ def _plan_revision_mismatch() -> Plan:
     )
 
 
+def _plan_commercial_coordination() -> Plan:
+    """Commercial multi-discipline set (Risk Group WB). Same level across an
+    architectural door schedule, a fire plan and a mechanical plan, seeded with
+    two commercial issues:
+
+      - a door schedule with no fire-resistance-rating column while a fire sheet
+        is present (deterministic ``fire_door_schedule_gap`` rule), and
+      - a mechanical duct crossing a fire-rated wall with no damper shown
+        (cross-discipline ``design_coordination`` — needs the coordination pass,
+        ``plan_coordination_enabled``).
+    """
+
+    def page1(c: canvas.Canvas) -> None:
+        _drawing_register(
+            c,
+            [
+                ("A-101", "Ground Floor Plan"),
+                ("A-102", "Door Schedule"),
+                ("F-101", "Fire Plan - Ground Floor"),
+                ("M-101", "Mechanical Plan - Ground Floor"),
+            ],
+        )
+        _title_block(c, sheet="A-101", revision="A", project="Riverside Offices")
+
+    def page2(c: canvas.Canvas) -> None:
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(80, PAGE_H - 80, "DOOR SCHEDULE")
+        # No FRR column — the gap the fire_door_schedule_gap rule catches.
+        _ruled_table(
+            c,
+            x=80,
+            top=PAGE_H - 110,
+            headers=["DOOR NO", "TYPE", "WIDTH", "HEIGHT"],
+            rows=[
+                ["D01", "Solid core", "910", "2100"],
+                ["D02", "Glazed", "910", "2100"],
+                ["D03", "Solid core", "810", "2100"],
+            ],
+        )
+        _title_block(c, sheet="A-102", revision="A", project="Riverside Offices")
+
+    def page3(c: canvas.Canvas) -> None:
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(80, PAGE_H - 80, "FIRE PLAN - GROUND FLOOR")
+        c.setFont("Helvetica", 11)
+        c.drawString(80, PAGE_H - 110, "LEVEL: GROUND FLOOR")
+        # A fire-rated wall running across the plan.
+        c.setLineWidth(2)
+        c.line(300, PAGE_H - 360, 600, PAGE_H - 360)
+        c.drawString(330, PAGE_H - 355, "FIRE RATED WALL -/60/60")
+        _title_block(c, sheet="F-101", revision="A", project="Riverside Offices")
+
+    def page4(c: canvas.Canvas) -> None:
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(80, PAGE_H - 80, "MECHANICAL PLAN - GROUND FLOOR")
+        c.setFont("Helvetica", 11)
+        c.drawString(80, PAGE_H - 110, "LEVEL: GROUND FLOOR")
+        # A duct crossing exactly where the fire wall sits on F-101 — no damper.
+        c.setLineWidth(2)
+        c.line(450, PAGE_H - 300, 450, PAGE_H - 420)
+        c.drawString(460, PAGE_H - 360, "DUCT 600x400 (no damper shown)")
+        _title_block(c, sheet="M-101", revision="A", project="Riverside Offices")
+
+    return Plan(
+        plan_id="synthetic-commercial-coordination",
+        bca="ccc",
+        project_type="commercial_office",
+        project="Riverside Offices",
+        pages=[page1, page2, page3, page4],
+        ground_truth=[
+            {
+                "category": "documentation:plans:design_coordination",
+                "severity": "must_resolve",
+                "page": 2,
+                "area_hint": "door schedule FRR",
+                "rationale": "Door schedule has no FRR column but a fire sheet is present.",
+                "detector": "doc_rule:fire_door_schedule_gap",
+            },
+            {
+                "category": "documentation:plans:design_coordination",
+                "severity": "must_resolve",
+                "page": 4,
+                "area_hint": "duct crosses fire wall",
+                "rationale": "M-101 duct crosses the F-101 fire-rated wall with no damper.",
+                "detector": "coordination_pass (plan_coordination_enabled)",
+            },
+        ],
+    )
+
+
 PLANS = [
     _plan_bracing_incomplete,
     _plan_missing_sheet,
     _plan_revision_mismatch,
+    _plan_commercial_coordination,
 ]
 
 

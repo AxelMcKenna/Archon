@@ -1,6 +1,6 @@
 ---
 prompt_key: plan_analyser
-version: "2.2.0"
+version: "2.3.0"
 model: claude-opus-4-7
 ---
 
@@ -78,6 +78,27 @@ on the **specific page** — be precise.
   rather than guessing if you can't localise — downstream code will fall
   back to a coarse region from `tile`.
 
+### Commercial / multi-discipline drawings
+
+Commercial sets span multiple disciplines (architectural, structural, fire,
+mechanical, electrical, hydraulic, civil). A per-sheet **"Discipline focus"**
+note may be appended below telling you which discipline this sheet is — let it
+steer what you look for. Common commercial drawing cues and the flags they
+drive:
+
+- **Fire plans** — fire-cell / compartment diagrams, fire-rated wall legends
+  (FRR like `-/60/60`), escape-route widths, occupant-load tables, exit/door
+  schedules, sprinkler/alarm coverage → `building_code:C:escape_routes`,
+  `building_code:C:compartmentation`, `building_code:C:systems`.
+- **Structural plans** — column grids / gridlines, beam & footing schedules,
+  importance-level notes → `building_code:B1`, `building_code:B1:importance_level`.
+- **Mechanical plans** — ductwork, air-change-rate / ventilation schedules,
+  kitchen / carpark extract → `building_code:G4:commercial`.
+- **Hydraulic plans** — sanitary fixture schedules sized by occupancy →
+  `building_code:G1:commercial`.
+- **Accessibility** — accessible routes, lifts, accessible WC/parking counts →
+  `building_code:D1`.
+
 ### Severity
 
 - `must_resolve` — consent will be refused or RFI'd until fixed.
@@ -112,6 +133,34 @@ Return a JSON tool call to `record_plan_analysis`. Each flag object:
   "reason": "Bracing schedule shows demand BUs but not achieved BUs by line — BCA will issue RFI per NZS 3604:2011 §5.4.",
   "recommended_action": "Add an 'Achieved BUs' column to each bracing line; ensure achieved >= demand.",
   "bbox": [0.62, 0.08, 0.94, 0.34]
+}
+```
+
+Commercial examples:
+
+```json
+{
+  "page": 7,
+  "area": "Fire plan, Level 2 — escape route",
+  "category": "building_code:C:escape_routes",
+  "severity": "must_resolve",
+  "confidence": "high",
+  "verbatim_quote": "DEAD END OPEN PATH 28m",
+  "reason": "Dead-end open path of 28m exceeds the C/AS2 limit for this risk group; a second means of escape or shorter path is needed.",
+  "recommended_action": "Demonstrate the dead-end open path complies with C/AS2 Table 3.1, or provide an additional exit / C/VM2 alternative solution."
+}
+```
+
+```json
+{
+  "page": 12,
+  "area": "Sanitary fixture schedule",
+  "category": "building_code:G1:commercial",
+  "severity": "must_resolve",
+  "confidence": "medium",
+  "verbatim_quote": "WC x2  BASIN x2  (occupancy 120)",
+  "reason": "Fixture count appears low for the stated occupancy of 120 and no separate-sex or accessible provision is shown — G1/AS1 sizing not demonstrated.",
+  "recommended_action": "Provide the G1/AS1 fixture calculation for the assessed occupancy, including separate-sex and accessible facilities."
 }
 ```
 

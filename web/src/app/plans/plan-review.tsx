@@ -12,6 +12,8 @@ type Flag = {
   tile?: string;
   area: string;
   category: string;
+  discipline?: string | null;
+  sheet_label?: string | null;
   severity: "must_resolve" | "nice_to_have";
   confidence?: Confidence;
   verbatim_quote?: string;
@@ -97,6 +99,7 @@ export function PlanReview({ plan }: { plan: Plan }) {
   const [showLowConfidence, setShowLowConfidence] = useState(false);
   const [showResolved, setShowResolved] = useState(false);
   const [activeFlagId, setActiveFlagId] = useState<number | null>(null);
+  const [disciplineFilter, setDisciplineFilter] = useState<string>("all");
 
   // AS-compliant suppressions: flags the verifier dropped because the drawing
   // visibly satisfies an Acceptable Solution. Surfaced (collapsed) so the
@@ -117,17 +120,30 @@ export function PlanReview({ plan }: { plan: Plan }) {
     [flags],
   );
 
+  // Disciplines present across the set (commercial multi-discipline sets);
+  // drives the discipline filter. Only shown when >1 discipline is detected.
+  const disciplines = useMemo(() => {
+    const seen = new Set<string>();
+    for (const f of numberedFlags) {
+      if (f.discipline && f.discipline !== "unknown") seen.add(f.discipline);
+    }
+    return Array.from(seen).sort();
+  }, [numberedFlags]);
+
   const { highMedium, lowConfidence } = useMemo(() => {
     const high: (Flag & { _n: number })[] = [];
     const low: (Flag & { _n: number })[] = [];
     for (const f of numberedFlags) {
+      if (disciplineFilter !== "all" && (f.discipline ?? "unknown") !== disciplineFilter) {
+        continue;
+      }
       if ((f.confidence ?? "medium") === "low") low.push(f);
       else high.push(f);
     }
     high.sort((a, b) => priorityScore(b) - priorityScore(a));
     low.sort((a, b) => priorityScore(b) - priorityScore(a));
     return { highMedium: high, lowConfidence: low };
-  }, [numberedFlags]);
+  }, [numberedFlags, disciplineFilter]);
 
   const visible = showAll ? highMedium : highMedium.slice(0, DEFAULT_VISIBLE);
   const hiddenCount = Math.max(0, highMedium.length - visible.length);
@@ -187,6 +203,24 @@ export function PlanReview({ plan }: { plan: Plan }) {
               {plan.cost_usd != null && <span>${plan.cost_usd.toFixed(4)}</span>}
               {plan.analysis_version && <span>v{plan.analysis_version}</span>}
             </div>
+          </div>
+        )}
+
+        {disciplines.length > 1 && (
+          <div className="flex items-center gap-2 text-xs">
+            <span className="uppercase tracking-wide text-ink-500">Discipline</span>
+            <select
+              value={disciplineFilter}
+              onChange={(e) => setDisciplineFilter(e.target.value)}
+              className="rounded-sm border border-ink-700/20 px-2 py-1 capitalize"
+            >
+              <option value="all">All disciplines</option>
+              {disciplines.map((d) => (
+                <option key={d} value={d} className="capitalize">
+                  {d}
+                </option>
+              ))}
+            </select>
           </div>
         )}
 

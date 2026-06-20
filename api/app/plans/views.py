@@ -20,6 +20,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
+from app.extractors.plan_text import discipline_for_sheet
 from app.vision.plans.schema import VIEW_TYPE_ENUM
 
 # Title keyword -> view_type. Order matters: the first match wins, so the more
@@ -41,6 +42,7 @@ class ViewRecord:
     sheet_number: str | None = None
     title: str | None = None
     view_type: str = "other"
+    discipline: str = "unknown"
     level_id: str | None = None
     scale: str | None = None
     datums: list[dict[str, Any]] = field(default_factory=list)
@@ -51,6 +53,7 @@ class ViewRecord:
             "page": self.page,
             "sheet_number": self.sheet_number,
             "view_type": self.view_type,
+            "discipline": self.discipline,
             "level_id": self.level_id,
             "datums": self.datums,
             "callouts": self.callouts,
@@ -151,6 +154,7 @@ def build_view_record(
         sheet_number=sheet_number,
         title=title,
         view_type=view_type,
+        discipline=discipline_for_sheet(sheet_number, title),
         level_id=_first("level_id"),
         scale=_first("scale"),
         datums=_dedupe(datums, ("label", "value")),

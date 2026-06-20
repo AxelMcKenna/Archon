@@ -33,6 +33,7 @@ class ComparisonSet:
     link_types: list[str]
     reason: str
     views: list[ViewRecord] = field(default_factory=list)
+    kind: str = "level_datum"  # "level_datum" | "coordination"
 
 
 def _norm_sheet(s: str | None) -> str:
@@ -160,6 +161,66 @@ def build_comparison_sets(
         )
         kept = kept[:max_sets]
     return kept
+
+
+def build_coordination_sets(
+    views: list[ViewRecord],
+    *,
+    max_set_size: int = 5,
+    max_sets: int = 12,
+) -> list[ComparisonSet]:
+    """Group same-level sheets of *different disciplines* into coordination sets.
+
+    The highest-value commercial RFI surface is cross-discipline inconsistency:
+    the architectural, structural, fire and services drawings of one storey must
+    agree. Unlike the level/datum slice, this does NOT require datum anchors —
+    the comparison is visual (does a wall on the arch plan appear on the fire
+    plan; does a beam clash with a door). A set is kept only when the same level
+    carries at least two *distinct* disciplines.
+    """
+    if len(views) < 2:
+        return []
+
+    by_level: dict[str, list[ViewRecord]] = {}
+    for v in views:
+        lvl = _norm_level(v.level_id)
+        if lvl:
+            by_level.setdefault(lvl, []).append(v)
+
+    candidates: list[ComparisonSet] = []
+    for members in by_level.values():
+        disciplines = {
+            v.discipline for v in members if v.discipline and v.discipline != "unknown"
+        }
+        if len(members) < 2 or len(disciplines) < 2:
+            continue
+        ordered = sorted(members, key=lambda v: v.page)
+        candidates.append(
+            ComparisonSet(
+                region_label=ordered[0].level_id or _region_label(ordered),
+                pages=[v.page for v in ordered],
+                link_types=["coordination"],
+                reason=(
+                    f"Same level ({ordered[0].level_id}) across disciplines: "
+                    + ", ".join(f"{v.discipline} (p{v.page})" for v in ordered)
+                ),
+                views=ordered,
+                kind="coordination",
+            )
+        )
+
+    # Prefer sets spanning more disciplines, then larger sets.
+    candidates.sort(
+        key=lambda cs: (len({v.discipline for v in cs.views}), len(cs.pages)),
+        reverse=True,
+    )
+    kept: list[ComparisonSet] = []
+    for cs in candidates:
+        if len(cs.pages) > max_set_size:
+            cs.pages = cs.pages[:max_set_size]
+            cs.views = cs.views[:max_set_size]
+        kept.append(cs)
+    return kept[:max_sets]
 
 
 def _region_label(views: list[ViewRecord]) -> str:

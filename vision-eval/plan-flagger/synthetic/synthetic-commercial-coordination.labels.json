@@ -1,0 +1,23 @@
+{
+  "plan_id": "synthetic-commercial-coordination",
+  "bca": "ccc",
+  "project_type": "commercial_office",
+  "ground_truth_flags": [
+    {
+      "category": "documentation:plans:design_coordination",
+      "severity": "must_resolve",
+      "page": 2,
+      "area_hint": "door schedule FRR",
+      "rationale": "Door schedule has no FRR column but a fire sheet is present.",
+      "detector": "doc_rule:fire_door_schedule_gap"
+    },
+    {
+      "category": "documentation:plans:design_coordination",
+      "severity": "must_resolve",
+      "page": 4,
+      "area_hint": "duct crosses fire wall",
+      "rationale": "M-101 duct crosses the F-101 fire-rated wall with no damper.",
+      "detector": "coordination_pass (plan_coordination_enabled)"
+    }
+  ]
+}

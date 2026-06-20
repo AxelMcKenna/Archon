@@ -85,6 +85,12 @@ class Settings(BaseSettings):
     plan_cross_view_max_set_size: int = 5
     plan_cross_view_max_sets: int = 12
 
+    # Cross-discipline coordination pass (Phase 6): compares same-level sheets of
+    # different disciplines (arch vs structural vs fire vs MEP) for coordination
+    # conflicts. Reuses the cross-view set caps. Gated off by default until
+    # validated against real commercial multi-discipline drawing sets.
+    plan_coordination_enabled: bool = False
+
     # OCR fallback (RapidOCR/PP-OCRv4) for flags whose verbatim_quote isn't
     # in the PDF text layer — typical when CAD vectorises drawing labels.
     # Disable to skip the refinement step (e.g. local dev without OCR

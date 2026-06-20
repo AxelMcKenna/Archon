@@ -29,6 +29,8 @@ from app.vision.plans.schema import ACTIVE_RECONCILIATION_PROMPT, RECONCILIATION
 log = logging.getLogger(__name__)
 
 CROSS_VIEW_CATEGORY = "consistency:level_datum"
+COORDINATION_CATEGORY = "documentation:plans:design_coordination"
+ACTIVE_COORDINATION_PROMPT = "plan_coordination_v1.md"
 
 
 def _view_records_block(cs: ComparisonSet) -> str:
@@ -38,6 +40,7 @@ def _view_records_block(cs: ComparisonSet) -> str:
                 "page": v.page,
                 "sheet_number": v.sheet_number,
                 "view_type": v.view_type,
+                "discipline": v.discipline,
                 "level_id": v.level_id,
                 "datums": [
                     {
@@ -66,7 +69,9 @@ def _citation(d: dict[str, Any], key: str) -> dict[str, Any] | None:
     return {"page": page, "verbatim_quote": quote, "bbox": bbox}
 
 
-def _to_flag(disc: dict[str, Any], cs: ComparisonSet) -> dict[str, Any] | None:
+def _to_flag(
+    disc: dict[str, Any], cs: ComparisonSet, category: str = CROSS_VIEW_CATEGORY
+) -> dict[str, Any] | None:
     """Map one reconciliation discrepancy onto a cross-view flag dict.
 
     Returns ``None`` (dropped) when either citation is ungrounded, the two
@@ -95,7 +100,7 @@ def _to_flag(disc: dict[str, Any], cs: ComparisonSet) -> dict[str, Any] | None:
         "tile": "full",
         "bbox": a["bbox"],
         "area": area[:200],
-        "category": CROSS_VIEW_CATEGORY,
+        "category": category,
         "severity": disc.get("severity", "must_resolve"),
         "confidence": disc.get("confidence", "medium"),
         "verbatim_quote": a["verbatim_quote"],
@@ -117,8 +122,13 @@ def reconcile_set(
     *,
     images_by_page: dict[int, list[RenderedImage]],
     metrics: Metrics,
+    prompt_key: str = ACTIVE_RECONCILIATION_PROMPT,
+    category: str = CROSS_VIEW_CATEGORY,
 ) -> list[dict[str, Any]]:
-    """Run one reconciliation call for a comparison set. Returns cross-view flags."""
+    """Run one reconciliation call for a comparison set. Returns cross-view flags.
+
+    ``prompt_key``/``category`` select the slice: the default level/datum pass,
+    or the cross-discipline coordination pass."""
     images: list[bytes] = []
     captions: list[str] = []
     for page in cs.pages:
@@ -128,7 +138,7 @@ def reconcile_set(
     if not images:
         return []
 
-    template, _ = load_prompt(ACTIVE_RECONCILIATION_PROMPT)
+    template, _ = load_prompt(prompt_key)
     prompt = fill(template, view_records=_view_records_block(cs))
 
     settings = get_settings()
@@ -142,13 +152,13 @@ def reconcile_set(
             max_output_tokens=4000,
         )
     except Exception as exc:  # noqa: BLE001
-        log.warning("cross-view reconciliation failed for %s: %s", cs.region_label, exc)
+        log.warning("reconciliation failed for %s: %s", cs.region_label, exc)
         return []
     metrics.input_tokens += in_t
     metrics.output_tokens += out_t
 
     discrepancies = payload.get("discrepancies") or []
-    flags = [f for d in discrepancies if (f := _to_flag(d, cs)) is not None]
+    flags = [f for d in discrepancies if (f := _to_flag(d, cs, category)) is not None]
     return flags
 
 
@@ -158,13 +168,21 @@ def reconcile_sets(
     images_by_page: dict[int, list[RenderedImage]],
     metrics: Metrics,
     concurrency: int = 4,
+    prompt_key: str = ACTIVE_RECONCILIATION_PROMPT,
+    category: str = CROSS_VIEW_CATEGORY,
 ) -> list[dict[str, Any]]:
     """Reconcile every comparison set, in parallel. Returns all cross-view flags."""
     if not sets:
         return []
 
     def _process(cs: ComparisonSet) -> list[dict[str, Any]]:
-        return reconcile_set(cs, images_by_page=images_by_page, metrics=metrics)
+        return reconcile_set(
+            cs,
+            images_by_page=images_by_page,
+            metrics=metrics,
+            prompt_key=prompt_key,
+            category=category,
+        )
 
     if len(sets) == 1 or concurrency == 1:
         results = [_process(cs) for cs in sets]

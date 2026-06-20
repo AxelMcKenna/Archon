@@ -32,8 +32,12 @@ from app.plans.bbox import attach_page_bbox
 from app.plans.bbox_refiner import refine_flag_bboxes
 from app.plans.ocr_refiner import refine_via_ocr
 from app.plans.prompt import taxonomy_block
-from app.plans.reconcile import reconcile_sets
-from app.plans.registration import build_comparison_sets
+from app.plans.reconcile import (
+    ACTIVE_COORDINATION_PROMPT,
+    COORDINATION_CATEGORY,
+    reconcile_sets,
+)
+from app.plans.registration import build_comparison_sets, build_coordination_sets
 from app.plans.views import ViewRecord, build_view_record, seed_hint
 from app.plans.vote import dedup_cross_view, dedup_flags, vote_flags, vote_key
 from app.taxonomy import get_taxonomy
@@ -44,9 +48,51 @@ from app.vision.plans.vision_pass import run_single_vision_pass, verify_flags
 
 log = logging.getLogger(__name__)
 
-ANALYSIS_VERSION = "2.3.0"
+ANALYSIS_VERSION = "2.4.0"
 # Back-compat: routes/tests still import ANALYSER_VERSION.
 ANALYSER_VERSION = ANALYSIS_VERSION
+
+# Per-discipline focus hint appended to the analyser prompt for a sheet, so the
+# model checks what actually drives RFIs on that discipline's drawings. Keyed on
+# the discipline resolved from the sheet code / title (see plan_text.py).
+_DISCIPLINE_FOCUS: dict[str, str] = {
+    "fire": (
+        "Discipline focus — this is a FIRE sheet. Prioritise means of escape "
+        "(occupant load, travel/dead-end distances, exit and door widths, number "
+        "of exits), fire compartmentation and fire resistance ratings (FRR), and "
+        "fire safety systems (sprinklers, alarms, emergency lighting). For non-SH "
+        "risk groups assess against C/AS2 or a C/VM2 alternative solution."
+    ),
+    "structural": (
+        "Discipline focus — this is a STRUCTURAL sheet. Prioritise B1: load paths, "
+        "foundation/geotech coordination, member sizes and connections, and "
+        "importance-level design (seismic/wind) where IL2-IL4 applies. Expect "
+        "PS1/PS4 from a CPEng and specific engineering design for higher IL."
+    ),
+    "mechanical": (
+        "Discipline focus — this is a MECHANICAL sheet. Prioritise G4 ventilation: "
+        "mechanical ventilation rates / air changes for the assessed occupancy, "
+        "contaminant-space extract (kitchens, carparks), and a mechanical PS1."
+    ),
+    "electrical": (
+        "Discipline focus — this is an ELECTRICAL sheet. Prioritise G9 and the fire "
+        "systems shown here (emergency lighting F6, detection/alarm), plus H1.3.5 "
+        "artificial-lighting energy efficiency for larger buildings."
+    ),
+    "hydraulic": (
+        "Discipline focus — this is a HYDRAULIC / PLUMBING sheet. Prioritise G12 "
+        "water supplies (backflow), G13 foul water / drainage, and G1 sanitary "
+        "fixture provision sized by occupancy for commercial buildings."
+    ),
+    "civil": (
+        "Discipline focus — this is a CIVIL sheet. Prioritise E1 surface water, site "
+        "levels / datum, network-utility capacity and lawful stormwater outfall."
+    ),
+    "geotech": (
+        "Discipline focus — this is a GEOTECH sheet. Prioritise B1 foundations, "
+        "Canterbury TC1/TC2/TC3 zoning, liquefaction and the geotech PS1."
+    ),
+}
 
 
 def analyse_plan(
@@ -165,6 +211,10 @@ def analyse_plan(
         metrics=metrics,
         seed_by_page=seed_by_page if cross_view_on else None,
         risk_group=risk_group,
+        discipline_by_page={
+            p: str(m.get("discipline") or "")
+            for p, m in text_extraction.page_metadata().items()
+        },
     )
 
     # Aggregate across sheets.
@@ -225,8 +275,43 @@ def analyse_plan(
             len(cross_view_flags),
         )
 
+        # Cross-discipline coordination (Phase 6) — same-level sheets of
+        # different disciplines. Gated off by default; reuses the cross-view
+        # set caps, two-citation flag shape and dedup.
+        if settings.plan_coordination_enabled:
+            coordination_sets = build_coordination_sets(
+                view_records,
+                max_set_size=settings.plan_cross_view_max_set_size,
+                max_sets=settings.plan_cross_view_max_sets,
+            )
+            coordination_flags = dedup_cross_view(
+                reconcile_sets(
+                    coordination_sets,
+                    images_by_page=images_by_page,
+                    metrics=metrics,
+                    prompt_key=ACTIVE_COORDINATION_PROMPT,
+                    category=COORDINATION_CATEGORY,
+                )
+            )
+            cross_view_flags = cross_view_flags + coordination_flags
+            log.info(
+                "coordination: %d sets, %d flags",
+                len(coordination_sets),
+                len(coordination_flags),
+            )
+
     # --- Phase D: merge with rule flags ----------------------------------
     merged_flags = attach_page_bbox(rule_flags) + all_kept + cross_view_flags
+
+    # Tag each flag with the discipline + sheet label of its page (from the
+    # PDF text layer) so commercial multi-discipline sets can be filtered and
+    # so the design-coordination pass has discipline context.
+    page_meta = text_extraction.page_metadata()
+    for flag in merged_flags:
+        meta = page_meta.get(flag.get("page"))
+        if meta:
+            flag.setdefault("discipline", meta.get("discipline"))
+            flag.setdefault("sheet_label", meta.get("sheet_label"))
 
     # --- Phase E: snap to PDF text layer ---------------------------------
     merged_flags = refine_flag_bboxes(
@@ -277,6 +362,7 @@ def _run_sheets_parallel(
     metrics: Metrics,
     seed_by_page: dict[int, str] | None = None,
     risk_group: str = "",
+    discipline_by_page: dict[int, str] | None = None,
 ) -> list[dict[str, Any]]:
     """Process sheets concurrently. Returns one result dict per sheet."""
     settings = get_settings()
@@ -285,12 +371,17 @@ def _run_sheets_parallel(
         captions = [caption_str(img) for img in sheet.images]
         image_pngs = [img.png for img in sheet.images]
         # Per-sheet prompt: append the deterministic view-type hint when
-        # cross-view is on (seed_by_page is None otherwise).
+        # cross-view is on, then a discipline-focus hint so the model checks
+        # what matters for this sheet's discipline (fire / structural / MEP).
         sheet_prompt = prompt
         if seed_by_page:
             hint = seed_by_page.get(sheet.page)
             if hint:
-                sheet_prompt = prompt + "\n\n" + hint
+                sheet_prompt = sheet_prompt + "\n\n" + hint
+        if discipline_by_page:
+            focus = _DISCIPLINE_FOCUS.get(discipline_by_page.get(sheet.page, ""))
+            if focus:
+                sheet_prompt = sheet_prompt + "\n\n" + focus
 
         # N vision passes on this sheet (sequential within the sheet — the
         # cross-sheet ThreadPoolExecutor already gives us parallelism, and

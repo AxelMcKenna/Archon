@@ -92,8 +92,50 @@ def flag_revision_mismatch(
     ]
 
 
+def flag_fire_door_schedule_gap(
+    extraction: PlanTextExtraction,
+) -> list[dict[str, Any]]:
+    """A fire sheet is present and a door schedule exists, but the door
+    schedule shows no fire-rating column. Low-false-positive coordination gap:
+    fire-rated buildings need their door FRRs documented on the schedule."""
+    has_fire_sheet = any(
+        e.discipline == "fire" for e in extraction.drawing_register
+    ) or any(tb.discipline == "fire" for tb in extraction.title_blocks)
+    if not has_fire_sheet:
+        return []
+    door = next((s for s in extraction.schedules if s.kind == "door"), None)
+    if door is None:
+        return []
+    header_text = " ".join(door.header).lower()
+    if any(k in header_text for k in ("fire", "frr", "rating")):
+        return []
+    return [
+        {
+            "page": door.page,
+            "tile": "full",
+            "area": f"Door schedule, sheet page {door.page}",
+            "category": "documentation:plans:design_coordination",
+            "severity": "must_resolve",
+            "confidence": "medium",
+            "verbatim_quote": " ".join(door.header)[:200],
+            "reason": (
+                "The set includes fire-rated construction (a fire sheet is "
+                "present) but the door schedule has no fire-resistance-rating "
+                "column. The BCA will RFI to confirm fire-door FRRs against the "
+                "fire plan."
+            ),
+            "recommended_action": (
+                "Add an FRR column to the door schedule and confirm fire-door "
+                "ratings match the fire compartmentation plan."
+            ),
+            "_rule": "fire_door_schedule_gap",
+        }
+    ]
+
+
 def run_doc_rules(extraction: PlanTextExtraction) -> list[dict[str, Any]]:
     flags: list[dict[str, Any]] = []
     flags.extend(flag_missing_sheets(extraction.drawing_register, extraction.title_blocks))
     flags.extend(flag_revision_mismatch(extraction.title_blocks))
+    flags.extend(flag_fire_door_schedule_gap(extraction))
     return flags
