@@ -256,6 +256,13 @@ const FORMAT_LABEL: Record<Row["format"], string> = {
   spec: "SPEC",
 };
 
+// Material datasheets share the "spec" format (same table) but get their own
+// badge so the list and the selected-row header agree.
+function rowLabel(r: Row): string {
+  if (r.format === "spec" && r.doc_kind === "material") return "MATERIAL";
+  return FORMAT_LABEL[r.format];
+}
+
 function rowQuery(r: Row): { plan: string } | { cad: string } | { spec: string } {
   if (r.format === "pdf") return { plan: r.id };
   if (r.format === "dxf") return { cad: r.id };
@@ -321,9 +328,7 @@ function RowsList({
               <div className="min-w-0">
                 <p className="font-medium text-ink-900 truncate">
                   <span className="inline-block mr-2 text-[10px] font-semibold tracking-wide rounded-sm bg-ink-100 text-ink-700 px-1.5 py-0.5">
-                    {r.format === "spec" && r.doc_kind === "material"
-                      ? "MATERIAL"
-                      : FORMAT_LABEL[r.format]}
+                    {rowLabel(r)}
                   </span>
                   {r.filename}
                 </p>
@@ -365,7 +370,7 @@ function SelectedHeader({ row, projectId }: { row: Row; projectId: string }) {
     <div className="flex items-baseline justify-between flex-wrap gap-2">
       <div className="space-y-1">
         <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
-          {FORMAT_LABEL[row.format]}
+          {rowLabel(row)}
         </p>
         <h2 className="text-xl font-semibold tracking-tight text-ink-900">{row.filename}</h2>
       </div>
