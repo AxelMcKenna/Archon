@@ -162,6 +162,14 @@ export default async function ProjectDrawings({
     typeof CoordinationPanel
   >[0]["run"];
 
+  // How many cross-document issues reference each document, so the Documents
+  // list can show a per-row "linked" badge and make cross-referencing visible.
+  const crossRefCounts: Record<string, number> = {};
+  for (const f of coordinationFlags) {
+    const ids = new Set((f.citations ?? []).map((c) => c.source_id));
+    for (const id of ids) crossRefCounts[id] = (crossRefCounts[id] ?? 0) + 1;
+  }
+
   const selected: Row | null = cadId
     ? cadRows.find((c) => c.id === cadId) ?? null
     : specId
@@ -217,7 +225,12 @@ export default async function ProjectDrawings({
         <h2 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
           Documents ({rows.length})
         </h2>
-        <RowsList rows={rows} active={selected?.id} projectId={projectId} />
+        <RowsList
+          rows={rows}
+          active={selected?.id}
+          projectId={projectId}
+          crossRefCounts={crossRefCounts}
+        />
       </section>
 
       <CoordinationPanel
@@ -273,10 +286,12 @@ function RowsList({
   rows,
   active,
   projectId,
+  crossRefCounts,
 }: {
   rows: Row[];
   active?: string;
   projectId: string;
+  crossRefCounts: Record<string, number>;
 }) {
   if (!rows.length) {
     return (
@@ -331,6 +346,15 @@ function RowsList({
                     {rowLabel(r)}
                   </span>
                   {r.filename}
+                  {crossRefCounts[r.id] > 0 && (
+                    <span
+                      className="ml-2 inline-flex items-center gap-1 text-[10px] font-semibold rounded-sm bg-sky-100 text-sky-800 px-1.5 py-0.5 align-middle"
+                      title={`${crossRefCounts[r.id]} cross-document issue(s) reference this document`}
+                    >
+                      ↔ {crossRefCounts[r.id]} cross-ref
+                      {crossRefCounts[r.id] === 1 ? "" : "s"}
+                    </span>
+                  )}
                 </p>
                 <p className="text-xs text-ink-500 mt-0.5">
                   {bcaName} · {new Date(r.created_at).toLocaleDateString()} ·{" "}

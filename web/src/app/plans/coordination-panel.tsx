@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { taxonomy } from "@arro/shared";
@@ -199,14 +199,19 @@ function CoordFlagCard({
         </p>
       )}
       {f.citations.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-3 flex items-center flex-wrap gap-2 rounded-sm bg-white/50 px-2.5 py-2">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-ink-500">
+            Cross-reference
+          </span>
           {f.citations.map((c, i) => (
-            <CitationChip
-              key={`${c.source_id}-${i}`}
-              citation={c}
-              projectId={projectId}
-              colour={sevColour}
-            />
+            <Fragment key={`${c.source_id}-${i}`}>
+              {i > 0 && (
+                <span className="text-ink-400 font-bold px-0.5" aria-hidden>
+                  ↔
+                </span>
+              )}
+              <CitationChip citation={c} projectId={projectId} colour={sevColour} />
+            </Fragment>
           ))}
         </div>
       )}

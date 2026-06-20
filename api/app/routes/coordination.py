@@ -50,7 +50,7 @@ async def recheck(
     _assert_project(db, project_id)
     try:
         result = await asyncio.to_thread(
-            run_project_coordination, db, str(project_id)
+            run_project_coordination, db, str(project_id), tier2="off"
         )
     except Exception as e:
         log.exception("coordination recheck failed (project_id=%s)", project_id)
@@ -70,13 +70,13 @@ async def deep_check(
     project_id: UUID,
     db: Client = Depends(get_db),
 ) -> dict[str, Any]:
-    """Run the LLM Tier-2 reconciliation (S4). Gated until validated."""
+    """Run the LLM Tier-2 reconciliation (force). Requires the feature gate."""
     if not get_settings().spec_coordination_enabled:
         raise HTTPException(409, "deep cross-check is not enabled")
     _assert_project(db, project_id)
     try:
         result = await asyncio.to_thread(
-            run_project_coordination, db, str(project_id), run_tier2=True
+            run_project_coordination, db, str(project_id), tier2="force"
         )
     except Exception as e:
         log.exception("coordination deep-check failed (project_id=%s)", project_id)
