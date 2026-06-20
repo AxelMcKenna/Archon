@@ -21,6 +21,7 @@ from uuid import uuid4
 
 from supabase import Client
 
+from app.coordination.engine import run_project_coordination_safe
 from app.extractors.spec_rules import run_spec_rules
 from app.extractors.spec_text import extract_spec_text
 from app.services.analysis_runner import content_hash as hash_bytes
@@ -119,6 +120,10 @@ def upload_and_analyse(
     replace_spec_flags(
         db, spec_document_id=spec_id, project_id=project_id, flags=flags
     )
+
+    # The project is one related set — refresh cross-document coordination now
+    # that this spec landed (deterministic + fail-open, never blocks the upload).
+    run_project_coordination_safe(db, project_id)
 
     return SpecAnalysisResult(
         spec_id=spec_id,

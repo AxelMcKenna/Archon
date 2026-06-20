@@ -9,6 +9,7 @@ import { CadReview } from "@/app/plans/cad-review";
 import { SpecReview } from "@/app/plans/spec-review";
 import { DeleteRowButton } from "@/app/plans/delete-row-button";
 import { DeleteSpecButton } from "@/app/plans/delete-spec-button";
+import { CoordinationPanel } from "@/app/plans/coordination-panel";
 import { DrawingsSubnav } from "@/components/drawings-subnav";
 import { effectiveStatus } from "@/lib/job-status";
 
@@ -87,34 +88,50 @@ export default async function ProjectDrawings({
     .single();
   if (!project) notFound();
 
-  const [{ data: plansRaw }, { data: cadsRaw }, { data: specsRaw }] =
-    await Promise.all([
-      supabase
-        .from("plan_uploads")
-        .select(
-          "id, project_id, filename, status, analyser_version, analysis_version, prompt_version, " +
-            "processing_ms, cost_usd, analysis, created_at, " +
-            "projects(address, bca, project_type)",
-        )
-        .eq("project_id", projectId)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("cad_uploads")
-        .select(
-          "id, project_id, filename, status, processing_ms, analysis, created_at, " +
-            "projects(address, bca, project_type)",
-        )
-        .eq("project_id", projectId)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("spec_documents")
-        .select(
-          "id, project_id, filename, status, processing_ms, flags_count, analysis, created_at, " +
-            "projects(address, bca, project_type)",
-        )
-        .eq("project_id", projectId)
-        .order("created_at", { ascending: false }),
-    ]);
+  const [
+    { data: plansRaw },
+    { data: cadsRaw },
+    { data: specsRaw },
+    { data: coordFlagsRaw },
+    { data: coordRunRaw },
+  ] = await Promise.all([
+    supabase
+      .from("plan_uploads")
+      .select(
+        "id, project_id, filename, status, analyser_version, analysis_version, prompt_version, " +
+          "processing_ms, cost_usd, analysis, created_at, " +
+          "projects(address, bca, project_type)",
+      )
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("cad_uploads")
+      .select(
+        "id, project_id, filename, status, processing_ms, analysis, created_at, " +
+          "projects(address, bca, project_type)",
+      )
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("spec_documents")
+      .select(
+        "id, project_id, filename, status, processing_ms, flags_count, analysis, created_at, " +
+          "projects(address, bca, project_type)",
+      )
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("project_coordination_flags")
+      .select(
+        "id, category, severity, confidence, area, reason, recommended_action, rule, tier, citations",
+      )
+      .eq("project_id", projectId),
+    supabase
+      .from("project_coordination_runs")
+      .select("ran_at, flags_count")
+      .eq("project_id", projectId)
+      .maybeSingle(),
+  ]);
 
   // Drawings uploaded from the value-engineering page are stored without an
   // RFI analysis (status 'uploaded'). They belong to the VE page only, so the
@@ -131,6 +148,18 @@ export default async function ProjectDrawings({
   const rows: Row[] = [...pdfRows, ...cadRows, ...specRows].sort((a, b) =>
     a.created_at < b.created_at ? 1 : -1,
   );
+
+  // Coordination compares analysed drawings + analysed specs (mirrors the
+  // engine's gather). cad rows don't contribute claims yet, so they're excluded.
+  const coordinationDocCount =
+    pdfRows.filter((r) => r.status === "analysed").length +
+    specRows.filter((r) => r.status === "analysed").length;
+  const coordinationFlags = (coordFlagsRaw ?? []) as unknown as Parameters<
+    typeof CoordinationPanel
+  >[0]["flags"];
+  const coordinationRun = (coordRunRaw ?? null) as Parameters<
+    typeof CoordinationPanel
+  >[0]["run"];
 
   const selected: Row | null = cadId
     ? cadRows.find((c) => c.id === cadId) ?? null
@@ -183,6 +212,13 @@ export default async function ProjectDrawings({
         </h2>
         <RowsList rows={rows} active={selected?.id} projectId={projectId} />
       </section>
+
+      <CoordinationPanel
+        projectId={projectId}
+        flags={coordinationFlags}
+        run={coordinationRun}
+        documentCount={coordinationDocCount}
+      />
 
       {selected && (
         <section className="space-y-4 pt-8 border-t border-ink-200/70">

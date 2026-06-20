@@ -394,6 +394,10 @@ def analyse_plan(
         "summary": summary,
         "taxonomy_version": tx.get("schema_version", "1.0"),
         "pages_analysed": pages_analysed,
+        # Persist the PDF text-layer extraction (schedules / register /
+        # discipline-tagged title blocks) so the project coordination engine can
+        # cross-reference this drawing against the spec without re-parsing.
+        "text_extraction": text_extraction.to_prompt_block(),
         "truncated": False,
         "verification": verification_status_final,
         "_debug_runs": runs_debug,

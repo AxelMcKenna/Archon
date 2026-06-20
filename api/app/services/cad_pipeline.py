@@ -17,6 +17,7 @@ from supabase import Client
 
 from app.cad.cad_analyzer import CAD_ANALYSIS_VERSION, analyse_cad
 from app.cad.cad_ops import apply_ops, apply_ops_with_delta, parse_ops
+from app.coordination.engine import run_project_coordination_safe
 from app.storage import CAD_BUCKET, download, signed_url, upload_cad
 
 
@@ -141,6 +142,9 @@ def upload_and_analyse(
         detail=f"{flags_count} flag(s) across {entity_count} entities",
         sid=cad_sid,
     )
+
+    # Keep the project's cross-document coordination current (fail-open).
+    run_project_coordination_safe(db, project_id)
 
     return CadAnalysisResult(
         cad_id=cad_id,

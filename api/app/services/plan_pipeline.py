@@ -23,6 +23,7 @@ from uuid import uuid4
 from supabase import Client
 
 from app.config import get_settings
+from app.coordination.engine import run_project_coordination_safe
 from app.plans import ANALYSIS_VERSION, analyse_plan
 from app.plans.flags_store import replace_plan_flags
 from app.services.analysis_runner import (
@@ -229,6 +230,10 @@ def upload_and_analyse(
         db, plan_upload_id=plan_id, project_id=project_id, flags=flags
     )
     emit("Saved flags to project", detail=f"{len(flags)} flag(s)")
+
+    # Refresh cross-document coordination now this drawing's flags are stored
+    # (deterministic + fail-open; never blocks the analysis result).
+    run_project_coordination_safe(db, project_id)
 
     return PlanAnalysisResult(
         plan_id=plan_id,
