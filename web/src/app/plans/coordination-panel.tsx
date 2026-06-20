@@ -36,10 +36,18 @@ const SEV_RANK: Record<CoordFlag["severity"], number> = {
   nice_to_have: 1,
 };
 
-const KIND_META: Record<Citation["source_kind"], { label: string; dot: string }> = {
-  spec: { label: "Spec", dot: "bg-violet-500" },
-  material: { label: "Material", dot: "bg-amber-500" },
-  drawing: { label: "Drawing", dot: "bg-ink-400" },
+// Colour == document type, used consistently with the Documents list badges and
+// the project summary, so a pill is obviously the same document you see there.
+const KIND_META: Record<
+  Citation["source_kind"],
+  { label: string; pill: string }
+> = {
+  spec: { label: "Spec", pill: "bg-violet-100 text-violet-800 border-violet-200" },
+  material: {
+    label: "Material",
+    pill: "bg-amber-100 text-amber-800 border-amber-200",
+  },
+  drawing: { label: "Drawing", pill: "bg-ink-100 text-ink-700 border-ink-200" },
 };
 
 function prettyDoc(name: string): string {
@@ -206,11 +214,14 @@ function CoordFlagCard({
       )}
 
       {f.citations.length > 0 && (
-        <div className="mt-3 flex items-center flex-wrap gap-1.5">
+        <div className="mt-3 inline-flex max-w-full items-center gap-2 flex-wrap rounded-md border border-ink-700/10 bg-ink-50/70 px-2.5 py-1.5">
           {f.citations.map((c, i) => (
             <Fragment key={`${c.source_id}-${i}`}>
               {i > 0 && (
-                <span className="text-ink-300 px-0.5" aria-hidden>
+                <span
+                  className="text-ink-400 text-sm font-semibold"
+                  aria-hidden
+                >
                   ↔
                 </span>
               )}
@@ -242,14 +253,13 @@ function DocPill({
     : null;
   const inner = (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full border border-ink-700/10 bg-ink-50 pl-2 pr-2.5 py-1 text-xs hover:bg-ink-100 transition-colors"
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs hover:brightness-95 transition ${meta.pill}`}
       title={c.quote || c.filename}
     >
-      <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} aria-hidden />
-      <span className="text-[10px] font-semibold uppercase tracking-wide text-ink-500">
+      <span className="text-[10px] font-bold uppercase tracking-wide opacity-70">
         {meta.label}
       </span>
-      <span className="text-ink-700 truncate max-w-[12rem]">
+      <span className="font-medium truncate max-w-[12rem]">
         {prettyDoc(c.filename)}
       </span>
     </span>

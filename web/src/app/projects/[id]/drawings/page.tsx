@@ -319,6 +319,17 @@ function rowLabel(r: Row): string {
   return FORMAT_LABEL[r.format];
 }
 
+// Badge colour == document type, matching the coordination pills + project
+// summary so a document is recognisable by colour everywhere it appears.
+function rowBadgeStyle(r: Row): string {
+  if (r.format === "spec") {
+    return r.doc_kind === "material"
+      ? "bg-amber-100 text-amber-800"
+      : "bg-violet-100 text-violet-800";
+  }
+  return "bg-ink-100 text-ink-700"; // PDF / DXF drawings
+}
+
 function rowQuery(r: Row): { plan: string } | { cad: string } | { spec: string } {
   if (r.format === "pdf") return { plan: r.id };
   if (r.format === "dxf") return { cad: r.id };
@@ -385,7 +396,9 @@ function RowsList({
             >
               <div className="min-w-0">
                 <p className="font-medium text-ink-900 truncate">
-                  <span className="inline-block mr-2 text-[10px] font-semibold tracking-wide rounded-sm bg-ink-100 text-ink-700 px-1.5 py-0.5">
+                  <span
+                    className={`inline-block mr-2 text-[10px] font-semibold tracking-wide rounded-sm px-1.5 py-0.5 ${rowBadgeStyle(r)}`}
+                  >
                     {rowLabel(r)}
                   </span>
                   {r.filename}
