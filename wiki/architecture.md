@@ -2,6 +2,8 @@
 
 Two views: the **system** (services, storage, deploy targets) and the **AI pipeline** (how a document moves through extraction, classification, drafting, and the agent loop).
 
+> For an exhaustive, file-by-file reference of the RFI engine (pipelines, MBIE grounding, data model, API surface, streaming, function references, diagrams), see [rfi-engine.md](rfi-engine.md).
+
 ## System
 
 ```mermaid
