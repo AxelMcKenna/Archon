@@ -15,6 +15,7 @@ import json
 from collections.abc import AsyncIterator
 from typing import Any
 
+from app.history import trim_history
 from app.llm.openrouter_chat import stream_chat
 from app.prompts.system import build_system_messages
 from app.tools import execute_tool, openai_tool_definitions
@@ -35,10 +36,13 @@ async def run_agent(
 
     for _iteration in range(MAX_TOOL_ITERATIONS):
         # Rebuild the wire payload each turn: fresh system prompt (tab can
-        # change between user turns) + the persisted history.
+        # change between user turns) + the persisted history. ``trim_history``
+        # bounds the wire size — old fat tool results (200-flag blobs) are
+        # shed so a long session doesn't grow the prompt without limit. The
+        # persisted ``history`` itself is left intact.
         wire_messages = build_system_messages(
             project_id=project_id, tab=tab, route=route
-        ) + history
+        ) + trim_history(history)
 
         assistant_text_parts: list[str] = []
         completed_tool_calls: list[dict[str, Any]] = []
