@@ -44,7 +44,7 @@ export default async function ProjectValueEngineering({
   return (
     <>
       <DrawingsSubnav projectId={projectId} />
-      <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
+      <div className="max-w-[1700px] mx-auto px-8 py-10 space-y-10">
         <header className="space-y-1.5">
           <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
             Cost optimisation

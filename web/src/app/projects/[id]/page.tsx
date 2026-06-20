@@ -153,7 +153,7 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
   const drawingsTotal = (drawingCount ?? 0) + (cadCount ?? 0);
 
   return (
-    <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
+    <div className="max-w-[1700px] mx-auto px-8 py-10 space-y-10">
       <header className="space-y-3">
         <p className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-ink-500">
           <span className="inline-block h-1 w-1 rounded-full bg-accent" />

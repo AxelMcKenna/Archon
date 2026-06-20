@@ -724,7 +724,7 @@ export function CccTabClient({
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-4 px-4 py-6 sm:px-6">
+    <div className="mx-auto max-w-[1700px] space-y-4 px-4 py-6 sm:px-6">
       <header>
         <h1 className="text-2xl font-semibold text-ink-900">Code Compliance Certificate</h1>
         <p className="mt-1 text-sm text-ink-600">Project {projectDisplay} · Christchurch City Council</p>

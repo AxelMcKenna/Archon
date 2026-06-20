@@ -105,7 +105,7 @@ export function InspectionsPage({
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
+    <div className="max-w-[1700px] mx-auto px-8 py-10 space-y-10">
       <header className="space-y-3">
         <div className="space-y-3">
           <p className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-ink-500">
