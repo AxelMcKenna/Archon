@@ -151,7 +151,17 @@ function CoordFlagCard({
     <article className={`rounded-sm border p-4 ${SEV_STYLE[f.severity]}`}>
       <header className="flex items-baseline justify-between flex-wrap gap-2 mb-2">
         <p className="font-medium text-sm">{f.area}</p>
-        <span className="font-mono text-xs">{f.category}</span>
+        <div className="flex items-center gap-2">
+          {f.tier === "llm" && (
+            <span
+              className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-sm border border-sky-200 bg-sky-50 text-sky-700"
+              title="Surfaced by AI semantic review — confirm before relying on it."
+            >
+              AI
+            </span>
+          )}
+          <span className="font-mono text-xs">{f.category}</span>
+        </div>
       </header>
       {cat && <p className="text-xs text-ink-500 mb-2">{cat.label}</p>}
       {f.reason && <p className="text-sm">{f.reason}</p>}

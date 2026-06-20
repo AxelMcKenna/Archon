@@ -17,12 +17,16 @@ from typing import Any
 
 from supabase import Client
 
+from app.config import get_settings
 from app.coordination.claims import (
-    DocumentClaims,
     claims_from_drawing,
     claims_from_spec,
 )
 from app.coordination.flags_store import replace_project_coordination_flags
+from app.coordination.llm_reconcile import (
+    llm_flag_signature,
+    reconcile_documents_llm,
+)
 from app.coordination.rules import run_coordination_rules
 from app.extractors.plan_text import extract_plan_text
 from app.storage import PLANS_BUCKET, download
@@ -61,13 +65,16 @@ def _drawing_text_extraction(db: Client, row: dict[str, Any]) -> dict[str, Any]:
         return {}
 
 
-def gather_claims(db: Client, project_id: str) -> tuple[list[DocumentClaims], list[str]]:
-    """Build claims for every analysed spec + drawing in the project.
+# One document = (row, extraction_block). The block is the spec's
+# analysis.extraction or the drawing's plan_text to_prompt_block — the same
+# structured text Tier 1 builds claims from and Tier 2 feeds to the LLM.
+Document = tuple[dict[str, Any], dict[str, Any]]
 
-    Returns ``(claims, fingerprint_parts)`` where each fingerprint part is
-    ``"<id>:<content_hash>"`` so the caller can detect a changed document set.
-    """
-    specs = (
+
+def gather_documents(db: Client, project_id: str) -> tuple[list[Document], list[Document]]:
+    """Gather every analysed spec + drawing with its extraction block (one DB
+    pass; drawings re-parse the stored PDF only when text wasn't persisted)."""
+    spec_rows = (
         db.table("spec_documents")
         .select("id, filename, content_hash, analysis, status")
         .eq("project_id", project_id)
@@ -76,7 +83,7 @@ def gather_claims(db: Client, project_id: str) -> tuple[list[DocumentClaims], li
         .data
         or []
     )
-    drawings = (
+    draw_rows = (
         db.table("plan_uploads")
         .select("id, filename, content_hash, storage_path, mime_type, analysis, status")
         .eq("project_id", project_id)
@@ -85,23 +92,27 @@ def gather_claims(db: Client, project_id: str) -> tuple[list[DocumentClaims], li
         .data
         or []
     )
+    specs: list[Document] = [
+        (r, (r.get("analysis") or {}).get("extraction") or {}) for r in spec_rows
+    ]
+    drawings: list[Document] = [
+        (r, _drawing_text_extraction(db, r)) for r in draw_rows
+    ]
+    return specs, drawings
 
-    claims: list[DocumentClaims] = []
-    parts: list[str] = []
-    for s in specs:
-        claims.append(claims_from_spec(s))
-        parts.append(f"{s.get('id')}:{s.get('content_hash')}")
-    for d in drawings:
-        te = _drawing_text_extraction(db, d)
-        claims.append(claims_from_drawing(d, te))
-        parts.append(f"{d.get('id')}:{d.get('content_hash')}")
-    return claims, sorted(parts)
+
+def _fingerprint(specs: list[Document], drawings: list[Document]) -> str:
+    parts = [f"{r.get('id')}:{r.get('content_hash')}" for r, _ in specs + drawings]
+    return "|".join(sorted(parts))
 
 
 def run_project_coordination(db: Client, project_id: str) -> CoordinationResult:
     """Reconcile the project's document set and persist coordination flags."""
-    claims, parts = gather_claims(db, project_id)
-    fingerprint = "|".join(parts)
+    specs, drawings = gather_documents(db, project_id)
+    claims = [claims_from_spec(r) for r, _ in specs] + [
+        claims_from_drawing(r, b) for r, b in drawings
+    ]
+    fingerprint = _fingerprint(specs, drawings)
 
     # Nothing to reconcile until at least two documents exist. Clear any stale
     # flags and record an empty run so the UI shows an honest "in sync" state.
@@ -117,7 +128,19 @@ def run_project_coordination(db: Client, project_id: str) -> CoordinationResult:
         )
 
     flags = run_coordination_rules(claims)
-    # Tier 2 (LLM) plugs in here, gated by settings.spec_coordination_enabled.
+
+    # Tier 2 — LLM semantic reconciliation of spec <-> drawing. Gated off by
+    # default; deduped against the Tier-1 flags it would otherwise restate.
+    settings = get_settings()
+    if settings.spec_coordination_enabled and specs and drawings:
+        seen = {llm_flag_signature(f) for f in flags}
+        for lf in reconcile_documents_llm(
+            specs=specs, drawings=drawings, settings=settings
+        ):
+            sig = llm_flag_signature(lf)
+            if sig not in seen:
+                seen.add(sig)
+                flags.append(lf)
 
     replace_project_coordination_flags(db, project_id=project_id, flags=flags)
     _record_run(db, project_id, fingerprint, len(flags))
