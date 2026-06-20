@@ -9,6 +9,11 @@ const projectTypeLabels: Record<string, string> = {
   extension: "Extension",
   accessory: "Accessory Building",
   deck: "Deck",
+  multi_unit_residential: "Multi-unit residential",
+  commercial_office: "Commercial — office",
+  retail: "Commercial — retail / hospitality",
+  industrial: "Industrial / warehouse",
+  mixed_use: "Mixed-use",
 };
 
 export default async function Settings() {

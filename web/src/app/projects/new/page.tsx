@@ -3,7 +3,14 @@ import { getSupabaseServer } from "@/lib/supabase/server";
 import { taxonomy } from "@arro/shared";
 import { ProjectCreateButton } from "@/components/project-create-button";
 import { AddressAutocompleteInput } from "@/components/address-autocomplete-input";
+import { ProjectTypeOccupancyFields } from "@/components/project-type-occupancy-fields";
 import { bootstrapConsentAssessment } from "@/lib/consent-assessment-bootstrap";
+import {
+  defaultImportanceLevelFor,
+  defaultRiskGroupFor,
+  normalizeImportanceLevel,
+  normalizeRiskGroup,
+} from "@/lib/project-details";
 
 async function createProject(formData: FormData) {
   "use server";
@@ -20,9 +27,13 @@ async function createProject(formData: FormData) {
   const bca = String(formData.get("bca") ?? "").trim();
   const projectType = String(formData.get("project_type") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim() || null;
+  const applicationRef = String(formData.get("application_ref") ?? "").trim() || null;
   const estimatedFloorArea = parseOptionalNumber(formData.get("estimated_floor_area_m2"));
   const estimatedConstructionValue = parseOptionalNumber(formData.get("estimated_construction_value_nzd"));
   const yearOfConstruction = parseOptionalYear(formData.get("year_of_construction"));
+  const riskGroup = normalizeRiskGroup(formData.get("risk_group")) ?? defaultRiskGroupFor(projectType);
+  const importanceLevel =
+    normalizeImportanceLevel(formData.get("importance_level")) ?? defaultImportanceLevelFor(projectType);
 
   // Idempotency: if an identical project was created within the last 15s, reuse it.
   const recentThreshold = new Date(Date.now() - 15_000).toISOString();
@@ -49,6 +60,9 @@ async function createProject(formData: FormData) {
       bca,
       project_type: projectType,
       description,
+      application_ref: applicationRef,
+      risk_group: riskGroup,
+      importance_level: importanceLevel,
       estimated_floor_area_m2: estimatedFloorArea,
       estimated_construction_value_nzd: estimatedConstructionValue,
       involves_structural_work: formData.get("involves_structural_work") === "on",
@@ -69,6 +83,8 @@ async function createProject(formData: FormData) {
   const newProjectId = inserted.data.id;
   const intake = {
     projectType,
+    riskGroup,
+    importanceLevel,
     estimatedFloorAreaM2: estimatedFloorArea,
     estimatedConstructionValueNZD: estimatedConstructionValue,
     involvesStructuralWork: formData.get("involves_structural_work") === "on",
@@ -101,12 +117,14 @@ export default function NewProjectPage() {
             ))}
           </select>
         </Field>
-        <Field label="Project type">
-          <select name="project_type" required className="w-full rounded-sm border border-ink-700/20 px-3 py-2">
-            {taxonomy.project_types.map((t) => (
-              <option key={t.id} value={t.id}>{t.label}</option>
-            ))}
-          </select>
+        <ProjectTypeOccupancyFields />
+        <Field label="Application reference (optional)">
+          <input
+            name="application_ref"
+            type="text"
+            placeholder="e.g. BC-2026-12345"
+            className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
+          />
         </Field>
         <Field label="Description (optional)">
           <textarea name="description" rows={4} className="w-full rounded-sm border border-ink-700/20 px-3 py-2" />

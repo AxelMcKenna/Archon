@@ -63,13 +63,22 @@ def _fill(template: str, **kwargs: str) -> str:
     return out
 
 
-def _cache_key(item: RfiItem, bca: str, project_type: str, prompt_version: str) -> str:
+def _cache_key(
+    item: RfiItem,
+    bca: str,
+    project_type: str,
+    risk_group: str,
+    importance_level: str,
+    prompt_version: str,
+) -> str:
     h = hashlib.sha256()
     h.update(item.raw_text.encode("utf-8"))
     h.update(b"|")
     h.update(item.extracted.model_dump_json().encode("utf-8"))
     h.update(b"|")
-    h.update(f"{bca}|{project_type}|{prompt_version}".encode())
+    h.update(
+        f"{bca}|{project_type}|{risk_group}|{importance_level}|{prompt_version}".encode()
+    )
     return h.hexdigest()
 
 
@@ -83,9 +92,11 @@ def classify(
     bca: str,
     project_type: str,
     project_description: str,
+    risk_group: str = "",
+    importance_level: str = "",
 ) -> AiPrediction:
     template, version, _hash = _load_prompt(ACTIVE_PROMPT)
-    key = _cache_key(item, bca, project_type, version)
+    key = _cache_key(item, bca, project_type, risk_group, importance_level, version)
     if key in _AI_CACHE:
         return _AI_CACHE[key]
 
@@ -95,6 +106,8 @@ def classify(
         template,
         bca=bca,
         project_type=project_type,
+        risk_group=risk_group or "(not specified)",
+        importance_level=importance_level or "(not specified)",
         project_description=project_description or "(none provided)",
         item_markdown=render_item(item),
     )
@@ -139,6 +152,8 @@ async def classify_async(
     bca: str,
     project_type: str,
     project_description: str,
+    risk_group: str = "",
+    importance_level: str = "",
 ) -> AiPrediction:
     """Awaitable variant — runs the sync classify on a worker thread.
 
@@ -148,7 +163,7 @@ async def classify_async(
     returns immediately without entering the threadpool.
     """
     template, version, _hash = _load_prompt(ACTIVE_PROMPT)
-    key = _cache_key(item, bca, project_type, version)
+    key = _cache_key(item, bca, project_type, risk_group, importance_level, version)
     if key in _AI_CACHE:
         return _AI_CACHE[key]
     return await asyncio.to_thread(
@@ -157,4 +172,6 @@ async def classify_async(
         bca=bca,
         project_type=project_type,
         project_description=project_description,
+        risk_group=risk_group,
+        importance_level=importance_level,
     )

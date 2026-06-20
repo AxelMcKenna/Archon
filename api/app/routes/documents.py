@@ -17,8 +17,21 @@ class ServiceConnections(BaseModel):
     stormwater: bool = False
 
 
+ProjectTypeT = Literal[
+    "new_dwelling",
+    "extension",
+    "accessory_building",
+    "deck",
+    "multi_unit_residential",
+    "commercial_office",
+    "retail",
+    "industrial",
+    "mixed_use",
+]
+
+
 class ProjectDetails(BaseModel):
-    projectType: Literal["new_dwelling", "extension", "accessory_building", "deck"]
+    projectType: ProjectTypeT
     estimatedFloorAreaM2: int | None = Field(default=None, ge=0)
     estimatedConstructionValueNZD: int | None = Field(default=None, ge=0)
     involvesStructuralWork: bool = False
@@ -27,6 +40,8 @@ class ProjectDetails(BaseModel):
     yearOfConstruction: int | None = None
     newRoadAccess: bool = False
     newServiceConnections: ServiceConnections = Field(default_factory=ServiceConnections)
+    riskGroup: str | None = None
+    importanceLevel: str | None = None
 
 
 class ResolveDocumentsRequest(BaseModel):

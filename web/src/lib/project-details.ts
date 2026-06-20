@@ -1,6 +1,64 @@
-import type { ProjectDetails, ProjectType } from "@/types/consent";
+import { taxonomy } from "@arro/shared";
 
-export type StoredProjectType = "new_dwelling" | "extension" | "accessory" | "deck";
+import type {
+  ImportanceLevel,
+  ProjectDetails,
+  ProjectType,
+  RiskGroup,
+} from "@/types/consent";
+
+const RISK_GROUP_IDS = new Set(["SH", "SM", "SI", "CA", "WB", "WF", "VP"]);
+const IMPORTANCE_LEVEL_IDS = new Set(["IL1", "IL2", "IL3", "IL4"]);
+
+type ProjectTypeDefault = { risk_group?: string; importance_level?: string };
+const PROJECT_TYPE_DEFAULTS = (taxonomy as { project_type_defaults?: Record<string, ProjectTypeDefault> })
+  .project_type_defaults ?? {};
+
+export function normalizeRiskGroup(value: unknown): RiskGroup | null {
+  const text = String(value ?? "").trim().toUpperCase();
+  return RISK_GROUP_IDS.has(text) ? (text as RiskGroup) : null;
+}
+
+export function normalizeImportanceLevel(value: unknown): ImportanceLevel | null {
+  const text = String(value ?? "").trim().toUpperCase();
+  return IMPORTANCE_LEVEL_IDS.has(text) ? (text as ImportanceLevel) : null;
+}
+
+export function defaultRiskGroupFor(projectType: string | null | undefined): RiskGroup | null {
+  const stored = getStoredProjectType(projectType);
+  return normalizeRiskGroup(PROJECT_TYPE_DEFAULTS[stored]?.risk_group);
+}
+
+export function defaultImportanceLevelFor(
+  projectType: string | null | undefined,
+): ImportanceLevel | null {
+  const stored = getStoredProjectType(projectType);
+  return normalizeImportanceLevel(PROJECT_TYPE_DEFAULTS[stored]?.importance_level);
+}
+
+export type StoredProjectType =
+  | "new_dwelling"
+  | "extension"
+  | "accessory"
+  | "deck"
+  | "multi_unit_residential"
+  | "commercial_office"
+  | "retail"
+  | "industrial"
+  | "mixed_use";
+
+// Project types that share the same id in both the stored (DB enum) and API
+// (`accessory_building`-style) representations — i.e. everything except the
+// legacy accessory split. Listed once and reused by both normalisers.
+const SHARED_PROJECT_TYPES = [
+  "extension",
+  "deck",
+  "multi_unit_residential",
+  "commercial_office",
+  "retail",
+  "industrial",
+  "mixed_use",
+] as const;
 
 export interface ProjectFormValues {
   address: string;
@@ -37,8 +95,11 @@ export function normalizeProjectType(value: string | null | undefined): ProjectT
   if (value === "accessory" || value === "accessory_building") {
     return "accessory_building";
   }
-  if (value === "new_dwelling" || value === "extension" || value === "deck") {
+  if (value === "new_dwelling") {
     return value;
+  }
+  if (value && (SHARED_PROJECT_TYPES as readonly string[]).includes(value)) {
+    return value as ProjectType;
   }
   return "new_dwelling";
 }
@@ -47,8 +108,8 @@ export function getStoredProjectType(value: string | null | undefined): StoredPr
   if (value === "accessory" || value === "accessory_building") {
     return "accessory";
   }
-  if (value === "extension" || value === "deck") {
-    return value;
+  if (value && (SHARED_PROJECT_TYPES as readonly string[]).includes(value)) {
+    return value as StoredProjectType;
   }
   return "new_dwelling";
 }
@@ -68,6 +129,8 @@ export function createDefaultProjectDetails(projectType?: string | null): Projec
       wastewater: false,
       stormwater: false,
     },
+    riskGroup: defaultRiskGroupFor(projectType),
+    importanceLevel: defaultImportanceLevelFor(projectType),
     buildingConsentNumbers: "",
     ownerPreferredFormOfAddress: "",
     ownerFullName: "",
@@ -115,6 +178,12 @@ export function normalizeProjectDetails(
       wastewater: Boolean(input.newServiceConnections?.wastewater),
       stormwater: Boolean(input.newServiceConnections?.stormwater),
     },
+    riskGroup:
+      normalizeRiskGroup(input.riskGroup) ??
+      defaultRiskGroupFor(input.projectType ?? projectTypeFallback),
+    importanceLevel:
+      normalizeImportanceLevel(input.importanceLevel) ??
+      defaultImportanceLevelFor(input.projectType ?? projectTypeFallback),
     buildingConsentNumbers: String(input.buildingConsentNumbers ?? "").trim(),
     ownerPreferredFormOfAddress: normalizePreferredFormOfAddress(input.ownerPreferredFormOfAddress),
     ownerFullName: String(input.ownerFullName ?? "").trim(),
@@ -230,6 +299,11 @@ export function parseProjectFormData(formData: FormData): ProjectFormValues {
         wastewater: hasCheckedValue(formData, "new_service_connection_wastewater"),
         stormwater: hasCheckedValue(formData, "new_service_connection_stormwater"),
       },
+      riskGroup:
+        normalizeRiskGroup(formData.get("risk_group")) ?? defaultRiskGroupFor(projectType),
+      importanceLevel:
+        normalizeImportanceLevel(formData.get("importance_level")) ??
+        defaultImportanceLevelFor(projectType),
     },
   };
 }

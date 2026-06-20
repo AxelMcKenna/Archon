@@ -6,7 +6,19 @@ export type ZoneCategory =
   | "openspace"
   | "general";
 
-export type ProjectType = "new_dwelling" | "extension" | "accessory_building" | "deck";
+export type ProjectType =
+  | "new_dwelling"
+  | "extension"
+  | "accessory_building"
+  | "deck"
+  | "multi_unit_residential"
+  | "commercial_office"
+  | "retail"
+  | "industrial"
+  | "mixed_use";
+
+export type RiskGroup = "SH" | "SM" | "SI" | "CA" | "WB" | "WF" | "VP";
+export type ImportanceLevel = "IL1" | "IL2" | "IL3" | "IL4";
 
 export interface ServiceConnections {
   water: boolean;
@@ -24,6 +36,8 @@ export interface ProjectDetails {
   yearOfConstruction: number | null;
   newRoadAccess: boolean;
   newServiceConnections: ServiceConnections;
+  riskGroup?: RiskGroup | null;
+  importanceLevel?: ImportanceLevel | null;
   buildingConsentNumbers?: string;
   ownerPreferredFormOfAddress?: "" | "Mr" | "Mrs" | "Ms" | "Miss" | "Dr";
   ownerFullName?: string;

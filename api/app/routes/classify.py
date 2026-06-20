@@ -59,20 +59,33 @@ async def _run_classify_letter(letter_id: str, db: Client) -> ClassifyResponse:
     canonical = CanonicalRfi.model_validate(letter["canonical_json"])
 
     # Pull project context (BCA, project_type, description) from the linked project.
-    proj = (
-        db.table("rfi_letters")
-        .select("project_id, projects(bca, project_type, description)")
-        .eq("id", letter_id)
-        .single()
-        .execute()
-        .data
-    )
-    project = proj.get("projects") if proj else None
+    # risk_group / importance_level are added by the commercial-support
+    # migration; fall back to the legacy projection if they aren't present yet
+    # so classification keeps working before the migration is applied.
+    def _fetch_project(columns: str) -> dict[str, Any] | None:
+        row = (
+            db.table("rfi_letters")
+            .select(f"project_id, projects({columns})")
+            .eq("id", letter_id)
+            .single()
+            .execute()
+            .data
+        )
+        return row.get("projects") if row else None
+
+    try:
+        project = _fetch_project(
+            "bca, project_type, description, risk_group, importance_level"
+        )
+    except Exception:  # noqa: BLE001 — pre-migration column-missing fallback
+        project = _fetch_project("bca, project_type, description")
     if not project:
         raise HTTPException(404, "project for letter not found")
     bca = project["bca"]
     project_type = project["project_type"]
     project_description = project.get("description") or ""
+    risk_group = project.get("risk_group") or ""
+    importance_level = project.get("importance_level") or ""
 
     # Need DB ids for items (canonical's item_id is letter-local).
     items_rows = (
@@ -98,6 +111,8 @@ async def _run_classify_letter(letter_id: str, db: Client) -> ClassifyResponse:
                 bca=bca,
                 project_type=project_type,
                 project_description=project_description,
+                risk_group=risk_group,
+                importance_level=importance_level,
             )
             for item in items
         )

@@ -7,7 +7,19 @@ export type CategoryId = (typeof taxonomy)["categories"][number]["id"];
 export type Severity = "must_resolve" | "nice_to_have";
 export type ProjectStatus = (typeof taxonomy)["project_statuses"][number];
 export type BcaId = "ccc" | "selwyn" | "waimakariri";
-export type ProjectTypeId = "new_dwelling" | "extension" | "accessory" | "deck";
+export type ProjectTypeId =
+  | "new_dwelling"
+  | "extension"
+  | "accessory"
+  | "deck"
+  | "multi_unit_residential"
+  | "commercial_office"
+  | "retail"
+  | "industrial"
+  | "mixed_use";
+
+export type RiskGroupId = "SH" | "SM" | "SI" | "CA" | "WB" | "WF" | "VP";
+export type ImportanceLevelId = "IL1" | "IL2" | "IL3" | "IL4";
 
 export interface ExtractedEntities {
   clause_references: string[];

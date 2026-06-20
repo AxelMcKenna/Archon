@@ -31,7 +31,17 @@ class ForecastRequest(BaseModel):
     lon: float
     zoneCategory: str
     activeOverlays: list[str]
-    projectType: Literal["new_dwelling", "extension", "accessory_building", "deck"]
+    projectType: Literal[
+        "new_dwelling",
+        "extension",
+        "accessory_building",
+        "deck",
+        "multi_unit_residential",
+        "commercial_office",
+        "retail",
+        "industrial",
+        "mixed_use",
+    ]
     estimatedFloorAreaM2: int | None = None
     estimatedConstructionValueNZD: int | None = None
     involvesStructuralWork: bool = False

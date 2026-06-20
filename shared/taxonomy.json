@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.3",
-  "version_notes": "1.2 (2026-06-01): added two documentation categories surfaced by deterministic PDF text-layer rules (missing_sheets, revision_mismatch) introduced with the v2 plan flagger. 1.1 (2026-05-08): added 22 sub-categories surfaced from CCC Avoiding RFIs, SDC Specific Approvals, WDC fact sheets, and 2 MBIE determinations. Existing 1.0 IDs preserved; new categories use namespaced IDs. Added stages, canterbury overlays, BCA-specific process facts. SDC portal corrected to AlphaOne (verified from SDC processing page).",
+  "schema_version": "1.4",
+  "version_notes": "1.4 (2026-06-20): commercial building support. Added 5 commercial project_types (multi_unit_residential, commercial_office, retail, industrial, mixed_use), risk_groups (NZ fire C/AS1-C/AS2), importance_levels (AS/NZS 1170 IL1-IL4), project_type_defaults map, and 7 commercial RFI categories (building_code:C:escape_routes / :compartmentation / :systems / :feb, building_code:G1:commercial, building_code:G4:commercial, building_code:B1:importance_level). Flagged the C/AS1(SH)-vs-C/AS2(other) risk-group split on the C acceptable solution. 1.2 (2026-06-01): added two documentation categories surfaced by deterministic PDF text-layer rules (missing_sheets, revision_mismatch) introduced with the v2 plan flagger. 1.1 (2026-05-08): added 22 sub-categories surfaced from CCC Avoiding RFIs, SDC Specific Approvals, WDC fact sheets, and 2 MBIE determinations. Existing 1.0 IDs preserved; new categories use namespaced IDs. Added stages, canterbury overlays, BCA-specific process facts. SDC portal corrected to AlphaOne (verified from SDC processing page).",
 
   "bcas": [
     {
@@ -112,8 +112,42 @@
     { "id": "new_dwelling", "label": "New dwelling" },
     { "id": "extension", "label": "Extension / addition" },
     { "id": "accessory", "label": "Accessory building (sleep-out / garage)" },
-    { "id": "deck", "label": "Deck" }
+    { "id": "deck", "label": "Deck" },
+    { "id": "multi_unit_residential", "label": "Multi-unit residential (apartments / townhouses)", "commercial": true },
+    { "id": "commercial_office", "label": "Commercial — office", "commercial": true },
+    { "id": "retail", "label": "Commercial — retail / hospitality", "commercial": true },
+    { "id": "industrial", "label": "Industrial / warehouse", "commercial": true },
+    { "id": "mixed_use", "label": "Mixed-use (commercial + residential)", "commercial": true }
   ],
+
+  "risk_groups": [
+    { "id": "SH", "label": "SH — Sleeping (household units)", "drives": "C/AS1", "notes": "Detached & semi-detached dwellings. The only risk group covered by C/AS1." },
+    { "id": "SM", "label": "SM — Sleeping (managed)", "drives": "C/AS2", "notes": "Apartments, multi-unit, motels, care where occupants manage their own escape." },
+    { "id": "SI", "label": "SI — Sleeping (institutional)", "drives": "C/AS2", "notes": "Hospitals, rest homes, detention — occupants need assistance to escape." },
+    { "id": "CA", "label": "CA — Crowd activity", "drives": "C/AS2", "notes": "Assembly, retail, hospitality, education — large numbers of people." },
+    { "id": "WB", "label": "WB — Working, business or storage (low fire load)", "drives": "C/AS2", "notes": "Offices, light commercial." },
+    { "id": "WF", "label": "WF — Working, business or storage (high fire load)", "drives": "C/AS2", "notes": "Industrial, warehouse, manufacturing." },
+    { "id": "VP", "label": "VP — Vehicle parking", "drives": "C/AS2", "notes": "Carparking buildings." }
+  ],
+
+  "importance_levels": [
+    { "id": "IL1", "label": "IL1 — Minor (low consequence of failure)", "notes": "Structures with low hazard to life — e.g. isolated farm sheds." },
+    { "id": "IL2", "label": "IL2 — Normal (ordinary buildings)", "notes": "Most dwellings and commercial buildings. Default." },
+    { "id": "IL3", "label": "IL3 — High (large crowds / critical)", "notes": "Buildings with large occupancy, assembly >300, or significant value." },
+    { "id": "IL4", "label": "IL4 — Post-disaster / essential facilities", "notes": "Hospitals, emergency services, lifeline utilities." }
+  ],
+
+  "project_type_defaults": {
+    "new_dwelling": { "risk_group": "SH", "importance_level": "IL2" },
+    "extension": { "risk_group": "SH", "importance_level": "IL2" },
+    "accessory": { "risk_group": "SH", "importance_level": "IL2" },
+    "deck": { "risk_group": "SH", "importance_level": "IL2" },
+    "multi_unit_residential": { "risk_group": "SM", "importance_level": "IL2" },
+    "commercial_office": { "risk_group": "WB", "importance_level": "IL2" },
+    "retail": { "risk_group": "CA", "importance_level": "IL2" },
+    "industrial": { "risk_group": "WF", "importance_level": "IL2" },
+    "mixed_use": { "risk_group": "CA", "importance_level": "IL2" }
+  },
 
   "categories": [
     { "id": "building_code:B1", "label": "B1 — Structure", "rfi_share": 0.315, "weight": 1.0 },
@@ -135,6 +169,14 @@
     { "id": "building_code:H1", "label": "H1 — Energy efficiency", "rfi_share": 0.05, "weight": 0.7 },
     { "id": "building_code:H1:envelope", "label": "H1 — Envelope thermal resistance (>300m²)", "weight": 0.7, "introduced": "1.1", "notes": "Schedule method or modelling method report; consultant-prepared." },
     { "id": "building_code:H1:lighting", "label": "H1.3.5 — Artificial lighting energy efficiency", "weight": 0.6, "introduced": "1.1", "notes": "NZS 4243.2:2007 schedule method calculations or electrical engineer PS1 covering H1.3.5." },
+
+    { "id": "building_code:C:escape_routes", "label": "C — Means of escape (escape routes)", "weight": 1.0, "introduced": "1.4", "notes": "Occupant load / density, travel & dead-end distances, exit and door widths, number of exits, final exit discharge. C/AS2 Part 3-4. Commercial / non-SH risk groups." },
+    { "id": "building_code:C:compartmentation", "label": "C — Fire compartmentation & separation", "weight": 1.0, "introduced": "1.4", "notes": "Fire cells, fire resistance ratings (FRR e.g. 60/60/60), inter-tenancy and inter-storey separation, penetrations / fire-stopping, fire & smoke dampers. C/AS2 Part 4-5." },
+    { "id": "building_code:C:systems", "label": "C — Fire safety systems", "weight": 1.0, "introduced": "1.4", "notes": "Sprinklers (NZS 4541), detection & alarm (NZS 4512), emergency lighting (F6/AS1), smoke control/management, hydrants & hose reels (NZS 4510). Often Specified Systems." },
+    { "id": "building_code:C:feb", "label": "C — Fire engineering brief / Alternative Solution", "weight": 1.1, "introduced": "1.4", "notes": "Fire Engineering Brief, C/VM2 verification method, fire engineer PS1, FENZ design review. Expected for complex non-SH buildings; a flag on an SH project is a mismatch worth surfacing." },
+    { "id": "building_code:G1:commercial", "label": "G1 — Sanitary facilities (occupancy-tiered)", "weight": 0.7, "introduced": "1.4", "notes": "Commercial fixture counts by user group (G1/AS1 Table 2), separate-sex provision, accessible WC, staff vs public facilities. Distinct from the residential per-dwelling rule." },
+    { "id": "building_code:G4:commercial", "label": "G4 — Ventilation (occupancy-rated / mechanical)", "weight": 0.7, "introduced": "1.4", "notes": "Mechanical ventilation air-change rates (G4/VM1), contaminant spaces (G4.3.3), kitchen / carpark extract. Commercial occupancy loads." },
+    { "id": "building_code:B1:importance_level", "label": "B1 — Importance Level / specific structural design", "weight": 0.9, "introduced": "1.4", "notes": "IL2-IL4 seismic importance factor, wind region / return period, SLS/ULS for higher IL, specific engineering design + PS1. AS/NZS 1170." },
 
     { "id": "documentation:plans", "label": "Documentation — Plans", "weight": 0.6 },
     { "id": "documentation:plans:site_levels", "label": "Plans — Site/floor levels & survey datum", "weight": 0.7, "introduced": "1.1", "notes": "Christchurch Drainage Datum, NZVD2016 / LVD1937, Building Location Certificate (BLC), FFL freeboard, FAC (SDC ≥25m²), benchmark references." },
@@ -181,7 +223,7 @@
   "acceptable_solutions": {
     "B1": { "title": "Structure", "documents": ["B1/AS1", "B1/VM1", "B1/VM4"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/b-stability/b1-structure/" },
     "B2": { "title": "Durability", "documents": ["B2/AS1", "B2/VM1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/b-stability/b2-durability/" },
-    "C":  { "title": "Protection from fire", "documents": ["C/AS1", "C/AS2", "C/VM2"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/c-protection-from-fire/" },
+    "C":  { "title": "Protection from fire", "documents": ["C/AS1", "C/AS2", "C/VM2"], "risk_group_split": { "SH": "C/AS1", "other": "C/AS2" }, "mbie_url": "https://www.building.govt.nz/building-code-compliance/c-protection-from-fire/", "notes": "C/AS1 covers Risk Group SH (household units) only. All other risk groups (SM/SI/CA/WB/WF/VP) use C/AS2 or a C/VM2 Alternative Solution. Ground commercial fire flags against C/AS2, not C/AS1." },
     "D":  { "title": "Access", "documents": ["D1/AS1", "D2/AS1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/d-access/" },
     "D1": { "title": "Access routes", "documents": ["D1/AS1", "D1/VM1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/d-access/d1-access-routes/" },
     "E1": { "title": "Surface water", "documents": ["E1/AS1", "E1/VM1"], "mbie_url": "https://www.building.govt.nz/building-code-compliance/e-moisture/e1-surface-water/" },
