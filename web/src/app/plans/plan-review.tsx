@@ -139,7 +139,7 @@ export function PlanReview({ plan }: { plan: Plan }) {
   const verificationStatus = plan.analysis?.verification ?? "verified";
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] gap-6">
       <aside className="lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)]">
         <PlanCanvas
           plan={plan}
