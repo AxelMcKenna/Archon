@@ -5,6 +5,7 @@ import { NeuralSphere } from "@/components/neural-sphere-lazy";
 import { Reveal } from "@/components/reveal";
 import { SiteFooter } from "@/components/site-footer";
 import { WaitlistForm } from "@/components/waitlist-form";
+import { UserMenu } from "@/components/auth/user-menu";
 
 /* One status-pill language shared across every demo container — soft-tinted
    fill, a leading tone dot, and consistent Inter / uppercase / tracking so the
@@ -41,13 +42,14 @@ export default async function Home() {
       <div aria-hidden className="grain pointer-events-none fixed inset-0 -z-10" />
 
       {/* Top bar */}
-      <header className="relative z-20 flex w-full items-center px-5 py-5 sm:px-8 sm:py-6 lg:px-10">
+      <header className="relative z-20 flex w-full items-center justify-between px-5 py-5 sm:px-8 sm:py-6 lg:px-10">
         <Link
           href="/"
           className="font-display uppercase font-bold tracking-[0.16em] text-[22px] text-ink-900 transition-colors hover:text-ink-700"
         >
           Arro
         </Link>
+        <UserMenu />
       </header>
 
       {/* Hero */}
