@@ -192,6 +192,8 @@ def upload_and_analyse(
             bca=project["bca"],
             project_type=project["project_type"],
             project_description=project.get("description") or "",
+            risk_group=project.get("risk_group") or "",
+            importance_level=project.get("importance_level") or "",
         ),
         clone_fields=clone_fields,
         analysed_fields=analysed_fields,

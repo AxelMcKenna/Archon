@@ -27,7 +27,6 @@ async function createProject(formData: FormData) {
   const bca = String(formData.get("bca") ?? "").trim();
   const projectType = String(formData.get("project_type") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim() || null;
-  const applicationRef = String(formData.get("application_ref") ?? "").trim() || null;
   const estimatedFloorArea = parseOptionalNumber(formData.get("estimated_floor_area_m2"));
   const estimatedConstructionValue = parseOptionalNumber(formData.get("estimated_construction_value_nzd"));
   const yearOfConstruction = parseOptionalYear(formData.get("year_of_construction"));
@@ -60,7 +59,6 @@ async function createProject(formData: FormData) {
       bca,
       project_type: projectType,
       description,
-      application_ref: applicationRef,
       risk_group: riskGroup,
       importance_level: importanceLevel,
       estimated_floor_area_m2: estimatedFloorArea,
@@ -118,14 +116,6 @@ export default function NewProjectPage() {
           </select>
         </Field>
         <ProjectTypeOccupancyFields />
-        <Field label="Application reference (optional)">
-          <input
-            name="application_ref"
-            type="text"
-            placeholder="e.g. BC-2026-12345"
-            className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
-          />
-        </Field>
         <Field label="Description (optional)">
           <textarea name="description" rows={4} className="w-full rounded-sm border border-ink-700/20 px-3 py-2" />
         </Field>

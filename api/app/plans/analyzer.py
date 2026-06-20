@@ -56,6 +56,8 @@ def analyse_plan(
     bca: str,
     project_type: str,
     project_description: str,
+    risk_group: str = "",
+    importance_level: str = "",
 ) -> tuple[dict[str, Any], str, Metrics, dict[str, Any]]:
     """Run the v2 analyser.
 
@@ -85,6 +87,8 @@ def analyse_plan(
         bca=bca,
         bca_long=bca_meta.get("name", bca),
         project_type=project_type,
+        risk_group=risk_group or "(not specified)",
+        importance_level=importance_level or "(not specified)",
         project_description=project_description or "(none provided)",
         taxonomy=taxonomy_block(),
     )
@@ -160,6 +164,7 @@ def analyse_plan(
         concurrency=concurrency,
         metrics=metrics,
         seed_by_page=seed_by_page if cross_view_on else None,
+        risk_group=risk_group,
     )
 
     # Aggregate across sheets.
@@ -271,6 +276,7 @@ def _run_sheets_parallel(
     concurrency: int,
     metrics: Metrics,
     seed_by_page: dict[int, str] | None = None,
+    risk_group: str = "",
 ) -> list[dict[str, Any]]:
     """Process sheets concurrently. Returns one result dict per sheet."""
     settings = get_settings()
@@ -345,7 +351,7 @@ def _run_sheets_parallel(
 
         # Per-sheet verification: scoped to this sheet's images.
         kept, drops, v_status, v_version = verify_flags(
-            images=sheet.images, flags=voted, metrics=metrics
+            images=sheet.images, flags=voted, metrics=metrics, risk_group=risk_group
         )
 
         sheet_runs_debug = [

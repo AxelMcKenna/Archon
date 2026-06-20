@@ -49,6 +49,7 @@ def run_single_vision_pass(
 
 def _retrieve_mbie_context(
     flags: list[dict[str, Any]],
+    risk_group: str = "",
 ) -> tuple[list[str], list[list[dict[str, Any]]]]:
     """Per-flag MBIE clause retrieval. Returns two parallel lists:
     formatted clause strings for the verifier prompt, and structured
@@ -66,7 +67,7 @@ def _retrieve_mbie_context(
     provenance: list[list[dict[str, Any]]] = []
     for f in flags:
         try:
-            hits = retrieve_for_flag(db, flag=f)
+            hits = retrieve_for_flag(db, flag=f, risk_group=risk_group or None)
             blocks.append(format_hits_for_prompt(hits, query=_build_query(f)))
             provenance.append(hit_provenance(hits))
         except Exception as exc:  # noqa: BLE001
@@ -217,6 +218,7 @@ def verify_flags(
     images: list[RenderedImage],
     flags: list[dict[str, Any]],
     metrics: Metrics,
+    risk_group: str = "",
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], str, str]:
     """Verify each flag's verbatim_quote and AS compliance, with optional
     self-consistency voting (``plan_verifier_voting_n``).
@@ -234,7 +236,7 @@ def verify_flags(
         return [], [], "verified", load_prompt(ACTIVE_VERIFICATION_PROMPT)[1]
 
     template, version = load_prompt(ACTIVE_VERIFICATION_PROMPT)
-    mbie_blocks, mbie_provenance = _retrieve_mbie_context(flags)
+    mbie_blocks, mbie_provenance = _retrieve_mbie_context(flags, risk_group=risk_group)
     flags_block = json.dumps(
         [
             {

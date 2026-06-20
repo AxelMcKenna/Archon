@@ -1,9 +1,16 @@
 # ARRO RFI classification rules
 # Versioned. Changes must pass /api/tests/rules_regression.yaml before merge.
 
-version: "1.1.0"
+version: "1.2.0"
 
 # ─────────────────────────────────────────────────────────────────────────────
+# 1.2.0 additions: commercial-building rule set (means of escape, fire
+# compartmentation, fire safety systems, fire engineering brief / C/VM2,
+# occupancy-tiered G1 sanitary, commercial G4 ventilation, D1 accessibility,
+# B1 importance-level structural, specified systems / compliance schedule,
+# FENZ / network-utility referrals, mixed-use). Targets the commercial
+# taxonomy categories added in taxonomy 1.4. All prior rules preserved.
+#
 # 1.1.0 additions: 30 new Canterbury-specific rules grounded in CCC Avoiding-RFI
 # page, SDC Specific-Approvals + Requirements, WDC fact sheets, MBIE Determinations
 # 2026/008 + 2026/013, MBIE BCA performance monitoring (Jun 2025).

@@ -51,16 +51,7 @@ async def upload_and_analyse(
     if len(payload) > MAX_BYTES:
         raise HTTPException(413, "file exceeds 50MB")
 
-    proj = (
-        db.table("projects")
-        .select("id, bca, project_type, description")
-        .eq("id", str(project_id))
-        .single()
-        .execute()
-        .data
-    )
-    if not proj:
-        raise HTTPException(404, "project not found")
+    proj = _load_project(db, project_id)
 
     try:
         result = await asyncio.to_thread(
@@ -89,14 +80,24 @@ async def upload_and_analyse(
 
 
 def _load_project(db: Client, project_id: UUID) -> dict[str, Any]:
-    proj = (
-        db.table("projects")
-        .select("id, bca, project_type, description")
-        .eq("id", str(project_id))
-        .single()
-        .execute()
-        .data
-    )
+    # risk_group / importance_level land with the commercial-support migration;
+    # fall back to the legacy projection if they aren't present yet.
+    def _fetch(columns: str) -> dict[str, Any] | None:
+        return (
+            db.table("projects")
+            .select(columns)
+            .eq("id", str(project_id))
+            .single()
+            .execute()
+            .data
+        )
+
+    try:
+        proj = _fetch(
+            "id, bca, project_type, description, risk_group, importance_level"
+        )
+    except Exception:  # noqa: BLE001 — pre-migration column-missing fallback
+        proj = _fetch("id, bca, project_type, description")
     if not proj:
         raise HTTPException(404, "project not found")
     return proj

@@ -1,6 +1,6 @@
 ---
 prompt_key: plan_analyser
-version: "2.1.0"
+version: "2.2.0"
 model: claude-opus-4-7
 ---
 
@@ -13,7 +13,18 @@ trigger a Request for Information (RFI) from the BCA.
 
 - BCA: {{bca}} ({{bca_long}})
 - Project type: {{project_type}}
+- Fire risk group: {{risk_group}}
+- Importance level: {{importance_level}}
 - Project description: {{project_description}}
+
+If the fire risk group is **not SH** (i.e. SM/SI/CA/WB/WF/VP — a multi-unit,
+commercial, assembly, industrial or carpark building), assess fire (clause C)
+against **C/AS2** or a **C/VM2** Alternative Solution, not C/AS1, and expect
+commercial RFI surfaces: means of escape (occupant load, travel distance, exit
+widths), fire compartmentation / fire resistance ratings, fire safety systems
+(sprinklers, alarms, emergency lighting), occupancy-tiered sanitary facilities
+(G1), mechanical ventilation (G4), accessibility (D1), specified systems /
+compliance schedule, and importance-level structural design (B1).
 
 ## What you're looking at
 
