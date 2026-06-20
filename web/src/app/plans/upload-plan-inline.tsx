@@ -7,6 +7,8 @@ import { apiFetch } from "@/lib/api";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
 import { taxonomy } from "@arro/shared";
 import { AiThinking } from "@/components/ai-thinking";
+import { RfiEngineLog } from "@/components/rfi-engine-log";
+import { streamIngest, type IngestStep } from "@/lib/ingest-stream";
 
 type Project = { id: string; address: string; bca: string; project_type: string };
 
@@ -41,6 +43,9 @@ export function UploadPlanInline({
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Live RFI-engine log, streamed from the analyse endpoint over SSE.
+  const [steps, setSteps] = useState<IngestStep[]>([]);
+  const [logDone, setLogDone] = useState(false);
 
   const project = projects.find((p) => p.id === projectId) ?? null;
 
@@ -49,6 +54,8 @@ export function UploadPlanInline({
     if (!file || !project) return;
     setBusy(true);
     setError(null);
+    setSteps([]);
+    setLogDone(false);
     try {
       // Direct-to-storage upload: the file goes straight to Supabase Storage
       // over HTTPS via a backend-issued signed URL, sidestepping the Vercel
@@ -81,26 +88,75 @@ export function UploadPlanInline({
       if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
 
       const uploadedId = dxf ? signed.cad_id : signed.plan_id;
-      const ingestEndpoint = dxf ? "/cad/ingest" : "/plans/ingest";
-      const res = await apiFetch<AnalyseResponse>(ingestEndpoint, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          project_id: project.id,
-          [dxf ? "cad_id" : "plan_id"]: uploadedId,
-          storage_path: signed.path,
-          filename: file.name,
-          ...(dxf ? {} : { content_type: contentType }),
-          analyse: analyseRfi,
-        }),
-      });
-      const id = dxf ? res.cad_id : res.plan_id;
-      if (onUploaded && id) {
-        onUploaded(id, dxf ? "dxf" : "pdf");
+      const ingestBody = {
+        project_id: project.id,
+        [dxf ? "cad_id" : "plan_id"]: uploadedId,
+        storage_path: signed.path,
+        filename: file.name,
+        ...(dxf ? {} : { content_type: contentType }),
+        analyse: analyseRfi,
+      };
+
+      const blockingIngest = async () => {
+        const res = await apiFetch<AnalyseResponse>(
+          dxf ? "/cad/ingest" : "/plans/ingest",
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify(ingestBody),
+          },
+        );
+        return (dxf ? res.cad_id : res.plan_id) ?? uploadedId;
+      };
+
+      let resolvedId = uploadedId;
+
+      if (analyseRfi) {
+        // Stream the engine's progress so the user sees a live log. Fall back to
+        // the blocking endpoint only if the stream never opens (proxy/connection
+        // failure) — a mid-analysis error frame is a real failure, not a reason
+        // to silently re-run the same work.
+        const streamEndpoint = dxf
+          ? "/cad/ingest-stream"
+          : "/plans/ingest-stream";
+        const byId = new Map<number, IngestStep>();
+        const order: number[] = [];
+        let sawEvent = false;
+        try {
+          for await (const ev of streamIngest(streamEndpoint, ingestBody)) {
+            sawEvent = true;
+            if (ev.type === "step") {
+              if (!byId.has(ev.id)) order.push(ev.id);
+              byId.set(ev.id, {
+                id: ev.id,
+                label: ev.label,
+                status: ev.status,
+                detail: ev.detail,
+              });
+              setSteps(order.map((sid) => byId.get(sid)!));
+            } else if (ev.type === "result") {
+              resolvedId = (dxf ? ev.cad_id : ev.plan_id) ?? uploadedId;
+              setLogDone(true);
+            } else if (ev.type === "error") {
+              throw new Error(ev.error || "RFI analysis failed");
+            }
+          }
+        } catch (streamErr) {
+          if (sawEvent) throw streamErr;
+          resolvedId = await blockingIngest();
+        }
+        // Let the completed log linger a beat so the result is readable.
+        await new Promise((r) => setTimeout(r, 700));
+      } else {
+        resolvedId = await blockingIngest();
+      }
+
+      if (onUploaded && resolvedId) {
+        onUploaded(resolvedId, dxf ? "dxf" : "pdf");
         router.refresh();
       } else {
         router.push(
-          `/projects/${project.id}/drawings?${dxf ? "cad" : "plan"}=${id}`,
+          `/projects/${project.id}/drawings?${dxf ? "cad" : "plan"}=${resolvedId}`,
         );
         router.refresh();
       }
@@ -179,21 +235,24 @@ export function UploadPlanInline({
       </button>
       {busy && (
         <div className="sm:col-span-full">
-          <AiThinking
-            label={
-              !analyseRfi
-                ? "Uploading drawing"
-                : file && isDxf(file.name)
-                  ? "Analysing CAD geometry"
-                  : "Analysing drawing"
-            }
-            hint={
-              analyseRfi
-                ? "Detecting flags and proposed redlines against the document rules corpus."
-                : "Storing your drawing for value engineering."
-            }
-            variant="block"
-          />
+          {analyseRfi ? (
+            <RfiEngineLog
+              steps={steps}
+              title={
+                file && isDxf(file.name)
+                  ? "RFI engine · CAD geometry"
+                  : "RFI engine"
+              }
+              hint="Flagging likely council RFIs against the NZ Building Code corpus."
+              done={logDone}
+            />
+          ) : (
+            <AiThinking
+              label="Uploading drawing"
+              hint="Storing your drawing for value engineering."
+              variant="block"
+            />
+          )}
         </div>
       )}
       {error && <p className="sm:col-span-full text-sm text-red-600">{error}</p>}
