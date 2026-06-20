@@ -24,7 +24,6 @@ const FULLBLEED_PREFIXES = [
 ];
 
 const PRIMARY_NAV: NavItem[] = [
-  { name: "Dashboard", href: "/dashboard" as Route },
   { name: "Projects", href: "/projects" as Route },
 ];
 
@@ -57,7 +56,7 @@ export function LayoutContent({
           <header className="sticky top-0 z-30 border-b border-ink-200/70 bg-surface-canvas">
             <div className="flex w-full items-center justify-between px-10 py-6">
               <Link
-                href="/dashboard"
+                href="/projects"
                 className="font-display uppercase font-bold tracking-[0.16em] text-[22px] text-ink-900 transition-colors hover:text-accent"
               >
                 Arro

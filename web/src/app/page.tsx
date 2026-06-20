@@ -5,7 +5,7 @@ import { NeuralSphere } from "@/components/neural-sphere-lazy";
 import { Reveal } from "@/components/reveal";
 import { SiteFooter } from "@/components/site-footer";
 import { WaitlistForm } from "@/components/waitlist-form";
-import { UserMenu } from "@/components/auth/user-menu";
+import { LandingAuthCta } from "@/components/auth/landing-auth-cta";
 
 /* One status-pill language shared across every demo container — soft-tinted
    fill, a leading tone dot, and consistent Inter / uppercase / tracking so the
@@ -49,7 +49,7 @@ export default async function Home() {
         >
           Arro
         </Link>
-        <UserMenu />
+        <LandingAuthCta />
       </header>
 
       {/* Hero */}

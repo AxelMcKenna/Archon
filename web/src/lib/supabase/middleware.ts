@@ -7,6 +7,7 @@ const PUBLIC_PREFIXES = [
   "/login",
   "/auth",
   "/api/waitlist",
+  "/api/admin/invite",
   "/_next",
   "/favicon",
   "/privacy",
@@ -49,7 +50,7 @@ export async function updateSession(request: NextRequest) {
   // and iterated on without forcing a sign-out.
   if (data.user && path === "/login") {
     const dash = request.nextUrl.clone();
-    dash.pathname = "/dashboard";
+    dash.pathname = "/projects";
     dash.search = "";
     return NextResponse.redirect(dash);
   }

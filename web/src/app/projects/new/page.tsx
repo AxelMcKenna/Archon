@@ -4,7 +4,6 @@ import { taxonomy } from "@arro/shared";
 import { ProjectCreateButton } from "@/components/project-create-button";
 import { AddressAutocompleteInput } from "@/components/address-autocomplete-input";
 import { bootstrapConsentAssessment } from "@/lib/consent-assessment-bootstrap";
-import { ProjectDetailFlagsFields } from "./project-detail-flags-fields";
 
 async function createProject(formData: FormData) {
   "use server";
@@ -109,33 +108,6 @@ export default function NewProjectPage() {
             ))}
           </select>
         </Field>
-        <Field label="Estimated floor area (m2)">
-          <input
-            name="estimated_floor_area_m2"
-            type="number"
-            min="0"
-            step="0.1"
-            className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
-          />
-        </Field>
-        <Field label="Estimated construction value (NZD)">
-          <input
-            name="estimated_construction_value_nzd"
-            type="number"
-            min="0"
-            step="1"
-            className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
-          />
-        </Field>
-        <ProjectDetailFlagsFields />
-        <fieldset className="rounded-sm border border-ink-700/10 bg-surface-raised p-4">
-          <legend className="text-sm text-ink-500">New service connections</legend>
-          <div className="mt-3 grid gap-3 sm:grid-cols-3">
-            <CheckboxField name="service_connection_water" label="Water" />
-            <CheckboxField name="service_connection_wastewater" label="Wastewater" />
-            <CheckboxField name="service_connection_stormwater" label="Stormwater" />
-          </div>
-        </fieldset>
         <Field label="Description (optional)">
           <textarea name="description" rows={4} className="w-full rounded-sm border border-ink-700/20 px-3 py-2" />
         </Field>
@@ -255,15 +227,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <label className="block">
       <span className="text-sm text-ink-500 block mb-1">{label}</span>
       {children}
-    </label>
-  );
-}
-
-function CheckboxField({ name, label }: { name: string; label: string }) {
-  return (
-    <label className="flex items-center gap-2 text-sm text-ink-700">
-      <input name={name} type="checkbox" className="h-4 w-4 rounded-sm border-ink-700/30" />
-      <span>{label}</span>
     </label>
   );
 }
