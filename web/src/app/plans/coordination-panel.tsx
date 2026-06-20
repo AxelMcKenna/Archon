@@ -3,7 +3,6 @@
 import { Fragment, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { taxonomy } from "@arro/shared";
 import { apiFetch } from "@/lib/api";
 import { useToast } from "@/components/ui/toast";
 
@@ -32,15 +31,20 @@ type CoordFlag = {
 
 type Run = { ran_at: string; flags_count: number } | null;
 
-const SEV_STYLE: Record<CoordFlag["severity"], string> = {
-  must_resolve: "bg-red-100 text-red-800 border-red-200",
-  nice_to_have: "bg-amber-100 text-amber-800 border-amber-200",
-};
-
 const SEV_RANK: Record<CoordFlag["severity"], number> = {
   must_resolve: 2,
   nice_to_have: 1,
 };
+
+const KIND_META: Record<Citation["source_kind"], { label: string; dot: string }> = {
+  spec: { label: "Spec", dot: "bg-violet-500" },
+  material: { label: "Material", dot: "bg-amber-500" },
+  drawing: { label: "Drawing", dot: "bg-ink-400" },
+};
+
+function prettyDoc(name: string): string {
+  return name === "drawing set" ? "Drawing set" : name;
+}
 
 function timeAgo(iso: string): string {
   const then = new Date(iso).getTime();
@@ -170,47 +174,47 @@ function CoordFlagCard({
   flag: CoordFlag;
   projectId: string;
 }) {
-  const cat = taxonomy.categories.find((c) => c.id === f.category);
-  const sevColour =
-    f.severity === "must_resolve" ? "rgb(220 38 38)" : "rgb(217 119 6)";
-
+  const must = f.severity === "must_resolve";
   return (
-    <article className={`rounded-sm border p-4 ${SEV_STYLE[f.severity]}`}>
-      <header className="flex items-baseline justify-between flex-wrap gap-2 mb-2">
-        <p className="font-medium text-sm">{f.area}</p>
-        <div className="flex items-center gap-2">
-          {f.tier === "llm" && (
-            <span
-              className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-sm border border-sky-200 bg-sky-50 text-sky-700"
-              title="Surfaced by AI semantic review - confirm before relying on it."
-            >
-              AI
-            </span>
-          )}
-          <span className="font-mono text-xs">{f.category}</span>
-        </div>
-      </header>
-      {cat && <p className="text-xs text-ink-500 mb-2">{cat.label}</p>}
-      {f.reason && <p className="text-sm">{f.reason}</p>}
+    <article
+      className={`rounded-md border border-ink-700/10 border-l-[3px] bg-white p-4 ${
+        must ? "border-l-red-500" : "border-l-amber-500"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <h4 className="text-sm font-semibold text-ink-900 leading-snug">
+          {f.area}
+        </h4>
+        {f.tier === "llm" && (
+          <span
+            className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-sky-700 bg-sky-50 border border-sky-200 rounded-full px-2 py-0.5"
+            title="Surfaced by AI semantic review - confirm before relying on it."
+          >
+            AI
+          </span>
+        )}
+      </div>
+
+      {f.reason && (
+        <p className="mt-1.5 text-sm text-ink-600 leading-relaxed">{f.reason}</p>
+      )}
       {f.recommended_action && (
-        <p className="text-sm mt-2">
-          <span className="font-medium">Recommended action:</span>{" "}
+        <p className="mt-2 text-sm text-ink-700">
+          <span className="font-medium text-ink-500">Fix · </span>
           {f.recommended_action}
         </p>
       )}
+
       {f.citations.length > 0 && (
-        <div className="mt-3 flex items-center flex-wrap gap-2 rounded-sm bg-white/50 px-2.5 py-2">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-ink-500">
-            Cross-reference
-          </span>
+        <div className="mt-3 flex items-center flex-wrap gap-1.5">
           {f.citations.map((c, i) => (
             <Fragment key={`${c.source_id}-${i}`}>
               {i > 0 && (
-                <span className="text-ink-400 font-bold px-0.5" aria-hidden>
+                <span className="text-ink-300 px-0.5" aria-hidden>
                   ↔
                 </span>
               )}
-              <CitationChip citation={c} projectId={projectId} colour={sevColour} />
+              <DocPill citation={c} projectId={projectId} />
             </Fragment>
           ))}
         </div>
@@ -219,36 +223,42 @@ function CoordFlagCard({
   );
 }
 
-function CitationChip({
+function DocPill({
   citation: c,
   projectId,
-  colour,
 }: {
   citation: Citation;
   projectId: string;
-  colour: string;
 }) {
+  const meta = KIND_META[c.source_kind];
   // spec + material both live in spec_documents (selected via ?spec=); drawings
   // are plan_uploads (?plan=).
   const param = c.source_kind === "drawing" ? "plan" : "spec";
-  const href = {
-    pathname: `/projects/${projectId}/drawings`,
-    query: { [param]: c.source_id },
-  };
-  return (
-    <Link
-      href={href}
-      className="inline-flex items-center gap-1.5 rounded-sm border border-current/30 bg-white/60 px-2 py-1 text-[11px] hover:bg-white"
+  const href = c.source_id
+    ? {
+        pathname: `/projects/${projectId}/drawings`,
+        query: { [param]: c.source_id },
+      }
+    : null;
+  const inner = (
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full border border-ink-700/10 bg-ink-50 pl-2 pr-2.5 py-1 text-xs hover:bg-ink-100 transition-colors"
       title={c.quote || c.filename}
     >
-      <span
-        className="inline-block w-2 h-2 rounded-full"
-        style={{ backgroundColor: colour }}
-      />
-      <span className="font-medium uppercase tracking-wide">
-        {c.source_kind}
+      <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} aria-hidden />
+      <span className="text-[10px] font-semibold uppercase tracking-wide text-ink-500">
+        {meta.label}
       </span>
-      <span className="text-ink-600 truncate max-w-[14rem]">{c.filename}</span>
+      <span className="text-ink-700 truncate max-w-[12rem]">
+        {prettyDoc(c.filename)}
+      </span>
+    </span>
+  );
+  return href ? (
+    <Link href={href} className="cursor-pointer">
+      {inner}
     </Link>
+  ) : (
+    inner
   );
 }
