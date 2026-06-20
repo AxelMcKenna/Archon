@@ -1,0 +1,49 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { apiFetch } from "@/lib/api";
+import { useToast } from "@/components/ui/toast";
+
+export function DeleteSpecButton({
+  id,
+  filename,
+  projectId,
+}: {
+  id: string;
+  filename: string;
+  projectId: string;
+}) {
+  const router = useRouter();
+  const toast = useToast();
+  const [busy, setBusy] = useState(false);
+
+  async function onDelete(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm(`Delete ${filename}? This cannot be undone.`)) return;
+    setBusy(true);
+    try {
+      await apiFetch(`/specs/${id}`, { method: "DELETE" });
+      toast.success(`Deleted ${filename}.`);
+      router.push(`/projects/${projectId}/drawings`);
+      router.refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Delete failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onDelete}
+      disabled={busy}
+      title={`Delete ${filename}`}
+      className="text-ink-400 hover:text-red-600 text-xs px-2 py-0.5 rounded-sm disabled:opacity-50"
+    >
+      {busy ? "…" : "Delete"}
+    </button>
+  );
+}

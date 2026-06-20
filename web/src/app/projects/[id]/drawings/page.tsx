@@ -3,9 +3,12 @@ import { notFound } from "next/navigation";
 import { taxonomy } from "@arro/shared";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { UploadDrawingPanel } from "@/app/plans/upload-drawing-panel";
+import { UploadSpecInline } from "@/app/plans/upload-spec-inline";
 import { PlanReview } from "@/app/plans/plan-review";
 import { CadReview } from "@/app/plans/cad-review";
+import { SpecReview } from "@/app/plans/spec-review";
 import { DeleteRowButton } from "@/app/plans/delete-row-button";
+import { DeleteSpecButton } from "@/app/plans/delete-spec-button";
 import { DrawingsSubnav } from "@/components/drawings-subnav";
 import { effectiveStatus } from "@/lib/job-status";
 
@@ -48,17 +51,33 @@ type CadRow = {
   projects: { address: string; bca: string; project_type: string } | null;
 };
 
-type Row = PdfRow | CadRow;
+type SpecRow = {
+  format: "spec";
+  id: string;
+  project_id: string;
+  filename: string;
+  status: string;
+  processing_ms: number | null;
+  flags_count: number | null;
+  analysis: {
+    flags?: { severity: string }[];
+    extractor_version?: string;
+  } | null;
+  created_at: string;
+  projects: { address: string; bca: string; project_type: string } | null;
+};
+
+type Row = PdfRow | CadRow | SpecRow;
 
 export default async function ProjectDrawings({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ plan?: string; cad?: string }>;
+  searchParams: Promise<{ plan?: string; cad?: string; spec?: string }>;
 }) {
   const { id: projectId } = await params;
-  const { plan: planId, cad: cadId } = await searchParams;
+  const { plan: planId, cad: cadId, spec: specId } = await searchParams;
   const supabase = await getSupabaseServer();
 
   const { data: project } = await supabase
@@ -68,25 +87,34 @@ export default async function ProjectDrawings({
     .single();
   if (!project) notFound();
 
-  const [{ data: plansRaw }, { data: cadsRaw }] = await Promise.all([
-    supabase
-      .from("plan_uploads")
-      .select(
-        "id, project_id, filename, status, analyser_version, analysis_version, prompt_version, " +
-          "processing_ms, cost_usd, analysis, created_at, " +
-          "projects(address, bca, project_type)",
-      )
-      .eq("project_id", projectId)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("cad_uploads")
-      .select(
-        "id, project_id, filename, status, processing_ms, analysis, created_at, " +
-          "projects(address, bca, project_type)",
-      )
-      .eq("project_id", projectId)
-      .order("created_at", { ascending: false }),
-  ]);
+  const [{ data: plansRaw }, { data: cadsRaw }, { data: specsRaw }] =
+    await Promise.all([
+      supabase
+        .from("plan_uploads")
+        .select(
+          "id, project_id, filename, status, analyser_version, analysis_version, prompt_version, " +
+            "processing_ms, cost_usd, analysis, created_at, " +
+            "projects(address, bca, project_type)",
+        )
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("cad_uploads")
+        .select(
+          "id, project_id, filename, status, processing_ms, analysis, created_at, " +
+            "projects(address, bca, project_type)",
+        )
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("spec_documents")
+        .select(
+          "id, project_id, filename, status, processing_ms, flags_count, analysis, created_at, " +
+            "projects(address, bca, project_type)",
+        )
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: false }),
+    ]);
 
   // Drawings uploaded from the value-engineering page are stored without an
   // RFI analysis (status 'uploaded'). They belong to the VE page only, so the
@@ -97,15 +125,20 @@ export default async function ProjectDrawings({
   const cadRows: CadRow[] = ((cadsRaw ?? []) as unknown as object[])
     .map((r) => ({ format: "dxf", ...r }) as unknown as CadRow)
     .filter((r) => r.status !== "uploaded");
-  const rows: Row[] = [...pdfRows, ...cadRows].sort((a, b) =>
+  const specRows: SpecRow[] = ((specsRaw ?? []) as unknown as object[]).map(
+    (r) => ({ format: "spec", ...r }) as unknown as SpecRow,
+  );
+  const rows: Row[] = [...pdfRows, ...cadRows, ...specRows].sort((a, b) =>
     a.created_at < b.created_at ? 1 : -1,
   );
 
   const selected: Row | null = cadId
     ? cadRows.find((c) => c.id === cadId) ?? null
-    : planId
-      ? pdfRows.find((p) => p.id === planId) ?? null
-      : null;
+    : specId
+      ? specRows.find((s) => s.id === specId) ?? null
+      : planId
+        ? pdfRows.find((p) => p.id === planId) ?? null
+        : null;
 
   // Single-project mode for the upload form: pre-locked to this project.
   const projectsForUpload = [
@@ -127,17 +160,26 @@ export default async function ProjectDrawings({
         </p>
         <h1 className="text-2xl font-semibold tracking-tight text-ink-900">RFI flagger</h1>
         <p className="text-sm text-ink-500 max-w-2xl leading-relaxed">
-          Pre-flight a building plan or CAD drawing against likely council RFIs
-          before lodgement. Upload a PDF for flagged redlines, or a DXF for
-          flagged redlines + one-click geometry fixes.
+          Pre-flight your consent set against likely council RFIs before
+          lodgement. Drop in a building plan or CAD drawing for flagged redlines,
+          or a written specification / product document to check product
+          assurance, unresolved selections, and specified systems.
         </p>
       </header>
 
-      <UploadDrawingPanel projects={projectsForUpload} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <UploadDrawingPanel projects={projectsForUpload} />
+        <section className="rounded-sm bg-surface-raised shadow-depth p-8 space-y-4">
+          <h2 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
+            Analyse a specification
+          </h2>
+          <UploadSpecInline projects={projectsForUpload} />
+        </section>
+      </div>
 
       <section className="rounded-sm bg-surface-raised shadow-depth p-8 space-y-4">
         <h2 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
-          Drawings ({rows.length})
+          Documents ({rows.length})
         </h2>
         <RowsList rows={rows} active={selected?.id} projectId={projectId} />
       </section>
@@ -149,6 +191,10 @@ export default async function ProjectDrawings({
             <PlanReview
               plan={selected as unknown as Parameters<typeof PlanReview>[0]["plan"]}
             />
+          ) : selected.format === "spec" ? (
+            <SpecReview
+              spec={selected as unknown as Parameters<typeof SpecReview>[0]["spec"]}
+            />
           ) : (
             <CadReview
               cad={selected as unknown as Parameters<typeof CadReview>[0]["cad"]}
@@ -159,6 +205,18 @@ export default async function ProjectDrawings({
       </div>
     </>
   );
+}
+
+const FORMAT_LABEL: Record<Row["format"], string> = {
+  pdf: "PDF",
+  dxf: "DXF",
+  spec: "SPEC",
+};
+
+function rowQuery(r: Row): { plan: string } | { cad: string } | { spec: string } {
+  if (r.format === "pdf") return { plan: r.id };
+  if (r.format === "dxf") return { cad: r.id };
+  return { spec: r.id };
 }
 
 function RowsList({
@@ -173,7 +231,7 @@ function RowsList({
   if (!rows.length) {
     return (
       <p className="text-sm text-ink-500 italic">
-        Nothing analysed yet — upload a drawing above.
+        Nothing analysed yet — upload a drawing or specification above.
       </p>
     );
   }
@@ -192,9 +250,19 @@ function RowsList({
             : 0;
         const displayStatus = effectiveStatus(r.status, r.created_at);
         const stalled = displayStatus === "stalled";
+        const subtitle =
+          r.status === "analysed"
+            ? `${flags.length} flags (${must} must / ${nice} nice)${
+                r.format === "dxf" ? ` · ${fixable} fixable` : ""
+              }`
+            : r.format === "spec" && r.status === "no_text_layer"
+              ? "No text layer — re-upload a text PDF"
+              : stalled
+                ? "Analysis stalled — re-upload to retry"
+                : displayStatus;
         const href = {
           pathname: `/projects/${projectId}/drawings`,
-          query: r.format === "pdf" ? { plan: r.id } : { cad: r.id },
+          query: rowQuery(r),
         };
         return (
           <li
@@ -210,19 +278,13 @@ function RowsList({
               <div className="min-w-0">
                 <p className="font-medium text-ink-900 truncate">
                   <span className="inline-block mr-2 text-[10px] font-semibold tracking-wide rounded-sm bg-ink-100 text-ink-700 px-1.5 py-0.5">
-                    {r.format.toUpperCase()}
+                    {FORMAT_LABEL[r.format]}
                   </span>
                   {r.filename}
                 </p>
                 <p className="text-xs text-ink-500 mt-0.5">
                   {bcaName} · {new Date(r.created_at).toLocaleDateString()} ·{" "}
-                  {r.status === "analysed"
-                    ? `${flags.length} flags (${must} must / ${nice} nice)${
-                        r.format === "dxf" ? ` · ${fixable} fixable` : ""
-                      }`
-                    : stalled
-                      ? "Analysis stalled — re-upload to retry"
-                      : displayStatus}
+                  {subtitle}
                 </p>
               </div>
               <span
@@ -241,7 +303,11 @@ function RowsList({
                 {displayStatus}
               </span>
             </Link>
-            <DeleteRowButton format={r.format} id={r.id} filename={r.filename} />
+            {r.format === "spec" ? (
+              <DeleteSpecButton id={r.id} filename={r.filename} projectId={projectId} />
+            ) : (
+              <DeleteRowButton format={r.format} id={r.id} filename={r.filename} />
+            )}
           </li>
         );
       })}
@@ -253,7 +319,9 @@ function SelectedHeader({ row, projectId }: { row: Row; projectId: string }) {
   return (
     <div className="flex items-baseline justify-between flex-wrap gap-2">
       <div className="space-y-1">
-        <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">{row.format.toUpperCase()}</p>
+        <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
+          {FORMAT_LABEL[row.format]}
+        </p>
         <h2 className="text-xl font-semibold tracking-tight text-ink-900">{row.filename}</h2>
       </div>
       <Link
