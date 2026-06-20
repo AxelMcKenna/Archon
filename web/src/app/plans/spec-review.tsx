@@ -31,10 +31,6 @@ type SpecDocument = {
   } | null;
 };
 
-const SEV_STYLE: Record<SpecFlag["severity"], string> = {
-  must_resolve: "bg-red-100 text-red-800 border-red-200",
-  nice_to_have: "bg-amber-100 text-amber-800 border-amber-200",
-};
 
 const CONF_STYLE: Record<Confidence, string> = {
   high: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -135,37 +131,42 @@ function FlagCard({ flag: f }: { flag: SpecFlag & { _n: number } }) {
 
   return (
     <article
-      className={`rounded-sm border p-4 transition-shadow ${SEV_STYLE[f.severity]}`}
+      className={`rounded-md border border-ink-700/10 border-l-[3px] bg-white p-4 ${
+        f.severity === "must_resolve" ? "border-l-red-500" : "border-l-amber-500"
+      }`}
     >
-      <header className="flex items-baseline justify-between flex-wrap gap-2 mb-2">
-        <p className="font-medium text-sm flex items-center gap-2">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-2.5 min-w-0">
           <span
-            className="inline-flex items-center justify-center rounded-full text-white text-[10px] font-bold"
+            className="mt-0.5 shrink-0 inline-flex items-center justify-center rounded-full text-white text-[10px] font-bold"
             style={{ width: 18, height: 18, backgroundColor: sevColour }}
           >
             {f._n}
           </span>
-          {f.page > 1 ? `Page ${f.page} · ` : ""}
-          <span className="text-ink-700/80">{f.area}</span>
-        </p>
-        <div className="flex items-center gap-2">
-          <span
-            className={`text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-sm border ${CONF_STYLE[conf]}`}
-          >
-            {conf}
-          </span>
-          <span className="font-mono text-xs">{f.category}</span>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-ink-900 leading-snug">
+              {f.area}
+            </p>
+            <p className="text-[11px] text-ink-400 mt-0.5">
+              {f.page > 1 ? `Page ${f.page}` : "Specification"}
+              {cat ? ` · ${cat.label}` : ""}
+            </p>
+          </div>
         </div>
-      </header>
-      {cat && <p className="text-xs text-ink-500 mb-2">{cat.label}</p>}
+        <span
+          className={`shrink-0 text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-sm border ${CONF_STYLE[conf]}`}
+        >
+          {conf}
+        </span>
+      </div>
       {f.verbatim_quote && (
-        <blockquote className="border-l-2 border-current/40 pl-2 mb-2 text-xs italic">
+        <blockquote className="mt-2.5 border-l-2 border-ink-700/15 pl-2.5 text-xs italic text-ink-500">
           &ldquo;{f.verbatim_quote}&rdquo;
         </blockquote>
       )}
-      <p className="text-sm">{f.reason}</p>
-      <p className="text-sm mt-2">
-        <span className="font-medium">Recommended action:</span>{" "}
+      <p className="mt-2 text-sm text-ink-600 leading-relaxed">{f.reason}</p>
+      <p className="mt-2 text-sm text-ink-700">
+        <span className="font-medium text-ink-500">Fix · </span>
         {f.recommended_action}
       </p>
     </article>
