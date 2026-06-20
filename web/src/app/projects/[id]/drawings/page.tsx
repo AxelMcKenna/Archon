@@ -2,14 +2,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { taxonomy } from "@arro/shared";
 import { getSupabaseServer } from "@/lib/supabase/server";
-import { UploadDrawingPanel } from "@/app/plans/upload-drawing-panel";
-import { UploadSpecInline } from "@/app/plans/upload-spec-inline";
+import { BatchUploadPanel } from "@/app/plans/batch-upload-panel";
 import { PlanReview } from "@/app/plans/plan-review";
 import { CadReview } from "@/app/plans/cad-review";
 import { SpecReview } from "@/app/plans/spec-review";
 import { DeleteRowButton } from "@/app/plans/delete-row-button";
 import { DeleteSpecButton } from "@/app/plans/delete-spec-button";
 import { CoordinationPanel } from "@/app/plans/coordination-panel";
+import {
+  ProjectSummary,
+  type SummaryIssue,
+} from "@/app/plans/project-summary";
 import { DrawingsSubnav } from "@/components/drawings-subnav";
 import { effectiveStatus } from "@/lib/job-status";
 
@@ -170,6 +173,64 @@ export default async function ProjectDrawings({
     for (const id of ids) crossRefCounts[id] = (crossRefCounts[id] ?? 0) + 1;
   }
 
+  // Every issue across the whole project, in one list: drawing flags + spec /
+  // material flags + cross-document coordination flags. Source-attributed and
+  // linked so the project summary can show everything at once.
+  type RawFlag = {
+    severity?: string;
+    category?: string;
+    area?: string;
+    reason?: string;
+  };
+  const sev = (s?: string): SummaryIssue["severity"] =>
+    s === "must_resolve" ? "must_resolve" : "nice_to_have";
+  const summaryIssues: SummaryIssue[] = [];
+  for (const r of pdfRows) {
+    if (r.status !== "analysed") continue;
+    for (const f of (r.analysis?.flags ?? []) as RawFlag[]) {
+      summaryIssues.push({
+        severity: sev(f.severity),
+        category: f.category ?? "",
+        area: f.area ?? "",
+        reason: f.reason ?? "",
+        source: { kind: "drawing", filename: r.filename, id: r.id, param: "plan" },
+      });
+    }
+  }
+  for (const r of specRows) {
+    if (r.status !== "analysed") continue;
+    const kind = r.doc_kind === "material" ? "material" : "spec";
+    for (const f of (r.analysis?.flags ?? []) as RawFlag[]) {
+      summaryIssues.push({
+        severity: sev(f.severity),
+        category: f.category ?? "",
+        area: f.area ?? "",
+        reason: f.reason ?? "",
+        source: { kind, filename: r.filename, id: r.id, param: "spec" },
+      });
+    }
+  }
+  for (const f of coordinationFlags) {
+    const cites = f.citations ?? [];
+    const c0 = cites[0];
+    const pair =
+      cites.length >= 2
+        ? `${cites[0].filename} ↔ ${cites[1].filename}`
+        : (c0?.filename ?? "cross-document");
+    summaryIssues.push({
+      severity: sev(f.severity),
+      category: f.category ?? "",
+      area: f.area ?? "",
+      reason: f.reason ?? "",
+      source: {
+        kind: "coordination",
+        filename: pair,
+        id: c0?.source_id,
+        param: c0?.source_kind === "drawing" ? "plan" : "spec",
+      },
+    });
+  }
+
   const selected: Row | null = cadId
     ? cadRows.find((c) => c.id === cadId) ?? null
     : specId
@@ -177,16 +238,6 @@ export default async function ProjectDrawings({
       : planId
         ? pdfRows.find((p) => p.id === planId) ?? null
         : null;
-
-  // Single-project mode for the upload form: pre-locked to this project.
-  const projectsForUpload = [
-    {
-      id: project.id,
-      address: project.address,
-      bca: project.bca,
-      project_type: project.project_type,
-    },
-  ];
 
   return (
     <>
@@ -205,21 +256,13 @@ export default async function ProjectDrawings({
         </p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <UploadDrawingPanel projects={projectsForUpload} />
-        <section className="rounded-sm bg-surface-raised shadow-depth p-8 space-y-4">
-          <h2 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
-            Analyse a specification
-          </h2>
-          <UploadSpecInline projects={projectsForUpload} docKind="spec" />
-        </section>
-        <section className="rounded-sm bg-surface-raised shadow-depth p-8 space-y-4">
-          <h2 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
-            Analyse a material / product sheet
-          </h2>
-          <UploadSpecInline projects={projectsForUpload} docKind="material" />
-        </section>
-      </div>
+      <BatchUploadPanel projectId={projectId} />
+
+      <ProjectSummary
+        issues={summaryIssues}
+        documentCount={coordinationDocCount}
+        projectId={projectId}
+      />
 
       <section className="rounded-sm bg-surface-raised shadow-depth p-8 space-y-4">
         <h2 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
