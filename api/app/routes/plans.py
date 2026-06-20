@@ -13,7 +13,7 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import Response
+from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel
 from supabase import Client
 
@@ -28,6 +28,7 @@ from app.services.value_engineering_pipeline import (
 )
 from app.storage import PLANS_BUCKET, download, signed_upload_url, signed_url
 from app.utils.safe_filename import safe_filename
+from app.utils.sse import progress_sse_response
 
 router = APIRouter()
 log = logging.getLogger(__name__)
@@ -186,6 +187,48 @@ async def ingest_uploaded(
         "verification": result.verification,
         "cached": result.cached,
     }
+
+
+@router.post("/ingest-stream")
+@limiter.limit("10/minute")
+async def ingest_uploaded_stream(
+    request: Request,
+    body: IngestRequest,
+    db: Client = Depends(get_db),
+) -> StreamingResponse:
+    """Same as /ingest, but streams the analyser's progress as SSE so the UI can
+    show a live engine log instead of a spinner. The final ``result`` frame
+    carries the same payload /ingest returns."""
+    if body.content_type not in ALLOWED_MEDIA:
+        raise HTTPException(415, f"unsupported media type: {body.content_type}")
+    expected_prefix = f"{body.project_id}/{body.plan_id}/"
+    if not body.storage_path.startswith(expected_prefix):
+        raise HTTPException(400, "storage_path does not match project/plan")
+    proj = _load_project(db, body.project_id)
+
+    def run(progress: Any) -> dict[str, Any]:
+        result = run_pipeline(
+            db=db,
+            project_id=str(body.project_id),
+            project=proj,
+            filename=safe_filename(body.filename, default="plan.pdf"),
+            content_type=body.content_type,
+            storage_path=body.storage_path,
+            plan_id=str(body.plan_id),
+            analyse=body.analyse,
+            progress=progress,
+        )
+        return {
+            "plan_id": result.plan_id,
+            "flags_count": result.flags_count,
+            "processing_ms": result.processing_ms,
+            "cost_usd": result.cost_usd,
+            "truncated": result.truncated,
+            "verification": result.verification,
+            "cached": result.cached,
+        }
+
+    return await progress_sse_response(run)
 
 
 @router.get("/{plan_id}")

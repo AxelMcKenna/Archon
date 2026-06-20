@@ -17,10 +17,12 @@ and crucially, removes the hard cap on document size.
 
 from __future__ import annotations
 
+import itertools
 import json
 import logging
 import os
 import time
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
@@ -47,6 +49,11 @@ from app.vision.plans.schema import ACTIVE_ANALYSIS_PROMPT
 from app.vision.plans.vision_pass import run_single_vision_pass, verify_flags
 
 log = logging.getLogger(__name__)
+
+# Progress sink: called from analyse_plan (and its sheet worker threads) with a
+# small dict per pipeline phase so a streaming caller can surface a live log.
+# Must be cheap and thread-safe — it runs inside the per-sheet ThreadPoolExecutor.
+ProgressFn = Callable[[dict[str, Any]], None]
 
 ANALYSIS_VERSION = "2.4.0"
 # Back-compat: routes/tests still import ANALYSER_VERSION.
@@ -104,6 +111,7 @@ def analyse_plan(
     project_description: str,
     risk_group: str = "",
     importance_level: str = "",
+    progress: ProgressFn | None = None,
 ) -> tuple[dict[str, Any], str, Metrics, dict[str, Any]]:
     """Run the v2 analyser.
 
@@ -118,10 +126,37 @@ def analyse_plan(
     template, prompt_version = load_prompt(ACTIVE_ANALYSIS_PROMPT)
     settings = get_settings()
 
+    # Monotonic step ids let the streaming client pair a "running" line with its
+    # later "done" update (same id). next() on an itertools.count is atomic in
+    # CPython, so it's safe to share across the per-sheet worker threads.
+    step_seq = itertools.count(1)
+
+    def emit(
+        label: str,
+        *,
+        status: str = "done",
+        detail: str | None = None,
+        sid: int | None = None,
+    ) -> int | None:
+        if progress is None:
+            return sid
+        if sid is None:
+            sid = next(step_seq)
+        progress({"id": sid, "label": label, "status": status, "detail": detail})
+        return sid
+
     # --- Phase A: deterministic text-layer extraction ---------------------
     if media_type == "application/pdf":
+        extract_sid = emit("Extracting drawing text layer", status="running")
         text_extraction = extract_plan_text(file_bytes)
         rule_flags = run_doc_rules(text_extraction)
+        emit(
+            "Read drawing text layer",
+            detail=f"{len(text_extraction.title_blocks)} sheet title block(s)",
+            sid=extract_sid,
+        )
+        if rule_flags:
+            emit("Document-rules pass", detail=f"{len(rule_flags)} rule flag(s)")
     else:
         text_extraction = PlanTextExtraction()
         rule_flags = []
@@ -198,10 +233,18 @@ def analyse_plan(
         for s in sheets:
             seed_by_page[s.page] = seed_hint(*_sheet_meta(s.page))
 
+    emit("Rendered drawing sheets", detail=f"{len(sheets)} sheet(s)")
+
     metrics = Metrics()
     t0 = time.monotonic()
 
     # --- Phase B/C: per-sheet vision + verify ----------------------------
+    # Human-friendly sheet label per page for the live log (falls back to page
+    # number when the title block has no sheet code).
+    label_by_page = {s.page: (_sheet_meta(s.page)[0] or f"page {s.page}") for s in sheets}
+    vision_sid = emit(
+        "Reading drawings against NZ Building Code", status="running"
+    )
     sheet_results = _run_sheets_parallel(
         sheets=sheets,
         prompt=flat_prompt,
@@ -215,6 +258,10 @@ def analyse_plan(
             p: str(m.get("discipline") or "")
             for p, m in text_extraction.page_metadata().items()
         },
+        progress=progress,
+        step_seq=step_seq,
+        label_by_page=label_by_page,
+        sheet_total=len(sheets),
     )
 
     # Aggregate across sheets.
@@ -237,6 +284,12 @@ def analyse_plan(
             verification_version_final = sr["verification_version"]
 
     summary = max(summaries, key=len, default="")
+
+    emit(
+        "Read drawings against NZ Building Code",
+        detail=f"{len(all_kept)} flag(s) after verification",
+        sid=vision_sid,
+    )
 
     # --- Phase B2/G/H: cross-view reconciliation -------------------------
     # Build a ViewRecord per sheet, register views that describe the same
@@ -300,6 +353,12 @@ def analyse_plan(
                 len(coordination_flags),
             )
 
+    if cross_view_on:
+        emit(
+            "Cross-view reconciliation",
+            detail=f"{len(cross_view_flags)} cross-view flag(s)",
+        )
+
     # --- Phase D: merge with rule flags ----------------------------------
     merged_flags = attach_page_bbox(rule_flags) + all_kept + cross_view_flags
 
@@ -314,6 +373,7 @@ def analyse_plan(
             flag.setdefault("sheet_label", meta.get("sheet_label"))
 
     # --- Phase E: snap to PDF text layer ---------------------------------
+    snap_sid = emit("Snapping flags to drawing geometry", status="running")
     merged_flags = refine_flag_bboxes(
         file_bytes=file_bytes, media_type=media_type, flags=merged_flags
     )
@@ -322,6 +382,7 @@ def analyse_plan(
     merged_flags = refine_via_ocr(
         file_bytes=file_bytes, media_type=media_type, flags=merged_flags
     )
+    emit("Snapped flags to drawing geometry", sid=snap_sid)
 
     metrics.processing_ms = int((time.monotonic() - t0) * 1000)
 
@@ -363,9 +424,32 @@ def _run_sheets_parallel(
     seed_by_page: dict[int, str] | None = None,
     risk_group: str = "",
     discipline_by_page: dict[int, str] | None = None,
+    progress: ProgressFn | None = None,
+    step_seq: itertools.count[int] | None = None,
+    label_by_page: dict[int, str] | None = None,
+    sheet_total: int = 0,
 ) -> list[dict[str, Any]]:
     """Process sheets concurrently. Returns one result dict per sheet."""
     settings = get_settings()
+
+    # Completed-sheet counter for the live log. itertools.count.__next__ is
+    # atomic in CPython, so it's safe to call from the worker threads below.
+    done_counter = itertools.count(1)
+
+    def _emit_sheet_done(page: int, kept_count: int) -> None:
+        if progress is None or step_seq is None:
+            return
+        n_done = next(done_counter)
+        label = (label_by_page or {}).get(page) or f"page {page}"
+        suffix = f"/{sheet_total}" if sheet_total else ""
+        progress(
+            {
+                "id": next(step_seq),
+                "label": f"Sheet {label}",
+                "status": "done",
+                "detail": f"{kept_count} flag(s) · {n_done}{suffix}",
+            }
+        )
 
     def _process(sheet: RenderedSheet) -> dict[str, Any]:
         captions = [caption_str(img) for img in sheet.images]
@@ -388,6 +472,7 @@ def _run_sheets_parallel(
         # provider rate limits are global). Drop to 1 pass for the rare
         # sheet that has zero images (degenerate guard).
         if not image_pngs:
+            _emit_sheet_done(sheet.page, 0)
             return {
                 "sheet_index": sheet.sheet_index,
                 "page": sheet.page,
@@ -464,6 +549,8 @@ def _run_sheets_parallel(
             }
             for idx, run in enumerate(run_flag_lists)
         ]
+
+        _emit_sheet_done(sheet.page, len(kept))
 
         return {
             "sheet_index": sheet.sheet_index,

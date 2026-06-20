@@ -13,6 +13,8 @@ route, so RLS is enforced.
 
 from __future__ import annotations
 
+import itertools
+from collections.abc import Callable
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any
@@ -75,7 +77,19 @@ def upload_and_analyse(
     storage_path: str | None = None,
     plan_id: str | None = None,
     analyse: bool = True,
+    progress: Callable[[dict[str, Any]], None] | None = None,
 ) -> PlanAnalysisResult:
+    # Wrapper-level log lines use a negative id space so they never collide with
+    # the analyser's positive step ids (which pair a running line to its done).
+    _wrap_seq = itertools.count(-1, -1)
+
+    def emit(label: str, *, detail: str | None = None) -> None:
+        if progress is None:
+            return
+        progress(
+            {"id": next(_wrap_seq), "label": label, "status": "done", "detail": detail}
+        )
+
     provider, model_id = resolve_provider_model()
 
     if storage_path is not None:
@@ -99,6 +113,7 @@ def upload_and_analyse(
         )
 
     digest = hash_bytes(payload)
+    emit("Loaded drawing", detail=f"{len(payload) // 1024} KB")
 
     # Store-only path (e.g. uploads from the value-engineering page): persist
     # the file so VE can re-render it, but skip the RFI flagger entirely. The
@@ -139,6 +154,11 @@ def upload_and_analyse(
             "model_id": model_id,
         },
     )
+
+    if cached:
+        emit("Found a prior analysis", detail="reusing cached results")
+    else:
+        emit("No cached result", detail="running a fresh analysis")
 
     common_row: dict[str, Any] = {
         "id": plan_id,
@@ -194,6 +214,7 @@ def upload_and_analyse(
             project_description=project.get("description") or "",
             risk_group=project.get("risk_group") or "",
             importance_level=project.get("importance_level") or "",
+            progress=progress,
         ),
         clone_fields=clone_fields,
         analysed_fields=analysed_fields,
@@ -207,6 +228,7 @@ def upload_and_analyse(
     replace_plan_flags(
         db, plan_upload_id=plan_id, project_id=project_id, flags=flags
     )
+    emit("Saved flags to project", detail=f"{len(flags)} flag(s)")
 
     return PlanAnalysisResult(
         plan_id=plan_id,

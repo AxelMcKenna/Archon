@@ -7,6 +7,8 @@ thin HTTP layer.
 from __future__ import annotations
 
 import hashlib
+import itertools
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 from uuid import uuid4
@@ -37,7 +39,20 @@ def upload_and_analyse(
     storage_path: str | None = None,
     cad_id: str | None = None,
     analyse: bool = True,
+    progress: Callable[[dict[str, Any]], None] | None = None,
 ) -> CadAnalysisResult:
+    _seq = itertools.count(1)
+
+    def emit(
+        label: str, *, status: str = "done", detail: str | None = None, sid: int | None = None
+    ) -> int | None:
+        if progress is None:
+            return sid
+        if sid is None:
+            sid = next(_seq)
+        progress({"id": sid, "label": label, "status": status, "detail": detail})
+        return sid
+
     if storage_path is not None:
         # Direct-to-storage path: file already uploaded to a signed URL.
         if not cad_id:
@@ -56,6 +71,7 @@ def upload_and_analyse(
             data=payload,
         )
     content_hash = hashlib.sha256(payload).hexdigest()
+    emit("Loaded CAD drawing", detail=f"{len(payload) // 1024} KB")
 
     # Store-only path (e.g. uploads from the value-engineering page): persist
     # the file so VE can re-render it, but skip the RFI flagger entirely. The
@@ -93,6 +109,9 @@ def upload_and_analyse(
         }
     ).execute()
 
+    cad_sid = emit(
+        "Analysing CAD geometry against rules", status="running"
+    )
     try:
         analysis, prompt_version, metrics, _extras = analyse_cad(
             dxf_bytes=payload,
@@ -115,10 +134,18 @@ def upload_and_analyse(
         }
     ).eq("id", cad_id).execute()
 
+    flags_count = len(analysis.get("flags", []))
+    entity_count = analysis.get("entity_count", 0)
+    emit(
+        "Analysed CAD geometry against rules",
+        detail=f"{flags_count} flag(s) across {entity_count} entities",
+        sid=cad_sid,
+    )
+
     return CadAnalysisResult(
         cad_id=cad_id,
-        flags_count=len(analysis.get("flags", [])),
-        entity_count=analysis.get("entity_count", 0),
+        flags_count=flags_count,
+        entity_count=entity_count,
         views=analysis.get("views", []),
         processing_ms=metrics.processing_ms,
     )

@@ -74,7 +74,7 @@ export function ProjectSubnav({ projectId }: ProjectSubnavProps) {
           style={{ clipPath: hexClip }}
         />
         <div aria-hidden className="absolute inset-0 bg-white" style={{ clipPath: hexClip }} />
-        <ol className="relative flex min-w-max items-center gap-0.5 py-1.5 pl-7 pr-7">
+        <ol className="relative flex min-w-max items-center gap-0.5 py-2 pl-7 pr-7">
           {visibleTabs.map((tab, index) => {
             const tabPath = `/projects/${projectId}${tab.href}` as Route;
             const isActive = index === activeIndex;
@@ -85,12 +85,12 @@ export function ProjectSubnav({ projectId }: ProjectSubnavProps) {
                 <Link
                   href={tabPath}
                   style={isActive ? { clipPath: hexClip } : undefined}
-                  className={`relative inline-flex items-center whitespace-nowrap font-display text-[14px] tracking-tight transition-all duration-200 ${
+                  className={`relative inline-flex items-center whitespace-nowrap font-display text-[15.5px] tracking-tight transition-all duration-200 ${
                     isActive
-                      ? "bg-white pl-5 pr-5 py-1.5 font-semibold text-ink-900 [filter:drop-shadow(0_1px_1px_rgba(15,17,21,0.10))_drop-shadow(0_3px_6px_rgba(15,17,21,0.10))]"
+                      ? "bg-white pl-6 pr-6 py-2 font-semibold text-ink-900 [filter:drop-shadow(0_1px_1px_rgba(15,17,21,0.10))_drop-shadow(0_3px_6px_rgba(15,17,21,0.10))]"
                       : isPast
-                        ? "px-3.5 py-1.5 font-medium text-ink-700 hover:text-ink-900"
-                        : "px-3.5 py-1.5 font-medium text-ink-500 hover:text-ink-900"
+                        ? "px-4 py-2 font-medium text-ink-700 hover:text-ink-900"
+                        : "px-4 py-2 font-medium text-ink-500 hover:text-ink-900"
                   }`}
                 >
                   {tab.name}
@@ -98,7 +98,7 @@ export function ProjectSubnav({ projectId }: ProjectSubnavProps) {
                 {index < visibleTabs.length - 1 && (
                   <ChevronRight
                     aria-hidden
-                    className={`h-3 w-3 flex-shrink-0 ${
+                    className={`h-3.5 w-3.5 flex-shrink-0 ${
                       isPast || isActive ? "text-ink-400" : "text-ink-300"
                     }`}
                     strokeWidth={2.5}

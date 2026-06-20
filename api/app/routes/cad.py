@@ -21,7 +21,7 @@ from fastapi import (
     Request,
     UploadFile,
 )
-from fastapi.responses import Response
+from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel
 from supabase import Client
 
@@ -48,6 +48,7 @@ from app.services.value_engineering_pipeline import (
 )
 from app.storage import CAD_BUCKET, download, signed_upload_url, signed_url
 from app.utils.safe_filename import safe_filename
+from app.utils.sse import progress_sse_response
 
 router = APIRouter()
 log = logging.getLogger(__name__)
@@ -195,6 +196,43 @@ async def ingest_uploaded_cad(
         "views": result.views,
         "processing_ms": result.processing_ms,
     }
+
+
+@router.post("/ingest-stream")
+@limiter.limit("10/minute")
+async def ingest_uploaded_cad_stream(
+    request: Request,
+    body: CadIngestRequest,
+    db: Client = Depends(get_db),
+) -> StreamingResponse:
+    """Streaming variant of /cad/ingest — emits the analyser's progress as SSE."""
+    if not body.filename.lower().endswith(".dxf"):
+        raise HTTPException(415, "only .dxf is supported")
+    expected_prefix = f"{body.project_id}/{body.cad_id}/"
+    if not body.storage_path.startswith(expected_prefix):
+        raise HTTPException(400, "storage_path does not match project/cad")
+    proj = _load_cad_project(db, body.project_id)
+
+    def run(progress: Any) -> dict[str, Any]:
+        result = run_upload_pipeline(
+            db=db,
+            project_id=str(body.project_id),
+            project=proj,
+            filename=safe_filename(body.filename, default="drawing.dxf"),
+            storage_path=body.storage_path,
+            cad_id=str(body.cad_id),
+            analyse=body.analyse,
+            progress=progress,
+        )
+        return {
+            "cad_id": result.cad_id,
+            "flags_count": result.flags_count,
+            "entity_count": result.entity_count,
+            "views": result.views,
+            "processing_ms": result.processing_ms,
+        }
+
+    return await progress_sse_response(run)
 
 
 def _load_for_render(
