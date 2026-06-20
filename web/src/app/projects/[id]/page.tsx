@@ -163,7 +163,11 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
           {project.address}
         </h1>
         <p className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
-          {project.project_type} · status <span className="text-accent">{project.status}</span>
+          {taxonomy.project_types.find((t) => t.id === project.project_type)?.label ??
+            project.project_type}
+          {project.risk_group ? <> · risk {project.risk_group}</> : null}
+          {project.importance_level ? <> · {project.importance_level}</> : null}
+          {" · "}status <span className="text-accent">{project.status}</span>
         </p>
       </header>
 

@@ -2,6 +2,11 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { taxonomy } from "@arro/shared";
+
+const PROJECT_TYPE_LABELS: Record<string, string> = Object.fromEntries(
+  taxonomy.project_types.map((t) => [t.id, t.label]),
+);
 
 export type Row = {
   id: string;
@@ -90,7 +95,7 @@ export function ProjectsTable({ rows }: { rows: Row[] }) {
                 </Link>
               </td>
               <td>{p.bca_name}</td>
-              <td>{p.project_type}</td>
+              <td>{PROJECT_TYPE_LABELS[p.project_type] ?? p.project_type}</td>
               <td>
                 <span className={`inline-block rounded-sm px-2 py-0.5 text-xs ${STATUS_STYLE[p.status] ?? "bg-ink-700/10"}`}>
                   {p.status}

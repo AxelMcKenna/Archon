@@ -299,6 +299,187 @@
         "specialist": "CPEng structural engineer",
         "referenceClause": "Building Act 2004"
       }
+    ],
+    "multi_unit_residential": [
+      {
+        "id": "fire_report_c_as2",
+        "title": "Fire Safety Report (C/AS2 or C/VM2)",
+        "description": "Fire safety design demonstrating means of escape, fire separation and fire systems for a multi-unit (Risk Group SM) building. C/AS2 acceptable solution or a C/VM2 alternative solution.",
+        "category": "specialist",
+        "trigger": "Multi-unit residential buildings are not Risk Group SH and cannot use C/AS1.",
+        "specialist": "Fire engineer",
+        "referenceClause": "NZBC Clauses C1-C6"
+      },
+      {
+        "id": "inter_tenancy_acoustic_report",
+        "title": "Inter-tenancy Acoustic Report (G6)",
+        "description": "Airborne and impact sound insulation design for walls and floors between household units.",
+        "category": "specialist",
+        "trigger": "G6 requires sound insulation between abutting occupancies.",
+        "specialist": "Acoustic engineer",
+        "referenceClause": "NZBC Clause G6"
+      },
+      {
+        "id": "accessible_route_assessment_d1",
+        "title": "Accessible Route Assessment (D1 / NZS 4121)",
+        "description": "Accessible route, lift and accessible facilities provision where required across common areas.",
+        "category": "project",
+        "trigger": "Multi-unit and common-use areas trigger accessibility requirements.",
+        "specialist": "Architectural designer",
+        "referenceClause": "NZBC Clause D1"
+      }
+    ],
+    "commercial_office": [
+      {
+        "id": "fire_report_c_as2",
+        "title": "Fire Safety Report (C/AS2 or C/VM2)",
+        "description": "Fire safety design covering occupant load, means of escape, fire separation and fire safety systems for a Working/Business (Risk Group WB) building.",
+        "category": "specialist",
+        "trigger": "Commercial buildings are not Risk Group SH and cannot use C/AS1.",
+        "specialist": "Fire engineer",
+        "referenceClause": "NZBC Clauses C1-C6"
+      },
+      {
+        "id": "specified_systems_compliance_schedule",
+        "title": "Specified Systems List & Draft Compliance Schedule",
+        "description": "Schedule of specified systems (sprinklers, alarms, emergency lighting, HVAC, lifts) with performance standards and IM&R procedures for the BWOF regime.",
+        "category": "project",
+        "trigger": "Buildings with specified systems require a compliance schedule.",
+        "specialist": null,
+        "referenceClause": "Building Act 2004 s100"
+      },
+      {
+        "id": "accessible_route_assessment_d1",
+        "title": "Accessibility Report (D1 / NZS 4121)",
+        "description": "Accessible route, lift, accessible sanitary facilities and accessible parking provision for public-use buildings.",
+        "category": "project",
+        "trigger": "Buildings to which the public has access must be accessible.",
+        "specialist": "Architectural designer",
+        "referenceClause": "NZBC Clause D1"
+      },
+      {
+        "id": "mechanical_ventilation_g4",
+        "title": "Mechanical Ventilation Design (G4/VM1) + PS1",
+        "description": "Mechanical ventilation design with air-change rates for the assessed occupancy, contaminant-space extract, and producer statement.",
+        "category": "specialist",
+        "trigger": "Commercial occupancy ventilation typically requires mechanical design.",
+        "specialist": "Mechanical engineer",
+        "referenceClause": "NZBC Clause G4"
+      },
+      {
+        "id": "sanitary_facilities_g1_commercial",
+        "title": "Sanitary Facilities Calculation (G1)",
+        "description": "Number of sanitary fixtures for the assessed occupancy, separate-sex and accessible facilities per G1/AS1.",
+        "category": "project",
+        "trigger": "Commercial sanitary provision is sized by occupancy, not per dwelling.",
+        "specialist": null,
+        "referenceClause": "NZBC Clause G1"
+      }
+    ],
+    "retail": [
+      {
+        "id": "fire_report_c_as2",
+        "title": "Fire Safety Report (C/AS2 or C/VM2)",
+        "description": "Fire safety design covering occupant load, means of escape, fire separation and fire safety systems for a Crowd Activity (Risk Group CA) building.",
+        "category": "specialist",
+        "trigger": "Retail / hospitality buildings are Crowd Activity and cannot use C/AS1.",
+        "specialist": "Fire engineer",
+        "referenceClause": "NZBC Clauses C1-C6"
+      },
+      {
+        "id": "specified_systems_compliance_schedule",
+        "title": "Specified Systems List & Draft Compliance Schedule",
+        "description": "Schedule of specified systems with performance standards and IM&R procedures for the BWOF regime.",
+        "category": "project",
+        "trigger": "Buildings with specified systems require a compliance schedule.",
+        "specialist": null,
+        "referenceClause": "Building Act 2004 s100"
+      },
+      {
+        "id": "accessible_route_assessment_d1",
+        "title": "Accessibility Report (D1 / NZS 4121)",
+        "description": "Accessible route, accessible sanitary facilities and accessible parking provision for public-use buildings.",
+        "category": "project",
+        "trigger": "Buildings to which the public has access must be accessible.",
+        "specialist": "Architectural designer",
+        "referenceClause": "NZBC Clause D1"
+      },
+      {
+        "id": "mechanical_ventilation_g4",
+        "title": "Mechanical Ventilation Design (G4/VM1) + PS1",
+        "description": "Mechanical ventilation design with air-change rates and kitchen/contaminant extract for hospitality fit-outs.",
+        "category": "specialist",
+        "trigger": "Crowd-activity and food spaces typically require mechanical ventilation.",
+        "specialist": "Mechanical engineer",
+        "referenceClause": "NZBC Clause G4"
+      }
+    ],
+    "industrial": [
+      {
+        "id": "fire_report_c_as2",
+        "title": "Fire Safety Report (C/AS2 or C/VM2)",
+        "description": "Fire safety design accounting for high fire load (Risk Group WF), fire separation, fire systems and firefighting access.",
+        "category": "specialist",
+        "trigger": "Industrial buildings carry high fire load and cannot use C/AS1.",
+        "specialist": "Fire engineer",
+        "referenceClause": "NZBC Clauses C1-C6"
+      },
+      {
+        "id": "specified_systems_compliance_schedule",
+        "title": "Specified Systems List & Draft Compliance Schedule",
+        "description": "Schedule of specified systems with performance standards and IM&R procedures for the BWOF regime.",
+        "category": "project",
+        "trigger": "Buildings with specified systems require a compliance schedule.",
+        "specialist": null,
+        "referenceClause": "Building Act 2004 s100"
+      },
+      {
+        "id": "trade_waste_network_utility_approval",
+        "title": "Trade Waste / Network Utility Approval",
+        "description": "Trade-waste discharge consent and network-utility capacity confirmation for water, wastewater and stormwater.",
+        "category": "project",
+        "trigger": "Industrial discharges and servicing often require separate utility approvals.",
+        "specialist": "Civil engineer",
+        "referenceClause": "Building Act 2004 s37"
+      }
+    ],
+    "mixed_use": [
+      {
+        "id": "fire_report_c_as2",
+        "title": "Fire Safety Report (C/AS2 or C/VM2)",
+        "description": "Fire safety design covering multiple risk groups and vertical fire separation between commercial and residential occupancies.",
+        "category": "specialist",
+        "trigger": "Mixed-use buildings combine risk groups and cannot use C/AS1.",
+        "specialist": "Fire engineer",
+        "referenceClause": "NZBC Clauses C1-C6"
+      },
+      {
+        "id": "inter_tenancy_acoustic_report",
+        "title": "Inter-tenancy Acoustic Report (G6)",
+        "description": "Airborne and impact sound insulation between commercial and residential occupancies.",
+        "category": "specialist",
+        "trigger": "G6 requires sound insulation between abutting occupancies.",
+        "specialist": "Acoustic engineer",
+        "referenceClause": "NZBC Clause G6"
+      },
+      {
+        "id": "specified_systems_compliance_schedule",
+        "title": "Specified Systems List & Draft Compliance Schedule",
+        "description": "Schedule of specified systems with performance standards and IM&R procedures for the BWOF regime.",
+        "category": "project",
+        "trigger": "Buildings with specified systems require a compliance schedule.",
+        "specialist": null,
+        "referenceClause": "Building Act 2004 s100"
+      },
+      {
+        "id": "accessible_route_assessment_d1",
+        "title": "Accessibility Report (D1 / NZS 4121)",
+        "description": "Accessible route, lift and accessible facilities for the public-use portions of the building.",
+        "category": "project",
+        "trigger": "Public-use areas must be accessible.",
+        "specialist": "Architectural designer",
+        "referenceClause": "NZBC Clause D1"
+      }
     ]
   },
   "byProjectDetails": {

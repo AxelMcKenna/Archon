@@ -7,10 +7,10 @@ from typing import Any
 EXTRACTOR_VERSION = "1.0.0"
 ACTIVE_PROMPT = "rfi_extract_v1.md"
 
-# Hard cap on RFI page count, enforced at the upload boundary. Uploads over
-# this are rejected (422) rather than silently truncated. RFI letters are
-# almost always 1-3 pages; this limits vision spend on pathological uploads.
-MAX_RFI_PAGES = 20
+# The RFI page cap is now configurable via ``settings.rfi_max_pages`` (default
+# 50; 0 = unlimited, bounded only by the 25MB upload cap) and enforced in the
+# /extract route. The extractor sends all pages in a single vision call, so the
+# cap bounds context/cost on that request — see app/routes/extract.py.
 
 RFI_TOOL_SCHEMA: dict[str, Any] = {
     "name": "record_rfi_letter",

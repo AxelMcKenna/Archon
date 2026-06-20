@@ -17,7 +17,9 @@ def _run(monkeypatch, flags, verifications, *, prov=None):
     if prov is None:
         prov = [[{"document_id": "E2/AS1", "clause_number": "9.1.1"}] for _ in flags]
     monkeypatch.setattr(
-        vp, "_retrieve_mbie_context", lambda f: (["clause text" for _ in f], prov)
+        vp,
+        "_retrieve_mbie_context",
+        lambda f, risk_group="": (["clause text" for _ in f], prov),
     )
     monkeypatch.setattr(vp, "load_prompt", lambda key: ("tmpl {{flags_block}}", "v"))
     monkeypatch.setattr(vp, "fill", lambda t, **k: t)
@@ -114,7 +116,9 @@ def _run_voting(monkeypatch, flags, passes, *, n, threshold, prov=None):
     if prov is None:
         prov = [[{"document_id": "E2/AS1", "clause_number": "9.1.1"}] for _ in flags]
     monkeypatch.setattr(
-        vp, "_retrieve_mbie_context", lambda f: (["clause text" for _ in f], prov)
+        vp,
+        "_retrieve_mbie_context",
+        lambda f, risk_group="": (["clause text" for _ in f], prov),
     )
     monkeypatch.setattr(vp, "load_prompt", lambda key: ("tmpl {{flags_block}}", "v"))
     monkeypatch.setattr(vp, "fill", lambda t, **k: t)

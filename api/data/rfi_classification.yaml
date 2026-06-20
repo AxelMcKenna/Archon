@@ -834,7 +834,11 @@ rules:
       type: regex
       field: raw_text
       pattern: "(?i)\\b(fire\\s+engineering\\s+brief|\\bFEB\\b|C/VM2|fire\\s+engineer\\b|emergency\\s+lighting\\s+design)\\b"
-    category: building_code:C
+    # Re-pointed in 1.2.0 from building_code:C to the specific FEB sub-category.
+    # A fire engineering brief / C/VM2 / fire engineer is inherently a complex
+    # (non-SH) building artifact; both map to the "C" clause family for MBIE
+    # retrieval, so grounding is unchanged.
+    category: building_code:C:feb
     confidence: high
     severity_default: must_resolve
     hard_assertion: true
@@ -902,3 +906,477 @@ rules:
     severity_default: must_resolve
     hard_assertion: false
     version_introduced: "1.1.0"
+
+  # ─── v1.2.0 commercial building rules ──────────────────────────────────────
+  # Targets the commercial taxonomy categories added in taxonomy 1.4. Patterns
+  # deliberately match commercial-specific language (occupant load, FRR, air
+  # changes, etc.) so they fire on non-SH buildings without disturbing the
+  # residential rules above.
+
+  # ─ Means of escape (C/AS2 Part 3) → building_code:C:escape_routes ─
+  - id: escape-occupant-load
+    description: "Occupant load / density used to size means of escape"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(occupant\\s+load|occupant\\s+densit|design\\s+occupanc|number\\s+of\\s+occupants|persons?\\s+per\\s+(?:m2|square\\s+met|floor))\\b"
+    category: building_code:C:escape_routes
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: escape-travel-distance
+    description: "Travel distance / open path / dead-end to exits"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(travel\\s+distance|open\\s+path|dead[\\s-]?end|path\\s+of\\s+travel|maximum\\s+(?:open\\s+)?path)\\b"
+    category: building_code:C:escape_routes
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: escape-exit-width
+    description: "Exit / escape route width sizing"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b((?:exit|escape\\s+route|egress)\\s+width|aggregate\\s+(?:exit|escape)\\s+width|width\\s+of\\s+(?:the\\s+)?(?:exit|escape\\s+route))\\b"
+    category: building_code:C:escape_routes
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: escape-number-of-exits
+    description: "Required number of exits / second means of escape"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(number\\s+of\\s+(?:required\\s+)?exits|second\\s+(?:exit|means\\s+of\\s+escape)|alternative\\s+(?:exit|means\\s+of\\s+escape)|single\\s+exit|two\\s+(?:independent\\s+)?exits)\\b"
+    category: building_code:C:escape_routes
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: escape-final-exit
+    description: "Final exit / exit discharge / place of safety"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(final\\s+exit|exit\\s+discharge|place\\s+of\\s+safety|safe\\s+place)\\b"
+    category: building_code:C:escape_routes
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: escape-protected-stair
+    description: "Protected egress stair / exitway"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b((?:egress|escape|exit)\\s+stair|protected\\s+(?:stair|shaft|path)|exitway)\\b"
+    category: building_code:C:escape_routes
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  # ─ Generic commercial fire reference → building_code:C (family) ─
+  - id: c-as2-reference
+    description: "Explicit C/AS2 reference (commercial / non-SH fire)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\bC/AS2\\b"
+    category: building_code:C
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.2.0"
+
+  # ─ Fire compartmentation (C/AS2 Part 4-5) → building_code:C:compartmentation ─
+  - id: fire-cell-separation
+    description: "Fire cell / fire separation / fire compartment"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(fire\\s?cell|fire\\s+cell|fire\\s+separation|fire\\s+compartment|compartmentation)\\b"
+    category: building_code:C:compartmentation
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: fire-resistance-rating
+    description: "Fire resistance rating (FRR e.g. 60/60/60)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)(fire\\s+resistance\\s+rating|\\bFRR\\b|\\b\\d{2,3}/\\d{2,3}/\\d{2,3}\\b|-/\\d{2,3}/\\d{2,3})"
+    category: building_code:C:compartmentation
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.2.0"
+
+  - id: inter-tenancy-fire
+    description: "Inter-tenancy / tenancy fire separation"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(inter[\\s-]?tenancy|tenancy\\s+separation|between\\s+tenancies|party\\s+wall)\\b"
+    category: building_code:C:compartmentation
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: inter-storey-fire
+    description: "Inter-storey fire separation / vertical fire spread"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(inter[\\s-]?storey|vertical\\s+fire\\s+spread|spandrel|floor.{0,12}fire\\s+separation)\\b"
+    category: building_code:C:compartmentation
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: fire-stopping-penetration
+    description: "Fire stopping / service penetrations through fire-rated elements"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(fire[\\s-]?stop\\w*|fire\\s+collar|service\\s+penetration|penetration.{0,15}fire[\\s-]?rated|fire[\\s-]?rated\\s+penetration)\\b"
+    category: building_code:C:compartmentation
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: fire-smoke-damper
+    description: "Fire / smoke dampers to ducted penetrations"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(fire\\s+damper|smoke\\s+damper|fire/smoke\\s+damper)\\b"
+    category: building_code:C:compartmentation
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: fire-source-boundary
+    description: "Fire source boundary / unprotected area / external spread"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(fire\\s+source\\s+boundary|unprotected\\s+area|external\\s+fire\\s+spread|relevant\\s+boundary.{0,15}fire)\\b"
+    category: building_code:C:compartmentation
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: fire-door-schedule
+    description: "Fire door schedule / self-closing fire doors"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(fire\\s+door\\s+(?:schedule|rating)|self[\\s-]?closing\\s+fire\\s+door|fire\\s+door.{0,15}(?:FRR|self[\\s-]?clos))\\b"
+    category: building_code:C:compartmentation
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: structural-fire-protection
+    description: "Structural fire protection (steel/intumescent)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(structural\\s+fire\\s+(?:rating|protection)|fire\\s+protection\\s+(?:to|of)\\s+(?:steel|structure)|intumescent)\\b"
+    category: building_code:C:compartmentation
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  # ─ Fire safety systems → building_code:C:systems ─
+  - id: sprinkler-system
+    description: "Automatic sprinkler / suppression system (NZS 4541)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(sprinkler|NZS\\s?4541|fire\\s+suppression|fire\\s+pump)\\b"
+    category: building_code:C:systems
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: fire-detection-alarm
+    description: "Fire detection & alarm system (NZS 4512)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(fire\\s+alarm|smoke\\s+detection|automatic\\s+detection|NZS\\s?4512|manual\\s+call\\s+point|heat\\s+detector)\\b"
+    category: building_code:C:systems
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: emergency-lighting-system
+    description: "Emergency / escape route lighting (F6/AS1)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(emergency\\s+lighting|escape\\s+(?:route\\s+)?lighting|F6/AS1|\\bF6\\b)\\b"
+    category: building_code:C:systems
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: exit-signage-system
+    description: "Illuminated exit / egress signage (F8/AS1)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(exit\\s+sign|illuminated\\s+exit|egress\\s+sign|F8/AS1|\\bF8\\b)\\b"
+    category: building_code:C:systems
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: fire-hydrant-hosereel
+    description: "Fire hydrant / hose reel / fire main (NZS 4510)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(fire\\s+hydrant|hose\\s+reel|NZS\\s?4510|fire\\s+main|riser\\s+main)\\b"
+    category: building_code:C:systems
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: smoke-management-system
+    description: "Smoke management / extraction / control system"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(smoke\\s+management|smoke\\s+extraction|smoke\\s+control\\s+system|mechanical\\s+smoke\\s+(?:control|extract)|smoke\\s+clearance)\\b"
+    category: building_code:C:systems
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: fire-service-access
+    description: "Fire service vehicle access / hardstand"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(fire\\s+service\\s+(?:vehicle\\s+)?access|appliance\\s+access|hardstand|FENZ.{0,15}access)\\b"
+    category: building_code:C:systems
+    confidence: medium
+    severity_default: nice_to_have
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  # ─ Fire engineering / performance pathway → building_code:C:feb ─
+  - id: feb-fire-report
+    description: "Fire engineering / safety report / strategy"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(fire\\s+(?:engineering\\s+)?report|fire\\s+safety\\s+(?:design|report)|fire\\s+strategy|fire\\s+safety\\s+precautions\\s+schedule|performance[\\s-]?based\\s+fire)\\b"
+    category: building_code:C:feb
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  # ─ Commercial sanitary facilities → building_code:G1:commercial ─
+  - id: g1-occupancy-fixtures
+    description: "Sanitary fixtures sized by occupancy / user group"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)((?:sanitary|toilet|wc|fixture)\\w*.{0,30}(?:assessed\\s+occupanc\\w*|user\\s+group|per\\s+person|per\\s+\\d+\\s+(?:persons|people|occupants))|fixtures?\\s+for\\s+the\\s+(?:assessed\\s+)?occupanc\\w*)"
+    category: building_code:G1:commercial
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: g1-separate-sex-accessible
+    description: "Separate-sex / accessible / ambulant sanitary provision"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(separate[\\s-]?sex|gender[\\s-]?neutral\\s+(?:facilit|toilet)|accessible\\s+(?:toilet|wc|sanitary)|ambulant\\s+(?:toilet|wc)|unisex\\s+accessible)\\b"
+    category: building_code:G1:commercial
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: g1-staff-public-facilities
+    description: "Staff vs public/customer sanitary facilities"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(staff\\s+(?:and|&|/)\\s+(?:public|customer)\\s+(?:toilet|facilit)|public\\s+sanitary|customer\\s+toilet)\\b"
+    category: building_code:G1:commercial
+    confidence: medium
+    severity_default: nice_to_have
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  # ─ Commercial / mechanical ventilation → building_code:G4:commercial ─
+  - id: g4-air-change-rate
+    description: "Ventilation air-change / outdoor-air rate"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(air\\s+changes?\\s+per\\s+hour|\\bACH\\b|ventilation\\s+rate|l/s\\s+per\\s+person|litres?\\s+per\\s+second\\s+per\\s+person|outdoor\\s+air\\s+rate)\\b"
+    category: building_code:G4:commercial
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: g4-contaminant-extract
+    description: "Contaminant space / kitchen / carpark extract (G4.3.3)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(contaminant\\s+space|G4\\.3\\.3|extract\\s+ventilation|kitchen\\s+(?:extract|canopy)|carpark\\s+(?:ventilation|extract)|fume\\s+extract|grease\\s+(?:duct|filter))\\b"
+    category: building_code:G4:commercial
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: g4-vm1-mechanical
+    description: "G4/VM1 mechanical ventilation / HVAC design"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(G4/VM1|mechanical\\s+ventilation\\s+(?:design|calculation)|HVAC\\s+(?:design|load)|ductwork\\s+(?:layout|design))\\b"
+    category: building_code:G4:commercial
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  # ─ Commercial accessibility → building_code:D1 ─
+  - id: d1-accessible-lift
+    description: "Accessible lift / multi-storey accessibility"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(accessible\\s+lift|passenger\\s+lift.{0,15}access|lift.{0,15}accessible|(?:upper|each)\\s+floor.{0,15}accessible)\\b"
+    category: building_code:D1
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: d1-ramp-gradient
+    description: "Accessible ramp gradient (1:12)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(ramp\\s+gradient|1\\s*:\\s*12|1\\s+in\\s+12|accessible\\s+ramp|ramp.{0,12}(?:slope|gradient))\\b"
+    category: building_code:D1
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  - id: d1-accessible-parking
+    description: "Accessible / mobility parking provision (NZS 4121)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(accessible\\s+(?:car)?park\\w*|mobility\\s+park\\w*|NZS\\s?4121)\\b"
+    category: building_code:D1
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  # ─ Importance level structural design → building_code:B1:importance_level ─
+  - id: b1-importance-level
+    description: "Importance level / importance factor (AS/NZS 1170)"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)(\\bimportance\\s+level|\\bIL[2-4]\\b|importance\\s+factor|AS/NZS\\s?1170|seismic\\s+importance|annual\\s+probability\\s+of\\s+exceedance)"
+    category: building_code:B1:importance_level
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: true
+    version_introduced: "1.2.0"
+
+  - id: b1-specific-engineering-design
+    description: "Specific engineering design (SED) for higher IL"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(specific(?:ally)?\\s+engineer\\w*\\s+design|\\bSED\\b|specific\\s+engineering\\s+design)\\b"
+    category: building_code:B1:importance_level
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  # ─ Specified systems / compliance schedule → documentation:specified_systems ─
+  - id: ss-bwof-iqp
+    description: "BWOF / IQP for specified systems"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(BWOF|building\\s+warrant\\s+of\\s+fitness|\\bIQP\\b|independently\\s+qualified\\s+person|form\\s+12A)\\b"
+    category: documentation:specified_systems
+    confidence: high
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  # ─ Other-authority / network utility approvals → process:other_authorities ─
+  - id: network-utility-capacity
+    description: "Trade waste / network utility capacity approval"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b(trade\\s+waste|network\\s+utility\\s+(?:operator|approval)|water\\s+(?:supply\\s+)?capacity|wastewater\\s+capacity|stormwater\\s+(?:capacity|outfall)\\s+approval|asset\\s+protection)\\b"
+    category: process:other_authorities
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"
+
+  # ─ Mixed-use → cross-discipline coordination ─
+  - id: mixed-use-vertical-separation
+    description: "Mixed-use residential-over-commercial fire/use separation"
+    matcher:
+      type: regex
+      field: raw_text
+      pattern: "(?i)\\b((?:residential|apartment)\\w*\\s+(?:above|over)\\s+(?:retail|commercial)|mixed[\\s-]?use.{0,20}(?:fire\\s+separation|separation)|separation\\s+between\\s+(?:residential|commercial)\\s+(?:use|occupanc))\\b"
+    category: building_code:C:compartmentation
+    confidence: medium
+    severity_default: must_resolve
+    hard_assertion: false
+    version_introduced: "1.2.0"

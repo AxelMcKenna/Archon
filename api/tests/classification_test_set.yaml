@@ -121,3 +121,36 @@ cases:
   - id: e3-01
     raw_text: "Wet area waterproofing details required for the en-suite shower."
     expected: building_code:E3
+
+  # ─── Commercial (v1.2.0) ─────────────────────────────────────────────
+  - id: comm-escape-01
+    raw_text: "Provide the occupant load and travel distance to the required exits from the upper floor."
+    expected: building_code:C:escape_routes
+
+  - id: comm-compartment-01
+    raw_text: "Provide a fire resistance rating of 60/60/60 to the inter-tenancy fire separation."
+    expected: building_code:C:compartmentation
+
+  - id: comm-systems-01
+    raw_text: "Show the automatic sprinkler system to NZS 4541 and emergency lighting to the escape route."
+    expected: building_code:C:systems
+
+  - id: comm-feb-01
+    raw_text: "A Fire Engineering Brief and C/VM2 fire engineering report is required for the building."
+    expected: building_code:C:feb
+
+  - id: comm-g1-01
+    raw_text: "Provide the sanitary fixtures for the assessed occupancy of the restaurant."
+    expected: building_code:G1:commercial
+
+  - id: comm-g4-01
+    raw_text: "Provide the ventilation rate in litres per second per person for the open-plan office."
+    expected: building_code:G4:commercial
+
+  - id: comm-b1-il-01
+    raw_text: "The building is Importance Level 3 (IL3) under AS/NZS 1170; provide specific engineering design."
+    expected: building_code:B1:importance_level
+
+  - id: comm-d1-01
+    raw_text: "Provide accessible parking spaces in accordance with NZS 4121."
+    expected: building_code:D1

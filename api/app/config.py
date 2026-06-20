@@ -44,6 +44,12 @@ class Settings(BaseSettings):
     plan_analyser_provider: Provider = "gemini"
     plan_verifier_provider: Provider = "gemini"
     rfi_extractor_provider: Provider = "gemini"
+    # Max page count accepted for an RFI letter upload. The extractor sends all
+    # pages in a single vision call, so this bounds context/cost on that one
+    # request (the plan analyser, by contrast, is per-sheet and already
+    # unbounded). 0 = unlimited — only the 25MB upload cap then applies. Set
+    # RFI_MAX_PAGES in the env to override (e.g. larger commercial RFI sets).
+    rfi_max_pages: int = 50
     classifier_provider: Provider = "gemini"
     drafter_provider: Provider = "gemini"
     # CAD analyser routes through OpenRouter by default — keeps using a

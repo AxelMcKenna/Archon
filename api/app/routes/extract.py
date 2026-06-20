@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Uplo
 from supabase import Client
 
 from app.auth import get_db
+from app.config import get_settings
 from app.extractors.markdown import render_letter
 from app.extractors.router import extract_document
 from app.persistence import insert_extraction_audit, insert_letter
@@ -15,7 +16,6 @@ from app.rate_limit import limiter
 from app.storage import upload_rfi_original
 from app.utils.safe_filename import safe_filename
 from app.vision.core.renderer import count_pdf_pages
-from app.vision.rfi.schema import MAX_RFI_PAGES
 
 router = APIRouter()
 
@@ -42,11 +42,13 @@ async def extract(
     if len(payload) > MAX_BYTES:
         raise HTTPException(413, "file exceeds 25MB")
     if file.content_type == "application/pdf":
-        pages = count_pdf_pages(payload)
-        if pages > MAX_RFI_PAGES:
-            raise HTTPException(
-                422, f"PDF has {pages} pages; the limit is {MAX_RFI_PAGES}"
-            )
+        max_pages = get_settings().rfi_max_pages
+        if max_pages > 0:
+            pages = count_pdf_pages(payload)
+            if pages > max_pages:
+                raise HTTPException(
+                    422, f"PDF has {pages} pages; the limit is {max_pages}"
+                )
 
     letter_uuid = uuid4()
     filename = safe_filename(file.filename, default="rfi.pdf")

@@ -83,3 +83,26 @@ def test_rules_override_severity_comes_from_winning_assertion():
     assert f.state == "rules_override"
     assert f.primary_category == "building_code:B1"
     assert f.severity == "nice_to_have"
+
+
+def test_commercial_hard_assertion_overrides_ai():
+    # A commercial fire-resistance-rating hit (hard) must win over a softer AI
+    # guess so the commercial sub-category drives the final classification.
+    f = reconcile(
+        "i",
+        _rules(_hit("building_code:C:compartmentation", hard=True)),
+        _ai("building_code:C", confidence="medium"),
+    )
+    assert f.state == "rules_override"
+    assert f.primary_category == "building_code:C:compartmentation"
+    assert f.confidence == "high"
+
+
+def test_commercial_importance_level_agree():
+    f = reconcile(
+        "i",
+        _rules(_hit("building_code:B1:importance_level", hard=True)),
+        _ai("building_code:B1:importance_level"),
+    )
+    assert f.state == "agree"
+    assert f.primary_category == "building_code:B1:importance_level"

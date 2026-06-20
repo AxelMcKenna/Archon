@@ -17,11 +17,13 @@ import pytest
 from app.mbie.retriever import (
     QUERY_VARIANTS,
     ClauseHit,
+    _apply_doc_preference,
     _build_query,
     _window_around_query,
     code_clause_for_category,
     format_hits_for_prompt,
     hit_provenance,
+    preferred_documents_for,
 )
 
 _QV_FLAG = {
@@ -91,6 +93,64 @@ class TestCodeClauseForCategory:
     )
     def test_returns_none_for_non_clause_categories(self, category) -> None:
         assert code_clause_for_category(category) is None
+
+
+def _doc_hit(document_id: str, clause: str = "1.1", rank: float = 1.0) -> ClauseHit:
+    return ClauseHit(
+        document_id=document_id,
+        clause_number=clause,
+        heading=None,
+        text=f"{document_id} body",
+        page=1,
+        source_url=None,
+        rank=rank,
+    )
+
+
+class TestRiskGroupDocumentPreference:
+    """Occupancy-aware grounding: C/AS1 covers only Risk Group SH; every other
+    risk group is assessed against C/AS2. The retriever must not ground a
+    commercial fire flag against the residential solution."""
+
+    def test_sh_prefers_c_as1(self) -> None:
+        assert preferred_documents_for("C", "SH") == {"C/AS1"}
+
+    @pytest.mark.parametrize("rg", ["SM", "SI", "CA", "WB", "WF", "VP"])
+    def test_non_sh_prefers_c_as2(self, rg: str) -> None:
+        assert preferred_documents_for("C", rg) == {"C/AS2"}
+
+    def test_f7_split(self) -> None:
+        assert preferred_documents_for("F7", "SH") == {"F7/AS1"}
+        assert preferred_documents_for("F7", "WB") == {"F7/AS2"}
+
+    def test_no_split_for_other_clauses(self) -> None:
+        assert preferred_documents_for("E2", "SH") is None
+        assert preferred_documents_for("B1", "WB") is None
+
+    def test_none_risk_group_is_unfiltered(self) -> None:
+        assert preferred_documents_for("C", None) is None
+
+    def test_apply_preference_keeps_only_preferred_when_present(self) -> None:
+        hits = [_doc_hit("C/AS1"), _doc_hit("C/AS2"), _doc_hit("C/AS1")]
+        out = _apply_doc_preference(hits, {"C/AS2"}, k=3)
+        assert [h.document_id for h in out] == ["C/AS2"]
+
+    def test_apply_preference_sh_selects_c_as1(self) -> None:
+        hits = [_doc_hit("C/AS2"), _doc_hit("C/AS1")]
+        out = _apply_doc_preference(hits, {"C/AS1"}, k=3)
+        assert [h.document_id for h in out] == ["C/AS1"]
+
+    def test_apply_preference_falls_back_when_preferred_absent(self) -> None:
+        # Preferred document not in corpus yet → don't return empty; fall back
+        # to the original ranking so verification still has clauses to work with.
+        hits = [_doc_hit("C/AS1"), _doc_hit("C/AS1")]
+        out = _apply_doc_preference(hits, {"C/AS2"}, k=3)
+        assert [h.document_id for h in out] == ["C/AS1", "C/AS1"]
+
+    def test_apply_preference_no_filter_truncates_to_k(self) -> None:
+        hits = [_doc_hit("C/AS2"), _doc_hit("C/AS2"), _doc_hit("C/AS2")]
+        out = _apply_doc_preference(hits, None, k=2)
+        assert len(out) == 2
 
 
 class TestBuildQuery:

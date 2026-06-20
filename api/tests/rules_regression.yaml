@@ -72,3 +72,74 @@ cases:
     raw_text: "Material specifications are missing for the cladding system. Please provide."
     expected_category: documentation:specifications
     expected_rule: specifications-issue
+
+  # ─── v1.2.0 commercial cases ───────────────────────────────────────────────
+  - id: commercial-escape-routes
+    raw_text: "The occupant load and travel distance to the two required exits from Level 2 have not been demonstrated. Confirm compliance with C/AS2."
+    expected_category: building_code:C:escape_routes
+    expected_rule: escape-travel-distance
+
+  - id: commercial-occupant-load
+    raw_text: "Provide the design occupancy and occupant load calculation for the assembly space."
+    expected_category: building_code:C:escape_routes
+    expected_rule: escape-occupant-load
+
+  - id: commercial-compartmentation-frr
+    raw_text: "Provide a fire resistance rating of 60/60/60 to the inter-tenancy fire separation wall."
+    expected_category: building_code:C:compartmentation
+    expected_rule: fire-resistance-rating
+
+  - id: commercial-fire-stopping
+    raw_text: "Detail fire stopping to all service penetrations through the fire-rated floor."
+    expected_category: building_code:C:compartmentation
+    expected_rule: fire-stopping-penetration
+
+  - id: commercial-systems-sprinkler
+    raw_text: "Show the automatic sprinkler system designed to NZS 4541."
+    expected_category: building_code:C:systems
+    expected_rule: sprinkler-system
+
+  - id: commercial-systems-emergency-lighting
+    raw_text: "Provide emergency lighting to the escape route per F6/AS1."
+    expected_category: building_code:C:systems
+    expected_rule: emergency-lighting-system
+
+  - id: commercial-feb
+    raw_text: "A Fire Engineering Brief and C/VM2 fire engineering report from a suitably qualified fire engineer is required for the multi-storey building."
+    expected_category: building_code:C:feb
+    expected_rule: fire-engineering-brief
+
+  - id: commercial-c-as2-reference
+    raw_text: "Demonstrate the fire design complies with C/AS2 for the office building."
+    expected_category: building_code:C
+    expected_rule: c-as2-reference
+
+  - id: commercial-g1-occupancy
+    raw_text: "Provide the number of sanitary fixtures for the assessed occupancy of the cafe and confirm separate-sex and accessible facilities."
+    expected_category: building_code:G1:commercial
+    expected_rule: g1-occupancy-fixtures
+
+  - id: commercial-g4-contaminant
+    raw_text: "Confirm the kitchen extract ventilation and carpark extract are mechanically ventilated per G4.3.3."
+    expected_category: building_code:G4:commercial
+    expected_rule: g4-contaminant-extract
+
+  - id: commercial-g4-air-changes
+    raw_text: "Provide the ventilation rate in litres per second per person for the open-plan office."
+    expected_category: building_code:G4:commercial
+    expected_rule: g4-air-change-rate
+
+  - id: commercial-b1-importance-level
+    raw_text: "The building is Importance Level 3 (IL3) under AS/NZS 1170; provide specific engineering design."
+    expected_category: building_code:B1:importance_level
+    expected_rule: b1-importance-level
+
+  - id: commercial-d1-accessible-parking
+    raw_text: "Provide accessible parking spaces in accordance with NZS 4121."
+    expected_category: building_code:D1
+    expected_rule: d1-accessible-parking
+
+  - id: commercial-specified-systems-bwof
+    raw_text: "A building warrant of fitness (BWOF) and IQP details are required for the specified systems."
+    expected_category: documentation:specified_systems
+    expected_rule: ss-bwof-iqp
