@@ -117,7 +117,12 @@
     { "id": "commercial_office", "label": "Commercial — office", "commercial": true },
     { "id": "retail", "label": "Commercial — retail / hospitality", "commercial": true },
     { "id": "industrial", "label": "Industrial / warehouse", "commercial": true },
-    { "id": "mixed_use", "label": "Mixed-use (commercial + residential)", "commercial": true }
+    { "id": "mixed_use", "label": "Mixed-use (commercial + residential)", "commercial": true },
+    { "id": "accommodation", "label": "Accommodation (hotel / motel / hostel)", "commercial": true },
+    { "id": "healthcare", "label": "Healthcare (hospital / rest home / care)", "commercial": true },
+    { "id": "education", "label": "Education / assembly (school / ECE / hall)", "commercial": true },
+    { "id": "carpark", "label": "Carparking building", "commercial": true },
+    { "id": "commercial_other", "label": "Commercial — other", "commercial": true }
   ],
 
   "risk_groups": [
