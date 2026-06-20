@@ -31,9 +31,9 @@ export async function POST(req: Request) {
     );
   }
 
-  // Anon/publishable client: the `allow_all_single_user` RLS policy on
-  // public.waitlist grants anon inserts during the current permissive phase, so
-  // no service-role secret is required.
+  // Anon/publishable client: the `waitlist_anon_insert` RLS policy on
+  // public.waitlist grants anon INSERT only (no read-back), so the public
+  // waitlist form works without a service-role secret.
   let supabase;
   try {
     supabase = await getSupabaseServer();
