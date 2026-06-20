@@ -281,7 +281,7 @@ function RowsList({
   if (!rows.length) {
     return (
       <p className="text-sm text-ink-500 italic">
-        Nothing analysed yet — upload a drawing or specification above.
+        Nothing analysed yet - upload a drawing or specification above.
       </p>
     );
   }
@@ -306,9 +306,9 @@ function RowsList({
                 r.format === "dxf" ? ` · ${fixable} fixable` : ""
               }`
             : r.format === "spec" && r.status === "no_text_layer"
-              ? "No text layer — re-upload a text PDF"
+              ? "No text layer - re-upload a text PDF"
               : stalled
-                ? "Analysis stalled — re-upload to retry"
+                ? "Analysis stalled - re-upload to retry"
                 : displayStatus;
         const href = {
           pathname: `/projects/${projectId}/drawings`,

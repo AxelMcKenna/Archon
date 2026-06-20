@@ -48,7 +48,7 @@ def _flag(
 def flag_incomplete_assurance(ex: SpecExtraction) -> list[dict[str, Any]]:
     """A BRANZ Appraisal / CodeMark is named but with no certificate number.
 
-    The bare reference is unassessable — the BCA can't look it up — so it is one
+    The bare reference is unassessable - the BCA can't look it up - so it is one
     of the most common product-assurance RFIs. One flag per bare reference."""
     flags: list[dict[str, Any]] = []
     for ref in ex.assurance_refs:
@@ -92,7 +92,7 @@ def flag_unassured_products(ex: SpecExtraction) -> list[dict[str, Any]]:
     return [
         _flag(
             page=first.page,
-            area="Specification — product assurance",
+            area="Specification - product assurance",
             category="documentation:product_assurance",
             severity="must_resolve",
             confidence="medium",
@@ -126,7 +126,7 @@ def flag_placeholder_language(ex: SpecExtraction) -> list[dict[str, Any]]:
     return [
         _flag(
             page=first.page,
-            area="Specification — unresolved selections",
+            area="Specification - unresolved selections",
             category="documentation:specifications",
             severity="must_resolve",
             confidence="high",
@@ -157,7 +157,7 @@ def flag_specified_system_without_standard(ex: SpecExtraction) -> list[dict[str,
     flags: list[dict[str, Any]] = []
     for cue in ex.specified_systems:
         token = cue.expected_standard.upper()
-        # F6 is a Building Code clause, not an AS/NZS standard — check clauses.
+        # F6 is a Building Code clause, not an AS/NZS standard - check clauses.
         if token == "F6":
             if any(c.upper().startswith("F6") for c in ex.clauses) or "F6" in referenced:
                 continue
@@ -166,7 +166,7 @@ def flag_specified_system_without_standard(ex: SpecExtraction) -> list[dict[str,
         flags.append(
             _flag(
                 page=cue.page,
-                area=f"Specified system — {cue.system.replace('_', ' ')}",
+                area=f"Specified system - {cue.system.replace('_', ' ')}",
                 category="documentation:specified_systems",
                 severity="must_resolve",
                 confidence="high",
@@ -198,7 +198,7 @@ def flag_superseded_standards(ex: SpecExtraction) -> list[dict[str, Any]]:
         flags.append(
             _flag(
                 page=1,
-                area="Specification — standards currency",
+                area="Specification - standards currency",
                 category="documentation:specifications",
                 severity="nice_to_have",
                 confidence="high",

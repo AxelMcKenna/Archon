@@ -1,4 +1,4 @@
-"""Tier 2 — LLM spec↔drawing reconciliation. The provider call is mocked, so
+"""Tier 2 - LLM spec↔drawing reconciliation. The provider call is mocked, so
 these assert the mapping/grounding/fail-open behaviour, not the model."""
 
 from __future__ import annotations

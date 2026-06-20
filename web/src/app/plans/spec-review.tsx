@@ -73,7 +73,7 @@ export function SpecReview({ spec }: { spec: SpecDocument }) {
       )}
       {isStalled(spec.status, spec.created_at) && (
         <p className="rounded-sm bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
-          Analysis stalled — it didn&apos;t finish. Delete this document and
+          Analysis stalled - it didn&apos;t finish. Delete this document and
           re-upload to try again.
         </p>
       )}

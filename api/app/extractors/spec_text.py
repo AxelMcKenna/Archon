@@ -1,6 +1,6 @@
 """PDF text-layer extraction for written specifications and product documents.
 
-The plan analyser reads *drawings*; this reads the *spec* — the prose side of a
+The plan analyser reads *drawings*; this reads the *spec* - the prose side of a
 consent set (architectural/engineering specifications, masterspec trade sections,
 product/material data sheets, BRANZ appraisals, CodeMark certificates). Spec PDFs
 are text-heavy, so a deterministic pdfplumber text pass is enough; no vision call.
@@ -9,7 +9,7 @@ What we pull is exactly what the deterministic spec rules (``spec_rules``) and t
 RFI classifier care about:
 
   - product-assurance references (BRANZ Appraisal / CodeMark, with or without a
-    certificate number — a bare "BRANZ appraised" with no number is itself an RFI),
+    certificate number - a bare "BRANZ appraised" with no number is itself an RFI),
   - mentions of product categories that the BCA expects to be assured
     (cladding/membrane/proprietary systems),
   - hedge / placeholder language ("or similar approved", "TBC", "by others"),
@@ -43,7 +43,7 @@ _ASSURANCE_NUMBERED_RE = re.compile(
     """
 )
 # A bare assurance *word* with no number on the same line is an incomplete
-# reference — the single most common product-assurance RFI.
+# reference - the single most common product-assurance RFI.
 _ASSURANCE_WORD_RE = re.compile(r"(?i)\b(branz\s+appraisal|codemark)\b")
 
 # Product categories the BCA routinely expects product assurance for. A line
@@ -248,7 +248,7 @@ def _scan_line(out: SpecExtraction, page_no: int, line: str) -> None:
     line_has_assurance = bool(numbered)
     if not numbered and _ASSURANCE_WORD_RE.search(line):
         # A bare appraisal/codemark word with no number on the line is an
-        # incomplete reference — record it as a non-numbered ref.
+        # incomplete reference - record it as a non-numbered ref.
         out.assurance_refs.append(
             AssuranceRef(page=page_no, text=snippet, numbered=False)
         )

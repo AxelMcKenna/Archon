@@ -1,10 +1,10 @@
--- Project coordination layer — cross-document reconciliation flags.
+-- Project coordination layer - cross-document reconciliation flags.
 --
 -- Treats a project as one related document set (drawings + specifications) and
 -- records where they disagree. project_coordination_flags is the per-flag store
 -- (each flag carries >=2 citations in jsonb); project_coordination_runs holds one
 -- row per project for freshness (the fingerprint of the document set last
--- reconciled). Both owner-scoped only — created post per-user-isolation flip,
+-- reconciled). Both owner-scoped only - created post per-user-isolation flip,
 -- mirroring spec_documents/spec_flags.
 
 create table if not exists public.project_coordination_flags (
@@ -18,7 +18,7 @@ create table if not exists public.project_coordination_flags (
   recommended_action  text,
   rule                text,
   tier                text not null default 'deterministic',
-  -- list of {source_kind, source_id, filename, page, quote} — every flag cites
+  -- list of {source_kind, source_id, filename, page, quote} - every flag cites
   -- at least two documents, so it can never be ungrounded single-source noise.
   citations           jsonb not null default '[]'::jsonb,
   created_at          timestamptz not null default now()

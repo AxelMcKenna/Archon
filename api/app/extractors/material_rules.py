@@ -37,7 +37,7 @@ def _flag(
 
 
 def flag_missing_appraisal_number(ex: MaterialExtraction) -> list[dict[str, Any]]:
-    """A BRANZ Appraisal / CodeMark is named on the datasheet without a number —
+    """A BRANZ Appraisal / CodeMark is named on the datasheet without a number -
     the BCA can't verify an unnumbered assurance."""
     if ex.has_numbered_assurance:
         return []
@@ -48,7 +48,7 @@ def flag_missing_appraisal_number(ex: MaterialExtraction) -> list[dict[str, Any]
         _flag(
             severity="must_resolve",
             confidence="high",
-            area="Product assurance — missing certificate number",
+            area="Product assurance - missing certificate number",
             category="documentation:product_assurance",
             quote=bare[0].text,
             reason=(
@@ -66,7 +66,7 @@ def flag_missing_appraisal_number(ex: MaterialExtraction) -> list[dict[str, Any]
 
 
 def flag_scope_limitation_noted(ex: MaterialExtraction) -> list[dict[str, Any]]:
-    """The datasheet states a scope / conditions of use — surface it so the user
+    """The datasheet states a scope / conditions of use - surface it so the user
     confirms the application stays inside the appraised limits (low-FP nudge)."""
     if not ex.scope_of_use:
         return []

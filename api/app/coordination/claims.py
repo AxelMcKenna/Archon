@@ -1,6 +1,6 @@
 """Normalize any project document into a comparable ``DocumentClaims`` record.
 
-Both adapters are pure and deterministic — they read the structured extraction
+Both adapters are pure and deterministic - they read the structured extraction
 each single-document analyser already persisted (spec: ``spec_documents.analysis
 .extraction``; drawing: ``plan_uploads.analysis.text_extraction``) and project
 it onto a shared vocabulary of *systems*, *standards*, *disciplines*, and

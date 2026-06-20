@@ -7,7 +7,7 @@
 -- so reads can paginate and the RFI surface is queryable per category/severity.
 --
 -- Created post per-user-isolation flip (20260620000001): NO permissive
--- allow_all policy — owner-scoped policies anchored on projects.user_id are the
+-- allow_all policy - owner-scoped policies anchored on projects.user_id are the
 -- sole gate, matching every other user-owned table today.
 
 create table if not exists public.spec_documents (

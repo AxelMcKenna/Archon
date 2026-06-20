@@ -1,4 +1,4 @@
-"""Deterministic spec rules — positive and negative cases per rule."""
+"""Deterministic spec rules - positive and negative cases per rule."""
 
 from __future__ import annotations
 

@@ -65,7 +65,7 @@ export function UploadSpecInline({
       if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
 
       // The spec flagger is deterministic and fast, so a single blocking call
-      // is enough — no progress stream needed.
+      // is enough - no progress stream needed.
       const res = await apiFetch<IngestResponse>("/specs/ingest", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -134,7 +134,7 @@ export function UploadSpecInline({
       <label className="block text-sm">
         <span className="text-ink-500 block mb-1">
           {docKind === "material"
-            ? "Material / product data sheet (BRANZ, CodeMark, datasheet — PDF, ≤50MB)"
+            ? "Material / product data sheet (BRANZ, CodeMark, datasheet - PDF, ≤50MB)"
             : "Specification document (PDF, ≤50MB)"}
         </span>
         <input

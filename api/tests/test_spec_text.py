@@ -1,4 +1,4 @@
-"""Spec/product document text extraction (deterministic, no PDF fixture needed —
+"""Spec/product document text extraction (deterministic, no PDF fixture needed -
 driven through extract_spec_from_text)."""
 
 from __future__ import annotations

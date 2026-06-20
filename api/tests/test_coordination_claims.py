@@ -1,4 +1,4 @@
-"""Coordination claims adapters — spec + drawing normalization (deterministic)."""
+"""Coordination claims adapters - spec + drawing normalization (deterministic)."""
 
 from __future__ import annotations
 

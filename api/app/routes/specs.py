@@ -46,7 +46,7 @@ def _result_payload(result: Any) -> dict[str, Any]:
 
 
 def _assert_project(db: Client, project_id: UUID) -> None:
-    """RLS-enforced ownership check — a non-owner sees no row."""
+    """RLS-enforced ownership check - a non-owner sees no row."""
     row = (
         db.table("projects")
         .select("id")

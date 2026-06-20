@@ -90,7 +90,7 @@ export function CoordinationPanel({
     }
   }
 
-  // The AI pass — semantic spec/material<->drawing reconciliation incl. product
+  // The AI pass - semantic spec/material<->drawing reconciliation incl. product
   // scope-of-use vs the design. Explicit + slower; never runs on upload.
   async function deepCheck() {
     setDeepBusy(true);
@@ -145,7 +145,7 @@ export function CoordinationPanel({
 
       {flags.length === 0 ? (
         <p className="rounded-sm border border-emerald-200 bg-emerald-50/50 p-4 text-sm text-emerald-800">
-          Documents are consistent — no cross-document issues found.
+          Documents are consistent - no cross-document issues found.
         </p>
       ) : (
         <div className="space-y-2">
@@ -182,7 +182,7 @@ function CoordFlagCard({
           {f.tier === "llm" && (
             <span
               className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-sm border border-sky-200 bg-sky-50 text-sky-700"
-              title="Surfaced by AI semantic review — confirm before relying on it."
+              title="Surfaced by AI semantic review - confirm before relying on it."
             >
               AI
             </span>

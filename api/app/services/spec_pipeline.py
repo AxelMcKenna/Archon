@@ -8,7 +8,7 @@ Keeps the FastAPI handler thin:
   4. Write per-flag rows to spec_flags.
 
 The spec flagger is fully deterministic (no LLM), so unlike the plan pipeline
-there is no provider/model/cache-clone machinery — re-running is cheap and
+there is no provider/model/cache-clone machinery - re-running is cheap and
 idempotent. All DB writes use the request-scoped Supabase client so RLS holds.
 """
 
@@ -36,7 +36,7 @@ SPEC_EXTRACTOR_VERSION = "spec-1.0.0"
 MATERIAL_EXTRACTOR_VERSION = "material-1.0.0"
 
 # A spec_documents row is either a written specification or a material/product
-# data sheet — same table, same pipeline, different extractor + rules.
+# data sheet - same table, same pipeline, different extractor + rules.
 _DOC_KINDS = {"spec", "material"}
 
 # pdfplumber can only read a text layer out of PDFs; other media are stored but
@@ -103,7 +103,7 @@ def upload_and_analyse(
             else extract_spec_text(payload)
         )
         if extraction.looks_scanned:
-            # No usable text layer — store the file, flag nothing, and say so
+            # No usable text layer - store the file, flag nothing, and say so
             # rather than emit a misleading "0 issues" on an unreadable scan.
             status = "no_text_layer"
         else:
@@ -144,7 +144,7 @@ def upload_and_analyse(
         db, spec_document_id=spec_id, project_id=project_id, flags=flags
     )
 
-    # The project is one related set — refresh cross-document coordination now
+    # The project is one related set - refresh cross-document coordination now
     # that this spec landed (deterministic + fail-open, never blocks the upload).
     run_project_coordination_safe(db, project_id)
 

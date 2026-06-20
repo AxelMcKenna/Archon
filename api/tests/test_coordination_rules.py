@@ -1,4 +1,4 @@
-"""Deterministic cross-document coordination rules — positive + negative cases."""
+"""Deterministic cross-document coordination rules - positive + negative cases."""
 
 from __future__ import annotations
 

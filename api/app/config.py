@@ -93,7 +93,7 @@ class Settings(BaseSettings):
 
     # Specification / product-document understanding. The deterministic spec +
     # coordination flaggers always run (free, per-upload). spec_coordination_
-    # enabled gates the LLM Tier-2 pass — semantic spec/material<->drawing
+    # enabled gates the LLM Tier-2 pass - semantic spec/material<->drawing
     # reconciliation, including product scope-of-use vs the design. Tier 2 runs
     # ONLY on an explicit deep cross-check (never on the per-upload auto-trigger),
     # so enabling this does not add per-upload LLM cost. Set

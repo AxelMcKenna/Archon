@@ -1,8 +1,8 @@
-"""Tier 2 — LLM semantic reconciliation of spec ↔ drawing (gated).
+"""Tier 2 - LLM semantic reconciliation of spec ↔ drawing (gated).
 
 Tier 1 (``coordination.rules``) catches gaps by entity matching. Tier 2 reads
 the actual spec prose + drawing schedule/register text and asks an LLM for the
-fuzzy cross-document clashes keyword matching can't see — a schedule value that
+fuzzy cross-document clashes keyword matching can't see - a schedule value that
 contradicts a spec clause, a system described differently on each side.
 
 Text-only tool call (mirrors ``app.classifier.ai``: ``images=[]`` + a tool
@@ -112,7 +112,7 @@ def reconcile_documents_llm(
 ) -> list[dict[str, Any]]:
     """One text tool call reconciling the project's specs against its drawings.
 
-    ``specs``/``drawings`` are ``[(row, extraction_block)]`` — the same rows and
+    ``specs``/``drawings`` are ``[(row, extraction_block)]`` - the same rows and
     extraction blocks Tier 1 builds claims from. ``project_context`` carries the
     design parameters (project type, floor area, risk group, etc.) so the model
     can judge a product's scope of use against the building. Returns coordination
@@ -152,7 +152,7 @@ def reconcile_documents_llm(
                 max_output_tokens=3000,
                 model=settings.gemini_model,
             )
-    except Exception as exc:  # noqa: BLE001 — Tier 2 must never break a run
+    except Exception as exc:  # noqa: BLE001 - Tier 2 must never break a run
         log.warning("coordination Tier 2: LLM call failed: %s", exc)
         return []
 
@@ -170,7 +170,7 @@ def _to_flag(
     draw_by_ref: dict[str, dict[str, Any]],
 ) -> dict[str, Any] | None:
     """Map one discrepancy onto a coordination flag. Dropped when either side is
-    ungrounded — the model occasionally invents a ref, and an ungrounded
+    ungrounded - the model occasionally invents a ref, and an ungrounded
     cross-document flag is worse than a missed one."""
     spec_row = spec_by_ref.get(str(d.get("spec_ref")))
     draw_row = draw_by_ref.get(str(d.get("drawing_ref")))

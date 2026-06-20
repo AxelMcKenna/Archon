@@ -21,7 +21,7 @@ You are given two structured extractions:
 
 ## Your task
 
-Find **cross-document discrepancies** — places where the specification and the
+Find **cross-document discrepancies** - places where the specification and the
 drawings contradict each other or one references something the other is missing.
 Examples of real coordination RFIs:
 
@@ -37,10 +37,10 @@ Examples of real coordination RFIs:
 - a standard or product cited at a different edition / specification across the
   two sides.
 
-### Material / product data sheets — scope of use
+### Material / product data sheets - scope of use
 
 A material/product document (BRANZ appraisal, CodeMark certificate, datasheet)
-carries a **scope / conditions of use** — the limits the product is appraised
+carries a **scope / conditions of use** - the limits the product is appraised
 for (maximum building height or number of storeys, wind zone, exposure zone,
 substrate, fire rating). Compare that scope against the design as described by
 the PROJECT CONTEXT and the drawings:
@@ -54,7 +54,7 @@ the PROJECT CONTEXT and the drawings:
 
 **Do not guess.** If the relevant design parameter (height, storeys, wind /
 exposure zone) is not determinable from the inputs, do NOT report a scope
-discrepancy — silence is correct when you can't ground both sides.
+discrepancy - silence is correct when you can't ground both sides.
 
 ## Rules
 
@@ -67,7 +67,7 @@ discrepancy — silence is correct when you can't ground both sides.
   false coordination flag wastes the applicant's time more than a missed one.
 - Prefer the semantic clashes that simple keyword matching would miss (a
   schedule value that contradicts a spec clause, a system described differently
-  on each side) — obvious presence/absence gaps may already be caught elsewhere.
+  on each side) - obvious presence/absence gaps may already be caught elsewhere.
 
 ## Inputs
 
@@ -77,7 +77,7 @@ PROJECT CONTEXT (the design parameters known for this building):
 ```
 
 SPECIFICATION and PRODUCT documents (specifications + material/product data
-sheets — the product side):
+sheets - the product side):
 ```json
 {{spec_blocks}}
 ```

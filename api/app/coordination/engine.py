@@ -50,7 +50,7 @@ def _drawing_text_extraction(db: Client, row: dict[str, Any]) -> dict[str, Any]:
     """Persisted ``analysis.text_extraction`` if present, else re-parse the PDF.
 
     Older plan rows (analysed before the analyser persisted text_extraction) are
-    re-parsed on demand from the stored PDF — cheap and deterministic. Fails open
+    re-parsed on demand from the stored PDF - cheap and deterministic. Fails open
     to an empty extraction so one unreadable drawing never breaks the run."""
     analysis = row.get("analysis") or {}
     te = analysis.get("text_extraction")
@@ -63,13 +63,13 @@ def _drawing_text_extraction(db: Client, row: dict[str, Any]) -> dict[str, Any]:
     try:
         pdf = download(db, bucket=PLANS_BUCKET, path=storage_path)
         return extract_plan_text(pdf).to_prompt_block()
-    except Exception as exc:  # noqa: BLE001 — fail open on a single bad file
+    except Exception as exc:  # noqa: BLE001 - fail open on a single bad file
         log.warning("coordination: re-parse failed for plan %s: %s", row.get("id"), exc)
         return {}
 
 
 # One document = (row, extraction_block). The block is the spec's
-# analysis.extraction or the drawing's plan_text to_prompt_block — the same
+# analysis.extraction or the drawing's plan_text to_prompt_block - the same
 # structured text Tier 1 builds claims from and Tier 2 feeds to the LLM.
 Document = tuple[dict[str, Any], dict[str, Any]]
 
@@ -128,7 +128,7 @@ def run_project_coordination(
     """Reconcile the project's document set and persist coordination flags.
 
     Tier 1 (deterministic) always runs. Tier 2 (LLM) runs only when
-    ``run_tier2`` is set AND the feature gate is on — so the per-upload
+    ``run_tier2`` is set AND the feature gate is on - so the per-upload
     auto-trigger stays free and the LLM cost is paid only on an explicit
     deep cross-check."""
     specs, materials, drawings = gather_documents(db, project_id)
@@ -154,7 +154,7 @@ def run_project_coordination(
 
     flags = run_coordination_rules(claims)
 
-    # Tier 2 — LLM semantic reconciliation of spec <-> drawing. Gated off by
+    # Tier 2 - LLM semantic reconciliation of spec <-> drawing. Gated off by
     # default; deduped against the Tier-1 flags it would otherwise restate.
     settings = get_settings()
     product_docs = specs + materials
@@ -192,14 +192,14 @@ def run_project_coordination_safe(db: Client, project_id: str) -> None:
     to run inline at the end of each pipeline."""
     try:
         run_project_coordination(db, project_id)
-    except Exception as exc:  # noqa: BLE001 — coordination must never break an upload
+    except Exception as exc:  # noqa: BLE001 - coordination must never break an upload
         log.warning("coordination: run failed for project %s: %s", project_id, exc)
 
 
 def _project_context(db: Client, project_id: str) -> dict[str, Any]:
     """The design parameters Tier 2 needs to judge a product's scope of use.
 
-    Fail-open to ``{}`` — the prompt is told not to guess when a parameter is
+    Fail-open to ``{}`` - the prompt is told not to guess when a parameter is
     missing, so partial context simply narrows what the scope check can catch."""
     cols = (
         "project_type, description, bca, risk_group, importance_level, "
@@ -214,7 +214,7 @@ def _project_context(db: Client, project_id: str) -> dict[str, Any]:
             .execute()
             .data
         )
-    except Exception:  # noqa: BLE001 — older schemas may lack a column
+    except Exception:  # noqa: BLE001 - older schemas may lack a column
         try:
             row = (
                 db.table("projects")
@@ -241,5 +241,5 @@ def _record_run(db: Client, project_id: str, fingerprint: str, flags_count: int)
             },
             on_conflict="project_id",
         ).execute()
-    except Exception as exc:  # noqa: BLE001 — run bookkeeping must never fail a run
+    except Exception as exc:  # noqa: BLE001 - run bookkeeping must never fail a run
         log.warning("coordination: run upsert failed for %s: %s", project_id, exc)

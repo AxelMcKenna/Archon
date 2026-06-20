@@ -1,7 +1,7 @@
 """Deterministic cross-document coordination rules.
 
 Each rule reads the project's ``DocumentClaims`` set and emits flags that cite
-**two or more documents** — so a coordination flag can never be ungrounded
+**two or more documents** - so a coordination flag can never be ungrounded
 single-source noise. Flags use the same dict contract as the single-document
 flaggers, plus a ``citations`` list and a ``tier`` marker.
 
@@ -80,7 +80,7 @@ def flag_system_specified_not_drawn(
         drawing_disciplines |= d.disciplines
         drawing_systems |= d.systems
     if not drawing_disciplines:
-        return []  # unclassified set — can't assert a discipline is missing
+        return []  # unclassified set - can't assert a discipline is missing
 
     flags: list[dict[str, Any]] = []
     seen: set[str] = set()

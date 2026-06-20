@@ -1,13 +1,13 @@
 """PDF text-layer extraction for material / product data sheets.
 
 A product datasheet (BRANZ appraisal, CodeMark certificate, manufacturer data
-sheet) is its own document shape — not specification prose. What the BCA cares
+sheet) is its own document shape - not specification prose. What the BCA cares
 about, and what drives product-assurance RFIs, is:
 
   - the product / system name and manufacturer,
-  - the assurance reference (BRANZ Appraisal No. / CodeMark CM number) — a bare
+  - the assurance reference (BRANZ Appraisal No. / CodeMark CM number) - a bare
     "BRANZ appraised" with no number is itself an RFI,
-  - the **scope / conditions of use** (the appraisal's limits — wind zone,
+  - the **scope / conditions of use** (the appraisal's limits - wind zone,
     height, exposure), which is where "product used outside its appraised scope"
     RFIs originate,
   - durability (B2) / weathertightness (E2) relevance and cited standards.
@@ -30,7 +30,7 @@ from app.extractors.spec_text import (
     _ASSURANCE_WORD_RE,
 )
 
-# Product / system tokens (shared coordination vocabulary — same tokens the spec
+# Product / system tokens (shared coordination vocabulary - same tokens the spec
 # extractor and coordination claims use).
 _SYSTEM_KEYWORDS: dict[str, str] = {
     "cladding": "cladding_system",
@@ -52,7 +52,7 @@ _MANUFACTURER_RE = re.compile(
     r"(?im)^\s*(?:manufacturer|manufactured\s+by|supplier|distributed\s+by|product\s+holder|appraisal\s+holder)\s*[:\-]\s*(.+)$"
 )
 
-# Scope / conditions of use — the lines that carry the appraisal's limits.
+# Scope / conditions of use - the lines that carry the appraisal's limits.
 _SCOPE_RE = re.compile(
     r"(?i)\b(scope\s+of\s+use|conditions?\s+of\s+use|intended\s+(?:for\s+)?use|"
     r"limitations?|must\s+not\s+be\s+used|not\s+suitable|maximum\s+(?:height|wind)|"

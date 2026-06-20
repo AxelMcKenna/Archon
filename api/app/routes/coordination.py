@@ -1,4 +1,4 @@
-"""Project coordination routes — on-demand re-check + (gated) deep cross-check.
+"""Project coordination routes - on-demand re-check + (gated) deep cross-check.
 
 Reads are served directly from Supabase by the frontend server component; these
 endpoints only trigger work. The deterministic Tier-1 pass also runs
@@ -26,7 +26,7 @@ log = logging.getLogger(__name__)
 
 
 def _assert_project(db: Client, project_id: UUID) -> None:
-    """RLS-enforced ownership check — a non-owner sees no row."""
+    """RLS-enforced ownership check - a non-owner sees no row."""
     row = (
         db.table("projects")
         .select("id")
