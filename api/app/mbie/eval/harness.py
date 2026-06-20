@@ -13,8 +13,9 @@ of clause-number drift while still pinning the right document and topic.
 from __future__ import annotations
 
 import pathlib
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Protocol
+from typing import Any, Protocol
 
 import yaml
 

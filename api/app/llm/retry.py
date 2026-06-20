@@ -13,13 +13,11 @@ from __future__ import annotations
 import logging
 import random
 import time
-from typing import Callable, TypeVar
+from collections.abc import Callable
 
 import httpx
 
 log = logging.getLogger(__name__)
-
-T = TypeVar("T")
 
 
 class TransientLLMError(RuntimeError):
@@ -50,7 +48,7 @@ def is_retryable(exc: BaseException) -> bool:
     return _status_of(exc) in _RETRYABLE_STATUS
 
 
-def call_with_retries(
+def call_with_retries[T](
     fn: Callable[[], T],
     *,
     label: str,

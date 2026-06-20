@@ -131,5 +131,6 @@ def invoke_tool(
         try:
             return _dispatch(fb_provider, fb_model, **kw)
         except Exception:
-            # Fallback also failed — surface the original (more informative) error.
-            raise primary_exc
+            # Fallback also failed — surface the original (more informative) error
+            # and drop the fallback's traceback to keep the chain readable.
+            raise primary_exc from None

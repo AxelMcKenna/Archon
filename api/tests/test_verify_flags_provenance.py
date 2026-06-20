@@ -8,9 +8,9 @@ and that an AS-compliant drop is tagged with its reason.
 
 from __future__ import annotations
 
+import app.vision.plans.vision_pass as vp
 from app.extractors.metrics import Metrics
 from app.vision.core.renderer import RenderedImage
-import app.vision.plans.vision_pass as vp
 
 
 def _run(monkeypatch, flags, verifications, *, prov=None):

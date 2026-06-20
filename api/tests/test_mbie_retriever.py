@@ -24,7 +24,6 @@ from app.mbie.retriever import (
     hit_provenance,
 )
 
-
 _QV_FLAG = {
     "verbatim_quote": "DP 4050 SHT A1.02",
     "area": "north wall cladding",

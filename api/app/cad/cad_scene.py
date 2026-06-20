@@ -188,7 +188,8 @@ def _collect_snaps(e: Any, geom: dict[str, Any], snaps: _SnapAccumulator) -> Non
         for p in pts:
             snaps.add(p[0], p[1], "endpoint", h)
         ring = pts + ([pts[0]] if geom.get("closed") and pts else [])
-        for a, b in zip(ring, ring[1:]):
+        # ring[1:] is intentionally one shorter — pair each point with its successor.
+        for a, b in zip(ring, ring[1:], strict=False):
             mx, my = _mid(a, b)
             snaps.add(mx, my, "midpoint", h)
     elif t == "CIRCLE":

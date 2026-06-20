@@ -7,6 +7,7 @@ get a client scoped to that JWT, so RLS policies apply.
 
 from __future__ import annotations
 
+import contextlib
 from contextvars import ContextVar
 
 from fastapi import HTTPException, Request, status
@@ -48,8 +49,6 @@ def get_supabase() -> Client:
 
     options = ClientOptions(headers={"Authorization": f"Bearer {token}"})
     client = create_client(s.supabase_url, s.supabase_anon_key, options=options)
-    try:
+    with contextlib.suppress(Exception):
         client.postgrest.auth(token)
-    except Exception:
-        pass
     return client
