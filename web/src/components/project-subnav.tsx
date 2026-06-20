@@ -25,6 +25,11 @@ export const projectTabs: ProjectTab[] = [
   { name: "Construction", href: "/inspections", slug: "inspections", alsoMatch: ["/ccc"] },
 ];
 
+// TEMP: tabs hidden from the subnav. Routes still resolve and activeTabSlug
+// still matches them — this only removes them from the rendered nav. To
+// restore a tab, delete its slug here.
+const HIDDEN_TAB_SLUGS: TabSlug[] = ["application-prep", "rfis", "inspections"];
+
 function tabMatchesPath(tab: ProjectTab, pathname: string, projectId: string): boolean {
   const candidates = [tab.href, ...(tab.alsoMatch ?? [])];
   for (const seg of candidates) {
@@ -46,7 +51,9 @@ export function activeTabSlug(pathname: string, projectId: string): TabSlug {
 export function ProjectSubnav({ projectId }: ProjectSubnavProps) {
   const pathname = usePathname();
 
-  const activeIndex = projectTabs.findIndex((tab) => {
+  const visibleTabs = projectTabs.filter((tab) => !HIDDEN_TAB_SLUGS.includes(tab.slug));
+
+  const activeIndex = visibleTabs.findIndex((tab) => {
     if (!tab.href) return pathname === `/projects/${projectId}`;
     return tabMatchesPath(tab, pathname, projectId);
   });
@@ -68,7 +75,7 @@ export function ProjectSubnav({ projectId }: ProjectSubnavProps) {
         />
         <div aria-hidden className="absolute inset-0 bg-white" style={{ clipPath: hexClip }} />
         <ol className="relative flex min-w-max items-center gap-0.5 py-1.5 pl-7 pr-7">
-          {projectTabs.map((tab, index) => {
+          {visibleTabs.map((tab, index) => {
             const tabPath = `/projects/${projectId}${tab.href}` as Route;
             const isActive = index === activeIndex;
             const isPast = activeIndex >= 0 && index < activeIndex;
@@ -88,7 +95,7 @@ export function ProjectSubnav({ projectId }: ProjectSubnavProps) {
                 >
                   {tab.name}
                 </Link>
-                {index < projectTabs.length - 1 && (
+                {index < visibleTabs.length - 1 && (
                   <ChevronRight
                     aria-hidden
                     className={`h-3 w-3 flex-shrink-0 ${
