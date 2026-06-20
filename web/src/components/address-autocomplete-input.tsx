@@ -6,7 +6,7 @@ interface Suggestion {
   display_name: string;
 }
 
-const ADDRESS_AUTOCOMPLETE_DEBOUNCE_MS = 80;
+const ADDRESS_AUTOCOMPLETE_DEBOUNCE_MS = 250;
 
 export function AddressAutocompleteInput({
   name,
@@ -67,7 +67,7 @@ export function AddressAutocompleteInput({
         onChange={(event) => setValue(event.target.value)}
         onBlur={() => setTimeout(() => setIsOpen(false), 120)}
         onFocus={() => setIsOpen(suggestions.length > 0)}
-        placeholder="Start typing an address in Canterbury"
+        placeholder="Start typing a New Zealand address"
         autoComplete="off"
         className="w-full rounded-sm border border-ink-700/20 px-3 py-2"
       />

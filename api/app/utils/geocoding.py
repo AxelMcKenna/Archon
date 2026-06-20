@@ -13,19 +13,20 @@ import httpx
 from app.config import get_settings
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
-ANTIMERIDIAN_SAFE_CANTERBURY_VIEWBOX = "171.6,-42.2,173.4,-44.4"
-ALLOWED_TERRITORIAL_AUTHORITIES = {
-    "christchurch city",
-    "selwyn district",
-    "waimakariri district",
-}
+# Nationwide viewbox (lon,lat,lon,lat) used as a soft bias, not a hard bound —
+# covers the NZ mainland and outlying populated areas.
+NZ_VIEWBOX = "166.0,-34.0,179.5,-47.5"
+# Christchurch coordinates — used to bias suggestions toward the demo region
+# while still allowing the whole country.
+CHRISTCHURCH_PROXIMITY = "172.6362,-43.5321"
 logger = logging.getLogger(__name__)
 GEOAPIFY_AUTOCOMPLETE_URL = "https://api.geoapify.com/v1/geocode/autocomplete"
 
 # Shared in-process Nominatim cooldown — once 429'd, fail fast for N seconds
-# instead of stalling every keystroke / checklist click.
+# instead of stalling every keystroke / checklist click. Kept short so the demo
+# self-heals quickly rather than going dark for minutes.
 _NOMINATIM_BLOCKED_UNTIL: float = 0.0
-_NOMINATIM_BLOCK_SECONDS: float = 300.0
+_NOMINATIM_BLOCK_SECONDS: float = 60.0
 
 
 async def geocode_address(address: str, city: str = "", postalcode: str = "") -> dict | None:
@@ -50,8 +51,8 @@ async def geocode_address(address: str, city: str = "", postalcode: str = "") ->
     free_text_params = {
         "q": address,
         "countrycodes": "nz",
-        "viewbox": ANTIMERIDIAN_SAFE_CANTERBURY_VIEWBOX,
-        "bounded": 1,
+        "viewbox": NZ_VIEWBOX,
+        "bounded": 0,
         "format": "json",
         "addressdetails": 1,
         "limit": 1,
@@ -62,8 +63,8 @@ async def geocode_address(address: str, city: str = "", postalcode: str = "") ->
         "city": city,
         "postalcode": postalcode,
         "country": "nz",
-        "viewbox": ANTIMERIDIAN_SAFE_CANTERBURY_VIEWBOX,
-        "bounded": 1,
+        "viewbox": NZ_VIEWBOX,
+        "bounded": 0,
         "format": "json",
         "addressdetails": 1,
         "limit": 1,
@@ -169,7 +170,7 @@ async def suggest_addresses(query: str, limit: int = 6) -> list[dict]:
     params = {
         "q": query,
         "countrycodes": "nz",
-        "viewbox": ANTIMERIDIAN_SAFE_CANTERBURY_VIEWBOX,
+        "viewbox": NZ_VIEWBOX,
         "bounded": 0,
         "format": "json",
         "addressdetails": 1,
@@ -239,7 +240,7 @@ async def _suggest_addresses_geoapify(query: str, limit: int, api_key: str) -> l
     params = {
         "text": query,
         "filter": "countrycode:nz",
-        "bias": "proximity:172.6362,-43.5321",
+        "bias": f"proximity:{CHRISTCHURCH_PROXIMITY}",
         "limit": max(1, min(limit, 10)),
         "format": "json",
         "apiKey": api_key,
@@ -288,36 +289,18 @@ async def _suggest_addresses_geoapify(query: str, limit: int, api_key: str) -> l
 
 
 def _is_within_supported_region(result: dict) -> bool:
-    address = result.get("address", {})
-    county = str(address.get("county", "")).lower().strip()
-    city = str(address.get("city", "")).lower().strip()
-    town = str(address.get("town", "")).lower().strip()
-    municipality = str(address.get("municipality", "")).lower().strip()
-    state = str(address.get("state", "")).lower().strip()
-    display_name = str(result.get("display_name", "")).lower()
-
-    if county in ALLOWED_TERRITORIAL_AUTHORITIES:
-        return True
-    if city == "christchurch" or town == "christchurch":
-        return True
-    if municipality in {"selwyn", "waimakariri"}:
-        return True
-    return "canterbury" in state and any(
-        token in display_name
-        for token in ("christchurch", "selwyn", "waimakariri")
-    )
+    """Accept any New Zealand result. The upstream query is already restricted to
+    NZ (`countrycodes=nz`); this is a light guard for sparse payloads."""
+    country_code = str(result.get("address", {}).get("country_code", "")).lower().strip()
+    if country_code:
+        return country_code == "nz"
+    return "new zealand" in str(result.get("display_name", "")).lower()
 
 
 def _is_geoapify_within_supported_region(result: dict) -> bool:
-    county = str(result.get("county", "")).lower().strip()
-    city = str(result.get("city", "")).lower().strip()
-    state = str(result.get("state", "")).lower().strip()
-    formatted = str(result.get("formatted", "")).lower()
-    if county in ALLOWED_TERRITORIAL_AUTHORITIES:
-        return True
-    if city == "christchurch":
-        return True
-    return "canterbury" in state and any(
-        token in formatted
-        for token in ("christchurch", "selwyn", "waimakariri")
-    )
+    """Accept any New Zealand result. Geoapify is queried with
+    `filter=countrycode:nz`, so this just guards malformed rows."""
+    country_code = str(result.get("country_code", "")).lower().strip()
+    if country_code:
+        return country_code == "nz"
+    return "new zealand" in str(result.get("formatted", "")).lower()
