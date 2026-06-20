@@ -6,6 +6,8 @@ import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
 import { AiThinking } from "@/components/ai-thinking";
+import { RfiEngineLog } from "@/components/rfi-engine-log";
+import { streamIngest, type IngestStep } from "@/lib/ingest-stream";
 
 type Project = { id: string; address: string; bca: string };
 
@@ -47,6 +49,10 @@ export function BatchUploadPanel({ projectId }: { projectId: string }) {
   const [progress, setProgress] = useState<{ done: number; total: number; current: string } | null>(
     null,
   );
+  // Live engine log for the drawing currently streaming (specs/materials are
+  // deterministic and don't stream).
+  const [steps, setSteps] = useState<IngestStep[]>([]);
+  const [logDone, setLogDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const total = staged.drawing.length + staged.spec.length + staged.material.length;
@@ -95,35 +101,73 @@ export function BatchUploadPanel({ projectId }: { projectId: string }) {
       .uploadToSignedUrl(signed.path, signed.token, file, { contentType });
     if (upErr) throw new Error(`Upload failed: ${upErr.message}`);
 
-    const ingestEndpoint =
-      kind === "drawing"
-        ? dxf
-          ? "/cad/ingest"
-          : "/plans/ingest"
-        : "/specs/ingest";
     const idField = dxf ? "cad_id" : kind === "drawing" ? "plan_id" : "spec_id";
     const idValue = dxf ? signed.cad_id : kind === "drawing" ? signed.plan_id : signed.spec_id;
+    const ingestBody = {
+      project_id: projectId,
+      [idField]: idValue,
+      storage_path: signed.path,
+      filename: file.name,
+      ...(dxf ? {} : { content_type: contentType }),
+      analyse: true,
+      ...(kind === "material" ? { doc_kind: "material" } : {}),
+      ...(kind === "spec" ? { doc_kind: "spec" } : {}),
+    };
 
-    await apiFetch(ingestEndpoint, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        project_id: projectId,
-        [idField]: idValue,
-        storage_path: signed.path,
-        filename: file.name,
-        ...(dxf ? {} : { content_type: contentType }),
-        analyse: true,
-        ...(kind === "material" ? { doc_kind: "material" } : {}),
-        ...(kind === "spec" ? { doc_kind: "spec" } : {}),
-      }),
-    });
+    // Specs / materials are deterministic and fast - one blocking call, no log.
+    if (kind !== "drawing") {
+      setSteps([]);
+      await apiFetch("/specs/ingest", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(ingestBody),
+      });
+      return;
+    }
+
+    // Drawings: stream the engine's per-sheet progress as a live log. Fall back
+    // to the blocking endpoint only if the stream never opens (a mid-analysis
+    // error frame is a real failure, not a reason to silently re-run the work).
+    setSteps([]);
+    setLogDone(false);
+    const streamEndpoint = dxf ? "/cad/ingest-stream" : "/plans/ingest-stream";
+    const byId = new Map<number, IngestStep>();
+    const order: number[] = [];
+    let sawEvent = false;
+    try {
+      for await (const ev of streamIngest(streamEndpoint, ingestBody)) {
+        sawEvent = true;
+        if (ev.type === "step") {
+          if (!byId.has(ev.id)) order.push(ev.id);
+          byId.set(ev.id, {
+            id: ev.id,
+            label: ev.label,
+            status: ev.status,
+            detail: ev.detail,
+          });
+          setSteps(order.map((sid) => byId.get(sid)!));
+        } else if (ev.type === "result") {
+          setLogDone(true);
+        } else if (ev.type === "error") {
+          throw new Error(ev.error || "RFI analysis failed");
+        }
+      }
+    } catch (streamErr) {
+      if (sawEvent) throw streamErr;
+      await apiFetch(dxf ? "/cad/ingest" : "/plans/ingest", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(ingestBody),
+      });
+    }
   }
 
   async function runAll() {
     if (!total) return;
     setBusy(true);
     setError(null);
+    setSteps([]);
+    setLogDone(false);
     const queue: { kind: Kind; file: File }[] = [
       ...staged.drawing.map((file) => ({ kind: "drawing" as const, file })),
       ...staged.spec.map((file) => ({ kind: "spec" as const, file })),
@@ -228,13 +272,25 @@ export function BatchUploadPanel({ projectId }: { projectId: string }) {
         )}
       </div>
 
-      {busy && (
-        <AiThinking
-          label="Running the RFI engine"
-          hint="Drawings are read sheet by sheet; specs and material sheets are checked, then cross-referenced. Larger drawing sets take longer."
-          variant="block"
-        />
-      )}
+      {busy &&
+        (steps.length > 0 ? (
+          <RfiEngineLog
+            steps={steps}
+            title={
+              progress?.current
+                ? `RFI engine · ${progress.current}`
+                : "RFI engine"
+            }
+            hint="Reading the drawing sheet by sheet against the NZ Building Code corpus."
+            done={logDone}
+          />
+        ) : (
+          <AiThinking
+            label="Running the RFI engine"
+            hint="Specs and material sheets are checked, then cross-referenced. Drawings stream their per-sheet progress as they run."
+            variant="block"
+          />
+        ))}
       {error && <p className="text-sm text-red-600">{error}</p>}
       {!total && !busy && (
         <p className="text-xs text-ink-400">
