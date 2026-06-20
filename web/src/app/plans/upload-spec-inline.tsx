@@ -18,7 +18,13 @@ type IngestResponse = {
   analysed: boolean;
 };
 
-export function UploadSpecInline({ projects }: { projects: Project[] }) {
+export function UploadSpecInline({
+  projects,
+  docKind = "spec",
+}: {
+  projects: Project[];
+  docKind?: "spec" | "material";
+}) {
   const router = useRouter();
   const [projectId, setProjectId] = useState<string>(projects[0]?.id ?? "");
   const [file, setFile] = useState<File | null>(null);
@@ -70,13 +76,14 @@ export function UploadSpecInline({ projects }: { projects: Project[] }) {
           filename: file.name,
           content_type: contentType,
           analyse: true,
+          doc_kind: docKind,
         }),
       });
 
       router.push(`/projects/${project.id}/drawings?spec=${res.spec_id}`);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Spec analysis failed");
+      setError(err instanceof Error ? err.message : "Analysis failed");
     } finally {
       setBusy(false);
     }
@@ -126,7 +133,9 @@ export function UploadSpecInline({ projects }: { projects: Project[] }) {
       )}
       <label className="block text-sm">
         <span className="text-ink-500 block mb-1">
-          Specification or product document (PDF, ≤50MB)
+          {docKind === "material"
+            ? "Material / product data sheet (BRANZ, CodeMark, datasheet — PDF, ≤50MB)"
+            : "Specification document (PDF, ≤50MB)"}
         </span>
         <input
           type="file"
@@ -141,6 +150,8 @@ export function UploadSpecInline({ projects }: { projects: Project[] }) {
       >
         {busy ? (
           <AiThinking label="Analysing" variant="button" />
+        ) : docKind === "material" ? (
+          "Analyse sheet"
         ) : (
           "Analyse spec"
         )}
@@ -148,8 +159,16 @@ export function UploadSpecInline({ projects }: { projects: Project[] }) {
       {busy && (
         <div className="sm:col-span-full">
           <AiThinking
-            label="Reading the specification"
-            hint="Checking product assurance, placeholder language, specified systems, and standards currency."
+            label={
+              docKind === "material"
+                ? "Reading the data sheet"
+                : "Reading the specification"
+            }
+            hint={
+              docKind === "material"
+                ? "Checking product assurance (BRANZ / CodeMark), scope of use, and standards."
+                : "Checking product assurance, placeholder language, specified systems, and standards currency."
+            }
             variant="block"
           />
         </div>

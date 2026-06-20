@@ -150,6 +150,37 @@ def claims_from_spec(spec_row: dict[str, Any]) -> DocumentClaims:
     return claims
 
 
+def claims_from_material(material_row: dict[str, Any]) -> DocumentClaims:
+    """Build claims from a material/product datasheet row (doc_kind='material').
+
+    Reads the persisted ``analysis.extraction`` (MaterialExtraction block):
+    product/system tokens, numbered assurance count, standards, and scope-of-use
+    as evidence the coordination rules / Tier 2 can cite."""
+    analysis = material_row.get("analysis") or {}
+    ex = analysis.get("extraction") or {}
+    claims = DocumentClaims(
+        source_kind="material",
+        source_id=str(material_row.get("id")),
+        filename=str(material_row.get("filename") or "product datasheet"),
+    )
+    claims.systems = set(ex.get("systems") or [])
+    claims.standards = set(ex.get("standards") or [])
+    claims.assurance_refs = sum(
+        1 for r in (ex.get("assurance_refs") or []) if r.get("numbered")
+    )
+    product = ex.get("product") or ", ".join(sorted(claims.systems)) or "product"
+    for token in claims.systems:
+        claims.evidence.setdefault(token, {"page": 1, "quote": product})
+    scope = ex.get("scope_of_use") or []
+    if scope:
+        claims.evidence.setdefault(
+            "scope_of_use", {"page": scope[0].get("page", 1), "quote": scope[0].get("snippet", "")}
+        )
+    families = {standard_family(s) for s in claims.standards}
+    claims.fire_rated = bool(families & _FIRE_STANDARDS)
+    return claims
+
+
 def claims_from_drawing(
     drawing_row: dict[str, Any], text_extraction: dict[str, Any]
 ) -> DocumentClaims:

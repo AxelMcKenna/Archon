@@ -5,6 +5,7 @@ from __future__ import annotations
 from app.coordination.claims import DocumentClaims
 from app.coordination.rules import (
     flag_drawn_fire_rating_spec_silent,
+    flag_material_not_on_drawings,
     flag_proprietary_system_no_drawing,
     flag_standard_edition_mismatch,
     flag_system_specified_not_drawn,
@@ -18,6 +19,35 @@ def _spec(**kw) -> DocumentClaims:
 
 def _drawing(**kw) -> DocumentClaims:
     return DocumentClaims(source_kind="drawing", source_id="d1", filename="plans.pdf", **kw)
+
+
+def _material(**kw) -> DocumentClaims:
+    return DocumentClaims(
+        source_kind="material", source_id="m1", filename="datasheet.pdf", **kw
+    )
+
+
+class TestMaterialNotOnDrawings:
+    def test_flags_when_product_absent(self) -> None:
+        claims = [
+            _material(systems={"cladding_system"}),
+            _drawing(disciplines={"architectural"}),
+        ]
+        flags = flag_material_not_on_drawings(claims)
+        assert len(flags) == 1
+        assert flags[0]["_rule"] == "material_not_on_drawings"
+        assert {c["source_kind"] for c in flags[0]["citations"]} == {"material", "drawing"}
+
+    def test_no_flag_when_product_on_drawing(self) -> None:
+        claims = [
+            _material(systems={"cladding_system"}),
+            _drawing(disciplines={"architectural"}, systems={"cladding_system"}),
+        ]
+        assert flag_material_not_on_drawings(claims) == []
+
+    def test_no_flag_when_drawings_unclassified(self) -> None:
+        claims = [_material(systems={"cladding_system"}), _drawing()]
+        assert flag_material_not_on_drawings(claims) == []
 
 
 class TestSystemSpecifiedNotDrawn:

@@ -22,6 +22,8 @@ from uuid import uuid4
 from supabase import Client
 
 from app.coordination.engine import run_project_coordination_safe
+from app.extractors.material_rules import run_material_rules
+from app.extractors.material_text import extract_material_text
 from app.extractors.spec_rules import run_spec_rules
 from app.extractors.spec_text import extract_spec_text
 from app.services.analysis_runner import content_hash as hash_bytes
@@ -31,6 +33,11 @@ from app.storage import SPECS_BUCKET, download, upload_spec
 # Bump when the extractor or rules change in a way that should re-flag existing
 # documents. Stored on the row for observability (not a cache key today).
 SPEC_EXTRACTOR_VERSION = "spec-1.0.0"
+MATERIAL_EXTRACTOR_VERSION = "material-1.0.0"
+
+# A spec_documents row is either a written specification or a material/product
+# data sheet — same table, same pipeline, different extractor + rules.
+_DOC_KINDS = {"spec", "material"}
 
 # pdfplumber can only read a text layer out of PDFs; other media are stored but
 # not flagged (a scanned-image spec would need the vision path, out of scope).
@@ -56,8 +63,14 @@ def upload_and_analyse(
     storage_path: str | None = None,
     spec_id: str | None = None,
     analyse: bool = True,
+    doc_kind: str = "spec",
 ) -> SpecAnalysisResult:
     started = time.perf_counter()
+    doc_kind = doc_kind if doc_kind in _DOC_KINDS else "spec"
+    is_material = doc_kind == "material"
+    extractor_version = (
+        MATERIAL_EXTRACTOR_VERSION if is_material else SPEC_EXTRACTOR_VERSION
+    )
 
     if storage_path is not None:
         if not spec_id:
@@ -84,17 +97,26 @@ def upload_and_analyse(
     status = "uploaded"
 
     if can_analyse:
-        extraction = extract_spec_text(payload)
+        extraction = (
+            extract_material_text(payload)
+            if is_material
+            else extract_spec_text(payload)
+        )
         if extraction.looks_scanned:
             # No usable text layer — store the file, flag nothing, and say so
             # rather than emit a misleading "0 issues" on an unreadable scan.
             status = "no_text_layer"
         else:
-            flags = run_spec_rules(extraction)
+            flags = (
+                run_material_rules(extraction)
+                if is_material
+                else run_spec_rules(extraction)
+            )
             analysis = {
                 "flags": flags,
                 "extraction": extraction.to_prompt_block(),
-                "extractor_version": SPEC_EXTRACTOR_VERSION,
+                "extractor_version": extractor_version,
+                "doc_kind": doc_kind,
             }
             status = "analysed"
 
@@ -110,7 +132,8 @@ def upload_and_analyse(
             "size_bytes": len(payload),
             "status": status,
             "content_hash": digest,
-            "extractor_version": SPEC_EXTRACTOR_VERSION,
+            "extractor_version": extractor_version,
+            "doc_kind": doc_kind,
             "analysis": analysis,
             "flags_count": len(flags),
             "processing_ms": processing_ms,

@@ -58,6 +58,7 @@ type SpecRow = {
   project_id: string;
   filename: string;
   status: string;
+  doc_kind: string | null;
   processing_ms: number | null;
   flags_count: number | null;
   analysis: {
@@ -115,7 +116,7 @@ export default async function ProjectDrawings({
     supabase
       .from("spec_documents")
       .select(
-        "id, project_id, filename, status, processing_ms, flags_count, analysis, created_at, " +
+        "id, project_id, filename, status, doc_kind, processing_ms, flags_count, analysis, created_at, " +
           "projects(address, bca, project_type)",
       )
       .eq("project_id", projectId)
@@ -196,13 +197,19 @@ export default async function ProjectDrawings({
         </p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <UploadDrawingPanel projects={projectsForUpload} />
         <section className="rounded-sm bg-surface-raised shadow-depth p-8 space-y-4">
           <h2 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
             Analyse a specification
           </h2>
-          <UploadSpecInline projects={projectsForUpload} />
+          <UploadSpecInline projects={projectsForUpload} docKind="spec" />
+        </section>
+        <section className="rounded-sm bg-surface-raised shadow-depth p-8 space-y-4">
+          <h2 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
+            Analyse a material / product sheet
+          </h2>
+          <UploadSpecInline projects={projectsForUpload} docKind="material" />
         </section>
       </div>
 
@@ -314,7 +321,9 @@ function RowsList({
               <div className="min-w-0">
                 <p className="font-medium text-ink-900 truncate">
                   <span className="inline-block mr-2 text-[10px] font-semibold tracking-wide rounded-sm bg-ink-100 text-ink-700 px-1.5 py-0.5">
-                    {FORMAT_LABEL[r.format]}
+                    {r.format === "spec" && r.doc_kind === "material"
+                      ? "MATERIAL"
+                      : FORMAT_LABEL[r.format]}
                   </span>
                   {r.filename}
                 </p>

@@ -10,7 +10,7 @@ import { useToast } from "@/components/ui/toast";
 type Confidence = "high" | "medium" | "low";
 
 type Citation = {
-  source_kind: "drawing" | "spec";
+  source_kind: "drawing" | "spec" | "material";
   source_id: string;
   filename: string;
   page?: number;
@@ -196,7 +196,9 @@ function CitationChip({
   projectId: string;
   colour: string;
 }) {
-  const param = c.source_kind === "spec" ? "spec" : "plan";
+  // spec + material both live in spec_documents (selected via ?spec=); drawings
+  // are plan_uploads (?plan=).
+  const param = c.source_kind === "drawing" ? "plan" : "spec";
   const href = {
     pathname: `/projects/${projectId}/drawings`,
     query: { [param]: c.source_id },

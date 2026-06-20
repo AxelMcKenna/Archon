@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from app.coordination.claims import (
     claims_from_drawing,
+    claims_from_material,
     claims_from_spec,
     standard_family,
     standard_year,
 )
+from app.extractors.material_text import extract_material_from_text
 from app.extractors.spec_text import extract_spec_from_text
 
 
@@ -54,6 +56,29 @@ class TestClaimsFromSpec:
     def test_non_fire_spec_not_fire_rated(self) -> None:
         c = claims_from_spec(_spec_row("Paint internal walls two coats."))
         assert c.fire_rated is False
+        assert c.systems == set()
+
+
+def _material_row(text: str, *, id_: str = "m1", filename: str = "datasheet.pdf") -> dict:
+    block = extract_material_from_text(text).to_prompt_block()
+    return {"id": id_, "filename": filename, "analysis": {"extraction": block}}
+
+
+class TestClaimsFromMaterial:
+    def test_systems_and_assurance(self) -> None:
+        c = claims_from_material(
+            _material_row(
+                "Product: Acme Cavity Cladding\nBRANZ Appraisal No. 1234.\n"
+                "Scope of use: max height 7m."
+            )
+        )
+        assert c.source_kind == "material"
+        assert "cladding_system" in c.systems
+        assert c.assurance_refs == 1
+        assert "scope_of_use" in c.evidence
+
+    def test_empty_extraction(self) -> None:
+        c = claims_from_material({"id": "m2", "filename": "x.pdf", "analysis": {}})
         assert c.systems == set()
 
 

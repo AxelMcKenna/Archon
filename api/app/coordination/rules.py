@@ -285,6 +285,64 @@ def flag_proprietary_system_no_drawing(
     return flags
 
 
+def flag_material_not_on_drawings(
+    claims: list[DocumentClaims],
+) -> list[dict[str, Any]]:
+    """A product/material datasheet was provided but its product isn't shown on
+    any drawing. Guarded on a classified drawing set so it doesn't fire on an
+    unclassified upload."""
+    materials = [c for c in claims if c.source_kind == "material"]
+    drawings = [c for c in claims if c.source_kind == "drawing"]
+    if not materials or not drawings:
+        return []
+    drawing_disciplines: set[str] = set()
+    drawing_systems: set[str] = set()
+    for d in drawings:
+        drawing_disciplines |= d.disciplines
+        drawing_systems |= d.systems
+    if not drawing_disciplines:
+        return []
+
+    flags: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for mat in materials:
+        for sysname in sorted(mat.systems):
+            key = f"{mat.source_id}:{sysname}"
+            if key in seen or sysname in drawing_systems:
+                continue
+            seen.add(key)
+            label = _SYSTEM_LABEL.get(sysname, sysname.replace("_", " "))
+            flags.append(
+                _flag(
+                    severity="must_resolve",
+                    confidence="medium",
+                    area=f"Product datasheet ({label}) not shown on drawings",
+                    reason=(
+                        f"A product/material data sheet for a {label} system was "
+                        "provided, but no drawing or schedule references it. The "
+                        "BCA will RFI to see the appraised product documented on "
+                        "the drawings."
+                    ),
+                    action=(
+                        f"Show the {label} product on the relevant drawings / "
+                        "schedules, or confirm the datasheet belongs to this job."
+                    ),
+                    rule="material_not_on_drawings",
+                    citations=[
+                        mat.citation(sysname),
+                        {
+                            "source_kind": "drawing",
+                            "source_id": drawings[0].source_id,
+                            "filename": "drawing set",
+                            "page": 1,
+                            "quote": f"disciplines: {', '.join(sorted(drawing_disciplines))}",
+                        },
+                    ],
+                )
+            )
+    return flags
+
+
 def run_coordination_rules(claims: list[DocumentClaims]) -> list[dict[str, Any]]:
     """Run every deterministic coordination rule over the project's claims."""
     flags: list[dict[str, Any]] = []
@@ -292,4 +350,5 @@ def run_coordination_rules(claims: list[DocumentClaims]) -> list[dict[str, Any]]
     flags.extend(flag_drawn_fire_rating_spec_silent(claims))
     flags.extend(flag_standard_edition_mismatch(claims))
     flags.extend(flag_proprietary_system_no_drawing(claims))
+    flags.extend(flag_material_not_on_drawings(claims))
     return flags

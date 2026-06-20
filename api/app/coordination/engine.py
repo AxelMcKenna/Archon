@@ -20,6 +20,7 @@ from supabase import Client
 from app.config import get_settings
 from app.coordination.claims import (
     claims_from_drawing,
+    claims_from_material,
     claims_from_spec,
 )
 from app.coordination.flags_store import replace_project_coordination_flags
@@ -71,12 +72,16 @@ def _drawing_text_extraction(db: Client, row: dict[str, Any]) -> dict[str, Any]:
 Document = tuple[dict[str, Any], dict[str, Any]]
 
 
-def gather_documents(db: Client, project_id: str) -> tuple[list[Document], list[Document]]:
-    """Gather every analysed spec + drawing with its extraction block (one DB
-    pass; drawings re-parse the stored PDF only when text wasn't persisted)."""
-    spec_rows = (
+def gather_documents(
+    db: Client, project_id: str
+) -> tuple[list[Document], list[Document], list[Document]]:
+    """Gather every analysed spec, material datasheet, and drawing with its
+    extraction block (one DB pass; drawings re-parse the stored PDF only when
+    text wasn't persisted). spec_documents holds both specs and materials,
+    distinguished by ``doc_kind``."""
+    sd_rows = (
         db.table("spec_documents")
-        .select("id, filename, content_hash, analysis, status")
+        .select("id, filename, content_hash, analysis, status, doc_kind")
         .eq("project_id", project_id)
         .eq("status", "analysed")
         .execute()
@@ -93,26 +98,37 @@ def gather_documents(db: Client, project_id: str) -> tuple[list[Document], list[
         or []
     )
     specs: list[Document] = [
-        (r, (r.get("analysis") or {}).get("extraction") or {}) for r in spec_rows
+        (r, (r.get("analysis") or {}).get("extraction") or {})
+        for r in sd_rows
+        if (r.get("doc_kind") or "spec") != "material"
+    ]
+    materials: list[Document] = [
+        (r, (r.get("analysis") or {}).get("extraction") or {})
+        for r in sd_rows
+        if (r.get("doc_kind") or "spec") == "material"
     ]
     drawings: list[Document] = [
         (r, _drawing_text_extraction(db, r)) for r in draw_rows
     ]
-    return specs, drawings
+    return specs, materials, drawings
 
 
-def _fingerprint(specs: list[Document], drawings: list[Document]) -> str:
-    parts = [f"{r.get('id')}:{r.get('content_hash')}" for r, _ in specs + drawings]
+def _fingerprint(*groups: list[Document]) -> str:
+    parts = [
+        f"{r.get('id')}:{r.get('content_hash')}" for g in groups for r, _ in g
+    ]
     return "|".join(sorted(parts))
 
 
 def run_project_coordination(db: Client, project_id: str) -> CoordinationResult:
     """Reconcile the project's document set and persist coordination flags."""
-    specs, drawings = gather_documents(db, project_id)
-    claims = [claims_from_spec(r) for r, _ in specs] + [
-        claims_from_drawing(r, b) for r, b in drawings
-    ]
-    fingerprint = _fingerprint(specs, drawings)
+    specs, materials, drawings = gather_documents(db, project_id)
+    claims = (
+        [claims_from_spec(r) for r, _ in specs]
+        + [claims_from_material(r) for r, _ in materials]
+        + [claims_from_drawing(r, b) for r, b in drawings]
+    )
+    fingerprint = _fingerprint(specs, materials, drawings)
 
     # Nothing to reconcile until at least two documents exist. Clear any stale
     # flags and record an empty run so the UI shows an honest "in sync" state.
@@ -132,10 +148,11 @@ def run_project_coordination(db: Client, project_id: str) -> CoordinationResult:
     # Tier 2 — LLM semantic reconciliation of spec <-> drawing. Gated off by
     # default; deduped against the Tier-1 flags it would otherwise restate.
     settings = get_settings()
-    if settings.spec_coordination_enabled and specs and drawings:
+    product_docs = specs + materials
+    if settings.spec_coordination_enabled and product_docs and drawings:
         seen = {llm_flag_signature(f) for f in flags}
         for lf in reconcile_documents_llm(
-            specs=specs, drawings=drawings, settings=settings
+            specs=product_docs, drawings=drawings, settings=settings
         ):
             sig = llm_flag_signature(lf)
             if sig not in seen:

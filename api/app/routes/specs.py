@@ -66,6 +66,7 @@ async def upload_and_analyse(
     file: UploadFile = File(...),
     project_id: UUID = Form(...),
     analyse: bool = Form(True),
+    doc_kind: str = Form("spec"),
     db: Client = Depends(get_db),
 ) -> dict[str, Any]:
     if file.content_type not in ALLOWED_MEDIA:
@@ -85,6 +86,7 @@ async def upload_and_analyse(
             content_type=file.content_type,
             payload=payload,
             analyse=analyse,
+            doc_kind=doc_kind,
         )
     except Exception as e:
         log.exception("spec analysis failed (project_id=%s)", project_id)
@@ -106,6 +108,7 @@ class IngestRequest(BaseModel):
     filename: str
     content_type: str
     analyse: bool = True
+    doc_kind: str = "spec"
 
 
 @router.post("/upload-url")
@@ -159,6 +162,7 @@ async def ingest_uploaded(
             storage_path=body.storage_path,
             spec_id=str(body.spec_id),
             analyse=body.analyse,
+            doc_kind=body.doc_kind,
         )
     except Exception as e:
         log.exception("spec ingest failed (project_id=%s)", body.project_id)
