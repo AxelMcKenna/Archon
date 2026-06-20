@@ -17,7 +17,7 @@ export default function SetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
 
   // The /auth/confirm route should have established a session before sending us
-  // here. If there isn't one, the link was used already or opened directly —
+  // here. If there isn't one, the link was used already or opened directly -
   // bounce to login rather than show a form that can't submit.
   useEffect(() => {
     const supabase = getSupabaseBrowser();

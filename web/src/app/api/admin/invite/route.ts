@@ -61,7 +61,7 @@ export async function POST(req: Request) {
   const redirectTo = `${site}/auth/confirm`;
 
   // generateLink creates the pending auth.users row and returns a one-time
-  // token — it does NOT send an email itself, so there's no double-send.
+  // token - it does NOT send an email itself, so there's no double-send.
   const { data, error } = await admin.auth.admin.generateLink({
     type: "invite",
     email,
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
 
   if (error || !data?.properties?.hashed_token) {
     const msg = error?.message ?? "Could not generate an invite link.";
-    // A user that already exists is the common case — surface it clearly.
+    // A user that already exists is the common case - surface it clearly.
     const status = /already|exists|registered/i.test(msg) ? 409 : 500;
     console.error("invite: generateLink failed", error);
     return NextResponse.json({ error: msg }, { status });

@@ -10,7 +10,7 @@ import { Resend } from "resend";
 //
 // Unlike the waitlist confirmation, sending here is NOT best-effort: if the
 // email can't go out, the invite is useless, so the caller should surface a
-// failure. We still never throw — we return false and let the route decide.
+// failure. We still never throw - we return false and let the route decide.
 // ---------------------------------------------------------------------------
 
 const FROM = process.env.WAITLIST_FROM_EMAIL ?? "Arro <onboarding@resend.dev>";
@@ -124,7 +124,7 @@ ${dot(7)}<span style="margin-left:9px;">Your access is ready</span>
 <h1 class="h1" style="margin:18px 0 0 0;font-family:${DISPLAY};font-size:34px;line-height:1.08;font-weight:500;letter-spacing:0.2px;color:${INK_900};">You're invited to<br />Arro<span style="color:${ACCENT};">.</span></h1>
 
 <p style="margin:18px 0 0 0;font-family:${SANS};font-size:15px;line-height:1.65;color:${INK_500};max-width:380px;">
-Create your account to bring your projects, drawings, and council RFIs into Arro. It takes under a minute — just set a password.
+Create your account to bring your projects, drawings, and council RFIs into Arro. It takes under a minute - just set a password.
 </p>
 
 <!-- Inset panel echoing the site's product cards -->
@@ -180,7 +180,7 @@ function inviteText(actionUrl: string): string {
     "Create your account.",
     "",
     "You've been invited to Arro. Create your account to bring your projects,",
-    "drawings, and council RFIs in. It takes under a minute — just set a password.",
+    "drawings, and council RFIs in. It takes under a minute - just set a password.",
     "",
     `Create your account: ${actionUrl}`,
     "",
