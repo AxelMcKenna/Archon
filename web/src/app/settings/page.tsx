@@ -14,6 +14,11 @@ const projectTypeLabels: Record<string, string> = {
   retail: "Commercial — retail / hospitality",
   industrial: "Industrial / warehouse",
   mixed_use: "Mixed-use",
+  accommodation: "Accommodation",
+  healthcare: "Healthcare",
+  education: "Education / assembly",
+  carpark: "Carparking building",
+  commercial_other: "Commercial — other",
 };
 
 export default async function Settings() {

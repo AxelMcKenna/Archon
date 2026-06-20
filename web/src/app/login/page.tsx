@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import type { Route } from "next";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
 
@@ -31,11 +31,13 @@ function LoginForm() {
     setError(null);
     const supabase = getSupabaseBrowser();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setBusy(false);
     if (error) {
+      setBusy(false);
       setError(error.message);
       return;
     }
+    // Keep the button in its loading state through the navigation + refresh —
+    // resetting here would flash an idle "Sign in" while the next page loads.
     router.replace(next as Route);
     router.refresh();
   }
@@ -109,6 +111,7 @@ function LoginForm() {
             disabled={busy}
             className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-ink-900 px-4 py-2.5 text-[13px] font-medium text-white shadow-depth transition-shadow hover:shadow-depth-hover disabled:opacity-50"
           >
+            {busy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             {busy ? "Signing in…" : "Sign in"}
             {!busy && <ArrowUpRight className="h-3.5 w-3.5" />}
           </button>

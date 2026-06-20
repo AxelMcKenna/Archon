@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.4",
-  "version_notes": "1.4 (2026-06-20): commercial building support. Added 5 commercial project_types (multi_unit_residential, commercial_office, retail, industrial, mixed_use), risk_groups (NZ fire C/AS1-C/AS2), importance_levels (AS/NZS 1170 IL1-IL4), project_type_defaults map, and 7 commercial RFI categories (building_code:C:escape_routes / :compartmentation / :systems / :feb, building_code:G1:commercial, building_code:G4:commercial, building_code:B1:importance_level). Flagged the C/AS1(SH)-vs-C/AS2(other) risk-group split on the C acceptable solution. 1.2 (2026-06-01): added two documentation categories surfaced by deterministic PDF text-layer rules (missing_sheets, revision_mismatch) introduced with the v2 plan flagger. 1.1 (2026-05-08): added 22 sub-categories surfaced from CCC Avoiding RFIs, SDC Specific Approvals, WDC fact sheets, and 2 MBIE determinations. Existing 1.0 IDs preserved; new categories use namespaced IDs. Added stages, canterbury overlays, BCA-specific process facts. SDC portal corrected to AlphaOne (verified from SDC processing page).",
+  "schema_version": "1.5",
+  "version_notes": "1.5 (2026-06-20): 5 more commercial project types (accommodation→SM, healthcare→SI, education→CA, carpark→VP, commercial_other→CA) to give the orphaned risk groups (SM-managed-sleeping, SI-institutional, VP-vehicle-parking) a project-type home plus a catch-all. 1.4 (2026-06-20): commercial building support. Added 5 commercial project_types (multi_unit_residential, commercial_office, retail, industrial, mixed_use), risk_groups (NZ fire C/AS1-C/AS2), importance_levels (AS/NZS 1170 IL1-IL4), project_type_defaults map, and 7 commercial RFI categories (building_code:C:escape_routes / :compartmentation / :systems / :feb, building_code:G1:commercial, building_code:G4:commercial, building_code:B1:importance_level). Flagged the C/AS1(SH)-vs-C/AS2(other) risk-group split on the C acceptable solution. 1.2 (2026-06-01): added two documentation categories surfaced by deterministic PDF text-layer rules (missing_sheets, revision_mismatch) introduced with the v2 plan flagger. 1.1 (2026-05-08): added 22 sub-categories surfaced from CCC Avoiding RFIs, SDC Specific Approvals, WDC fact sheets, and 2 MBIE determinations. Existing 1.0 IDs preserved; new categories use namespaced IDs. Added stages, canterbury overlays, BCA-specific process facts. SDC portal corrected to AlphaOne (verified from SDC processing page).",
 
   "bcas": [
     {
@@ -151,7 +151,12 @@
     "commercial_office": { "risk_group": "WB", "importance_level": "IL2" },
     "retail": { "risk_group": "CA", "importance_level": "IL2" },
     "industrial": { "risk_group": "WF", "importance_level": "IL2" },
-    "mixed_use": { "risk_group": "CA", "importance_level": "IL2" }
+    "mixed_use": { "risk_group": "CA", "importance_level": "IL2" },
+    "accommodation": { "risk_group": "SM", "importance_level": "IL2" },
+    "healthcare": { "risk_group": "SI", "importance_level": "IL2" },
+    "education": { "risk_group": "CA", "importance_level": "IL2" },
+    "carpark": { "risk_group": "VP", "importance_level": "IL2" },
+    "commercial_other": { "risk_group": "CA", "importance_level": "IL2" }
   },
 
   "categories": [

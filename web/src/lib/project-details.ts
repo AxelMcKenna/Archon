@@ -45,7 +45,12 @@ export type StoredProjectType =
   | "commercial_office"
   | "retail"
   | "industrial"
-  | "mixed_use";
+  | "mixed_use"
+  | "accommodation"
+  | "healthcare"
+  | "education"
+  | "carpark"
+  | "commercial_other";
 
 // Project types that share the same id in both the stored (DB enum) and API
 // (`accessory_building`-style) representations — i.e. everything except the
@@ -58,6 +63,11 @@ const SHARED_PROJECT_TYPES = [
   "retail",
   "industrial",
   "mixed_use",
+  "accommodation",
+  "healthcare",
+  "education",
+  "carpark",
+  "commercial_other",
 ] as const;
 
 export interface ProjectFormValues {

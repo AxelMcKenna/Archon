@@ -73,6 +73,35 @@ def preferred_documents_for(code_clause: str, risk_group: str | None) -> set[str
     return {split[key]}
 
 
+# Purpose-group descriptor terms per fire risk group. C/AS2 is a single
+# document covering every non-SH risk group, with provisions differentiated by
+# purpose group. Our corpus isn't tagged per risk group, so we bias *within*
+# C/AS2 by appending the risk group's purpose-group language to the retrieval
+# query — clauses that speak to (e.g.) institutional or crowd occupancies then
+# rank higher for the matching building. Scoped to the C family, where this
+# differentiation lives; SH adds nothing (it grounds against C/AS1).
+_RISK_GROUP_QUERY_TERMS: dict[str, str] = {
+    "SM": "sleeping managed accommodation residents",
+    "SI": "sleeping institutional hospital care assisted evacuation",
+    "CA": "crowd activity assembly public large numbers",
+    "WB": "working business office storage low fire load",
+    "WF": "working business industrial high fire load storage",
+    "VP": "vehicle parking carpark",
+}
+
+
+def enrich_query_for_risk_group(
+    query: str, code_clause: str | None, risk_group: str | None
+) -> str:
+    """Append risk-group purpose-group terms to a C-family query so C/AS2
+    clauses for the building's occupancy rank higher. No-op for non-C clauses,
+    unknown/SH risk groups, or an empty query."""
+    if not query or code_clause != "C" or not risk_group:
+        return query
+    terms = _RISK_GROUP_QUERY_TERMS.get(risk_group.strip().upper())
+    return f"{query} {terms}" if terms else query
+
+
 def code_clause_for_category(category: str | None) -> str | None:
     """``building_code:E2:cladding`` → ``E2``. Returns None for
     non-building-code categories (e.g. ``documentation:plans``).
@@ -168,6 +197,8 @@ def retrieve_for_flag(
     query = _build_query(flag, query_variant)
     if not query:
         return []
+    # Bias C-family retrieval toward the building's purpose group within C/AS2.
+    query = enrich_query_for_risk_group(query, code_clause, risk_group)
 
     preferred_docs = preferred_documents_for(code_clause, risk_group)
     # When biasing to a specific document, pull a wider candidate pool so the

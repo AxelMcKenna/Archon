@@ -21,6 +21,7 @@ from app.mbie.retriever import (
     _build_query,
     _window_around_query,
     code_clause_for_category,
+    enrich_query_for_risk_group,
     format_hits_for_prompt,
     hit_provenance,
     preferred_documents_for,
@@ -151,6 +152,36 @@ class TestRiskGroupDocumentPreference:
         hits = [_doc_hit("C/AS2"), _doc_hit("C/AS2"), _doc_hit("C/AS2")]
         out = _apply_doc_preference(hits, None, k=2)
         assert len(out) == 2
+
+
+class TestRiskGroupQueryEnrichment:
+    """Within C/AS2 (one document for all non-SH groups) we bias retrieval to
+    the building's purpose group by appending risk-group terms to the query."""
+
+    def test_appends_purpose_group_terms_for_c(self) -> None:
+        out = enrich_query_for_risk_group("escape route width", "C", "SI")
+        assert out.startswith("escape route width ")
+        assert "institutional" in out
+
+    def test_crowd_terms_for_ca(self) -> None:
+        assert "crowd" in enrich_query_for_risk_group("occupant load", "C", "CA")
+
+    def test_vehicle_terms_for_vp(self) -> None:
+        assert "vehicle" in enrich_query_for_risk_group("fire separation", "C", "VP")
+
+    def test_noop_for_non_c_clause(self) -> None:
+        assert enrich_query_for_risk_group("cavity batten", "E2", "WB") == "cavity batten"
+
+    def test_noop_for_sh(self) -> None:
+        # SH grounds against C/AS1; no within-C/AS2 biasing.
+        assert enrich_query_for_risk_group("escape", "C", "SH") == "escape"
+
+    def test_noop_for_unknown_or_missing_risk_group(self) -> None:
+        assert enrich_query_for_risk_group("escape", "C", None) == "escape"
+        assert enrich_query_for_risk_group("escape", "C", "ZZ") == "escape"
+
+    def test_noop_for_empty_query(self) -> None:
+        assert enrich_query_for_risk_group("", "C", "CA") == ""
 
 
 class TestBuildQuery:

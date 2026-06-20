@@ -522,6 +522,11 @@ function intakeToProjectDetails(
     "retail",
     "industrial",
     "mixed_use",
+    "accommodation",
+    "healthcare",
+    "education",
+    "carpark",
+    "commercial_other",
   ];
   const rawType = (intake?.projectType ?? "new_dwelling") as ProjectType;
   const projectType: ProjectType = allowedTypes.includes(rawType)

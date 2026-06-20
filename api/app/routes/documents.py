@@ -27,6 +27,11 @@ ProjectTypeT = Literal[
     "retail",
     "industrial",
     "mixed_use",
+    "accommodation",
+    "healthcare",
+    "education",
+    "carpark",
+    "commercial_other",
 ]
 
 

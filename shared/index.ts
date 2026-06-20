@@ -16,7 +16,12 @@ export type ProjectTypeId =
   | "commercial_office"
   | "retail"
   | "industrial"
-  | "mixed_use";
+  | "mixed_use"
+  | "accommodation"
+  | "healthcare"
+  | "education"
+  | "carpark"
+  | "commercial_other";
 
 export type RiskGroupId = "SH" | "SM" | "SI" | "CA" | "WB" | "WF" | "VP";
 export type ImportanceLevelId = "IL1" | "IL2" | "IL3" | "IL4";

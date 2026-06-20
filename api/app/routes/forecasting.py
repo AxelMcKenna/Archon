@@ -41,6 +41,11 @@ class ForecastRequest(BaseModel):
         "retail",
         "industrial",
         "mixed_use",
+        "accommodation",
+        "healthcare",
+        "education",
+        "carpark",
+        "commercial_other",
     ]
     estimatedFloorAreaM2: int | None = None
     estimatedConstructionValueNZD: int | None = None

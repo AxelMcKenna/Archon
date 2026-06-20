@@ -480,6 +480,178 @@
         "specialist": "Architectural designer",
         "referenceClause": "NZBC Clause D1"
       }
+    ],
+    "accommodation": [
+      {
+        "id": "fire_report_c_as2",
+        "title": "Fire Safety Report (C/AS2 or C/VM2)",
+        "description": "Fire safety design for managed sleeping (Risk Group SM) — means of escape from guest/sleeping areas, fire separation between sleeping units, alarms and emergency lighting.",
+        "category": "specialist",
+        "trigger": "Accommodation is managed sleeping (SM), not Risk Group SH; cannot use C/AS1.",
+        "specialist": "Fire engineer",
+        "referenceClause": "NZBC Clauses C1-C6"
+      },
+      {
+        "id": "inter_tenancy_acoustic_report",
+        "title": "Inter-tenancy Acoustic Report (G6)",
+        "description": "Airborne and impact sound insulation between guest/sleeping units.",
+        "category": "specialist",
+        "trigger": "G6 requires sound insulation between abutting sleeping occupancies.",
+        "specialist": "Acoustic engineer",
+        "referenceClause": "NZBC Clause G6"
+      },
+      {
+        "id": "specified_systems_compliance_schedule",
+        "title": "Specified Systems List & Draft Compliance Schedule",
+        "description": "Schedule of specified systems with performance standards and IM&R procedures for the BWOF regime.",
+        "category": "project",
+        "trigger": "Buildings with specified systems require a compliance schedule.",
+        "specialist": null,
+        "referenceClause": "Building Act 2004 s100"
+      },
+      {
+        "id": "accessible_route_assessment_d1",
+        "title": "Accessibility Report (D1 / NZS 4121)",
+        "description": "Accessible route, accessible rooms and accessible facilities provision.",
+        "category": "project",
+        "trigger": "Accommodation buildings must provide accessible facilities.",
+        "specialist": "Architectural designer",
+        "referenceClause": "NZBC Clause D1"
+      }
+    ],
+    "healthcare": [
+      {
+        "id": "fire_report_c_as2",
+        "title": "Fire Safety Report (C/AS2 or C/VM2)",
+        "description": "Fire safety design for institutional sleeping (Risk Group SI) where occupants need assistance to escape — progressive horizontal evacuation, fire separation, sprinklers, alarms.",
+        "category": "specialist",
+        "trigger": "Healthcare is institutional sleeping (SI); occupants cannot self-evacuate, cannot use C/AS1.",
+        "specialist": "Fire engineer",
+        "referenceClause": "NZBC Clauses C1-C6"
+      },
+      {
+        "id": "specified_systems_compliance_schedule",
+        "title": "Specified Systems List & Draft Compliance Schedule",
+        "description": "Schedule of specified systems with performance standards and IM&R procedures for the BWOF regime.",
+        "category": "project",
+        "trigger": "Buildings with specified systems require a compliance schedule.",
+        "specialist": null,
+        "referenceClause": "Building Act 2004 s100"
+      },
+      {
+        "id": "mechanical_ventilation_g4",
+        "title": "Mechanical Ventilation Design (G4/VM1) + PS1",
+        "description": "Mechanical ventilation design for clinical spaces with air-change rates and contaminant-space extract.",
+        "category": "specialist",
+        "trigger": "Clinical occupancy typically requires designed mechanical ventilation.",
+        "specialist": "Mechanical engineer",
+        "referenceClause": "NZBC Clause G4"
+      },
+      {
+        "id": "accessible_route_assessment_d1",
+        "title": "Accessibility Report (D1 / NZS 4121)",
+        "description": "Accessible route, lift and accessible facilities throughout patient and public areas.",
+        "category": "project",
+        "trigger": "Healthcare buildings must be fully accessible.",
+        "specialist": "Architectural designer",
+        "referenceClause": "NZBC Clause D1"
+      }
+    ],
+    "education": [
+      {
+        "id": "fire_report_c_as2",
+        "title": "Fire Safety Report (C/AS2 or C/VM2)",
+        "description": "Fire safety design for crowd activity (Risk Group CA) — occupant load, means of escape, fire separation and fire systems for assembly spaces.",
+        "category": "specialist",
+        "trigger": "Education / assembly is crowd activity (CA); cannot use C/AS1.",
+        "specialist": "Fire engineer",
+        "referenceClause": "NZBC Clauses C1-C6"
+      },
+      {
+        "id": "specified_systems_compliance_schedule",
+        "title": "Specified Systems List & Draft Compliance Schedule",
+        "description": "Schedule of specified systems with performance standards and IM&R procedures for the BWOF regime.",
+        "category": "project",
+        "trigger": "Buildings with specified systems require a compliance schedule.",
+        "specialist": null,
+        "referenceClause": "Building Act 2004 s100"
+      },
+      {
+        "id": "sanitary_facilities_g1_commercial",
+        "title": "Sanitary Facilities Calculation (G1)",
+        "description": "Number of sanitary fixtures for the assessed occupancy, separate-sex and accessible facilities per G1/AS1.",
+        "category": "project",
+        "trigger": "Assembly sanitary provision is sized by occupancy.",
+        "specialist": null,
+        "referenceClause": "NZBC Clause G1"
+      },
+      {
+        "id": "accessible_route_assessment_d1",
+        "title": "Accessibility Report (D1 / NZS 4121)",
+        "description": "Accessible route, lift and accessible facilities for public-use education / assembly spaces.",
+        "category": "project",
+        "trigger": "Public-use areas must be accessible.",
+        "specialist": "Architectural designer",
+        "referenceClause": "NZBC Clause D1"
+      }
+    ],
+    "carpark": [
+      {
+        "id": "fire_report_c_as2",
+        "title": "Fire Safety Report (C/AS2 or C/VM2)",
+        "description": "Fire safety design for vehicle parking (Risk Group VP) — fire separation, sprinklers where required, and firefighting access.",
+        "category": "specialist",
+        "trigger": "Carparking buildings are Risk Group VP; cannot use C/AS1.",
+        "specialist": "Fire engineer",
+        "referenceClause": "NZBC Clauses C1-C6"
+      },
+      {
+        "id": "mechanical_ventilation_g4",
+        "title": "Carpark Ventilation Design (G4) + PS1",
+        "description": "Mechanical extract / contaminant ventilation design for the carpark per G4 (vehicle exhaust).",
+        "category": "specialist",
+        "trigger": "Enclosed carparks are contaminant spaces requiring mechanical ventilation.",
+        "specialist": "Mechanical engineer",
+        "referenceClause": "NZBC Clause G4"
+      },
+      {
+        "id": "specified_systems_compliance_schedule",
+        "title": "Specified Systems List & Draft Compliance Schedule",
+        "description": "Schedule of specified systems with performance standards and IM&R procedures for the BWOF regime.",
+        "category": "project",
+        "trigger": "Buildings with specified systems require a compliance schedule.",
+        "specialist": null,
+        "referenceClause": "Building Act 2004 s100"
+      }
+    ],
+    "commercial_other": [
+      {
+        "id": "fire_report_c_as2",
+        "title": "Fire Safety Report (C/AS2 or C/VM2)",
+        "description": "Fire safety design for a non-SH building. Confirm the risk group and ground against C/AS2 or a C/VM2 alternative solution.",
+        "category": "specialist",
+        "trigger": "Non-residential buildings are not Risk Group SH and cannot use C/AS1.",
+        "specialist": "Fire engineer",
+        "referenceClause": "NZBC Clauses C1-C6"
+      },
+      {
+        "id": "specified_systems_compliance_schedule",
+        "title": "Specified Systems List & Draft Compliance Schedule",
+        "description": "Schedule of specified systems with performance standards and IM&R procedures for the BWOF regime.",
+        "category": "project",
+        "trigger": "Buildings with specified systems require a compliance schedule.",
+        "specialist": null,
+        "referenceClause": "Building Act 2004 s100"
+      },
+      {
+        "id": "accessible_route_assessment_d1",
+        "title": "Accessibility Report (D1 / NZS 4121)",
+        "description": "Accessible route and accessible facilities provision for public-use buildings.",
+        "category": "project",
+        "trigger": "Buildings to which the public has access must be accessible.",
+        "specialist": "Architectural designer",
+        "referenceClause": "NZBC Clause D1"
+      }
     ]
   },
   "byProjectDetails": {

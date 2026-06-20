@@ -15,7 +15,12 @@ export type ProjectType =
   | "commercial_office"
   | "retail"
   | "industrial"
-  | "mixed_use";
+  | "mixed_use"
+  | "accommodation"
+  | "healthcare"
+  | "education"
+  | "carpark"
+  | "commercial_other";
 
 export type RiskGroup = "SH" | "SM" | "SI" | "CA" | "WB" | "WF" | "VP";
 export type ImportanceLevel = "IL1" | "IL2" | "IL3" | "IL4";
