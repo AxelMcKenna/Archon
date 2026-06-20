@@ -43,7 +43,7 @@ def extract_via_vision(
     prompt, prompt_version = load_prompt(ACTIVE_PROMPT)
 
     if media_type == "application/pdf":
-        # Page count is hard-capped at the upload boundary (MAX_RFI_PAGES),
+        # Page count is bounded at the upload boundary (settings.rfi_max_pages),
         # so render every page here without truncating.
         rendered, _, _ = render_pages(file_bytes)
         image_pngs = [img.png for img in rendered]
