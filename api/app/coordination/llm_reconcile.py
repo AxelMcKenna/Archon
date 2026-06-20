@@ -108,12 +108,15 @@ def reconcile_documents_llm(
     specs: list[tuple[dict[str, Any], dict[str, Any]]],
     drawings: list[tuple[dict[str, Any], dict[str, Any]]],
     settings: Any,
+    project_context: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     """One text tool call reconciling the project's specs against its drawings.
 
     ``specs``/``drawings`` are ``[(row, extraction_block)]`` — the same rows and
-    extraction blocks Tier 1 builds claims from. Returns coordination flags
-    (``tier='llm'``) or ``[]`` on no findings / any failure."""
+    extraction blocks Tier 1 builds claims from. ``project_context`` carries the
+    design parameters (project type, floor area, risk group, etc.) so the model
+    can judge a product's scope of use against the building. Returns coordination
+    flags (``tier='llm'``) or ``[]`` on no findings / any failure."""
     if not specs or not drawings:
         return []
 
@@ -123,6 +126,7 @@ def reconcile_documents_llm(
     template, _version = _load_prompt(ACTIVE_PROMPT)
     prompt = _fill(
         template,
+        project_context=json.dumps(project_context or {}, indent=2)[:8000],
         spec_blocks=json.dumps(_blocks(specs), indent=2)[:60000],
         drawing_blocks=json.dumps(_blocks(drawings), indent=2)[:60000],
     )

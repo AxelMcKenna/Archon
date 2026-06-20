@@ -91,6 +91,23 @@ class TestReconcile:
             specs=_specs(), drawings=_drawings(), settings=_SETTINGS
         ) == []
 
+    def test_project_context_threads_into_prompt(self, monkeypatch) -> None:
+        captured: dict = {}
+
+        def _cap(**kw):
+            captured.update(kw)
+            return SimpleNamespace(payload={"discrepancies": []})
+
+        monkeypatch.setattr(llm_reconcile, "call_gemini_tool", _cap)
+        reconcile_documents_llm(
+            specs=_specs(),
+            drawings=_drawings(),
+            settings=_SETTINGS,
+            project_context={"project_type": "commercial_office", "estimated_floor_area_m2": 1200},
+        )
+        assert "commercial_office" in captured["prompt"]
+        assert "1200" in captured["prompt"]
+
     def test_openrouter_branch(self, monkeypatch) -> None:
         called = {}
 

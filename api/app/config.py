@@ -91,13 +91,14 @@ class Settings(BaseSettings):
     # validated against real commercial multi-discipline drawing sets.
     plan_coordination_enabled: bool = False
 
-    # Specification / product-document understanding. The deterministic spec
-    # flagger (product-assurance, placeholder language, specified-system,
-    # superseded-standard rules) always runs. spec_coordination_enabled gates the
-    # deferred LLM pass that reconciles the spec against drawing schedules
-    # (a material/system on the spec absent from the drawings, and vice versa);
-    # off until validated against real commercial spec + drawing sets.
-    spec_coordination_enabled: bool = False
+    # Specification / product-document understanding. The deterministic spec +
+    # coordination flaggers always run (free, per-upload). spec_coordination_
+    # enabled gates the LLM Tier-2 pass — semantic spec/material<->drawing
+    # reconciliation, including product scope-of-use vs the design. Tier 2 runs
+    # ONLY on an explicit deep cross-check (never on the per-upload auto-trigger),
+    # so enabling this does not add per-upload LLM cost. Set
+    # SPEC_COORDINATION_ENABLED=false to hide the deep cross-check entirely.
+    spec_coordination_enabled: bool = True
 
     # OCR fallback (RapidOCR/PP-OCRv4) for flags whose verbatim_quote isn't
     # in the PDF text layer — typical when CAD vectorises drawing labels.

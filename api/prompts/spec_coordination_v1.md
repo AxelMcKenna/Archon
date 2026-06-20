@@ -1,5 +1,5 @@
 ---
-version: "1.0.0"
+version: "1.1.0"
 name: spec_coordination
 ---
 
@@ -37,6 +37,25 @@ Examples of real coordination RFIs:
 - a standard or product cited at a different edition / specification across the
   two sides.
 
+### Material / product data sheets — scope of use
+
+A material/product document (BRANZ appraisal, CodeMark certificate, datasheet)
+carries a **scope / conditions of use** — the limits the product is appraised
+for (maximum building height or number of storeys, wind zone, exposure zone,
+substrate, fire rating). Compare that scope against the design as described by
+the PROJECT CONTEXT and the drawings:
+
+- if the building clearly **exceeds** an appraised limit (e.g. the datasheet
+  says "maximum height 7m / up to 2 storeys / not in sea-spray / up to High wind
+  zone" but the project is taller, has more storeys, is coastal, or is a higher
+  wind zone), report it as a must-resolve product-assurance discrepancy;
+- cite the scope wording from the material document and the conflicting figure
+  from the project context or a drawing.
+
+**Do not guess.** If the relevant design parameter (height, storeys, wind /
+exposure zone) is not determinable from the inputs, do NOT report a scope
+discrepancy — silence is correct when you can't ground both sides.
+
 ## Rules
 
 - Only report a genuine **cross-document** issue: each discrepancy MUST cite one
@@ -52,7 +71,13 @@ Examples of real coordination RFIs:
 
 ## Inputs
 
-SPECIFICATION documents:
+PROJECT CONTEXT (the design parameters known for this building):
+```json
+{{project_context}}
+```
+
+SPECIFICATION and PRODUCT documents (specifications + material/product data
+sheets — the product side):
 ```json
 {{spec_blocks}}
 ```

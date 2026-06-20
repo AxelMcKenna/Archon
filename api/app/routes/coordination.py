@@ -74,12 +74,9 @@ async def deep_check(
     if not get_settings().spec_coordination_enabled:
         raise HTTPException(409, "deep cross-check is not enabled")
     _assert_project(db, project_id)
-    # Tier 2 plugs into run_project_coordination via the settings gate; today the
-    # gate is off, so this path is reserved. Running the same engine keeps the
-    # behaviour correct (it will include Tier 2 once implemented).
     try:
         result = await asyncio.to_thread(
-            run_project_coordination, db, str(project_id)
+            run_project_coordination, db, str(project_id), run_tier2=True
         )
     except Exception as e:
         log.exception("coordination deep-check failed (project_id=%s)", project_id)

@@ -1,12 +1,14 @@
 """Project coordination engine: gather → reconcile → persist.
 
 ``run_project_coordination`` is invoked after any document is analysed (cheap,
-deterministic) and on demand from the coordination route. It reads each
-document's already-persisted extraction, builds ``DocumentClaims``, runs the
-Tier-1 rules, and replaces the project's ``project_coordination_flags``.
+deterministic Tier 1) and on demand from the coordination route (which may also
+request the gated Tier-2 LLM pass). It reads each document's already-persisted
+extraction, builds ``DocumentClaims``, runs the Tier-1 rules, and replaces the
+project's ``project_coordination_flags``.
 
-Gathering claims is split out (``gather_claims``) so it can be unit-tested /
-monkeypatched without a live DB.
+Gathering documents is split out (``gather_documents``) and the rules / claims
+are pure functions, so the reconciliation logic is unit-tested directly without
+a live DB.
 """
 
 from __future__ import annotations
@@ -120,8 +122,15 @@ def _fingerprint(*groups: list[Document]) -> str:
     return "|".join(sorted(parts))
 
 
-def run_project_coordination(db: Client, project_id: str) -> CoordinationResult:
-    """Reconcile the project's document set and persist coordination flags."""
+def run_project_coordination(
+    db: Client, project_id: str, *, run_tier2: bool = False
+) -> CoordinationResult:
+    """Reconcile the project's document set and persist coordination flags.
+
+    Tier 1 (deterministic) always runs. Tier 2 (LLM) runs only when
+    ``run_tier2`` is set AND the feature gate is on — so the per-upload
+    auto-trigger stays free and the LLM cost is paid only on an explicit
+    deep cross-check."""
     specs, materials, drawings = gather_documents(db, project_id)
     claims = (
         [claims_from_spec(r) for r, _ in specs]
@@ -149,10 +158,14 @@ def run_project_coordination(db: Client, project_id: str) -> CoordinationResult:
     # default; deduped against the Tier-1 flags it would otherwise restate.
     settings = get_settings()
     product_docs = specs + materials
-    if settings.spec_coordination_enabled and product_docs and drawings:
+    if run_tier2 and settings.spec_coordination_enabled and product_docs and drawings:
+        ctx = _project_context(db, project_id)
         seen = {llm_flag_signature(f) for f in flags}
         for lf in reconcile_documents_llm(
-            specs=product_docs, drawings=drawings, settings=settings
+            specs=product_docs,
+            drawings=drawings,
+            settings=settings,
+            project_context=ctx,
         ):
             sig = llm_flag_signature(lf)
             if sig not in seen:
@@ -181,6 +194,39 @@ def run_project_coordination_safe(db: Client, project_id: str) -> None:
         run_project_coordination(db, project_id)
     except Exception as exc:  # noqa: BLE001 — coordination must never break an upload
         log.warning("coordination: run failed for project %s: %s", project_id, exc)
+
+
+def _project_context(db: Client, project_id: str) -> dict[str, Any]:
+    """The design parameters Tier 2 needs to judge a product's scope of use.
+
+    Fail-open to ``{}`` — the prompt is told not to guess when a parameter is
+    missing, so partial context simply narrows what the scope check can catch."""
+    cols = (
+        "project_type, description, bca, risk_group, importance_level, "
+        "estimated_floor_area_m2, estimated_construction_value_nzd"
+    )
+    try:
+        row = (
+            db.table("projects")
+            .select(cols)
+            .eq("id", project_id)
+            .maybe_single()
+            .execute()
+            .data
+        )
+    except Exception:  # noqa: BLE001 — older schemas may lack a column
+        try:
+            row = (
+                db.table("projects")
+                .select("project_type, description, bca")
+                .eq("id", project_id)
+                .maybe_single()
+                .execute()
+                .data
+            )
+        except Exception:  # noqa: BLE001
+            return {}
+    return {k: v for k, v in (row or {}).items() if v not in (None, "")}
 
 
 def _record_run(db: Client, project_id: str, fingerprint: str, flags_count: int) -> None:

@@ -67,6 +67,7 @@ export function CoordinationPanel({
   const router = useRouter();
   const toast = useToast();
   const [busy, setBusy] = useState(false);
+  const [deepBusy, setDeepBusy] = useState(false);
 
   // Coordination only means something with at least two documents to compare.
   if (documentCount < 2) return null;
@@ -89,6 +90,23 @@ export function CoordinationPanel({
     }
   }
 
+  // The AI pass — semantic spec/material<->drawing reconciliation incl. product
+  // scope-of-use vs the design. Explicit + slower; never runs on upload.
+  async function deepCheck() {
+    setDeepBusy(true);
+    try {
+      await apiFetch(`/coordination/${projectId}/deep-check`, { method: "POST" });
+      toast.success("AI cross-check complete.");
+      router.refresh();
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "AI cross-check failed.",
+      );
+    } finally {
+      setDeepBusy(false);
+    }
+  }
+
   return (
     <section className="rounded-sm bg-surface-raised shadow-depth p-8 space-y-4">
       <div className="flex items-baseline justify-between flex-wrap gap-2">
@@ -100,6 +118,15 @@ export function CoordinationPanel({
             {documentCount} documents
             {run ? ` · checked ${timeAgo(run.ran_at)}` : ""}
           </span>
+          <button
+            type="button"
+            onClick={deepCheck}
+            disabled={deepBusy}
+            title="AI semantic cross-check, including product scope of use vs the design. Slower; uses AI."
+            className="underline text-sky-700 disabled:opacity-50 cursor-pointer"
+          >
+            {deepBusy ? "AI cross-checking…" : "Deep cross-check (AI)"}
+          </button>
           <button
             type="button"
             onClick={recheck}
