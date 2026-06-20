@@ -91,6 +91,14 @@ class Settings(BaseSettings):
     # validated against real commercial multi-discipline drawing sets.
     plan_coordination_enabled: bool = False
 
+    # Specification / product-document understanding. The deterministic spec
+    # flagger (product-assurance, placeholder language, specified-system,
+    # superseded-standard rules) always runs. spec_coordination_enabled gates the
+    # deferred LLM pass that reconciles the spec against drawing schedules
+    # (a material/system on the spec absent from the drawings, and vice versa);
+    # off until validated against real commercial spec + drawing sets.
+    spec_coordination_enabled: bool = False
+
     # OCR fallback (RapidOCR/PP-OCRv4) for flags whose verbatim_quote isn't
     # in the PDF text layer — typical when CAD vectorises drawing labels.
     # Disable to skip the refinement step (e.g. local dev without OCR

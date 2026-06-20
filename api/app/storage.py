@@ -9,6 +9,7 @@ ATTACH_BUCKET = "attachments"
 EXPORTS_BUCKET = "exports"
 PLANS_BUCKET = "plans"
 CAD_BUCKET = "cad"
+SPECS_BUCKET = "specs"
 
 
 def upload_rfi_original(
@@ -94,6 +95,24 @@ def upload_cad(
 ) -> str:
     path = f"{project_id}/{cad_id}/{filename}"
     client.storage.from_(CAD_BUCKET).upload(
+        path,
+        data,
+        {"content-type": content_type, "upsert": "true"},
+    )
+    return path
+
+
+def upload_spec(
+    client: Client,
+    *,
+    project_id: str,
+    spec_id: str,
+    filename: str,
+    content_type: str,
+    data: bytes,
+) -> str:
+    path = f"{project_id}/{spec_id}/{filename}"
+    client.storage.from_(SPECS_BUCKET).upload(
         path,
         data,
         {"content-type": content_type, "upsert": "true"},

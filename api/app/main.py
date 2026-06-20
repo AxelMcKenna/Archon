@@ -27,6 +27,7 @@ from app.routes import health as health_routes
 from app.routes import letters as letters_routes
 from app.routes import plans as plans_routes
 from app.routes import risk as risk_routes
+from app.routes import specs as specs_routes
 
 log = logging.getLogger("app")
 
@@ -107,6 +108,7 @@ app.include_router(attachments_routes.router, prefix="/attachments", tags=["atta
 app.include_router(export_routes.router, prefix="/export", tags=["export"])
 app.include_router(risk_routes.router, prefix="/risk", tags=["risk"])
 app.include_router(plans_routes.router, prefix="/plans", tags=["plans"])
+app.include_router(specs_routes.router, prefix="/specs", tags=["specs"])
 app.include_router(cad_routes.router, prefix="/cad", tags=["cad"])
 app.include_router(
     address_checklist_routes.router, prefix="/address-to-checklist", tags=["address-to-checklist"]
