@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { taxonomy } from "@arro/shared";
-import { ForecastingClient } from "./forecasting-client";
 import { buildProjectSettingsValues } from "@/lib/project-details";
 import type { ProjectSettingsValues } from "@/lib/project-details";
 import { ProjectOwnerDetailsSettings } from "@/components/project-owner-details-settings";
@@ -70,7 +69,6 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
     { count: drawingCount },
     { count: cadCount },
     { count: letterCount },
-    { data: assessmentRow },
     { data: settingsSnapshotRows },
     { data: richAttachments, error: richAttachmentsError },
   ] = await Promise.all([
@@ -88,11 +86,6 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
       .select("*", { count: "exact", head: true })
       .eq("project_id", id),
     supabase
-      .from("consent_assessments")
-      .select("forecast_context")
-      .eq("project_id", id)
-      .maybeSingle(),
-    supabase
       .from("audit_log")
       .select("metadata")
       .eq("project_id", id)
@@ -106,9 +99,6 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
       .order("uploaded_at", { ascending: false }),
   ]);
   if (!project) notFound();
-  const forecastPayload =
-    (assessmentRow as { forecast_context?: Record<string, unknown> | null } | null)
-      ?.forecast_context ?? null;
   const settingsSnapshot = normalizeSettingsSnapshot(settingsSnapshotRows?.[0]?.metadata);
   const initialSettings = buildProjectSettingsValues(project);
   const mergedSettings: ProjectSettingsValues = settingsSnapshot
@@ -194,16 +184,6 @@ export default async function ProjectOverview({ params }: { params: Promise<{ id
             {(letterCount ?? 0) > 0 ? "open the Council tab to respond" : "no RFIs received yet"}
           </p>
         </Link>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-[11px] uppercase tracking-[0.22em] text-ink-500">
-          Consent forecast
-        </h2>
-        <ForecastingClient
-          projectId={project.id}
-          initialPayload={forecastPayload}
-        />
       </section>
 
       <section className="space-y-4">
