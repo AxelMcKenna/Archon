@@ -62,8 +62,12 @@ export function BatchUploadPanel({ projectId }: { projectId: string }) {
 
   function addFiles(kind: Kind, files: FileList | null) {
     if (!files?.length) return;
+    // Snapshot the File objects now: the onChange clears the input's value
+    // immediately after this call, which empties the live FileList before a
+    // lazy state updater would read it.
+    const picked = Array.from(files);
     setLastRunCount(0);
-    setStaged((s) => ({ ...s, [kind]: [...s[kind], ...Array.from(files)] }));
+    setStaged((s) => ({ ...s, [kind]: [...s[kind], ...picked] }));
   }
   function removeFile(kind: Kind, idx: number) {
     setStaged((s) => ({ ...s, [kind]: s[kind].filter((_, i) => i !== idx) }));
