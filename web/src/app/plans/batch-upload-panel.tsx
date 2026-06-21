@@ -54,11 +54,15 @@ export function BatchUploadPanel({ projectId }: { projectId: string }) {
   const [steps, setSteps] = useState<IngestStep[]>([]);
   const [logDone, setLogDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // How many files the most recent batch processed - drives the "add another
+  // batch" confirmation so users know they can keep stacking drawings/specs/materials.
+  const [lastRunCount, setLastRunCount] = useState(0);
 
   const total = staged.drawing.length + staged.spec.length + staged.material.length;
 
   function addFiles(kind: Kind, files: FileList | null) {
     if (!files?.length) return;
+    setLastRunCount(0);
     setStaged((s) => ({ ...s, [kind]: [...s[kind], ...Array.from(files)] }));
   }
   function removeFile(kind: Kind, idx: number) {
@@ -168,6 +172,7 @@ export function BatchUploadPanel({ projectId }: { projectId: string }) {
     setError(null);
     setSteps([]);
     setLogDone(false);
+    setLastRunCount(0);
     const queue: { kind: Kind; file: File }[] = [
       ...staged.drawing.map((file) => ({ kind: "drawing" as const, file })),
       ...staged.spec.map((file) => ({ kind: "spec" as const, file })),
@@ -178,10 +183,14 @@ export function BatchUploadPanel({ projectId }: { projectId: string }) {
         setProgress({ done: i, total: queue.length, current: queue[i].file.name });
         await processOne(queue[i].kind, queue[i].file);
       }
-      setProgress({ done: queue.length, total: queue.length, current: "" });
+      setProgress(null);
+      setSteps([]);
+      setLogDone(false);
       setStaged({ drawing: [], spec: [], material: [] });
-      // Land on a clean project view so the freshly-built summary is front and centre.
-      router.push(`/projects/${projectId}/drawings`);
+      setLastRunCount(queue.length);
+      // Stay put and refresh the server data in place so the freshly-built
+      // summary and documents appear below, while the panel stays ready for the
+      // next batch (e.g. drawings now, spec/material sheets in a later pass).
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Analysis failed");
@@ -197,7 +206,8 @@ export function BatchUploadPanel({ projectId }: { projectId: string }) {
           Upload &amp; analyse
         </h2>
         <p className="text-xs text-ink-500">
-          Drop files into each box, then run them together.
+          Drop files into each box, then run them together. Add more batches any
+          time - results stack onto the project.
         </p>
       </div>
 
@@ -267,10 +277,18 @@ export function BatchUploadPanel({ projectId }: { projectId: string }) {
             {progress.current ? ` · analysing ${progress.current}` : ""}
           </span>
         )}
-        {!total && !busy && (
+        {!total && !busy && lastRunCount === 0 && (
           <span className="text-sm text-ink-400">No files staged yet.</span>
         )}
       </div>
+
+      {!busy && lastRunCount > 0 && total === 0 && (
+        <p className="text-sm text-emerald-700 bg-emerald-50 rounded-sm px-3 py-2">
+          Analysed {lastRunCount} file{lastRunCount === 1 ? "" : "s"}. The summary
+          and documents below are updated. Stage more files in any box above to run
+          another batch.
+        </p>
+      )}
 
       {busy &&
         (steps.length > 0 ? (
