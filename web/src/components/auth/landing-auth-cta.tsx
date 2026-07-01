@@ -1,12 +1,10 @@
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
 import { getSupabaseServer } from "@/lib/supabase/server";
 import { ProfileMenu } from "@/components/auth/profile-menu";
 
 // Landing-page header auth area. Signed-out visitors get a "Sign in" link;
-// signed-in visitors get a prominent "Launch the platform" button into the app
-// (plus their profile menu for settings / sign out). Distinct from UserMenu so
-// the in-app nav doesn't get a redundant launch button.
+// signed-in visitors get their profile menu for settings / sign out. The
+// "Launch the platform" CTA itself lives in the hero copy, not the header.
 export async function LandingAuthCta() {
   const supabase = await getSupabaseServer();
   const {
@@ -32,16 +30,5 @@ export async function LandingAuthCta() {
 
   const displayName = profile?.username || user.email || "Account";
 
-  return (
-    <div className="flex items-center gap-5">
-      <Link
-        href="/projects"
-        className="inline-flex items-center gap-2 rounded-md bg-ink-900 px-4 py-2.5 text-[13px] font-medium text-white shadow-depth transition-shadow hover:shadow-depth-hover"
-      >
-        Launch the platform
-        <ArrowUpRight className="h-3.5 w-3.5" />
-      </Link>
-      <ProfileMenu displayName={displayName} />
-    </div>
-  );
+  return <ProfileMenu displayName={displayName} />;
 }

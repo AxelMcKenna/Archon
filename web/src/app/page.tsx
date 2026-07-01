@@ -6,6 +6,7 @@ import { Reveal } from "@/components/reveal";
 import { SiteFooter } from "@/components/site-footer";
 import { WaitlistForm } from "@/components/waitlist-form";
 import { LandingAuthCta } from "@/components/auth/landing-auth-cta";
+import { getSupabaseServer } from "@/lib/supabase/server";
 
 /* One status-pill language shared across every demo container — soft-tinted
    fill, a leading tone dot, and consistent Inter / uppercase / tracking so the
@@ -33,6 +34,11 @@ function StatusPill({ tone, children }: { tone: string; children: ReactNode }) {
 }
 
 export default async function Home() {
+  const supabase = await getSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-surface-canvas text-ink-900">
       {/* Page-wide atmosphere — soft accent glows + faint grain over the flat canvas */}
@@ -75,9 +81,20 @@ export default async function Home() {
               clause, and condition on your project, and watches every RFI,
               inspection, and blocker so your crew can keep building.
             </p>
-            <div className="mt-7 flex items-center gap-2 text-[11px] text-ink-500">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent ai-glow" />
-              Indexing 1,284 consent conditions in real time
+            <div className="mt-7">
+              {user && (
+                <Link
+                  href="/projects"
+                  className="mb-5 inline-flex items-center gap-2 rounded-md bg-ink-900 px-4 py-2.5 text-[13px] font-medium text-white shadow-depth transition-shadow hover:shadow-depth-hover"
+                >
+                  Launch the platform
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </Link>
+              )}
+              <div className="flex items-center gap-2 text-[11px] text-ink-500">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent ai-glow" />
+                Indexing 1,284 consent conditions in real time
+              </div>
             </div>
           </Reveal>
 
