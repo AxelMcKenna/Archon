@@ -5,9 +5,11 @@ type CookieSet = { name: string; value: string; options?: CookieOptions };
 
 const PUBLIC_PREFIXES = [
   "/login",
+  "/forgot-password",
   "/auth",
   "/api/waitlist",
   "/api/admin/invite",
+  "/api/auth/forgot-password",
   "/_next",
   "/favicon",
   "/privacy",

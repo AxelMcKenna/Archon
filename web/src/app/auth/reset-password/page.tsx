@@ -1,61 +1,61 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Route } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Loader2 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowUpRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
 
-const LINK_ERRORS: Record<string, string> = {
-  invite_invalid: "That invite link isn't valid. Ask for a new one.",
-  invite_expired: "That invite link has expired or was already used.",
-  reset_expired: "That password reset link has expired or was already used.",
-};
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={null}>
-      <LoginForm />
-    </Suspense>
-  );
-}
-
-function LoginForm() {
+export default function ResetPasswordPage() {
   const router = useRouter();
-  const params = useSearchParams();
-  const next = params.get("next") || "/";
-
-  const [email, setEmail] = useState("");
+  const [checking, setChecking] = useState(true);
+  const [email, setEmail] = useState<string | null>(null);
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // The /auth/confirm route should have established a session before sending us
+  // here. If there isn't one, the link was used already or opened directly -
+  // bounce to login rather than show a form that can't submit.
   useEffect(() => {
-    const code = params.get("error");
-    if (code && LINK_ERRORS[code]) setError(LINK_ERRORS[code]);
-  }, [params]);
+    const supabase = getSupabaseBrowser();
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) {
+        router.replace("/login?error=reset_expired" as Route);
+        return;
+      }
+      setEmail(data.user.email ?? null);
+      setChecking(false);
+    });
+  }, [router]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setBusy(true);
     setError(null);
+    if (password.length < 8) {
+      setError("Use at least 8 characters.");
+      return;
+    }
+    if (password !== confirm) {
+      setError("Passwords don't match.");
+      return;
+    }
+    setBusy(true);
     const supabase = getSupabaseBrowser();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.updateUser({ password });
+    setBusy(false);
     if (error) {
-      setBusy(false);
       setError(error.message);
       return;
     }
-    // Keep the button in its loading state through the navigation + refresh —
-    // resetting here would flash an idle "Sign in" while the next page loads.
-    router.replace(next as Route);
+    router.replace("/projects" as Route);
     router.refresh();
   }
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-surface-canvas px-4 text-ink-900">
-      {/* Atmosphere — soft accent glow + faint grain, matching the landing page */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="glow-drift absolute left-1/2 top-1/2 h-[560px] w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/[0.08] blur-[130px]" />
       </div>
@@ -75,44 +75,45 @@ function LoginForm() {
             </Link>
             <div className="mt-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-ink-500">
               <span className="h-px w-6 bg-accent/50" />
-              Welcome back
+              Reset your password
               <span className="h-px w-6 bg-accent/50" />
             </div>
+            {email && (
+              <p className="mt-3 text-[12.5px] text-ink-500">
+                Choose a new password for <span className="text-ink-800">{email}</span>
+              </p>
+            )}
           </div>
 
           <label className="block">
             <span className="block text-[11px] uppercase tracking-[0.18em] text-ink-500">
-              Email
-            </span>
-            <input
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@company.com"
-              className="mt-2 block w-full rounded-md border border-ink-200 bg-surface-canvas px-3 py-2.5 text-[14px] text-ink-900 placeholder:text-ink-400 transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-            />
-          </label>
-
-          <label className="block">
-            <span className="flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-ink-500">
-              Password
-              <Link
-                href="/forgot-password"
-                className="normal-case tracking-normal text-ink-500 underline-offset-2 hover:text-ink-700 hover:underline"
-              >
-                Forgot password?
-              </Link>
+              New password
             </span>
             <input
               type="password"
               required
-              autoComplete="current-password"
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 8 characters"
+              disabled={checking}
+              className="mt-2 block w-full rounded-md border border-ink-200 bg-surface-canvas px-3 py-2.5 text-[14px] text-ink-900 placeholder:text-ink-400 transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-50"
+            />
+          </label>
+
+          <label className="block">
+            <span className="block text-[11px] uppercase tracking-[0.18em] text-ink-500">
+              Confirm new password
+            </span>
+            <input
+              type="password"
+              required
+              autoComplete="new-password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
               placeholder="••••••••"
-              className="mt-2 block w-full rounded-md border border-ink-200 bg-surface-canvas px-3 py-2.5 text-[14px] text-ink-900 placeholder:text-ink-400 transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              disabled={checking}
+              className="mt-2 block w-full rounded-md border border-ink-200 bg-surface-canvas px-3 py-2.5 text-[14px] text-ink-900 placeholder:text-ink-400 transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-50"
             />
           </label>
 
@@ -125,12 +126,11 @@ function LoginForm() {
 
           <button
             type="submit"
-            disabled={busy}
+            disabled={busy || checking}
             className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-ink-900 px-4 py-2.5 text-[13px] font-medium text-white shadow-depth transition-shadow hover:shadow-depth-hover disabled:opacity-50"
           >
-            {busy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            {busy ? "Signing in…" : "Sign in"}
-            {!busy && <ArrowUpRight className="h-3.5 w-3.5" />}
+            {busy ? "Updating password…" : checking ? "Verifying link…" : "Update password"}
+            {!busy && !checking && <ArrowUpRight className="h-3.5 w-3.5" />}
           </button>
         </form>
       </div>
