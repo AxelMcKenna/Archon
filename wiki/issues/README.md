@@ -18,7 +18,7 @@ Deterministic-code fixes landed 2026-07-02 (0002, 0003, 0004, 0005, 0008,
 
 | ID | Title | Severity | Area | Status |
 |----|-------|----------|------|--------|
-| [0001](0001-seed-voting-nondeterminism.md) | Temp 0 + no seed → ~40% of flags flicker run-to-run; voting only damps it | Critical | flagger | **Open — eval-gated.** Seed + `top_p` pinned, voting 3/2, temperature knob ready; option B needs the determinism/accuracy A/B on a keyed box. Note: exact re-uploads are already deterministic via the service-level content-hash cache |
+| [0001](0001-seed-voting-nondeterminism.md) | Temp 0 + no seed → ~40% of flags flicker run-to-run; voting only damps it | Critical | flagger | **Closed as mitigated 2026-07-02** — option B adopted (temp 0.5 + per-pass seed, voting 3/2): Jaccard 0.584 → 0.700 at identical recall. Residual flicker is provider-side (best-effort seeds); exact re-uploads fully deterministic via the content-hash cache |
 | [0002](0002-provider-fallback-model-swap.md) | Cross-provider fallback silently swaps the model | Critical | infra | **Fixed 2026-07-02** — same-tier fallback + provenance persisted (`llm_fallback_events`) |
 | [0003](0003-retrieval-rank-ties.md) | Hybrid retrieval rank ties have no tiebreaker | High | retrieval | **Fixed 2026-07-02** — migration `20260702000001` |
 | [0004](0004-verifier-truncation-drops.md) | Flag drop can hinge on verifier output truncation | High | flagger | **Fixed 2026-07-02** — verifier chunked (`plan_verifier_flags_per_call`) |
@@ -33,14 +33,15 @@ Deterministic-code fixes landed 2026-07-02 (0002, 0003, 0004, 0005, 0008,
 
 Does the same plan/letter produce a different result on re-run?
 
-1. **0001** — borderline flags flicker — *headline issue; all prep landed, decision is eval-gated*
+1. **0001** — borderline flags flicker — *mitigated (option B adopted: J 0.584 → 0.700, recall flat)*
 2. **0003** — retrieval ties flip verdicts via the clause set — *fixed*
 3. **0002** — fallback swaps the model silently and unrecorded — *fixed*
 4. **0007 / 0008** — caches freeze / serve stale non-deterministic results across workers — *both fixed*
 
-Everything code-fixable has landed (0002–0010). What remains is running the
-eval harness on a keyed box (eden / CI): the option-B temperature decision for
-**0001**, and a confirmation run for **0006**'s tiling change. Exact
-re-uploads of an unchanged file were already deterministic via the
-service-level content-hash cache in `plan_pipeline.py`.
+All ten issues are now fixed or mitigated (validated on the eden box
+2026-07-02; the 0006 tiling change was exercised in the same runs). The
+remaining determinism gap is provider-side: seeds are honoured best-effort,
+so first-run borderline flags still flicker at a reduced rate. Exact
+re-uploads of an unchanged file are fully deterministic via the service-level
+content-hash cache in `plan_pipeline.py`.
 </content>

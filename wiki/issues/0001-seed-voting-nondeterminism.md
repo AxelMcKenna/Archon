@@ -174,6 +174,29 @@ Adopt (set `plan_analyser_temperature: 0.5` in `config.py`) if Jaccard
 improves materially with recall flat; revert the env var and close as
 "voting-only" if not.
 
+## Option-B A/B results (2026-07-02) — ADOPTED
+
+Run on the eden box (throwaway container from `arro-api:latest` + the
+`feat/rfi-engine` code, live env/keys, OpenRouter analyser), K=5 repeats on
+`synthetic-commercial-coordination`:
+
+| config | mean pairwise Jaccard | core flags | accuracy (4-plan run.py) |
+|--------|----------------------|------------|--------------------------|
+| temp 0 (baseline) | 0.584 | 3 | P 0.196 / **R 0.625** / H 0.742 |
+| temp 0.5 + seed (option B) | **0.700** | 3 | P 0.188 / **R 0.625** / H 0.750 |
+
+Both decision-rule conditions met: Jaccard up ~0.12 absolute (~28% less
+flicker), recall identical at 0.625, precision/hallucination inside the known
+run-to-run jitter band (0.181–0.229 across identical configs in earlier
+rounds). **`plan_analyser_temperature` default flipped to 0.5.**
+
+Honest residual: J=0.70 is not J=1.0 — the provider honours `seed` only
+best-effort, so borderline flags still flicker at a reduced rate. Full
+determinism for the *exact same file* comes from the service-level
+content-hash cache (`plan_pipeline.py`), which serves the persisted analysis
+on re-upload. Status: **closed as mitigated** — the remaining gap is
+provider-side and tracked by the caveat in [0002].
+
 ## Validation procedure (for re-runs)
 
 The eval calls the real vision model via `analyse_plan()`, so it can only run

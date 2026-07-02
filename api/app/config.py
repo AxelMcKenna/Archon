@@ -76,9 +76,13 @@ class Settings(BaseSettings):
     # the per-pass seed is inert (greedy decoding has no RNG to pin) and
     # voting only damps uncontrolled provider jitter. >0 makes the passes
     # *purposefully* diverse while the existing per-pass seed keeps each one
-    # reproducible - the design voting always implied. Unvalidated: raising
-    # this needs an eval-harness determinism re-run before it's trusted.
-    plan_analyser_temperature: float = 0.0
+    # reproducible - the design voting always implied. Validated 2026-07-02 on
+    # the eden box (OpenRouter analyser): run-to-run flag-set Jaccard 0.584 ->
+    # 0.700 at identical accuracy (recall 0.625 both configs) - see
+    # wiki/issues/0001. Seeds are best-effort, so this reduces flicker rather
+    # than eliminating it; exact re-uploads are fully deterministic via the
+    # service-level content-hash cache.
+    plan_analyser_temperature: float = 0.5
 
     # Self-consistency voting on the *verifier* — the destructive step that
     # drops flags from the user's view. N verification passes per sheet; a flag
