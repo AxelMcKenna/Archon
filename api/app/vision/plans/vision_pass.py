@@ -38,12 +38,16 @@ def run_single_vision_pass(
     temperature: float = 0.0,
     seed: int | None = None,
     provenance: dict[str, Any] | None = None,
+    provider: str | None = None,
+    model: str | None = None,
 ) -> tuple[dict[str, Any], int, int]:
     """One analyser call. Returns (payload, input_tokens, output_tokens).
 
     ``seed`` is the voting-pass index, so each self-consistency pass is
     independently reproducible once temperature is raised above 0.
     ``provenance`` records which provider/model actually answered.
+    ``provider``/``model`` override the settings-resolved pair — used by the
+    ensemble to route passes to the secondary provider.
     """
     return run_tool_pass(
         settings=settings,
@@ -55,6 +59,8 @@ def run_single_vision_pass(
         temperature=temperature,
         seed=seed,
         provenance=provenance,
+        provider=provider,
+        model=model,
     )
 
 
@@ -262,8 +268,26 @@ def verify_flags(
     if not flags:
         return [], [], "verified", load_prompt(ACTIVE_VERIFICATION_PROMPT)[1]
 
+    settings = get_settings()
     template, version = load_prompt(ACTIVE_VERIFICATION_PROMPT)
     mbie_blocks, mbie_provenance = _retrieve_mbie_context(flags, risk_group=risk_group)
+
+    # A building_code:* flag for which clause retrieval found NOTHING has no
+    # regulatory anchor — annotate it, and demote it to low confidence when
+    # plan_ungrounded_code_demotion is on. Retrieval already ran for the
+    # verifier context, so the signal is free.
+    annotated: list[dict[str, Any]] = []
+    for idx, f in enumerate(flags):
+        if str(f.get("category") or "").startswith("building_code") and not mbie_provenance[idx]:
+            f = {**f, "mbie_grounding": "none"}
+            demote = getattr(settings, "plan_ungrounded_code_demotion", False)
+            if demote and f.get("confidence") != "low":
+                f["confidence_before_demotion"] = f.get("confidence")
+                f["confidence"] = "low"
+                f["demotion_reason"] = "no MBIE clause retrieved for a building_code flag"
+        annotated.append(f)
+    flags = annotated
+
     # flag_id stays the flag's index in the *full* list, so per-chunk verdict
     # maps merge into the same per-flag vote logic untouched.
     entries = [
@@ -281,7 +305,6 @@ def verify_flags(
         for idx, f in enumerate(flags)
     ]
 
-    settings = get_settings()
     captions = [caption_str(img) for img in images]
     image_pngs = [img.png for img in images]
     provider = settings.plan_verifier_provider
@@ -349,6 +372,9 @@ def verify_flags(
                 {
                     **flag,
                     "verification_note": "no verdict from verifier — kept unverified",
+                    # Machine-readable marker: singleton-rescued flags are
+                    # fail-closed and get filtered out on this (analyzer.py).
+                    "kept_unverified": True,
                     "mbie_clauses_considered": prov,
                 }
             )

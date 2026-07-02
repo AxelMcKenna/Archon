@@ -106,23 +106,11 @@ def dedup_cross_view(flags: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return list(seen.values())
 
 
-def vote_flags(
-    runs: list[list[dict[str, Any]]], *, threshold: int
-) -> list[dict[str, Any]]:
-    """Cross-run consensus voting.
-
-    Bucket every flag by ``vote_key`` — primarily by (page, normalised
-    verbatim_quote). The model labels the same observation with different
-    `area` prose and different `category` labels across runs, but the
-    verbatim quote (a string copied off the drawing) is much more stable
-    — so it's the strongest cross-run anchor we have.
-
-    Within a single run, duplicate keys count once (so a hyperactive run
-    can't pad the vote). Keep buckets that appear in >= threshold
-    distinct runs; the surviving representative is the highest-confidence
-    hit, with ties broken by most-common category within the bucket.
-    """
-    threshold = max(1, threshold)
+def _bucket_flags(
+    runs: list[list[dict[str, Any]]],
+) -> dict[tuple[int, str], list[dict[str, Any]]]:
+    """Bucket flags across runs by ``vote_key``; within a single run duplicate
+    keys count once (so a hyperactive run can't pad the vote)."""
     buckets: dict[tuple[int, str], list[dict[str, Any]]] = defaultdict(list)
     for run in runs:
         seen_in_run: set[tuple[int, str]] = set()
@@ -132,22 +120,102 @@ def vote_flags(
                 continue
             seen_in_run.add(key)
             buckets[key].append(f)
+    return buckets
 
+
+def _bucket_best(hits: list[dict[str, Any]]) -> dict[str, Any]:
+    """Representative of a bucket: highest confidence, ties broken by
+    most-common category within the bucket, then by ``_rep_key``."""
+    cat_counts = Counter(f.get("category") for f in hits)
+
+    def _score(f: dict[str, Any]) -> tuple[int, int, int, int, str]:
+        return (
+            _CONFIDENCE_RANK.get(f.get("confidence", "low"), 0),
+            cat_counts[f.get("category")],
+            *_rep_key(f),
+        )
+
+    return max(hits, key=_score)
+
+
+def vote_flags(
+    runs: list[list[dict[str, Any]]],
+    *,
+    threshold: int,
+    low_confidence_extra_vote: bool = False,
+) -> list[dict[str, Any]]:
+    """Cross-run consensus voting.
+
+    Bucket every flag by ``vote_key`` — primarily by (page, normalised
+    verbatim_quote). The model labels the same observation with different
+    `area` prose and different `category` labels across runs, but the
+    verbatim quote (a string copied off the drawing) is much more stable
+    — so it's the strongest cross-run anchor we have.
+
+    Keep buckets that appear in >= threshold distinct runs; the surviving
+    representative is the highest-confidence hit, with ties broken by
+    most-common category within the bucket.
+
+    ``low_confidence_extra_vote`` (plan_low_confidence_extra_vote): a bucket
+    whose *best* hit is only low-confidence needs one extra vote to survive
+    (clamped to the number of runs, so 3/3 at n=3) — the model's own
+    uncertainty signal gates its noisiest output.
+    """
+    threshold = max(1, threshold)
+    n_runs = max(1, len(runs))
     out: list[dict[str, Any]] = []
-    for hits in buckets.values():
-        if len(hits) < threshold:
+    for hits in _bucket_flags(runs).values():
+        best = _bucket_best(hits)
+        need = threshold
+        if (
+            low_confidence_extra_vote
+            and _CONFIDENCE_RANK.get(best.get("confidence", "low"), 0)
+            <= _CONFIDENCE_RANK["low"]
+        ):
+            need = min(n_runs, threshold + 1)
+        if len(hits) < need:
             continue
-        cat_counts = Counter(f.get("category") for f in hits)
-
-        def _score(
-            f: dict[str, Any], _cat_counts: Counter = cat_counts
-        ) -> tuple[int, int, int, int, str]:
-            return (
-                _CONFIDENCE_RANK.get(f.get("confidence", "low"), 0),
-                _cat_counts[f.get("category")],
-                *_rep_key(f),
-            )
-
-        best = max(hits, key=_score)
         out.append(best)
     return out
+
+
+def rescue_singletons(
+    runs: list[list[dict[str, Any]]], *, threshold: int
+) -> list[dict[str, Any]]:
+    """High-confidence buckets that MISSED the voting threshold
+    (plan_singleton_rescue).
+
+    Voting discards anything under the threshold, which trades recall for
+    precision. This returns the representatives of sub-threshold buckets whose
+    best hit is high-confidence, marked ``singleton_rescue: True`` — the
+    analyser sends them through verification and keeps them only on a
+    positive verdict (fail-closed; see ``_run_sheets_parallel``).
+    """
+    threshold = max(1, threshold)
+    out: list[dict[str, Any]] = []
+    for hits in _bucket_flags(runs).values():
+        if len(hits) >= threshold:
+            continue
+        best = _bucket_best(hits)
+        if _CONFIDENCE_RANK.get(best.get("confidence", "low"), 0) < _CONFIDENCE_RANK["high"]:
+            continue
+        out.append({**best, "singleton_rescue": True})
+    return out
+
+
+def dedup_by_vote_key(flags: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Collapse flags sharing a ``vote_key`` (page + normalised quote),
+    keeping the highest by ``_rep_key``.
+
+    Used to union the per-provider voting survivors under
+    ``plan_analyser_ensemble``: the same observation surfaced by both model
+    families should reach the verifier once, and ``flag_key``-based dedup
+    misses it when the two providers phrase `area` differently.
+    """
+    seen: dict[tuple[int, str], dict[str, Any]] = {}
+    for f in flags:
+        key = vote_key(f)
+        existing = seen.get(key)
+        if existing is None or _rep_key(f) > _rep_key(existing):
+            seen[key] = f
+    return list(seen.values())

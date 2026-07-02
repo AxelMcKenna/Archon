@@ -32,7 +32,7 @@ from app.extractors.metrics import Metrics
 from app.extractors.plan_text import PlanTextExtraction, extract_plan_text
 from app.plans.bbox import attach_page_bbox
 from app.plans.bbox_refiner import refine_flag_bboxes
-from app.plans.ocr_refiner import refine_via_ocr
+from app.plans.ocr_refiner import ocr_available, refine_via_ocr
 from app.plans.prompt import taxonomy_block
 from app.plans.reconcile import (
     ACTIVE_COORDINATION_PROMPT,
@@ -41,8 +41,16 @@ from app.plans.reconcile import (
 )
 from app.plans.registration import build_comparison_sets, build_coordination_sets
 from app.plans.views import ViewRecord, build_view_record, seed_hint
-from app.plans.vote import dedup_cross_view, dedup_flags, vote_flags, vote_key
+from app.plans.vote import (
+    dedup_by_vote_key,
+    dedup_cross_view,
+    dedup_flags,
+    rescue_singletons,
+    vote_flags,
+    vote_key,
+)
 from app.taxonomy import get_taxonomy
+from app.vision.core.invoker import secondary_analyser_provider_model
 from app.vision.core.prompts import fill, load_prompt
 from app.vision.core.renderer import RenderedImage, RenderedSheet, caption_str, iter_sheets
 from app.vision.plans.schema import ACTIVE_ANALYSIS_PROMPT
@@ -403,6 +411,15 @@ def analyse_plan(
     )
     emit("Snapped flags to drawing geometry", sid=snap_sid)
 
+    # --- Phase F2: quote-location annotation ------------------------------
+    # After both locators have had their shot, bbox_source is the receipt for
+    # whether the verbatim_quote actually exists on the drawing. A quote
+    # neither the text layer nor OCR can find is the classic hallucination
+    # signature — annotate it, and demote when configured.
+    merged_flags = _annotate_quote_location(
+        merged_flags, media_type=media_type, settings=settings
+    )
+
     metrics.processing_ms = int((time.monotonic() - t0) * 1000)
 
     image_count = sum(len(s.images) for s in sheets)
@@ -439,6 +456,54 @@ def analyse_plan(
     }
 
     return final_payload, prompt_version, metrics, extras
+
+
+# Matches ocr_refiner._MIN_QUOTE_LEN — quotes shorter than this were never
+# eligible for locating, so their absence is not a signal.
+_QUOTE_MIN_LEN = 5
+
+
+def _annotate_quote_location(
+    flags: list[dict[str, Any]],
+    *,
+    media_type: str,
+    settings: Any,
+) -> list[dict[str, Any]]:
+    """Mark whether each flag's ``verbatim_quote`` was located on the drawing.
+
+    ``bbox_source`` of ``text_layer``/``ocr`` means one of the locators found
+    the quoted text; ``model``/``tile_fallback`` means neither could. Sets
+    ``quote_located`` on every eligible vision flag; when
+    ``plan_unlocated_quote_demotion`` is on, an unlocated quote also demotes
+    the flag to low confidence (audit trail in ``confidence_before_demotion``).
+
+    Skips entirely when the upload isn't a PDF or OCR isn't actually
+    available — if OCR never had a chance to look, "not located" is a
+    statement about the environment, not the flag. Rule flags (deterministic,
+    ``_rule`` marker) and sub-locatable quotes are passed through untouched.
+    """
+    if media_type != "application/pdf" or not flags:
+        return flags
+    if not (settings.plan_ocr_refiner_enabled and ocr_available()):
+        return flags
+    out: list[dict[str, Any]] = []
+    for f in flags:
+        quote = (f.get("verbatim_quote") or "").strip()
+        if f.get("_rule") or len(quote) < _QUOTE_MIN_LEN:
+            out.append(f)
+            continue
+        located = f.get("bbox_source") in ("text_layer", "ocr")
+        f = {**f, "quote_located": located}
+        if (
+            not located
+            and settings.plan_unlocated_quote_demotion
+            and f.get("confidence") != "low"
+        ):
+            f["confidence_before_demotion"] = f.get("confidence")
+            f["confidence"] = "low"
+            f["demotion_reason"] = "verbatim_quote not found in text layer or OCR"
+        out.append(f)
+    return out
 
 
 def _run_sheets_parallel(
@@ -515,7 +580,6 @@ def _run_sheets_parallel(
                 "fallback_events": [],
             }
 
-        run_flag_lists: list[list[dict[str, Any]]] = []
         run_summaries: list[str] = []
         view_payloads: list[dict[str, Any] | None] = []
         # Tokens and fallback events accumulate on per-sheet locals and are
@@ -525,42 +589,92 @@ def _run_sheets_parallel(
         sheet_metrics = Metrics()
         fallback_events: list[dict[str, Any]] = []
 
-        for pass_idx in range(voting_n):
-            provenance: dict[str, Any] = {}
-            try:
-                payload, in_t, out_t = run_single_vision_pass(
-                    settings=settings,
-                    images=image_pngs,
-                    captions=captions,
-                    prompt=sheet_prompt,
-                    temperature=settings.plan_analyser_temperature,
-                    seed=pass_idx,
-                    provenance=provenance,
-                )
-            except Exception as exc:  # noqa: BLE001
+        # Provider plan: (None, None) means "settings default". Under
+        # plan_analyser_ensemble the full set of voting passes runs once per
+        # model family; each family's runs are voted separately below, so one
+        # provider's threshold can't be met by the other's passes.
+        pass_providers: list[tuple[str | None, str | None]] = [(None, None)]
+        if settings.plan_analyser_ensemble:
+            secondary = secondary_analyser_provider_model(settings)
+            if secondary:
+                pass_providers.append(secondary)
+            else:
                 log.warning(
-                    "vision pass failed sheet=%s pass=%s: %s",
-                    sheet.sheet_index,
-                    pass_idx,
-                    exc,
+                    "plan_analyser_ensemble enabled but the secondary "
+                    "provider has no API key configured — single family"
                 )
-                continue
-            if provenance.get("fallback"):
-                fallback_events.append(
-                    {"stage": "analyser", "page": sheet.page, "pass": pass_idx, **provenance}
+
+        runs_by_provider: list[list[list[dict[str, Any]]]] = [
+            [] for _ in pass_providers
+        ]
+        runs_debug_meta: list[tuple[str, list[dict[str, Any]]]] = []
+        for prov_idx, (p_provider, p_model) in enumerate(pass_providers):
+            for pass_idx in range(voting_n):
+                provenance: dict[str, Any] = {}
+                try:
+                    payload, in_t, out_t = run_single_vision_pass(
+                        settings=settings,
+                        images=image_pngs,
+                        captions=captions,
+                        prompt=sheet_prompt,
+                        temperature=settings.plan_analyser_temperature,
+                        seed=pass_idx,
+                        provenance=provenance,
+                        provider=p_provider,
+                        model=p_model,
+                    )
+                except Exception as exc:  # noqa: BLE001
+                    log.warning(
+                        "vision pass failed sheet=%s provider=%s pass=%s: %s",
+                        sheet.sheet_index,
+                        p_provider or "default",
+                        pass_idx,
+                        exc,
+                    )
+                    continue
+                if provenance.get("fallback"):
+                    fallback_events.append(
+                        {"stage": "analyser", "page": sheet.page, "pass": pass_idx, **provenance}
+                    )
+                flags_list = list(payload.get("flags") or [])
+                runs_by_provider[prov_idx].append(flags_list)
+                runs_debug_meta.append(
+                    (provenance.get("provider") or p_provider or "default", flags_list)
                 )
-            run_flag_lists.append(list(payload.get("flags") or []))
-            if payload.get("summary"):
-                run_summaries.append(str(payload["summary"]))
-            if isinstance(payload.get("view"), dict):
-                view_payloads.append(payload["view"])
-            sheet_metrics.input_tokens += in_t
-            sheet_metrics.output_tokens += out_t
+                if payload.get("summary"):
+                    run_summaries.append(str(payload["summary"]))
+                if isinstance(payload.get("view"), dict):
+                    view_payloads.append(payload["view"])
+                sheet_metrics.input_tokens += in_t
+                sheet_metrics.output_tokens += out_t
 
         # Per-sheet voting. vote_key includes page, so within-sheet voting
         # is semantically identical to global voting for these buckets.
-        threshold = max(1, min(voting_threshold, max(1, len(run_flag_lists))))
-        voted = vote_flags(run_flag_lists, threshold=threshold)
+        # Each provider's runs vote independently; the survivors are
+        # unioned by vote_key (the verifier arbitrates the union).
+        voted: list[dict[str, Any]] = []
+        rescued: list[dict[str, Any]] = []
+        for runs in runs_by_provider:
+            if not runs:
+                continue
+            threshold = max(1, min(voting_threshold, len(runs)))
+            voted.extend(
+                vote_flags(
+                    runs,
+                    threshold=threshold,
+                    low_confidence_extra_vote=settings.plan_low_confidence_extra_vote,
+                )
+            )
+            if settings.plan_singleton_rescue:
+                rescued.extend(rescue_singletons(runs, threshold=threshold))
+        voted = dedup_by_vote_key(voted)
+        if rescued:
+            # A rescue voting already surfaced (e.g. via the other provider)
+            # is redundant — prefer the unmarked, threshold-passing copy.
+            voted_keys = {vote_key(f) for f in voted}
+            voted.extend(
+                f for f in dedup_by_vote_key(rescued) if vote_key(f) not in voted_keys
+            )
         voted = dedup_flags(voted)
         voted = attach_page_bbox(voted)
 
@@ -573,10 +687,22 @@ def _run_sheets_parallel(
             fallback_events=fallback_events,
         )
 
+        if settings.plan_singleton_rescue:
+            # Rescued flags are fail-CLOSED: they already missed the voting
+            # threshold, so surviving on "verifier never returned a verdict"
+            # would just re-open the noise gate the vote had shut.
+            kept = [
+                f
+                for f in kept
+                if not f.get("singleton_rescue")
+                or (v_status == "verified" and not f.get("kept_unverified"))
+            ]
+
         sheet_runs_debug = [
             {
                 "sheet_index": sheet.sheet_index,
                 "run": idx,
+                "provider": run_provider,
                 "flag_count": len(run),
                 "flags": [
                     {
@@ -590,7 +716,7 @@ def _run_sheets_parallel(
                     for f in run
                 ],
             }
-            for idx, run in enumerate(run_flag_lists)
+            for idx, (run_provider, run) in enumerate(runs_debug_meta)
         ]
 
         _emit_sheet_done(sheet.page, len(kept))

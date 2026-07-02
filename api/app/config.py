@@ -84,6 +84,36 @@ class Settings(BaseSettings):
     # service-level content-hash cache.
     plan_analyser_temperature: float = 0.5
 
+    # ── Accuracy mechanisms (spike — all default OFF until validated on a
+    # labelled real-plan eval set; see spike/accuracy-mechanisms) ─────────
+    #
+    # Precision: a voting bucket whose best hit is low-confidence needs one
+    # extra vote to survive (threshold+1, clamped to n). High/medium buckets
+    # are unaffected.
+    plan_low_confidence_extra_vote: bool = False
+    # Recall: a bucket seen in only one pass but at high confidence is not
+    # discarded — it is sent to the verifier marked `singleton_rescue` and
+    # kept ONLY if the verifier positively verifies it (fail-closed, unlike
+    # normal flags which are fail-open).
+    plan_singleton_rescue: bool = False
+    # Precision: a flag whose verbatim_quote could not be located by either
+    # the PDF text layer or OCR is demoted to low confidence and annotated
+    # (`quote_located: false`) — the classic hallucination signature. Only
+    # applies when OCR actually ran, so a missing OCR wheel can't demote
+    # everything.
+    plan_unlocated_quote_demotion: bool = False
+    # Precision: a building_code:* flag for which MBIE clause retrieval
+    # returned nothing is demoted to low confidence and annotated
+    # (`mbie_grounding: "none"`). Retrieval already runs for the verifier,
+    # so the signal is free.
+    plan_ungrounded_code_demotion: bool = False
+    # Recall: run the analyser voting passes on BOTH providers (primary +
+    # the other one when its API key is configured), vote each provider's
+    # passes separately, union the survivors, and let the verifier
+    # arbitrate. ~2x analyser cost; different model families have different
+    # blind spots.
+    plan_analyser_ensemble: bool = False
+
     # Self-consistency voting on the *verifier* — the destructive step that
     # drops flags from the user's view. N verification passes per sheet; a flag
     # is only dropped when >= threshold passes agree on dropping it (fail-open:

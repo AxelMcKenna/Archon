@@ -49,6 +49,13 @@ def _get_ocr() -> Any | None:
     return RapidOCR()
 
 
+def ocr_available() -> bool:
+    """Whether the OCR engine can actually run on this platform. Callers that
+    treat "quote not located" as a signal (quote_located annotation) must not
+    fire when OCR never had a chance to look."""
+    return _get_ocr() is not None
+
+
 def _normalise(s: str) -> str:
     """Normalise for cross-source comparison.
 

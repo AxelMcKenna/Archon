@@ -43,8 +43,21 @@ def _tokens(text: str) -> set[str]:
     return {t.strip().lower() for t in text.split() if t.strip()}
 
 
-def _match(flag: dict[str, Any], gt: dict[str, Any]) -> bool:
-    if flag.get("category") != gt.get("category"):
+def _family(category: str | None) -> str:
+    """Taxonomy family: the first segment of the category path.
+    'building_code:B1' -> 'building_code'; 'documentation:plans:...' ->
+    'documentation'."""
+    return str(category or "").split(":", 1)[0]
+
+
+def _match(flag: dict[str, Any], gt: dict[str, Any], *, lenient: bool = False) -> bool:
+    """Strict: exact category. Lenient: same taxonomy family — separates
+    "found the issue, filed under a sibling category" (a categorisation
+    error) from "missed it entirely"."""
+    if lenient:
+        if _family(flag.get("category")) != _family(gt.get("category")):
+            return False
+    elif flag.get("category") != gt.get("category"):
         return False
     if int(flag.get("page") or 0) != int(gt.get("page") or 0):
         return False
@@ -55,23 +68,45 @@ def _match(flag: dict[str, Any], gt: dict[str, Any]) -> bool:
     return bool(hint_tokens & area_tokens)
 
 
-def _score_plan(flags: list[dict[str, Any]], ground_truth: list[dict[str, Any]]) -> dict[str, Any]:
+def _greedy_match(
+    flags: list[dict[str, Any]],
+    ground_truth: list[dict[str, Any]],
+    *,
+    lenient: bool,
+) -> tuple[set[int], set[int]]:
+    """Greedy 1:1 assignment. Returns (matched_flag_indices, matched_gt_indices)."""
     matched_gt: set[int] = set()
     matched_flag: set[int] = set()
     for fi, flag in enumerate(flags):
         for gi, gt in enumerate(ground_truth):
             if gi in matched_gt:
                 continue
-            if _match(flag, gt):
+            if _match(flag, gt, lenient=lenient):
                 matched_gt.add(gi)
                 matched_flag.add(fi)
                 break
+    return matched_flag, matched_gt
+
+
+def _pr(tp: int, n_flags: int, n_gt: int) -> tuple[float, float]:
+    fp = n_flags - tp
+    fn = n_gt - tp
+    precision = tp / (tp + fp) if (tp + fp) else 0.0
+    recall = tp / (tp + fn) if (tp + fn) else 0.0
+    return precision, recall
+
+
+def _score_plan(flags: list[dict[str, Any]], ground_truth: list[dict[str, Any]]) -> dict[str, Any]:
+    matched_flag, matched_gt = _greedy_match(flags, ground_truth, lenient=False)
+    matched_flag_len, matched_gt_len = _greedy_match(flags, ground_truth, lenient=True)
 
     tp = len(matched_flag)
     fp = len(flags) - tp
     fn = len(ground_truth) - len(matched_gt)
-    precision = tp / (tp + fp) if (tp + fp) else 0.0
-    recall = tp / (tp + fn) if (tp + fn) else 0.0
+    precision, recall = _pr(tp, len(flags), len(ground_truth))
+    precision_lenient, recall_lenient = _pr(
+        len(matched_flag_len), len(flags), len(ground_truth)
+    )
     # A hallucinated flag is one whose category isn't anywhere in the
     # ground-truth set — the model invented a category that's not on the
     # plan at all.
@@ -88,11 +123,22 @@ def _score_plan(flags: list[dict[str, Any]], ground_truth: list[dict[str, Any]])
         "false_negatives": fn,
         "precision": precision,
         "recall": recall,
+        # Lenient tier: taxonomy-family match. The strict-lenient gap is the
+        # categorisation-error rate, invisible when both count as plain FP/FN.
+        "precision_lenient": precision_lenient,
+        "recall_lenient": recall_lenient,
         "hallucination_rate": hallucination_rate,
         "missed_categories": [
             gt.get("category")
             for gi, gt in enumerate(ground_truth)
             if gi not in matched_gt
+        ],
+        # Found at family level but not at exact category — the flags to
+        # inspect when tuning the taxonomy prompt block.
+        "near_miss_categories": [
+            gt.get("category")
+            for gi, gt in enumerate(ground_truth)
+            if gi not in matched_gt and gi in matched_gt_len
         ],
     }
 
@@ -162,6 +208,12 @@ def run(plan_dir: Path, *, persist: bool = False) -> dict[str, Any]:
         "n_plans": n,
         "precision_avg": round(sum(p["precision"] for p in per_plan) / n, 4),
         "recall_avg": round(sum(p["recall"] for p in per_plan) / n, 4),
+        "precision_lenient_avg": round(
+            sum(p["precision_lenient"] for p in per_plan) / n, 4
+        ),
+        "recall_lenient_avg": round(
+            sum(p["recall_lenient"] for p in per_plan) / n, 4
+        ),
         "hallucination_rate": round(
             sum(p["hallucination_rate"] for p in per_plan) / n, 4
         ),
@@ -197,11 +249,14 @@ def main() -> None:
         s = payload["summary"]
         print(
             f"plans={s['n_plans']}  precision={s['precision_avg']:.2f}  "
-            f"recall={s['recall_avg']:.2f}  hallucination={s['hallucination_rate']:.2f}"
+            f"recall={s['recall_avg']:.2f}  "
+            f"lenient(P={s['precision_lenient_avg']:.2f} R={s['recall_lenient_avg']:.2f})  "
+            f"hallucination={s['hallucination_rate']:.2f}"
         )
         for p in payload["per_plan_results"]:
             print(
                 f"  {p['plan_id']:40s}  P={p['precision']:.2f}  R={p['recall']:.2f}  "
+                f"lenientR={p['recall_lenient']:.2f}  "
                 f"flags={p['flags_returned']} gt={p['ground_truth_count']}"
             )
 

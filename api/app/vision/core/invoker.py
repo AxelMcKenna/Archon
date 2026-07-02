@@ -32,6 +32,21 @@ def analyser_provider_model(settings: Any) -> tuple[str, str]:
     return provider, model
 
 
+def secondary_analyser_provider_model(settings: Any) -> tuple[str, str] | None:
+    """The *other* provider's analyser-tier (provider, model), or None when its
+    API key isn't configured. Used by the ensemble mechanism
+    (``plan_analyser_ensemble``) to run voting passes on both model families.
+    """
+    primary, _ = analyser_provider_model(settings)
+    if primary == "gemini":
+        if settings.openrouter_api_key:
+            return "openrouter", settings.openrouter_model
+        return None
+    if settings.gemini_api_key:
+        return "gemini", settings.gemini_model
+    return None
+
+
 def run_tool_pass(
     *,
     settings: Any,
@@ -43,6 +58,8 @@ def run_tool_pass(
     temperature: float = 0.0,
     seed: int | None = None,
     provenance: dict[str, Any] | None = None,
+    provider: str | None = None,
+    model: str | None = None,
 ) -> tuple[dict[str, Any], int, int]:
     """Run one analyser-tier tool call from a ``{name, description,
     input_schema}`` schema dict. Returns (payload, input_tokens, output_tokens).
@@ -50,8 +67,12 @@ def run_tool_pass(
     Shared by the RFI and VE vision passes — they differ only in which schema
     and token budget they hand in. ``seed`` and ``provenance`` are forwarded
     for best-effort reproducibility / fallback auditing (see ``invoke_tool``).
+    ``provider``/``model`` override the settings-resolved analyser pair (both
+    must be given together) — the ensemble uses this to route passes to the
+    secondary provider.
     """
-    provider, model = analyser_provider_model(settings)
+    if provider is None or model is None:
+        provider, model = analyser_provider_model(settings)
     return invoke_tool(
         provider=provider,
         model=model,
