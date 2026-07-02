@@ -34,7 +34,9 @@ _DEFAULT_K = 3
 
 
 def _vec_literal(vec: list[float]) -> str:
-    return "[" + ",".join(f"{x:.7g}" for x in vec) + "]"
+    # %.9g keeps float32 round-trip precision so the SQL-side cosine distances
+    # (and thus borderline retrieval orderings) don't shift with formatting.
+    return "[" + ",".join(f"{x:.9g}" for x in vec) + "]"
 
 
 @dataclass

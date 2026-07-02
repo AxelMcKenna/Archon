@@ -9,7 +9,10 @@ from PIL import Image
 from app.plans.vote import dedup_flags as _dedup_flags
 from app.vision.core.renderer import (
     MAX_IMAGE_BYTES,
+    TILE_PIXEL_THRESHOLD,
     RenderedImage,
+    encode_capped,
+    needs_tiling,
 )
 from app.vision.core.renderer import (
     png_bytes as _png_bytes,
@@ -130,3 +133,32 @@ def test_rendered_image_shape():
     rendered = RenderedImage(page=1, tile="top-left", png=b"abc", dpi=300)
     assert rendered.tile == "top-left"
     assert rendered.dpi == 300
+
+
+def test_tiling_decided_by_pixels_not_png_bytes():
+    # The tiling decision must be a pure function of rendered dimensions
+    # (wiki/issues/0006) — content/encoder cannot flip it. An A3@200dpi-sized
+    # page stays full; a page one pixel over the budget tiles.
+    assert not needs_tiling(_solid_image(3308, 2339))  # 7.7 MP
+    w, h = 6000, TILE_PIXEL_THRESHOLD // 6000  # just under the budget
+    assert not needs_tiling(_solid_image(w, h))
+    assert needs_tiling(_solid_image(w, h + 1))
+
+
+def test_encode_capped_downscales_to_fit_but_never_retiles():
+    # Noise compresses terribly — a 5 MP noise PNG blows the byte cap, so
+    # encode_capped must downscale it under MAX_IMAGE_BYTES. The structure
+    # decision is untouched: 5 MP is still well under the tiling budget.
+    noisy = Image.effect_noise((2500, 2000), 100).convert("RGB")
+    assert len(_png_bytes(noisy)) > MAX_IMAGE_BYTES  # would have tiled under the old rule
+    assert not needs_tiling(noisy)
+    capped = encode_capped(noisy)
+    assert len(capped) <= MAX_IMAGE_BYTES
+    reopened = Image.open(io.BytesIO(capped))
+    # Halved (possibly repeatedly), aspect preserved.
+    assert reopened.width in (1250, 625) and reopened.height in (1000, 500)
+
+
+def test_encode_capped_leaves_small_images_untouched():
+    img = _solid_image(800, 600)
+    assert encode_capped(img) == _png_bytes(img)

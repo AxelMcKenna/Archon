@@ -60,8 +60,25 @@ class Settings(BaseSettings):
 
     # Self-consistency voting on the analyser. N parallel runs; keep flags
     # appearing in >= threshold of them. N=1 short-circuits the threadpool.
+    #
+    # Kept at 3/2. A determinism test (wiki/issues/0001) showed voting is a
+    # *stabiliser*, not a no-op: the >=2-of-3 threshold filters out per-pass
+    # provider jitter, so n=3 is measurably MORE reproducible run-to-run
+    # (mean flag-set Jaccard ~0.58 vs ~0.50 at n=1) at equal accuracy.
+    # Dropping to n=1 made determinism worse, so the "gut the voting" change
+    # was reverted. Real reproducibility still needs temp>0 + per-pass seed
+    # (the seed wiring is in place) or provider-level determinism — voting
+    # alone only damps the jitter, it doesn't remove it.
     plan_analyser_voting_n: int = 3
     plan_analyser_voting_threshold: int = 2
+
+    # Analyser sampling temperature (option B from wiki/issues/0001). At 0.0
+    # the per-pass seed is inert (greedy decoding has no RNG to pin) and
+    # voting only damps uncontrolled provider jitter. >0 makes the passes
+    # *purposefully* diverse while the existing per-pass seed keeps each one
+    # reproducible - the design voting always implied. Unvalidated: raising
+    # this needs an eval-harness determinism re-run before it's trusted.
+    plan_analyser_temperature: float = 0.0
 
     # Self-consistency voting on the *verifier* — the destructive step that
     # drops flags from the user's view. N verification passes per sheet; a flag
@@ -71,6 +88,14 @@ class Settings(BaseSettings):
     # (e.g. 3/2) when wrong drops cost more than verifier spend.
     plan_verifier_voting_n: int = 1
     plan_verifier_voting_threshold: int = 2
+
+    # Max flags per verifier call. Busy sheets are verified in chunks of this
+    # size so the verdict list always fits well inside the 6000-token output
+    # budget — a truncated call used to silently drop verdicts for the trailing
+    # flag_ids, making keep/drop depend on a flag's position in the list
+    # (wiki/issues/0004). ~10 verdicts ≈ 1-2k output tokens; each extra chunk
+    # re-sends the sheet images, so don't set this too low.
+    plan_verifier_flags_per_call: int = 10
 
     # Cross-view reconciliation: build a per-sheet ViewRecord (view type,
     # level/datum, callouts), register views that describe the same region,

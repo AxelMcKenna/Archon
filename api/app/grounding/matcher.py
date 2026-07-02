@@ -142,11 +142,30 @@ def best_match(
     item_clause_refs: list[str],
     flags: list[FlagCandidate],
 ) -> Match | None:
-    """Pick the highest-scoring flag if it clears the threshold."""
+    """Pick the highest-scoring flag if it clears the threshold.
+
+    Ties are broken by content, not array position: clause overlap (the more
+    diagnostic signal) first, then token overlap, then the flag's own stable
+    fields — so which flag grounds the draft doesn't depend on the order the
+    flagger happened to emit them in (wiki/issues/0009).
+    """
     if not flags:
         return None
+    by_index = {f.index: f for f in flags}
+
+    def _key(m: Match) -> tuple[float, float, float, str, str, str]:
+        f = by_index[m.flag_index]
+        return (
+            m.score,
+            m.clause_overlap,
+            m.token_overlap,
+            f.verbatim_quote or "",
+            f.rule_cited or "",
+            f.rationale or "",
+        )
+
     scored = [score_match(item_text, item_clause_refs, f) for f in flags]
-    best = max(scored, key=lambda m: m.score)
+    best = max(scored, key=_key)
     return best if best.score >= MATCH_THRESHOLD else None
 
 

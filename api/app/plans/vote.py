@@ -2,11 +2,27 @@
 
 from __future__ import annotations
 
+import json
 import re
 from collections import Counter, defaultdict
 from typing import Any
 
 _CONFIDENCE_RANK = {"high": 3, "medium": 2, "low": 1}
+
+
+def _rep_key(f: dict[str, Any]) -> tuple[int, int, str]:
+    """Total order for picking a bucket's representative flag.
+
+    Confidence first, then the longer verbatim_quote (more grounding), then a
+    canonical serialisation as the final tiebreaker — so the surviving
+    wording/geometry is a pure function of the bucket contents, independent of
+    the order the model happened to emit them in (wiki/issues/0005).
+    """
+    return (
+        _CONFIDENCE_RANK.get(f.get("confidence", "low"), 0),
+        len(f.get("verbatim_quote") or ""),
+        json.dumps(f, sort_keys=True, default=str),
+    )
 
 
 def normalise_area(area: str) -> str:
@@ -24,19 +40,14 @@ def flag_key(f: dict[str, Any]) -> tuple[int, str, str]:
 def dedup_flags(flags: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Merge flags with the same (page, normalised_area, category) key.
 
-    Keeps the entry with the highest confidence, falling back to the first
-    one seen.
+    Keeps the entry ranked highest by ``_rep_key`` (confidence, quote length,
+    canonical content) so ties don't fall back to arrival order.
     """
     seen: dict[tuple[int, str, str], dict[str, Any]] = {}
     for f in flags:
         key = flag_key(f)
         existing = seen.get(key)
-        if existing is None:
-            seen[key] = f
-            continue
-        new_rank = _CONFIDENCE_RANK.get(f.get("confidence", "low"), 0)
-        old_rank = _CONFIDENCE_RANK.get(existing.get("confidence", "low"), 0)
-        if new_rank > old_rank:
+        if existing is None or _rep_key(f) > _rep_key(existing):
             seen[key] = f
     return list(seen.values())
 
@@ -84,17 +95,13 @@ def cross_view_key(f: dict[str, Any]) -> tuple[tuple[int, int], tuple[str, str]]
 
 
 def dedup_cross_view(flags: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Collapse duplicate cross-view flags, keeping the highest-confidence hit."""
+    """Collapse duplicate cross-view flags, keeping the highest-confidence hit
+    (ties broken by ``_rep_key``, not arrival order)."""
     seen: dict[tuple[tuple[int, int], tuple[str, str]], dict[str, Any]] = {}
     for f in flags:
         key = cross_view_key(f)
         existing = seen.get(key)
-        if existing is None:
-            seen[key] = f
-            continue
-        new_rank = _CONFIDENCE_RANK.get(f.get("confidence", "low"), 0)
-        old_rank = _CONFIDENCE_RANK.get(existing.get("confidence", "low"), 0)
-        if new_rank > old_rank:
+        if existing is None or _rep_key(f) > _rep_key(existing):
             seen[key] = f
     return list(seen.values())
 
@@ -134,10 +141,11 @@ def vote_flags(
 
         def _score(
             f: dict[str, Any], _cat_counts: Counter = cat_counts
-        ) -> tuple[int, int]:
+        ) -> tuple[int, int, int, int, str]:
             return (
                 _CONFIDENCE_RANK.get(f.get("confidence", "low"), 0),
                 _cat_counts[f.get("category")],
+                *_rep_key(f),
             )
 
         best = max(hits, key=_score)

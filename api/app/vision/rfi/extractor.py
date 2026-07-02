@@ -69,6 +69,7 @@ def extract_via_vision(
         tool_description=RFI_TOOL_SCHEMA["description"],
         tool_parameters=RFI_TOOL_SCHEMA["input_schema"],
         max_output_tokens=8000,
+        seed=0,
     )
 
     items: list[RfiItem] = []

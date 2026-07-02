@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import hashlib
 import re
 from functools import lru_cache
@@ -17,6 +18,7 @@ from typing import Any
 
 from app.config import get_settings
 from app.extractors.markdown import render_item
+from app.llm import result_cache
 from app.llm.gemini import call_gemini_tool
 from app.llm.openrouter import call_openrouter_tool
 from app.models import AiPrediction, RfiItem
@@ -63,6 +65,13 @@ def _fill(template: str, **kwargs: str) -> str:
     return out
 
 
+def _provider_model() -> tuple[str, str]:
+    s = get_settings()
+    if s.classifier_provider == "openrouter":
+        return "openrouter", s.openrouter_model
+    return "gemini", s.gemini_model
+
+
 def _cache_key(
     item: RfiItem,
     bca: str,
@@ -71,19 +80,33 @@ def _cache_key(
     importance_level: str,
     prompt_version: str,
 ) -> str:
+    # Provider + model are part of the key so a model config change never
+    # serves an answer produced by a different model.
+    provider, model = _provider_model()
     h = hashlib.sha256()
     h.update(item.raw_text.encode("utf-8"))
     h.update(b"|")
     h.update(item.extracted.model_dump_json().encode("utf-8"))
     h.update(b"|")
     h.update(
-        f"{bca}|{project_type}|{risk_group}|{importance_level}|{prompt_version}".encode()
+        f"{bca}|{project_type}|{risk_group}|{importance_level}|{prompt_version}"
+        f"|{provider}|{model}".encode()
     )
     return h.hexdigest()
 
 
-# In-memory cache (process-local). Real cache lives in DB / redis in prod. TODO: set redis up
+# Process-local L1 in front of the shared llm_cache table (wiki/issues/0007).
 _AI_CACHE: dict[str, AiPrediction] = {}
+
+
+def _shared_get(key: str) -> AiPrediction | None:
+    row = result_cache.get("classifier", key)
+    if row is None:
+        return None
+    try:
+        return AiPrediction(**row)
+    except Exception:  # noqa: BLE001 — malformed cache row: recompute
+        return None
 
 
 def classify(
@@ -99,6 +122,10 @@ def classify(
     key = _cache_key(item, bca, project_type, risk_group, importance_level, version)
     if key in _AI_CACHE:
         return _AI_CACHE[key]
+    shared = _shared_get(key)
+    if shared is not None:
+        _AI_CACHE[key] = shared
+        return shared
 
     settings = get_settings()
 
@@ -142,6 +169,13 @@ def classify(
         reasoning=payload["reasoning"],
         prompt_version=version,
     )
+    # Publish write-once and adopt the winner, so every worker converges on
+    # one durable answer per key even when two race on the same miss.
+    published = result_cache.put(
+        "classifier", key, pred.model_dump(mode="json"), prompt_version=version
+    )
+    with contextlib.suppress(Exception):  # malformed winner: keep our own result
+        pred = AiPrediction(**published)
     _AI_CACHE[key] = pred
     return pred
 

@@ -40,12 +40,16 @@ def run_tool_pass(
     captions: list[str] | None,
     prompt: str,
     max_output_tokens: int = 6000,
+    temperature: float = 0.0,
+    seed: int | None = None,
+    provenance: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], int, int]:
     """Run one analyser-tier tool call from a ``{name, description,
     input_schema}`` schema dict. Returns (payload, input_tokens, output_tokens).
 
     Shared by the RFI and VE vision passes — they differ only in which schema
-    and token budget they hand in.
+    and token budget they hand in. ``seed`` and ``provenance`` are forwarded
+    for best-effort reproducibility / fallback auditing (see ``invoke_tool``).
     """
     provider, model = analyser_provider_model(settings)
     return invoke_tool(
@@ -58,6 +62,9 @@ def run_tool_pass(
         tool_description=schema["description"],
         tool_parameters=schema["input_schema"],
         max_output_tokens=max_output_tokens,
+        temperature=temperature,
+        seed=seed,
+        provenance=provenance,
     )
 
 
@@ -69,17 +76,22 @@ def _dispatch(provider: str, model: str, **kw: Any) -> tuple[dict[str, Any], int
     return r.payload, r.input_tokens, r.output_tokens
 
 
-def _fallback_for(provider: str) -> tuple[str, str] | None:
+def _fallback_for(provider: str, model: str) -> tuple[str, str] | None:
     """Return (provider, model) to fail over to, or None if unavailable.
 
-    Coarse outage-survival: maps to the other provider's *default* model.
-    For non-analyser touchpoints (e.g. the verifier) this may swap in an
-    analyser-tier model — acceptable on a rare emergency path.
+    Outage-survival that stays in the same capability tier: a verifier-tier
+    model fails over to the other provider's verifier model, everything else
+    to the other provider's analyser default — so a transient 429 never swaps
+    an analyser-tier model in for the verifier (or vice versa).
     """
     s = get_settings()
     if provider == "openrouter" and s.gemini_api_key:
+        if model == s.openrouter_verifier_model:
+            return "gemini", s.gemini_verifier_model
         return "gemini", s.gemini_model
     if provider == "gemini" and s.openrouter_api_key:
+        if model == s.gemini_verifier_model:
+            return "openrouter", s.openrouter_verifier_model
         return "openrouter", s.openrouter_model
     return None
 
@@ -96,12 +108,21 @@ def invoke_tool(
     image_captions: list[str] | None = None,
     max_output_tokens: int = 6000,
     temperature: float = 0.0,
+    seed: int | None = None,
+    provenance: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], int, int]:
     """Run one vision tool call. Returns (payload, input_tokens, output_tokens).
 
     Each provider call already retries transient failures internally; if it
     still fails and ``llm_provider_fallback`` is enabled, we fail over to the
     other provider once before surfacing the original error.
+
+    ``seed`` is passed to whichever provider serves the call (including the
+    fail-over provider) for best-effort reproducible sampling.
+
+    ``provenance``, if given, is filled in-place with which provider/model
+    actually answered (``{"provider", "model", "fallback", "fallback_reason"?}``)
+    so a silent cross-provider swap is auditable after the fact.
     """
     kw: dict[str, Any] = dict(
         images=images,
@@ -112,11 +133,19 @@ def invoke_tool(
         tool_parameters=tool_parameters,
         max_output_tokens=max_output_tokens,
         temperature=temperature,
+        seed=seed,
     )
     try:
-        return _dispatch(provider, model, **kw)
+        result = _dispatch(provider, model, **kw)
+        if provenance is not None:
+            provenance.update(provider=provider, model=model, fallback=False)
+        return result
     except Exception as primary_exc:
-        fb = _fallback_for(provider) if get_settings().llm_provider_fallback else None
+        fb = (
+            _fallback_for(provider, model)
+            if get_settings().llm_provider_fallback
+            else None
+        )
         if not fb:
             raise
         fb_provider, fb_model = fb
@@ -129,8 +158,16 @@ def invoke_tool(
             fb_model,
         )
         try:
-            return _dispatch(fb_provider, fb_model, **kw)
+            result = _dispatch(fb_provider, fb_model, **kw)
         except Exception:
             # Fallback also failed — surface the original (more informative) error
             # and drop the fallback's traceback to keep the chain readable.
             raise primary_exc from None
+        if provenance is not None:
+            provenance.update(
+                provider=fb_provider,
+                model=fb_model,
+                fallback=True,
+                fallback_reason=str(primary_exc),
+            )
+        return result

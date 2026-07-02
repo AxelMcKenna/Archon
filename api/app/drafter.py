@@ -16,6 +16,7 @@ from typing import Any
 
 from app.config import get_settings
 from app.extractors.metrics import Metrics
+from app.llm import result_cache
 from app.llm.gemini import call_gemini_tool
 from app.llm.openrouter import call_openrouter_tool
 
@@ -148,6 +149,7 @@ def _fill(template: str, **kwargs: str) -> str:
     return out
 
 
+# Process-local L1 in front of the shared llm_cache table (wiki/issues/0007).
 _DRAFT_CACHE: dict[str, tuple[str, str]] = {}
 
 
@@ -168,19 +170,31 @@ def draft_response(
     """Returns (draft_text, prompt_version, metrics)."""
     template, version = _load_prompt(ACTIVE_PROMPT)
     evidence_block = _render_plan_evidence_block(plan_evidence)
+    settings = get_settings()
+    provider = settings.drafter_provider
+    model = (
+        settings.openrouter_model if provider == "openrouter" else settings.gemini_model
+    )
     # Cache key includes the evidence source so re-grounded items get
     # re-drafted (a flag match should not return a previously cached
-    # NO MATCH draft).
+    # NO MATCH draft) — and the rendered evidence block itself, so a re-run
+    # flagger changing the flag *content* at the same source/index invalidates
+    # the cached draft instead of serving one grounded in evidence that no
+    # longer exists (wiki/issues/0008). Provider + model are included so a
+    # model config change never serves another model's draft.
     evidence_source = (plan_evidence or {}).get("source", "absent")
     evidence_flag_idx = (plan_evidence or {}).get("flag_index", "")
     cache_key = hashlib.sha256(
-        f"{item_text}|{category}|{bca}|{project_type}|{version}|{evidence_source}|{evidence_flag_idx}".encode()
+        f"{item_text}|{category}|{bca}|{project_type}|{version}|{evidence_source}|{evidence_flag_idx}|{evidence_block}|{provider}|{model}".encode()
     ).hexdigest()
     if cache_key in _DRAFT_CACHE:
         cached, ver = _DRAFT_CACHE[cache_key]
         return cached, ver, Metrics()
-
-    settings = get_settings()
+    shared = result_cache.get("draft", cache_key)
+    if shared is not None and shared.get("draft_text"):
+        ver = str(shared.get("prompt_version") or version)
+        _DRAFT_CACHE[cache_key] = (str(shared["draft_text"]), ver)
+        return str(shared["draft_text"]), ver, Metrics()
 
     prompt = _fill(
         template,
@@ -222,6 +236,16 @@ def draft_response(
     draft = result.payload.get("draft_text")
     if not draft:
         raise RuntimeError("Drafter returned no draft_text")
+    # Publish write-once and adopt the winner so all workers serve one draft.
+    published = result_cache.put(
+        "draft",
+        cache_key,
+        {"draft_text": draft, "prompt_version": version},
+        prompt_version=version,
+    )
+    if published.get("draft_text"):
+        draft = str(published["draft_text"])
+        version = str(published.get("prompt_version") or version)
     _DRAFT_CACHE[cache_key] = (draft, version)
     metrics = Metrics(
         processing_ms=int((time.monotonic() - t0) * 1000),

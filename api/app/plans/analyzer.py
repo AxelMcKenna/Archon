@@ -211,7 +211,11 @@ def analyse_plan(
 
     # --- Build sheet list (image-typed only) ------------------------------
     sheets: list[RenderedSheet] = []
-    dpi_breakdown = {"standard_pages": 0, "high_detail_pages": 0, "tiled_pages": 0}
+    dpi_breakdown: dict[str, Any] = {
+        "standard_pages": 0,
+        "high_detail_pages": 0,
+        "tiled_pages": 0,
+    }
 
     if media_type == "application/pdf":
         for sheet, delta in iter_sheets(file_bytes):
@@ -228,6 +232,19 @@ def analyse_plan(
             )
         )
         dpi_breakdown["standard_pages"] = 1
+
+    # Per-page render provenance (wiki/issues/0006): which DPI/tiling path each
+    # page took, so a render-path change between runs (library bump, edited
+    # source PDF) is auditable instead of looking like model noise. String
+    # keys for JSON persistence.
+    dpi_breakdown["by_page"] = {
+        str(s.page): {
+            "dpi": s.images[0].dpi if s.images else None,
+            "tiled": len(s.images) > 1,
+            "classification": s.classification,
+        }
+        for s in sheets
+    }
 
     if cross_view_on:
         for s in sheets:
@@ -269,6 +286,7 @@ def analyse_plan(
     all_drops: list[dict[str, Any]] = []
     summaries: list[str] = []
     runs_debug: list[dict[str, Any]] = []
+    llm_fallback_events: list[dict[str, Any]] = []
     verification_status_final = "verified"
     verification_version_final = ""
 
@@ -278,12 +296,13 @@ def analyse_plan(
         if sr.get("summary"):
             summaries.append(sr["summary"])
         runs_debug.extend(sr.get("runs_debug", []))
+        llm_fallback_events.extend(sr.get("fallback_events", []))
         if sr.get("verification_status") == "skipped":
             verification_status_final = "skipped"
         if not verification_version_final and sr.get("verification_version"):
             verification_version_final = sr["verification_version"]
 
-    summary = max(summaries, key=len, default="")
+    summary = max(summaries, key=lambda s: (len(s), s), default="")
 
     emit(
         "Read drawings against NZ Building Code",
@@ -403,6 +422,11 @@ def analyse_plan(
         "_debug_runs": runs_debug,
         "_debug_voting_threshold": threshold,
         "cross_view_flag_count": len(cross_view_flags),
+        # Provider fail-over provenance (wiki/issues/0002): non-empty means part
+        # of this analysis was served by a different model than configured —
+        # the run is auditable and a candidate for re-run, not silently mixed.
+        "served_by_fallback": bool(llm_fallback_events),
+        "llm_fallback_events": llm_fallback_events,
     }
 
     extras = {
@@ -487,21 +511,31 @@ def _run_sheets_parallel(
                 "verification_status": "verified",
                 "verification_version": "",
                 "view_payloads": [],
+                "metrics": Metrics(),
+                "fallback_events": [],
             }
 
         run_flag_lists: list[list[dict[str, Any]]] = []
         run_summaries: list[str] = []
         view_payloads: list[dict[str, Any] | None] = []
-        sheet_in_tokens = 0
-        sheet_out_tokens = 0
+        # Tokens and fallback events accumulate on per-sheet locals and are
+        # merged on the main thread after the pool joins — `obj.attr += x` on
+        # the shared Metrics from worker threads is a read-modify-write race
+        # that undercounts (wiki/issues/0010b).
+        sheet_metrics = Metrics()
+        fallback_events: list[dict[str, Any]] = []
 
         for pass_idx in range(voting_n):
+            provenance: dict[str, Any] = {}
             try:
                 payload, in_t, out_t = run_single_vision_pass(
                     settings=settings,
                     images=image_pngs,
                     captions=captions,
                     prompt=sheet_prompt,
+                    temperature=settings.plan_analyser_temperature,
+                    seed=pass_idx,
+                    provenance=provenance,
                 )
             except Exception as exc:  # noqa: BLE001
                 log.warning(
@@ -511,16 +545,17 @@ def _run_sheets_parallel(
                     exc,
                 )
                 continue
+            if provenance.get("fallback"):
+                fallback_events.append(
+                    {"stage": "analyser", "page": sheet.page, "pass": pass_idx, **provenance}
+                )
             run_flag_lists.append(list(payload.get("flags") or []))
             if payload.get("summary"):
                 run_summaries.append(str(payload["summary"]))
             if isinstance(payload.get("view"), dict):
                 view_payloads.append(payload["view"])
-            sheet_in_tokens += in_t
-            sheet_out_tokens += out_t
-
-        metrics.input_tokens += sheet_in_tokens
-        metrics.output_tokens += sheet_out_tokens
+            sheet_metrics.input_tokens += in_t
+            sheet_metrics.output_tokens += out_t
 
         # Per-sheet voting. vote_key includes page, so within-sheet voting
         # is semantically identical to global voting for these buckets.
@@ -531,7 +566,11 @@ def _run_sheets_parallel(
 
         # Per-sheet verification: scoped to this sheet's images.
         kept, drops, v_status, v_version = verify_flags(
-            images=sheet.images, flags=voted, metrics=metrics, risk_group=risk_group
+            images=sheet.images,
+            flags=voted,
+            metrics=sheet_metrics,
+            risk_group=risk_group,
+            fallback_events=fallback_events,
         )
 
         sheet_runs_debug = [
@@ -561,15 +600,29 @@ def _run_sheets_parallel(
             "page": sheet.page,
             "kept": kept,
             "drops": drops,
-            "summary": max(run_summaries, key=len, default=""),
+            # Lexicographic tiebreak so an equal-length tie can't make the
+            # chosen summary depend on pass order.
+            "summary": max(run_summaries, key=lambda s: (len(s), s), default=""),
             "runs_debug": sheet_runs_debug,
             "verification_status": v_status,
             "verification_version": v_version,
             "view_payloads": view_payloads,
+            "metrics": sheet_metrics,
+            "fallback_events": fallback_events,
         }
 
     if len(sheets) == 1 or concurrency == 1:
-        return [_process(s) for s in sheets]
+        results = [_process(s) for s in sheets]
+    else:
+        with ThreadPoolExecutor(max_workers=concurrency) as pool:
+            results = list(pool.map(_process, sheets))
 
-    with ThreadPoolExecutor(max_workers=concurrency) as pool:
-        return list(pool.map(_process, sheets))
+    # Merge per-sheet token counts on the main thread (see the race note in
+    # _process).
+    for sr in results:
+        sm: Metrics = sr["metrics"]
+        metrics.input_tokens += sm.input_tokens
+        metrics.output_tokens += sm.output_tokens
+        metrics.verification_input_tokens += sm.verification_input_tokens
+        metrics.verification_output_tokens += sm.verification_output_tokens
+    return results

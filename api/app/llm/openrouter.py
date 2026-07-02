@@ -49,12 +49,18 @@ def call_openrouter_tool(
     max_output_tokens: int = 6000,
     model: str | None = None,
     temperature: float = 0.0,
+    seed: int | None = None,
 ) -> OpenRouterResult:
     """Run a single OpenRouter call with a forced tool call.
 
     `tool_parameters` is a JSONSchema input_schema (same as we hand to
     Anthropic). OpenAI-compatible tool calling accepts JSONSchema
     natively, so unlike Gemini we don't need to strip keys.
+
+    ``seed`` requests best-effort reproducible sampling (OpenAI-compatible
+    ``seed``; honoured per-backend, surfaced via ``system_fingerprint``). As
+    with Gemini it only bites at ``temperature > 0``. Omitted from the body
+    when ``None`` so providers that reject the field are unaffected.
     """
     settings = get_settings()
     if not settings.openrouter_api_key:
@@ -80,6 +86,9 @@ def call_openrouter_tool(
         "model": model_id,
         "max_tokens": max_output_tokens,
         "temperature": temperature,
+        # Pinned for the same reason as the Gemini arm: sampling shape must
+        # not move with provider defaults (wiki/issues/0001).
+        "top_p": 1.0,
         "messages": [{"role": "user", "content": user_content}],
         "tools": [
             {
@@ -96,6 +105,8 @@ def call_openrouter_tool(
             "function": {"name": tool_name},
         },
     }
+    if seed is not None:
+        body["seed"] = seed
 
     headers = {
         "Authorization": f"Bearer {settings.openrouter_api_key}",
@@ -175,6 +186,7 @@ async def call_openrouter_tool_async(
     max_output_tokens: int = 6000,
     model: str | None = None,
     temperature: float = 0.0,
+    seed: int | None = None,
 ) -> OpenRouterResult:
     """Awaitable variant. Offloads the sync call onto a worker thread."""
     return await asyncio.to_thread(
@@ -188,4 +200,5 @@ async def call_openrouter_tool_async(
         max_output_tokens=max_output_tokens,
         model=model,
         temperature=temperature,
+        seed=seed,
     )

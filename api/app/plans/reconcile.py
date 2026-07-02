@@ -150,6 +150,7 @@ def reconcile_set(
             captions=captions,
             prompt=prompt,
             max_output_tokens=4000,
+            seed=0,
         )
     except Exception as exc:  # noqa: BLE001
         log.warning("reconciliation failed for %s: %s", cs.region_label, exc)

@@ -12,6 +12,15 @@ from PIL import Image
 # Anthropic per-image size ceiling is ~5MB base64 encoded; raw PNG must
 # stay under ~3.7MB to be safe. We use a slightly tighter threshold.
 MAX_IMAGE_BYTES = 3_500_000
+# Tiling decision (wiki/issues/0006): decided from rendered *pixel*
+# dimensions, a pure function of the PDF + DPI policy — never from compressed
+# PNG size, which shifts with Pillow/zlib versions and borderline content
+# density and would silently change the image set between environments.
+# 18 MP ≈ a MAX_IMAGE_BYTES PNG at ~0.19 bytes/pixel (mid-density drawing):
+# A3/A2 sheets render as one image at either DPI tier; A1 at 200 DPI tiles.
+# The byte cap above only ever *downscales* an already-chosen image
+# (see encode_capped); it can't flip a page between full and tiled.
+TILE_PIXEL_THRESHOLD = 18_000_000
 # Page classification thresholds (FR-1.1).
 HIGH_DETAIL_TEXT_OBJECTS = 500
 HIGH_DETAIL_VECTOR_PATHS = 2000
@@ -40,6 +49,27 @@ def png_bytes(image: Image.Image) -> bytes:
     buf = io.BytesIO()
     image.save(buf, format="PNG", optimize=True)
     return buf.getvalue()
+
+
+def needs_tiling(image: Image.Image) -> bool:
+    """Tile when the rendered page exceeds the pixel budget."""
+    return image.width * image.height > TILE_PIXEL_THRESHOLD
+
+
+def encode_capped(image: Image.Image) -> bytes:
+    """PNG-encode, downscaling as needed to satisfy the upload byte cap.
+
+    Only pixel density degrades here — the full-vs-tiled structure is decided
+    by ``needs_tiling`` and can't change with encoder behaviour.
+    """
+    png = png_bytes(image)
+    while len(png) > MAX_IMAGE_BYTES and min(image.width, image.height) > 1:
+        image = image.resize(
+            (max(1, image.width // 2), max(1, image.height // 2)),
+            Image.LANCZOS,
+        )
+        png = png_bytes(image)
+    return png
 
 
 def tile_image(image: Image.Image, overlap: float = 0.10) -> dict[str, Image.Image]:
@@ -85,10 +115,13 @@ def _render_one_page(
     }
 
     rendered = render_page(page, dpi)
-    png = png_bytes(rendered)
 
-    if len(png) <= MAX_IMAGE_BYTES:
-        images = [RenderedImage(page=page_num, tile="full", png=png, dpi=dpi)]
+    if not needs_tiling(rendered):
+        images = [
+            RenderedImage(
+                page=page_num, tile="full", png=encode_capped(rendered), dpi=dpi
+            )
+        ]
         return (
             RenderedSheet(
                 page=page_num,
@@ -100,18 +133,12 @@ def _render_one_page(
         )
 
     breakdown_delta["tiled_pages"] = 1
-    images = []
-    for tile_name, tile_img in tile_image(rendered).items():
-        tile_png = png_bytes(tile_img)
-        if len(tile_png) > MAX_IMAGE_BYTES:
-            tile_img = tile_img.resize(
-                (tile_img.width // 2, tile_img.height // 2),
-                Image.LANCZOS,
-            )
-            tile_png = png_bytes(tile_img)
-        images.append(
-            RenderedImage(page=page_num, tile=tile_name, png=tile_png, dpi=dpi)
+    images = [
+        RenderedImage(
+            page=page_num, tile=tile_name, png=encode_capped(tile_img), dpi=dpi
         )
+        for tile_name, tile_img in tile_image(rendered).items()
+    ]
     return (
         RenderedSheet(
             page=page_num,

@@ -35,8 +35,16 @@ def run_single_vision_pass(
     images: list[bytes],
     captions: list[str],
     prompt: str,
+    temperature: float = 0.0,
+    seed: int | None = None,
+    provenance: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], int, int]:
-    """One analyser call. Returns (payload, input_tokens, output_tokens)."""
+    """One analyser call. Returns (payload, input_tokens, output_tokens).
+
+    ``seed`` is the voting-pass index, so each self-consistency pass is
+    independently reproducible once temperature is raised above 0.
+    ``provenance`` records which provider/model actually answered.
+    """
     return run_tool_pass(
         settings=settings,
         schema=ANALYSIS_TOOL_SCHEMA,
@@ -44,6 +52,9 @@ def run_single_vision_pass(
         captions=captions,
         prompt=prompt,
         max_output_tokens=6000,
+        temperature=temperature,
+        seed=seed,
+        provenance=provenance,
     )
 
 
@@ -180,10 +191,13 @@ def _run_verification_pass(
     captions: list[str],
     prompt: str,
     metrics: Metrics,
+    seed: int | None = None,
+    fallback_events: list[dict[str, Any]] | None = None,
 ) -> dict[int, dict[str, Any]] | None:
     """One verifier call. Returns verdicts keyed by flag_id, or ``None`` if the
     call itself failed (so the caller can distinguish a failed pass from a pass
     that simply returned no verdicts)."""
+    provenance: dict[str, Any] = {}
     try:
         payload, in_tokens, out_tokens = invoke_tool(
             provider=provider,
@@ -194,11 +208,13 @@ def _run_verification_pass(
             tool_name=VERIFICATION_TOOL_SCHEMA["name"],
             tool_description=VERIFICATION_TOOL_SCHEMA["description"],
             tool_parameters=VERIFICATION_TOOL_SCHEMA["input_schema"],
-            # Sized to match the analyser (6000). A tight budget here truncates
-            # the tool call on sheets with many flags, dropping the trailing
-            # flag_ids from the response — and a missing verdict must never be
-            # the reason a real flag disappears (see the keep-on-no-verdict path
-            # below).
+            seed=seed,
+            provenance=provenance,
+            # Sized to match the analyser (6000). Flags are chunked upstream
+            # (``verify_flags``) so a single call can't hold enough flags for
+            # the verdict list to truncate — and a missing verdict must never
+            # be the reason a real flag disappears (see the keep-on-no-verdict
+            # path below).
             max_output_tokens=6000,
         )
         metrics.verification_input_tokens += in_tokens
@@ -206,6 +222,8 @@ def _run_verification_pass(
     except Exception as exc:  # noqa: BLE001
         log.warning("plan verification pass failed: %s", exc)
         return None
+    if fallback_events is not None and provenance.get("fallback"):
+        fallback_events.append({"stage": "verifier", **provenance})
     return {
         int(v["flag_id"]): v
         for v in payload.get("verifications", [])
@@ -219,6 +237,7 @@ def verify_flags(
     flags: list[dict[str, Any]],
     metrics: Metrics,
     risk_group: str = "",
+    fallback_events: list[dict[str, Any]] | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], str, str]:
     """Verify each flag's verbatim_quote and AS compliance, with optional
     self-consistency voting (``plan_verifier_voting_n``).
@@ -231,30 +250,36 @@ def verify_flags(
     least ``threshold`` of the passes that returned a verdict for it agree on a
     drop. A missing verdict, a split vote, or a total call failure all keep the
     flag.
+
+    Flags are verified in chunks of ``plan_verifier_flags_per_call`` so the
+    verdict list of any single call fits well inside the output-token budget —
+    whether a flag near the end of a busy sheet gets a verdict must not depend
+    on how many flags precede it (truncation dropped trailing flag_ids).
+
+    ``fallback_events``, if given, collects provider fail-over records from the
+    verifier calls (see ``invoke_tool``).
     """
     if not flags:
         return [], [], "verified", load_prompt(ACTIVE_VERIFICATION_PROMPT)[1]
 
     template, version = load_prompt(ACTIVE_VERIFICATION_PROMPT)
     mbie_blocks, mbie_provenance = _retrieve_mbie_context(flags, risk_group=risk_group)
-    flags_block = json.dumps(
-        [
-            {
-                "flag_id": idx,
-                "page": f.get("page"),
-                "tile": f.get("tile") or "full",
-                "category": f.get("category"),
-                "area": f.get("area", ""),
-                "verbatim_quote": f.get("verbatim_quote", ""),
-                "reason": f.get("reason", ""),
-                "recommended_action": f.get("recommended_action", ""),
-                "acceptable_solution_clauses": mbie_blocks[idx] or "(none retrieved)",
-            }
-            for idx, f in enumerate(flags)
-        ],
-        indent=2,
-    )
-    prompt = fill(template, flags_block=flags_block)
+    # flag_id stays the flag's index in the *full* list, so per-chunk verdict
+    # maps merge into the same per-flag vote logic untouched.
+    entries = [
+        {
+            "flag_id": idx,
+            "page": f.get("page"),
+            "tile": f.get("tile") or "full",
+            "category": f.get("category"),
+            "area": f.get("area", ""),
+            "verbatim_quote": f.get("verbatim_quote", ""),
+            "reason": f.get("reason", ""),
+            "recommended_action": f.get("recommended_action", ""),
+            "acceptable_solution_clauses": mbie_blocks[idx] or "(none retrieved)",
+        }
+        for idx, f in enumerate(flags)
+    ]
 
     settings = get_settings()
     captions = [caption_str(img) for img in images]
@@ -267,18 +292,41 @@ def verify_flags(
     )
     n = max(1, getattr(settings, "plan_verifier_voting_n", 1))
     vote_threshold = max(1, getattr(settings, "plan_verifier_voting_threshold", 1))
+    chunk_size = max(1, getattr(settings, "plan_verifier_flags_per_call", 10))
 
+    # Each (chunk, pass) call yields its own verdict map. The flat list works
+    # with the per-flag vote below unchanged: a flag's votes are exactly the
+    # maps that contain its flag_id, i.e. the passes over its own chunk.
     verdict_maps: list[dict[int, dict[str, Any]]] = []
-    for _ in range(n):
-        vm = _run_verification_pass(
-            provider=provider,
-            model=model,
-            image_pngs=image_pngs,
-            captions=captions,
-            prompt=prompt,
-            metrics=metrics,
-        )
-        if vm is not None:
+    for start in range(0, len(entries), chunk_size):
+        chunk = entries[start : start + chunk_size]
+        chunk_ids = {e["flag_id"] for e in chunk}
+        prompt = fill(template, flags_block=json.dumps(chunk, indent=2))
+        for pass_idx in range(n):
+            vm = _run_verification_pass(
+                provider=provider,
+                model=model,
+                image_pngs=image_pngs,
+                captions=captions,
+                prompt=prompt,
+                metrics=metrics,
+                seed=pass_idx,
+                fallback_events=fallback_events,
+            )
+            if vm is None:
+                continue
+            # Verdicts for ids we never asked about are hallucinated — drop
+            # them rather than let them vote on another chunk's flags.
+            vm = {k: v for k, v in vm.items() if k in chunk_ids}
+            missing = sorted(chunk_ids - vm.keys())
+            if missing:
+                log.warning(
+                    "verifier pass %d returned no verdict for flag_ids %s "
+                    "(%d asked) — fail-open keeps them",
+                    pass_idx,
+                    missing,
+                    len(chunk),
+                )
             verdict_maps.append(vm)
 
     # Every pass failed → no signal at all. Fail open: keep everything.
@@ -319,9 +367,15 @@ def verify_flags(
             continue
         keep_payloads = [p for k, p in decisions if k == "keep"]
         # Representative kept row: prefer one that carries an Alternative
-        # Solution pathway so the annotation survives a split vote.
-        rep = next(
-            (p for p in keep_payloads if p.get("alt_solution_pathway")), None
-        ) or keep_payloads[0]
+        # Solution pathway so the annotation survives a split vote. The final
+        # canonical-JSON key makes the choice a pure function of the payload
+        # contents, not of pass arrival order.
+        rep = max(
+            keep_payloads,
+            key=lambda p: (
+                bool(p.get("alt_solution_pathway")),
+                json.dumps(p, sort_keys=True, default=str),
+            ),
+        )
         kept.append(rep)
     return kept, drops, "verified", version

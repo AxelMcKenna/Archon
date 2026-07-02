@@ -75,11 +75,17 @@ def call_gemini_tool(
     max_output_tokens: int = 6000,
     model: str | None = None,
     temperature: float = 0.0,
+    seed: int | None = None,
 ) -> GeminiResult:
     """Run a single Gemini call with a forced function call.
 
     Returns the parsed function-call args (same shape Claude's tool_use
     payload would have) plus token usage.
+
+    ``seed`` pins Gemini's sampler for best-effort reproducibility. Note this
+    only bites at ``temperature > 0`` (greedy decoding has no sampling RNG to
+    seed); at ``temperature == 0`` residual jitter comes from batch/MoE
+    non-determinism the seed can't control. Left ``None`` the field is unset.
     """
     settings = get_settings()
     if not settings.gemini_api_key:
@@ -111,6 +117,13 @@ def call_gemini_tool(
         ),
         max_output_tokens=max_output_tokens,
         temperature=temperature,
+        seed=seed,
+        # Pinned so a provider-default change can't alter sampling behaviour
+        # under us, and so both providers sample the same way (a fallback swap
+        # doesn't also change the sampling shape). With a seed at
+        # temperature > 0 this keeps each pass best-effort reproducible
+        # (wiki/issues/0001).
+        top_p=1.0,
     )
 
     def _once() -> GeminiResult:
@@ -158,6 +171,7 @@ async def call_gemini_tool_async(
     max_output_tokens: int = 6000,
     model: str | None = None,
     temperature: float = 0.0,
+    seed: int | None = None,
 ) -> GeminiResult:
     """Awaitable variant. Offloads the sync call onto a worker thread."""
     return await asyncio.to_thread(
@@ -171,4 +185,5 @@ async def call_gemini_tool_async(
         max_output_tokens=max_output_tokens,
         model=model,
         temperature=temperature,
+        seed=seed,
     )

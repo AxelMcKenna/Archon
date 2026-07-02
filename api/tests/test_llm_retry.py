@@ -69,7 +69,9 @@ def test_status_code_attribute_is_retryable():
 def test_provider_fallback_used_on_primary_failure(monkeypatch):
     from app.vision.core import invoker
 
-    monkeypatch.setattr(invoker, "_fallback_for", lambda provider: ("gemini", "g-model"))
+    monkeypatch.setattr(
+        invoker, "_fallback_for", lambda provider, model: ("gemini", "g-model")
+    )
 
     seen: list[str] = []
 
@@ -81,6 +83,7 @@ def test_provider_fallback_used_on_primary_failure(monkeypatch):
 
     monkeypatch.setattr(invoker, "_dispatch", fake_dispatch)
 
+    provenance: dict = {}
     payload, _in, _out = invoker.invoke_tool(
         provider="openrouter",
         model="gpt-5",
@@ -89,15 +92,23 @@ def test_provider_fallback_used_on_primary_failure(monkeypatch):
         tool_name="t",
         tool_description="d",
         tool_parameters={},
+        provenance=provenance,
     )
     assert payload == {"flags": []}
     assert seen == ["openrouter", "gemini"]  # tried primary, then failed over
+    # The swap is recorded, not silent: provenance names the serving model.
+    assert provenance["fallback"] is True
+    assert provenance["provider"] == "gemini"
+    assert provenance["model"] == "g-model"
+    assert "primary down" in provenance["fallback_reason"]
 
 
 def test_fallback_surfaces_original_error_when_both_fail(monkeypatch):
     from app.vision.core import invoker
 
-    monkeypatch.setattr(invoker, "_fallback_for", lambda provider: ("gemini", "g-model"))
+    monkeypatch.setattr(
+        invoker, "_fallback_for", lambda provider, model: ("gemini", "g-model")
+    )
 
     def fake_dispatch(provider, model, **kw):
         raise TransientLLMError(f"{provider} down")
